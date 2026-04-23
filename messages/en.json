@@ -1,0 +1,115 @@
+{
+  "nav": {
+    "service": "Service",
+    "works": "Works",
+    "aboutUs": "About Us",
+    "insights": "Insights",
+    "news": "News",
+    "qa": "Q&A",
+    "blog": "Blog",
+    "getQuote": "Get Quote",
+    "lang": "日本語"
+  },
+  "hero": {
+    "cta1": "Get Free Quote",
+    "cta2": "View Our Works",
+    "trust": "Trusted CG partner for 50+ Japanese companies"
+  },
+  "services": {
+    "subtitle": "Service List",
+    "title": "WHAT WE DO",
+    "description": "We deliver high-quality 3DCG, Animation, VR, and BIM services tailored to the Japanese architecture and real estate market.",
+    "learnMore": "Learn More"
+  },
+  "works": {
+    "subtitle": "Track Record",
+    "title": "Works",
+    "viewAll": "View All Works",
+    "filters": {
+      "all": "All",
+      "3dcg": "3DCG",
+      "animation": "Animation",
+      "vr": "VR",
+      "bim": "BIM"
+    }
+  },
+  "process": {
+    "title": "How We Work",
+    "cta": "Start Your Project",
+    "steps": {
+      "inquiry": { "title": "Inquiry", "desc": "Send us your project details" },
+      "consultation": { "title": "Consultation", "desc": "Free consultation & quote" },
+      "production": { "title": "Production", "desc": "We create your content" },
+      "review": { "title": "Review", "desc": "Revision rounds included" },
+      "delivery": { "title": "Delivery", "desc": "Final files delivered" }
+    }
+  },
+  "testimonials": {
+    "title": "What Our Clients Say"
+  },
+  "about": {
+    "title": "About us",
+    "learnMore": "Learn more",
+    "milestones": {
+      "2019": "Founded in Da Nang, Vietnam",
+      "2020": "First Japanese client partnerships",
+      "2022": "200+ projects completed",
+      "2024": "50+ active Japanese clients"
+    }
+  },
+  "caseStudies": {
+    "title": "Success Stories",
+    "viewAll": "View All Case Studies"
+  },
+  "concerns": {
+    "title": "Do you have concerns like these?",
+    "items": {
+      "quality": "Quality doesn't match the price",
+      "deadline": "Missed deadlines",
+      "communication": "Poor communication with overseas teams",
+      "revisions": "Too many revision rounds"
+    },
+    "cta": "We solve all these problems. Let's talk.",
+    "ctaButton": "Let's Talk"
+  },
+  "news": {
+    "title": "News",
+    "viewAll": "View All News"
+  },
+  "qa": {
+    "title": "Q&A",
+    "viewMore": "View More Q&A"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "name": "Full Name",
+    "email": "Email",
+    "service": "Service",
+    "message": "Message",
+    "submit": "Send Message",
+    "responseTime": "We respond within 24 hours",
+    "nda": "NDA available upon request",
+    "selectService": "Select a service",
+    "workingHours": "Mon-Fri 9:00-18:00 JST"
+  },
+  "footer": {
+    "tagline": "High-quality CG outsourcing for Japanese architecture market",
+    "navigation": "Navigation",
+    "services": "Services",
+    "contact": "Contact",
+    "rights": "© 2019-2026 i8STUDIO. All rights reserved.",
+    "trust": "Trusted CG partner for 50+ Japanese companies"
+  },
+  "insights": {
+    "title": "Insights",
+    "subtitle": "Our publications and newsletters",
+    "readNow": "Read Now",
+    "page": "Page",
+    "of": "of"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "notFound": "Page not found"
+  }
+}

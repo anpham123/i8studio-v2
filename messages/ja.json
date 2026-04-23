@@ -1,0 +1,115 @@
+{
+  "nav": {
+    "service": "サービス",
+    "works": "実績",
+    "aboutUs": "会社概要",
+    "insights": "インサイト",
+    "news": "ニュース",
+    "qa": "よくある質問",
+    "blog": "ブログ",
+    "getQuote": "見積もり",
+    "lang": "English"
+  },
+  "hero": {
+    "cta1": "無料見積もりを取得",
+    "cta2": "実績を見る",
+    "trust": "50社以上の日本企業から信頼されているCGパートナー"
+  },
+  "services": {
+    "subtitle": "サービス一覧",
+    "title": "サービス内容",
+    "description": "日本の建築・不動産市場に特化した高品質な3DCG・アニメーション・VR・BIMサービスを提供します。",
+    "learnMore": "詳しく見る"
+  },
+  "works": {
+    "subtitle": "実績",
+    "title": "Works",
+    "viewAll": "すべての実績を見る",
+    "filters": {
+      "all": "すべて",
+      "3dcg": "3DCG",
+      "animation": "アニメーション",
+      "vr": "VR",
+      "bim": "BIM"
+    }
+  },
+  "process": {
+    "title": "制作の流れ",
+    "cta": "プロジェクトを開始する",
+    "steps": {
+      "inquiry": { "title": "お問い合わせ", "desc": "プロジェクトの詳細をお送りください" },
+      "consultation": { "title": "ご相談", "desc": "無料相談・お見積もり" },
+      "production": { "title": "制作", "desc": "コンテンツを制作します" },
+      "review": { "title": "確認", "desc": "修正ラウンドが含まれます" },
+      "delivery": { "title": "納品", "desc": "最終ファイルを納品" }
+    }
+  },
+  "testimonials": {
+    "title": "お客様の声"
+  },
+  "about": {
+    "title": "会社概要",
+    "learnMore": "詳しく見る",
+    "milestones": {
+      "2019": "ベトナム・ダナンで創業",
+      "2020": "日本のクライアントとの取引開始",
+      "2022": "200件以上のプロジェクト完了",
+      "2024": "50社以上のアクティブな日本のクライアント"
+    }
+  },
+  "caseStudies": {
+    "title": "成功事例",
+    "viewAll": "すべての事例を見る"
+  },
+  "concerns": {
+    "title": "このようなお悩みはありませんか？",
+    "items": {
+      "quality": "価格に見合わないクオリティ",
+      "deadline": "納期の遅れ",
+      "communication": "海外チームとのコミュニケーション不足",
+      "revisions": "修正回数が多すぎる"
+    },
+    "cta": "私たちがこれらの問題をすべて解決します。",
+    "ctaButton": "お問い合わせ"
+  },
+  "news": {
+    "title": "ニュース",
+    "viewAll": "ニュース一覧を見る"
+  },
+  "qa": {
+    "title": "よくある質問",
+    "viewMore": "もっと見る"
+  },
+  "contact": {
+    "title": "お問い合わせ",
+    "name": "お名前",
+    "email": "メールアドレス",
+    "service": "サービス",
+    "message": "メッセージ",
+    "submit": "送信する",
+    "responseTime": "24時間以内にご返信します",
+    "nda": "NDA対応可能",
+    "selectService": "サービスを選択",
+    "workingHours": "月〜金 9:00-18:00 JST"
+  },
+  "footer": {
+    "tagline": "日本の建築市場向け高品質CGアウトソーシング",
+    "navigation": "ナビゲーション",
+    "services": "サービス",
+    "contact": "お問い合わせ",
+    "rights": "© 2019-2026 i8STUDIO. All rights reserved.",
+    "trust": "50社以上の日本企業から信頼"
+  },
+  "insights": {
+    "title": "インサイト",
+    "subtitle": "出版物・ニュースレター",
+    "readNow": "読む",
+    "page": "ページ",
+    "of": "/"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "notFound": "ページが見つかりません"
+  }
+}

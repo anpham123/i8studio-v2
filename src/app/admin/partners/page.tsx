@@ -1,0 +1,51 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import AdminShell from "@/components/admin/AdminShell";
+import DataTable, { Column } from "@/components/admin/DataTable";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useToast } from "@/components/admin/Toast";
+
+interface Partner { id: string; name: string; url: string; active: boolean; order: number; }
+
+export default function PartnersPage() {
+  const [data, setData] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [del, setDel] = useState<Partner | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch("/api/partners?limit=100");
+    const json = await res.json();
+    setData(json.data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleDelete = async () => {
+    if (!del) return;
+    setDeleting(true);
+    await fetch(`/api/partners/${del.id}`, { method: "DELETE" });
+    toast("Đã xóa", "success");
+    setDel(null); setDeleting(false); fetchData();
+  };
+
+  const cols: Column<Partner>[] = [
+    { key: "name", label: "Tên đối tác", sortable: true },
+    { key: "url", label: "Website", render: (v) => v ? <a href={String(v)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs truncate max-w-[200px] block">{String(v)}</a> : null },
+    { key: "active", label: "Trạng thái", render: (v) => <span className={`text-xs px-2 py-0.5 rounded-full ${v ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"}`}>{v ? "Hiện" : "Ẩn"}</span> },
+    { key: "order", label: "Thứ tự" },
+  ];
+
+  return (
+    <AdminShell title="Đối tác" actions={<button onClick={() => router.push("/admin/partners/new")} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Thêm mới</button>}>
+      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/partners/${r.id}`)} onDelete={setDel} />
+      <ConfirmDialog open={!!del} message={`Xóa đối tác "${del?.name}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
+    </AdminShell>
+  );
+}

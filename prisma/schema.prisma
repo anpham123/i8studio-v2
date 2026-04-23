@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id              String    @id @default(cuid())
+  title           String
+  titleJa         String    @default("")
+  slug            String    @unique
+  content         String    @default("")
+  contentJa       String    @default("")
+  excerpt         String    @default("")
+  excerptJa       String    @default("")
+  coverImage      String    @default("")
+  category        String    @default("NEWS")
+  status          String    @default("DRAFT")
+  metaTitle       String    @default("")
+  metaDescription String    @default("")
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Work {
+  id        String   @id @default(cuid())
+  title     String
+  titleJa   String   @default("")
+  subtitle  String   @default("")
+  category  String   @default("3DCG")
+  image     String   @default("")
+  videoUrl  String   @default("")
+  order     Int      @default(0)
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id            String   @id @default(cuid())
+  name          String
+  nameJa        String   @default("")
+  slug          String   @unique
+  description   String   @default("")
+  descriptionJa String   @default("")
+  icon          String   @default("")
+  image         String   @default("")
+  priceHint     String   @default("")
+  priceHintJa   String   @default("")
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+}
+
+model Slide {
+  id         String   @id @default(cuid())
+  title      String
+  titleJa    String   @default("")
+  subtitle   String   @default("")
+  subtitleJa String   @default("")
+  image      String   @default("")
+  gradient   String   @default("")
+  order      Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model QA {
+  id         String   @id @default(cuid())
+  question   String
+  questionJa String   @default("")
+  answer     String
+  answerJa   String   @default("")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Testimonial {
+  id            String   @id @default(cuid())
+  clientName    String
+  clientTitle   String   @default("")
+  clientCompany String   @default("")
+  clientPhoto   String   @default("")
+  quote         String
+  quoteJa       String   @default("")
+  rating        Int      @default(5)
+  featured      Boolean  @default(false)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  logo      String   @default("")
+  url       String   @default("")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model CaseStudy {
+  id          String   @id @default(cuid())
+  title       String
+  titleJa     String   @default("")
+  slug        String   @unique
+  client      String   @default("")
+  challenge   String   @default("")
+  challengeJa String   @default("")
+  solution    String   @default("")
+  solutionJa  String   @default("")
+  result      String   @default("")
+  resultJa    String   @default("")
+  beforeImage String   @default("")
+  afterImage  String   @default("")
+  metrics     String   @default("")
+  serviceType String   @default("")
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @default("")
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String
+  service   String   @default("")
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EmailSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String   @default("")
+  source    String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  page      String   @default("")
+  metadata  String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model Flipbook {
+  id            String   @id @default(cuid())
+  title         String
+  titleJa       String   @default("")
+  description   String   @default("")
+  descriptionJa String   @default("")
+  coverImage    String   @default("")
+  pdfUrl        String
+  order         Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
