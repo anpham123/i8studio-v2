@@ -19,7 +19,7 @@ export default function NewFlipbookPage() {
 
   const handlePdfUpload = async (file: File) => {
     if (file.type !== "application/pdf") return toast("Chỉ chấp nhận file PDF", "error");
-    if (file.size > 50 * 1024 * 1024) return toast("File PDF tối đa 50MB", "error");
+    if (file.size > 500 * 1024 * 1024) return toast("File PDF tối đa 500MB", "error");
     setUploadingPdf(true);
     const fd = new FormData();
     fd.append("file", file);
@@ -76,7 +76,7 @@ export default function NewFlipbookPage() {
                 {uploadingPdf ? (
                   <div className="flex flex-col items-center gap-2 text-blue-600"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" /><span className="text-sm">Đang upload...</span></div>
                 ) : (
-                  <div className="flex flex-col items-center gap-2 text-gray-400"><Upload size={24} /><span className="text-sm">Kéo thả PDF hoặc click để chọn</span><span className="text-xs">Tối đa 50MB</span></div>
+                  <div className="flex flex-col items-center gap-2 text-gray-400"><Upload size={24} /><span className="text-sm">Kéo thả PDF hoặc click để chọn</span><span className="text-xs">Tối đa 500MB</span></div>
                 )}
               </div>
             )}

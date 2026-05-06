@@ -1,0 +1,14 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://i8studio.vn
+
+# Sitemaps
+Sitemap: https://i8studio.vn/sitemap.xml

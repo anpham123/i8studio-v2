@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { buildMetadata, organizationJsonLd, websiteJsonLd, faqPageJsonLd } from "@/lib/seo";
 import HeroSlider from "@/components/public/HeroSlider";
 import SocialProofBar from "@/components/public/SocialProofBar";
 import StrengthsSection from "@/components/public/StrengthsSection";
@@ -13,6 +15,21 @@ import ConcernsSection from "@/components/public/ConcernsSection";
 import NewsSection from "@/components/public/NewsSection";
 import QASection from "@/components/public/QASection";
 import ContactSection from "@/components/public/ContactSection";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const { locale } = params;
+  return buildMetadata({
+    title: "i8 STUDIO — 3DCG, Animation, VR & BIM",
+    description:
+      "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
+    path: "",
+    locale,
+  });
+}
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const { locale } = params;
@@ -36,8 +53,32 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
+  const orgJsonLd = organizationJsonLd();
+  const siteJsonLd = websiteJsonLd();
+  const faqJsonLd = faqPageJsonLd(
+    qaItems.map((q) => ({
+      question: locale === "ja" ? q.questionJa || q.question : q.question,
+      answer: locale === "ja" ? q.answerJa || q.answer : q.answer,
+    }))
+  );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+      />
+      {qaItems.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
+
       {/* 1. Hero Slider */}
       <HeroSlider slides={slides} />
 

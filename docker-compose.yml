@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: i8studio_app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: file:/app/prisma/data/i8studio.db
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: https://demo.i8studio.vn
+      NODE_ENV: production
+    volumes:
+      - ./data/db:/app/prisma/data
+      - ./data/uploads:/app/public/uploads
+    networks:
+      - i8net
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: i8studio_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/certbot/conf:/etc/letsencrypt:ro
+      - ./data/certbot/www:/var/www/certbot:ro
+    networks:
+      - i8net
+    depends_on:
+      - app
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: i8studio_certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    # Auto-renew every 12 hours
+    entrypoint: >
+      /bin/sh -c "trap exit TERM;
+      while :; do
+        certbot renew --quiet --webroot -w /var/www/certbot;
+        sleep 12h & wait $${!};
+      done"
+
+networks:
+  i8net:
+    driver: bridge

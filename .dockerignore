@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (rebuilt in container)
+node_modules
+
+# Next.js build output (rebuilt in container)
+.next
+
+# Environment files (passed via docker-compose environment:)
+.env
+.env.local
+.env.production
+
+# Development tools
+*.md
+.eslintrc*
+.prettierrc*
+
+# Docker files (not needed inside image)
+Dockerfile*
+docker-compose*
+nginx/
+scripts/
+deploy.sh
+
+# Persistent data (mounted as volumes)
+data/
+prisma/data/
+prisma/dev.db
+
+# User uploads (mounted as volume)
+public/uploads/
+
+# Claude / IDE
+.claude/
+.vscode/
+.idea/

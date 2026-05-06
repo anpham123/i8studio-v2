@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
-const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_SIZE = 500 * 1024 * 1024; // 500MB
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (file.type !== "application/pdf")
       return NextResponse.json({ error: "Only PDF files allowed" }, { status: 400 });
     if (file.size > MAX_SIZE)
-      return NextResponse.json({ error: "File too large. Max 50MB." }, { status: 400 });
+      return NextResponse.json({ error: "File too large. Max 500MB." }, { status: 400 });
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

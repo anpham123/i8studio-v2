@@ -30,7 +30,7 @@ export default function EditFlipbookPage() {
 
   const handlePdfUpload = async (file: File) => {
     if (file.type !== "application/pdf") return toast("Chỉ chấp nhận file PDF", "error");
-    if (file.size > 50 * 1024 * 1024) return toast("File PDF tối đa 50MB", "error");
+    if (file.size > 500 * 1024 * 1024) return toast("File PDF tối đa 500MB", "error");
     setUploadingPdf(true);
     const fd = new FormData();
     fd.append("file", file);
