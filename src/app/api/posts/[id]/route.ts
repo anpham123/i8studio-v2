@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { PostSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const post = await prisma.post.findUnique({ where: { id: params.id } });
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });

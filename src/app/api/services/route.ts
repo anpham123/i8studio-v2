@@ -6,6 +6,8 @@ import { ServiceSchema } from "@/lib/validations";
 import { z } from "zod";
 import { slugify } from "@/lib/utils";
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const data = await prisma.service.findMany({ orderBy: { order: "asc" } });
   return NextResponse.json({ data });

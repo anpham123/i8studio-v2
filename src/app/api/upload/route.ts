@@ -5,6 +5,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import sharp from "sharp";
 
+export const dynamic = "force-dynamic"
+
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 

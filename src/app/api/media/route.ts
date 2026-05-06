@@ -5,6 +5,8 @@ import { readdir, stat, unlink } from "fs/promises";
 import { join } from "path";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { FlipbookSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   const where = session ? {} : { active: true };

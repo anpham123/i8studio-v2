@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { PartnerSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const data = await prisma.partner.findMany({ orderBy: { order: "asc" } });
   return NextResponse.json({ data });

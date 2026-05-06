@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { WorkSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");

@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
+export const dynamic = "force-dynamic"
+
 const MAX_SIZE = 500 * 1024 * 1024; // 500MB
 
 export async function POST(req: NextRequest) {

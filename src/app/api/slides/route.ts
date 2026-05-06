@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { SlideSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const data = await prisma.slide.findMany({ orderBy: { order: "asc" } });
   return NextResponse.json({ data });

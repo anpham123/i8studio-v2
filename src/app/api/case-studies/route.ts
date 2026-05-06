@@ -6,6 +6,8 @@ import { CaseStudySchema } from "@/lib/validations";
 import { z } from "zod";
 import { slugify } from "@/lib/utils";
 
+export const dynamic = "force-dynamic"
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");

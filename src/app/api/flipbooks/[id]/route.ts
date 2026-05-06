@@ -7,6 +7,8 @@ import { z } from "zod";
 import { unlink } from "fs/promises";
 import { join } from "path";
 
+export const dynamic = "force-dynamic"
+
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const item = await prisma.flipbook.findUnique({ where: { id: params.id } });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { ServiceSchema } from "@/lib/validations";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic"
+
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const item = await prisma.service.findUnique({ where: { id: params.id } });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
