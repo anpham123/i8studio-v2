@@ -16,7 +16,7 @@ export default function StatsCounter() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-16 relative overflow-hidden">
+    <section ref={ref} className="py-16 relative z-0 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-blue-900/20" />
       <div className="absolute inset-0 border-y border-white/5" />
