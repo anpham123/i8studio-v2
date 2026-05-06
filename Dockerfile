@@ -9,7 +9,7 @@ RUN apk add --no-cache libc6-compat openssl
 COPY package*.json ./
 COPY prisma/schema.prisma ./prisma/schema.prisma
 
-RUN npm ci
+RUN npm install --prefer-offline
 RUN npx prisma generate
 
 # ============================================================
