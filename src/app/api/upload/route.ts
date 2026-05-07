@@ -8,7 +8,7 @@ import sharp from "sharp";
 export const dynamic = "force-dynamic"
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     if (!ALLOWED_TYPES.includes(file.type))
       return NextResponse.json({ error: "Invalid file type. Use jpg, png, or webp." }, { status: 400 });
     if (file.size > MAX_SIZE)
-      return NextResponse.json({ error: "File too large. Max 5MB." }, { status: 400 });
+      return NextResponse.json({ error: "File too large. Max 50MB." }, { status: 400 });
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

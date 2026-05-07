@@ -50,7 +50,12 @@ export default function Header({ logoImage }: HeaderProps) {
           <Link href={`/${locale}`} className="flex items-center gap-2 shrink-0">
             {logoImage ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoImage} alt="i8 STUDIO" style={{ height: 40, width: "auto", maxWidth: 160 }} />
+              <img
+                src={logoImage}
+                alt="i8 STUDIO"
+                className="object-contain"
+                style={{ height: 44, width: "auto", maxWidth: 200 }}
+              />
             ) : (
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                 i8 STUDIO

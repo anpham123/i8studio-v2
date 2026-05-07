@@ -21,8 +21,8 @@ export default function ImageUpload({ value, onChange, label = "Ảnh" }: ImageU
       setError("Chỉ chấp nhận jpg, png, webp");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Tệp quá lớn. Tối đa 5MB");
+    if (file.size > 50 * 1024 * 1024) {
+      setError("Tệp quá lớn. Tối đa 50MB");
       return;
     }
     setUploading(true);
@@ -81,7 +81,7 @@ export default function ImageUpload({ value, onChange, label = "Ảnh" }: ImageU
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Kéo thả hoặc click để chọn</p>
-                <p className="text-xs mt-0.5">JPG, PNG, WebP · Tối đa 5MB</p>
+                <p className="text-xs mt-0.5">JPG, PNG, WebP · Tối đa 50MB</p>
               </div>
             </div>
           )}
