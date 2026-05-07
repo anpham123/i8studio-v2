@@ -8,9 +8,10 @@ import { useTranslations, useLocale } from "next-intl";
 
 interface HeaderProps {
   logoImage?: string;
+  logoHeight?: number;
 }
 
-export default function Header({ logoImage }: HeaderProps) {
+export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useTranslations("nav");
@@ -53,8 +54,7 @@ export default function Header({ logoImage }: HeaderProps) {
               <img
                 src={logoImage}
                 alt="i8 STUDIO"
-                className="object-contain"
-                style={{ height: 44, width: "auto", maxWidth: 200 }}
+                style={{ height: logoHeight, width: "auto", maxWidth: 240, display: "block", objectFit: "contain" }}
               />
             ) : (
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
