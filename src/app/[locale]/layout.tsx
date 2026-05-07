@@ -67,7 +67,7 @@ export default async function LocaleLayout({
   const bgGlobal = settingsMap.bgGlobal || "";
   const overlayOpacity = Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100;
   const logoImage = settingsMap.logoImage || "";
-  const logoHeight = Math.min(120, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
+  const logoHeight = Math.min(240, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
 
   return (
     <html lang={params.locale}>

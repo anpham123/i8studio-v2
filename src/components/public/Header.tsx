@@ -54,7 +54,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
               <img
                 src={logoImage}
                 alt="i8 STUDIO"
-                style={{ height: logoHeight, width: "auto", maxWidth: 240, display: "block", objectFit: "contain" }}
+                style={{ height: logoHeight, width: "auto", display: "block", objectFit: "contain" }}
               />
             ) : (
               <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">

@@ -12,7 +12,7 @@ interface BrandingSettings {
   strengthsImage: string;
 }
 
-const HEIGHT_PRESETS = [32, 40, 48, 56, 64, 80];
+const HEIGHT_PRESETS = [48, 64, 80, 120, 160, 200, 240];
 const DEFAULT_HEIGHT = 48;
 
 async function saveToAPI(patch: Partial<BrandingSettings>): Promise<boolean> {
@@ -90,7 +90,7 @@ export default function BrandingSettingsPage() {
     else toast("Lỗi khi khôi phục", "error");
   };
 
-  const parsedHeight = Math.min(120, Math.max(24, parseInt(values.logoHeight || String(DEFAULT_HEIGHT), 10) || DEFAULT_HEIGHT));
+  const parsedHeight = Math.min(240, Math.max(24, parseInt(values.logoHeight || String(DEFAULT_HEIGHT), 10) || DEFAULT_HEIGHT));
 
   if (loading) {
     return (
@@ -149,7 +149,7 @@ export default function BrandingSettingsPage() {
               <input
                 type="range"
                 min="24"
-                max="120"
+                max="240"
                 step="1"
                 value={parsedHeight}
                 onChange={(e) => setValues((v) => ({ ...v, logoHeight: e.target.value }))}
@@ -158,7 +158,7 @@ export default function BrandingSettingsPage() {
               <input
                 type="number"
                 min="24"
-                max="120"
+                max="240"
                 value={parsedHeight}
                 onChange={(e) => setValues((v) => ({ ...v, logoHeight: e.target.value }))}
                 className="w-20 text-center border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -167,7 +167,7 @@ export default function BrandingSettingsPage() {
             </div>
 
             {/* Quick presets */}
-            <div className="grid grid-cols-6 gap-2 mb-4">
+            <div className="grid grid-cols-7 gap-2 mb-4">
               {HEIGHT_PRESETS.map((px) => (
                 <button
                   key={px}
