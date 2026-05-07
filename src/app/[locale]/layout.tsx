@@ -64,7 +64,7 @@ export default async function LocaleLayout({
       <body className={`${outfit.variable} font-sans antialiased bg-[#0a0a0f] text-white`}>
         <NextIntlClientProvider messages={messages}>
           <Header />
-          <main>{children}</main>
+          <main className="pt-20">{children}</main>
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
           <ExitIntentPopup />
