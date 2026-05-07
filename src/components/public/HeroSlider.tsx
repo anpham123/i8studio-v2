@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -85,13 +84,11 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: Her
       {/* Background — custom image or default animated gradient */}
       {bgHero ? (
         <div className="absolute inset-0 overflow-hidden">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={bgHero}
             alt=""
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
           {/* Dark overlay for text readability */}
           <div
