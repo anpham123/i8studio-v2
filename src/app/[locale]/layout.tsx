@@ -59,9 +59,22 @@ export default async function LocaleLayout({
 
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
+  const bgGlobal = settingsMap.bgGlobal || "";
+  const overlayOpacity = Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100;
+
+  const bodyStyle: React.CSSProperties = bgGlobal
+    ? {
+        backgroundImage: `linear-gradient(rgba(10,10,15,${overlayOpacity}), rgba(10,10,15,${overlayOpacity})), url("${bgGlobal}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundAttachment: "fixed",
+        backgroundColor: "#0a0a0f",
+      }
+    : { backgroundColor: "#0a0a0f" };
+
   return (
     <html lang={params.locale}>
-      <body className={`${outfit.variable} font-sans antialiased bg-[#0a0a0f] text-white`}>
+      <body className={`${outfit.variable} font-sans antialiased text-white`} style={bodyStyle}>
         <NextIntlClientProvider messages={messages}>
           <Header />
           <main className="pt-20">{children}</main>

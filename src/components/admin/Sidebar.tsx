@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Image, Wrench, MessageSquare, Handshake,
   BookOpen, HelpCircle, Play, BookOpenCheck, Mail, Users, Folder,
-  Settings, LogOut, X, ChevronRight,
+  Settings, LogOut, X, ChevronRight, Palette,
 } from "lucide-react";
 
 const menuItems = [
@@ -24,7 +24,8 @@ const menuItems = [
   { href: "/admin/contacts", label: "Liên hệ", icon: Mail },
   { href: "/admin/subscribers", label: "Subscribers", icon: Users },
   { href: "/admin/media", label: "Media", icon: Folder },
-  { href: "/admin/settings", label: "Cài đặt", icon: Settings },
+  { href: "/admin/settings/background", label: "Giao diện nền", icon: Palette },
+  { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
 ];
 
 interface SidebarProps {

@@ -80,7 +80,11 @@ export default async function HomePage({ params }: { params: { locale: string } 
       )}
 
       {/* 1. Hero Slider */}
-      <HeroSlider slides={slides} />
+      <HeroSlider
+        slides={slides}
+        bgHero={settingsMap.bgHero}
+        overlayOpacity={Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100}
+      />
 
       <div className="section-divider" />
 

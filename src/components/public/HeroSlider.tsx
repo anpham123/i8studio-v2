@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -17,6 +18,8 @@ interface Slide {
 
 interface HeroSliderProps {
   slides: Slide[];
+  bgHero?: string;
+  overlayOpacity?: number;
 }
 
 const shapes = [
@@ -51,7 +54,7 @@ function FloatingShape({ cfg }: { cfg: typeof shapes[0] }) {
   );
 }
 
-export default function HeroSlider({ slides }: HeroSliderProps) {
+export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const locale = useLocale();
@@ -79,28 +82,48 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Slide gradient base */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          className={`absolute inset-0 bg-gradient-to-br ${slide.gradient || "from-blue-900 via-purple-900 to-slate-900"}`}
-        />
-      </AnimatePresence>
-
-      {/* Animated mesh gradient overlay */}
-      <div
-        className="absolute inset-0 opacity-50"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.35) 0%, transparent 60%), " +
-            "radial-gradient(ellipse 60% 50% at 85% 110%, rgba(139,92,246,0.3) 0%, transparent 60%), " +
-            "radial-gradient(ellipse 50% 40% at 5% 60%, rgba(6,182,212,0.2) 0%, transparent 60%)",
-        }}
-      />
+      {/* Background — custom image or default animated gradient */}
+      {bgHero ? (
+        <div className="absolute inset-0 overflow-hidden">
+          <Image
+            src={bgHero}
+            alt=""
+            fill
+            className="object-cover object-center"
+            priority
+            sizes="100vw"
+          />
+          {/* Dark overlay for text readability */}
+          <div
+            className="absolute inset-0"
+            style={{ background: `rgba(10,10,15,${overlayOpacity})` }}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Animated slide gradient */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className={`absolute inset-0 bg-gradient-to-br ${slide.gradient || "from-blue-900 via-purple-900 to-slate-900"}`}
+            />
+          </AnimatePresence>
+          {/* Animated mesh gradient overlay */}
+          <div
+            className="absolute inset-0 opacity-50"
+            style={{
+              background:
+                "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.35) 0%, transparent 60%), " +
+                "radial-gradient(ellipse 60% 50% at 85% 110%, rgba(139,92,246,0.3) 0%, transparent 60%), " +
+                "radial-gradient(ellipse 50% 40% at 5% 60%, rgba(6,182,212,0.2) 0%, transparent 60%)",
+            }}
+          />
+        </>
+      )}
 
       {/* Grid pattern 60px */}
       <div
