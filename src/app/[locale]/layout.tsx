@@ -69,7 +69,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={params.locale}>
-      <body className={`${outfit.variable} font-sans antialiased text-white`} style={{ backgroundColor: "#0a0a0f" }}>
+      <body className={`${outfit.variable} font-sans antialiased text-white`}>
         <GlobalBackground bgGlobal={bgGlobal} overlayOpacity={overlayOpacity} />
         <NextIntlClientProvider messages={messages}>
           <Header />
