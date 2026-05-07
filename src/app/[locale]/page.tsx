@@ -99,7 +99,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
       {/* 3. Strengths */}
       <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(10,10,15,1) 50%)" }}>
-        <StrengthsSection />
+        <StrengthsSection strengthsImage={settingsMap.strengthsImage || ""} />
       </div>
 
       <div className="section-divider" />

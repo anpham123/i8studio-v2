@@ -6,7 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
-export default function Header() {
+interface HeaderProps {
+  logoImage?: string;
+}
+
+export default function Header({ logoImage }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useTranslations("nav");
@@ -44,9 +48,14 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center gap-2 shrink-0">
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              i8 STUDIO
-            </span>
+            {logoImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoImage} alt="i8 STUDIO" style={{ height: 40, width: "auto", maxWidth: 160 }} />
+            ) : (
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                i8 STUDIO
+              </span>
+            )}
           </Link>
 
           {/* Desktop Nav */}

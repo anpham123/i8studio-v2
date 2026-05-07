@@ -9,30 +9,45 @@ const strengths = [
   "Flexible workflow: Revit, SketchUp, AutoCAD accepted",
 ];
 
-export default function StrengthsSection() {
+interface StrengthsSectionProps {
+  strengthsImage?: string;
+}
+
+export default function StrengthsSection({ strengthsImage }: StrengthsSectionProps) {
   return (
     <section className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Image placeholder */}
+          {/* Image — custom upload or placeholder */}
           <FadeIn direction="left">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-white/10 overflow-hidden flex items-center justify-center">
-                <div className="text-center text-white/20">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <path d="m3 9 4-4 4 4 4-4 4 4" />
-                      <path d="m3 15 4-4 4 4 4-4 4 4" />
-                    </svg>
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+                {strengthsImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={strengthsImage}
+                    alt="Studio Portfolio"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-900/30 to-purple-900/30 flex items-center justify-center">
+                    <div className="text-center text-white/20">
+                      <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <path d="m3 9 4-4 4 4 4-4 4 4" />
+                          <path d="m3 15 4-4 4 4 4-4 4 4" />
+                        </svg>
+                      </div>
+                      <span className="text-sm">Studio Portfolio</span>
+                    </div>
+                    {/* Decorative corners */}
+                    <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-blue-500/50 rounded-tl" />
+                    <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-purple-500/50 rounded-tr" />
+                    <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-blue-500/50 rounded-bl" />
+                    <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-purple-500/50 rounded-br" />
                   </div>
-                  <span className="text-sm">Studio Portfolio</span>
-                </div>
-                {/* Decorative corners */}
-                <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-blue-500/50 rounded-tl" />
-                <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-purple-500/50 rounded-tr" />
-                <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-blue-500/50 rounded-bl" />
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-purple-500/50 rounded-br" />
+                )}
               </div>
               {/* Floating badge */}
               <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 shadow-xl">
