@@ -1,11 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
+
 interface Props {
   bgGlobal: string;
   overlayOpacity: number;
 }
 
 export default function GlobalBackground({ bgGlobal, overlayOpacity }: Props) {
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[GlobalBackground] bgGlobal:", bgGlobal || "(empty)");
+      console.log("[GlobalBackground] overlayOpacity:", overlayOpacity);
+    }
+  }, [bgGlobal, overlayOpacity]);
+
   if (!bgGlobal) return null;
   return (
     <div

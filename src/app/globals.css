@@ -19,7 +19,8 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
+  /* transparent so GlobalBackground (position:fixed, z-index:-1) is visible above html canvas */
+  background-color: transparent;
   color: var(--text-primary);
   font-family: var(--font-outfit), sans-serif;
 }

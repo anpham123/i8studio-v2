@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { buildMetadata, organizationJsonLd, websiteJsonLd, faqPageJsonLd } from "@/lib/seo";
 import HeroSlider from "@/components/public/HeroSlider";
 import SocialProofBar from "@/components/public/SocialProofBar";

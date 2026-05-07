@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const outfit = Outfit({
   subsets: ["latin"],
