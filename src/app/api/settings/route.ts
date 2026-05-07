@@ -8,7 +8,9 @@ export const dynamic = "force-dynamic"
 export async function GET() {
   const settings = await prisma.setting.findMany();
   const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
-  return NextResponse.json({ data: map });
+  return NextResponse.json({ data: map }, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
 
 export async function PUT(req: NextRequest) {

@@ -10,6 +10,9 @@ import FloatingCTA from "@/components/public/FloatingCTA";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
 import { prisma } from "@/lib/prisma";
 
+// Always fetch fresh settings — never serve a cached layout with stale bg config
+export const dynamic = "force-dynamic";
+
 const outfit = Outfit({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
