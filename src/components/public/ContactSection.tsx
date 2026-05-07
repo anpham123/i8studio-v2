@@ -45,8 +45,26 @@ export default function ContactSection({ settings }: ContactSectionProps) {
   };
 
   return (
-    <section id="contact" className="py-20 lg:py-28 bg-white/[0.01]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-20 lg:py-28 relative overflow-hidden">
+      {/* Gradient mesh background */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 60%), " +
+            "radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.1) 0%, transparent 60%), " +
+            "radial-gradient(ellipse 40% 60% at 50% 100%, rgba(99,102,241,0.07) 0%, transparent 60%)",
+        }}
+      />
+      {/* Grid lines */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), " +
+            "linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <FadeIn className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
             {t("title")}
@@ -76,7 +94,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       required
                       value={form.fullName}
                       onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-blue-500/50 focus:bg-white/8 transition-colors text-sm"
+                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm"
                       placeholder="Tanaka Hiroshi"
                     />
                   </div>
@@ -90,7 +108,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       required
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-blue-500/50 transition-colors text-sm"
+                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm"
                       placeholder="hello@company.jp"
                     />
                   </div>
@@ -102,7 +120,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                     <select
                       value={form.service}
                       onChange={(e) => setForm({ ...form, service: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500/50 transition-colors text-sm appearance-none"
+                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm appearance-none"
                     >
                       <option value="" className="bg-[#0a0a0f]">{t("selectService")}</option>
                       {services.map((s) => (
@@ -120,7 +138,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-blue-500/50 transition-colors text-sm resize-none"
+                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm resize-none"
                       placeholder="Tell us about your project..."
                     />
                   </div>
@@ -132,7 +150,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="w-full btn-gradient py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="relative overflow-hidden shimmer-top w-full btn-gradient py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {status === "sending" ? (
                       <>

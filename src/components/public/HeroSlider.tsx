@@ -19,6 +19,38 @@ interface HeroSliderProps {
   slides: Slide[];
 }
 
+const shapes = [
+  { left: "7%",  top: "22%", size: 48, type: "square",   color: "border-blue-400/25",   delay: 0,   dur: 9  },
+  { left: "87%", top: "14%", size: 36, type: "circle",   color: "border-purple-400/20", delay: 1.5, dur: 12 },
+  { left: "72%", top: "68%", size: 52, type: "triangle", color: "text-cyan-400/15",      delay: 0.8, dur: 10 },
+  { left: "14%", top: "73%", size: 32, type: "square",   color: "border-purple-400/20", delay: 2,   dur: 8  },
+  { left: "50%", top: "10%", size: 22, type: "circle",   color: "border-blue-300/15",   delay: 0.3, dur: 14 },
+  { left: "93%", top: "48%", size: 40, type: "triangle", color: "text-blue-400/10",      delay: 1,   dur: 11 },
+];
+
+function FloatingShape({ cfg }: { cfg: typeof shapes[0] }) {
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      style={{ left: cfg.left, top: cfg.top, width: cfg.size, height: cfg.size }}
+      animate={{ y: [0, -22, 0], rotate: cfg.type === "circle" ? 0 : [0, 360], opacity: [0.6, 1, 0.6] }}
+      transition={{ duration: cfg.dur, repeat: Infinity, ease: "easeInOut", delay: cfg.delay }}
+    >
+      {cfg.type === "square" && (
+        <div className={`w-full h-full border ${cfg.color} rotate-12`} />
+      )}
+      {cfg.type === "circle" && (
+        <div className={`w-full h-full border ${cfg.color} rounded-full`} />
+      )}
+      {cfg.type === "triangle" && (
+        <svg viewBox="0 0 40 40" className={`w-full h-full ${cfg.color}`} fill="none">
+          <polygon points="20,2 38,38 2,38" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      )}
+    </motion.div>
+  );
+}
+
 export default function HeroSlider({ slides }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -47,7 +79,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Gradient background */}
+      {/* Slide gradient base */}
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -59,31 +91,74 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
         />
       </AnimatePresence>
 
-      {/* Noise texture overlay */}
-      <div className="absolute inset-0 opacity-30"
+      {/* Animated mesh gradient overlay */}
+      <div
+        className="absolute inset-0 opacity-50"
         style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E\")",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(59,130,246,0.35) 0%, transparent 60%), " +
+            "radial-gradient(ellipse 60% 50% at 85% 110%, rgba(139,92,246,0.3) 0%, transparent 60%), " +
+            "radial-gradient(ellipse 50% 40% at 5% 60%, rgba(6,182,212,0.2) 0%, transparent 60%)",
         }}
       />
 
-      {/* Grid pattern */}
-      <div className="absolute inset-0 opacity-10"
+      {/* Grid pattern 60px */}
+      <div
+        className="absolute inset-0 opacity-[0.05]"
         style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), " +
+            "linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
-      {/* Glow orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
+      {/* Moving glow orbs */}
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 640, height: 640,
+          top: "-15%", left: "-12%",
+          background: "radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)",
+          filter: "blur(70px)",
+        }}
+        animate={{ x: [0, 80, 0], y: [0, -50, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 560, height: 560,
+          bottom: "-12%", right: "-8%",
+          background: "radial-gradient(circle, rgba(139,92,246,0.28) 0%, transparent 70%)",
+          filter: "blur(70px)",
+        }}
+        animate={{ x: [0, -65, 0], y: [0, 55, 0] }}
+        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: 420, height: 420,
+          top: "20%", right: "15%",
+          background: "radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%)",
+          filter: "blur(60px)",
+        }}
+        animate={{ x: [0, 45, 0], y: [0, 65, 0] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Floating geometric shapes */}
+      {shapes.map((s, i) => (
+        <FloatingShape key={i} cfg={s} />
+      ))}
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={current}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -93,11 +168,17 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
               {t("trust")}
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
+            <h1
+              className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6"
+              style={{
+                textShadow:
+                  "0 0 80px rgba(99,102,241,0.45), 0 0 160px rgba(139,92,246,0.25)",
+              }}
+            >
               {title.split(" ").map((word, i) => (
                 <span key={i}>
                   {i === 0 || i === 1 ? (
-                    <span className="bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-300 bg-clip-text text-transparent">
                       {word}{" "}
                     </span>
                   ) : (
@@ -107,7 +188,10 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
               ))}
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p
+              className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed"
+              style={{ textShadow: "0 0 40px rgba(99,102,241,0.22)" }}
+            >
               {subtitle}
             </p>
 
@@ -137,7 +221,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
                 onClick={() => setCurrent(i)}
                 className={`transition-all duration-300 rounded-full ${
                   i === current
-                    ? "w-8 h-2 bg-white"
+                    ? "w-8 h-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
                     : "w-2 h-2 bg-white/30 hover:bg-white/60"
                 }`}
               />
@@ -146,7 +230,7 @@ export default function HeroSlider({ slides }: HeroSliderProps) {
         )}
       </div>
 
-      {/* Scroll down indicator */}
+      {/* Scroll indicator */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40"
         animate={{ y: [0, 8, 0] }}

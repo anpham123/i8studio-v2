@@ -34,8 +34,26 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
   const t = useTranslations("services");
 
   return (
-    <section id="services" className="py-20 lg:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="services" className="py-20 lg:py-28 relative overflow-hidden">
+      {/* Subtle blue section tint */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "linear-gradient(to bottom, rgba(10,14,20,0.8), rgba(10,10,15,1))" }} />
+      {/* Dot pattern overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.055]"
+        style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      {/* Decorative circle top-right */}
+      <div className="absolute -top-20 -right-20 w-80 h-80 opacity-[0.06] pointer-events-none">
+        <svg viewBox="0 0 320 320" fill="none">
+          <circle cx="160" cy="160" r="150" stroke="white" strokeWidth="0.8"/>
+          <circle cx="160" cy="160" r="100" stroke="white" strokeWidth="0.8"/>
+          <circle cx="160" cy="160" r="50"  stroke="white" strokeWidth="0.8"/>
+        </svg>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <FadeIn className="text-center mb-16">
           <div className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">
@@ -61,7 +79,7 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
               <FadeIn key={service.id} delay={i * 0.08}>
                 <Link
                   href={`/${locale}/service/${service.slug}`}
-                  className="group block card-glass p-6 hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] transition-all duration-300"
+                  className="group block card-glass-hover p-6"
                 >
                   {/* Icon */}
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center mb-4 group-hover:from-blue-500/30 group-hover:to-purple-500/30 transition-all">

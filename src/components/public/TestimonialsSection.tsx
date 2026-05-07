@@ -24,7 +24,16 @@ export default function TestimonialsSection({ testimonials, locale }: Testimonia
   if (!testimonials.length) return null;
 
   return (
-    <section className="py-20 lg:py-28 bg-white/[0.01]">
+    <section className="py-20 lg:py-28 relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.05) 0%, rgba(10,10,15,1) 40%, rgba(59,130,246,0.04) 100%)" }}
+    >
+      {/* Decorative dot pattern */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
@@ -37,7 +46,14 @@ export default function TestimonialsSection({ testimonials, locale }: Testimonia
             const quote = locale === "ja" ? t_item.quoteJa || t_item.quote : t_item.quote;
             return (
               <FadeIn key={t_item.id} delay={i * 0.15}>
-                <div className="card-glass p-8 h-full flex flex-col">
+                <div className="card-glass-hover p-8 h-full flex flex-col relative overflow-hidden">
+                  {/* Large decorative quote mark */}
+                  <div
+                    className="absolute -top-3 right-5 text-[130px] leading-none select-none pointer-events-none font-serif"
+                    style={{ color: "rgba(139,92,246,0.09)" }}
+                  >
+                    &ldquo;
+                  </div>
                   {/* Stars */}
                   <div className="flex gap-1 mb-5">
                     {Array.from({ length: t_item.rating }).map((_, s) => (

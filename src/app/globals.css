@@ -23,6 +23,18 @@ body {
   font-family: var(--font-outfit), sans-serif;
 }
 
+/* Premium noise texture — adds depth across all pages */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.022;
+  mix-blend-mode: overlay;
+}
+
 /* ── Scrollbar ──────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #0a0a0f; }
@@ -82,11 +94,27 @@ body {
 }
 @keyframes number-glow {
   0%, 100% { filter: drop-shadow(0 0 8px rgba(59,130,246,0.5)); }
-  50%       { filter: drop-shadow(0 0 20px rgba(139,92,246,0.8)) drop-shadow(0 0 40px rgba(59,130,246,0.4)); }
+  50%       { filter: drop-shadow(0 0 24px rgba(139,92,246,0.9)) drop-shadow(0 0 48px rgba(59,130,246,0.5)); }
 }
 @keyframes orbit {
   from { transform: rotate(0deg) translateX(var(--orbit-r, 40px)) rotate(0deg); }
   to   { transform: rotate(360deg) translateX(var(--orbit-r, 40px)) rotate(-360deg); }
+}
+@keyframes process-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59,130,246,0.25),
+                0 0 20px rgba(59,130,246,0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(59,130,246,0),
+                0 0 40px rgba(59,130,246,0.5),
+                0 0 70px rgba(139,92,246,0.25);
+  }
+}
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(25px, -18px) scale(1.06); }
+  66%       { transform: translate(-18px, 22px) scale(0.96); }
 }
 
 /* ── Animation utilities ────────────────────────────────── */
@@ -100,6 +128,12 @@ body {
 .animate-glow-pulse   { animation: glow-pulse-blue 2.5s ease-in-out infinite; }
 .animate-line-pulse   { animation: line-pulse 2s ease-in-out infinite; }
 .animate-number-glow  { animation: number-glow 3s ease-in-out infinite; }
+.animate-process-glow { animation: process-glow 3s ease-in-out infinite; }
+.animate-orb-drift    { animation: orb-drift 20s ease-in-out infinite; }
+.animate-line-glow {
+  background-size: 200% 200%;
+  animation: gradient-x 6s ease infinite, line-pulse 2.5s ease-in-out infinite;
+}
 
 /* ── Component classes ──────────────────────────────────── */
 @layer utilities {
@@ -125,14 +159,16 @@ body {
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    transition: border-color 0.3s, box-shadow 0.35s, transform 0.3s, background 0.3s;
   }
   .card-glass-hover:hover {
-    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(59, 130, 246, 0.42);
     box-shadow:
       0 0 0 1px rgba(59, 130, 246, 0.08),
-      0 0 40px rgba(59, 130, 246, 0.1),
-      0 24px 48px rgba(0, 0, 0, 0.35);
+      0 0 40px rgba(59, 130, 246, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 24px 48px rgba(0, 0, 0, 0.38);
     transform: translateY(-4px);
   }
 
@@ -141,25 +177,25 @@ body {
     box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
   }
   .btn-gradient:hover {
-    box-shadow: 0 6px 28px rgba(99, 102, 241, 0.55);
+    box-shadow: 0 6px 32px rgba(99, 102, 241, 0.6);
   }
 
   .btn-outline {
     @apply border border-white/30 text-white font-semibold rounded-lg px-6 py-3 hover:bg-white/10 transition-all duration-300;
   }
 
-  /* Input with glow on focus */
+  /* Input glow on focus */
   .input-glow {
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
   }
   .input-glow:focus {
     outline: none;
-    border-color: rgba(59, 130, 246, 0.55) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12), 0 0 20px rgba(59, 130, 246, 0.08);
-    background: rgba(255, 255, 255, 0.065) !important;
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.13), 0 0 24px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.07) !important;
   }
 
-  /* Shimmer effect on a card's top edge */
+  /* Shimmer sweep — apply to relative overflow-hidden elements */
   .shimmer-top::after {
     content: '';
     position: absolute;
@@ -170,20 +206,27 @@ body {
     background: linear-gradient(
       105deg,
       transparent 40%,
-      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.14) 50%,
       transparent 60%
     );
-    animation: shimmer 3.5s ease-in-out infinite;
+    animation: shimmer 2.8s ease-in-out infinite;
   }
 }
 
 /* ── Section dividers ───────────────────────────────────── */
 .section-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.05) 70%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.04) 25%,
+    rgba(139,92,246,0.12) 50%,
+    rgba(255,255,255,0.04) 75%,
+    transparent
+  );
 }
 
-/* ── Noise texture overlay ──────────────────────────────── */
+/* ── Noise texture overlay (for specific sections) ──────── */
 .noise-overlay::before {
   content: '';
   position: absolute;

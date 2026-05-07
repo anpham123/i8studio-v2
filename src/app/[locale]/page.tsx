@@ -82,43 +82,72 @@ export default async function HomePage({ params }: { params: { locale: string } 
       {/* 1. Hero Slider */}
       <HeroSlider slides={slides} />
 
+      <div className="section-divider" />
+
       {/* 2. Social Proof Bar */}
       <SocialProofBar partners={partners} />
 
+      <div className="section-divider" />
+
       {/* 3. Strengths */}
-      <StrengthsSection />
+      <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(10,10,15,1) 50%)" }}>
+        <StrengthsSection />
+      </div>
+
+      <div className="section-divider" />
 
       {/* 4. Stats Counter */}
       <StatsCounter />
 
+      <div className="section-divider" />
+
       {/* 5. Services */}
       <ServicesSection services={services} locale={locale} />
+
+      <div className="section-divider" />
 
       {/* 6. Works */}
       <WorksSection works={works} locale={locale} />
 
+      <div className="section-divider" />
+
       {/* 7. Process */}
       <ProcessSection locale={locale} />
+
+      <div className="section-divider" />
 
       {/* 8. Testimonials */}
       <TestimonialsSection testimonials={testimonials} locale={locale} />
 
+      <div className="section-divider" />
+
       {/* 9. About Us */}
       <AboutSection locale={locale} />
 
+      <div className="section-divider" />
+
       {/* 10. Case Studies (skip if empty) */}
       {caseStudies.length > 0 && (
-        <CaseStudyPreview caseStudies={caseStudies} locale={locale} />
+        <>
+          <CaseStudyPreview caseStudies={caseStudies} locale={locale} />
+          <div className="section-divider" />
+        </>
       )}
 
       {/* 11. Concerns */}
       <ConcernsSection locale={locale} />
 
+      <div className="section-divider" />
+
       {/* 12. News */}
       <NewsSection posts={posts} locale={locale} />
 
+      <div className="section-divider" />
+
       {/* 13. Q&A */}
       <QASection items={qaItems} locale={locale} preview />
+
+      <div className="section-divider" />
 
       {/* 14. Contact */}
       <ContactSection settings={settingsMap} />

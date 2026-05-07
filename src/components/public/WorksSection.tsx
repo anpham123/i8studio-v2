@@ -37,8 +37,18 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
   const displayed = filtered.slice(0, 6);
 
   return (
-    <section id="works" className="py-20 lg:py-28 bg-white/[0.01]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="works" className="py-20 lg:py-28 relative overflow-hidden"
+      style={{ background: "linear-gradient(to bottom right, rgba(10,10,15,1), rgba(10,12,18,1))" }}
+    >
+      {/* Circular deco bottom-left */}
+      <div className="absolute -bottom-16 -left-16 w-72 h-72 opacity-[0.06] pointer-events-none">
+        <svg viewBox="0 0 288 288" fill="none">
+          <circle cx="144" cy="144" r="130" stroke="white" strokeWidth="0.8"/>
+          <circle cx="144" cy="144" r="85"  stroke="white" strokeWidth="0.8"/>
+          <circle cx="144" cy="144" r="40"  stroke="white" strokeWidth="0.8"/>
+        </svg>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Header */}
         <FadeIn className="text-center mb-12">
           <div className="text-sm font-semibold text-purple-400 uppercase tracking-widest mb-3">
@@ -84,7 +94,7 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                 >
                   <div
-                    className="group relative overflow-hidden rounded-2xl border border-white/5 cursor-pointer bg-gradient-to-br from-blue-900/20 to-purple-900/20 aspect-[4/3]"
+                    className="group relative overflow-hidden rounded-2xl border border-white/5 cursor-pointer bg-gradient-to-br from-blue-900/20 to-purple-900/20 aspect-[4/3] hover:border-blue-500/30 hover:shadow-[0_0_40px_rgba(59,130,246,0.12)] transition-all duration-400"
                     onClick={() => {
                       if (hasVideo) {
                         setLightbox({ src: work.videoUrl, alt: title, isVideo: true });

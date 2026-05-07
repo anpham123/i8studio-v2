@@ -17,7 +17,11 @@ export default function ProcessSection({ locale }: { locale: string }) {
   ];
 
   return (
-    <section id="process" className="py-20 lg:py-28">
+    <section id="process" className="py-20 lg:py-28 relative overflow-hidden">
+      {/* Ambient center glow */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(59,130,246,0.06) 0%, transparent 70%)" }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
@@ -27,8 +31,8 @@ export default function ProcessSection({ locale }: { locale: string }) {
 
         {/* Steps */}
         <div className="relative">
-          {/* Connecting line (desktop) */}
-          <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px bg-gradient-to-r from-blue-500/0 via-blue-500/50 to-purple-500/0" />
+          {/* Connecting line (desktop) — animated gradient */}
+          <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px animate-line-glow bg-gradient-to-r from-blue-400/0 via-purple-400/60 to-blue-400/0" />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
             {steps.map((step, i) => {
@@ -41,9 +45,9 @@ export default function ProcessSection({ locale }: { locale: string }) {
                     <div className="text-xs font-bold text-blue-400/50 mb-2">
                       0{i + 1}
                     </div>
-                    {/* Icon circle */}
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 flex items-center justify-center mb-4 relative z-10">
-                      <Icon size={28} className="text-blue-400" />
+                    {/* Icon circle — glowing pulse */}
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/25 to-purple-500/25 border border-blue-500/40 flex items-center justify-center mb-4 relative z-10 animate-process-glow">
+                      <Icon size={28} className="text-blue-300" />
                     </div>
                     <h3 className="text-white font-bold mb-2">
                       {t(`steps.${stepKey}.title`)}
