@@ -90,72 +90,43 @@ export default async function HomePage({ params }: { params: { locale: string } 
         overlayOpacity={Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100}
       />
 
-      <div className="section-divider" />
-
       {/* 2. Social Proof Bar */}
       <SocialProofBar partners={partners} />
 
-      <div className="section-divider" />
-
       {/* 3. Strengths */}
-      <div style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(10,10,15,1) 50%)" }}>
-        <StrengthsSection strengthsImage={settingsMap.strengthsImage || ""} />
-      </div>
-
-      <div className="section-divider" />
+      <StrengthsSection strengthsImage={settingsMap.strengthsImage || ""} />
 
       {/* 4. Stats Counter */}
       <StatsCounter />
 
-      <div className="section-divider" />
-
       {/* 5. Services */}
       <ServicesSection services={services} locale={locale} />
-
-      <div className="section-divider" />
 
       {/* 6. Works */}
       <WorksSection works={works} locale={locale} />
 
-      <div className="section-divider" />
-
       {/* 7. Process */}
       <ProcessSection locale={locale} />
-
-      <div className="section-divider" />
 
       {/* 8. Testimonials */}
       <TestimonialsSection testimonials={testimonials} locale={locale} />
 
-      <div className="section-divider" />
-
       {/* 9. About Us */}
       <AboutSection locale={locale} />
 
-      <div className="section-divider" />
-
       {/* 10. Case Studies (skip if empty) */}
       {caseStudies.length > 0 && (
-        <>
-          <CaseStudyPreview caseStudies={caseStudies} locale={locale} />
-          <div className="section-divider" />
-        </>
+        <CaseStudyPreview caseStudies={caseStudies} locale={locale} />
       )}
 
       {/* 11. Concerns */}
       <ConcernsSection locale={locale} />
 
-      <div className="section-divider" />
-
       {/* 12. News */}
       <NewsSection posts={posts} locale={locale} />
 
-      <div className="section-divider" />
-
       {/* 13. Q&A */}
       <QASection items={qaItems} locale={locale} preview />
-
-      <div className="section-divider" />
 
       {/* 14. Contact */}
       <ContactSection settings={settingsMap} />

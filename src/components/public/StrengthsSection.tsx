@@ -15,13 +15,13 @@ interface StrengthsSectionProps {
 
 export default function StrengthsSection({ strengthsImage }: StrengthsSectionProps) {
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Image — custom upload or placeholder */}
+          {/* Image */}
           <FadeIn direction="left">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-gray-100">
                 {strengthsImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -30,9 +30,9 @@ export default function StrengthsSection({ strengthsImage }: StrengthsSectionPro
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-900/30 to-purple-900/30 flex items-center justify-center">
-                    <div className="text-center text-white/20">
-                      <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center relative">
+                    <div className="text-center text-gray-300">
+                      <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
                           <rect x="3" y="3" width="18" height="18" rx="2" />
                           <path d="m3 9 4-4 4 4 4-4 4 4" />
@@ -41,18 +41,13 @@ export default function StrengthsSection({ strengthsImage }: StrengthsSectionPro
                       </div>
                       <span className="text-sm">Studio Portfolio</span>
                     </div>
-                    {/* Decorative corners */}
-                    <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-blue-500/50 rounded-tl" />
-                    <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-purple-500/50 rounded-tr" />
-                    <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-blue-500/50 rounded-bl" />
-                    <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-purple-500/50 rounded-br" />
                   </div>
                 )}
               </div>
               {/* Floating badge */}
-              <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 shadow-xl">
+              <div className="absolute -bottom-4 -right-4 bg-gray-900 rounded-xl p-4 shadow-xl">
                 <div className="text-2xl font-bold text-white">200+</div>
-                <div className="text-xs text-white/70">Projects Delivered</div>
+                <div className="text-xs text-gray-400">Projects Delivered</div>
               </div>
             </div>
           </FadeIn>
@@ -60,24 +55,21 @@ export default function StrengthsSection({ strengthsImage }: StrengthsSectionPro
           {/* Strengths list */}
           <FadeIn direction="right">
             <div>
-              <div className="text-sm font-semibold text-blue-400 uppercase tracking-widest mb-3">
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
                 Why Choose Us
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-8 leading-tight">
-                High Quality CG at{" "}
-                <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                  Competitive Price
-                </span>
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+                High Quality CG at Competitive Price
               </h2>
 
               <div className="space-y-4">
                 {strengths.map((item, i) => (
                   <FadeIn key={i} delay={i * 0.1}>
                     <div className="flex items-start gap-4">
-                      <div className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mt-0.5">
+                      <div className="shrink-0 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center mt-0.5">
                         <Check size={13} strokeWidth={3} className="text-white" />
                       </div>
-                      <p className="text-white/80 leading-relaxed">{item}</p>
+                      <p className="text-base text-gray-600 leading-relaxed">{item}</p>
                     </div>
                   </FadeIn>
                 ))}

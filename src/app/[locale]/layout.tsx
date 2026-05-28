@@ -8,7 +8,6 @@ import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import FloatingCTA from "@/components/public/FloatingCTA";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
-import GlobalBackground from "@/components/public/GlobalBackground";
 import { prisma } from "@/lib/prisma";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
@@ -64,15 +63,12 @@ export default async function LocaleLayout({
 
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
-  const bgGlobal = settingsMap.bgGlobal || "";
-  const overlayOpacity = Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100;
   const logoImage = settingsMap.logoImage || "";
   const logoHeight = Math.min(240, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
 
   return (
     <html lang={params.locale}>
-      <body className={`${outfit.variable} font-sans antialiased text-white`}>
-        <GlobalBackground bgGlobal={bgGlobal} overlayOpacity={overlayOpacity} />
+      <body className={`${outfit.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Header logoImage={logoImage} logoHeight={logoHeight} />
           <main className="pt-20">{children}</main>

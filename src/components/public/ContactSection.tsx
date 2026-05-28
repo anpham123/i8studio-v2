@@ -45,28 +45,13 @@ export default function ContactSection({ settings }: ContactSectionProps) {
   };
 
   return (
-    <section id="contact" className="py-20 lg:py-28 relative overflow-hidden">
-      {/* Gradient mesh background */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 60% at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 60%), " +
-            "radial-gradient(ellipse 60% 50% at 80% 50%, rgba(139,92,246,0.1) 0%, transparent 60%), " +
-            "radial-gradient(ellipse 40% 60% at 50% 100%, rgba(99,102,241,0.07) 0%, transparent 60%)",
-        }}
-      />
-      {/* Grid lines */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), " +
-            "linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <section id="contact" className="py-20 lg:py-28 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Contact
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
             {t("title")}
           </h2>
         </FadeIn>
@@ -74,19 +59,19 @@ export default function ContactSection({ settings }: ContactSectionProps) {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* LEFT: Form */}
           <FadeIn direction="left">
-            <div className="card-glass p-8">
+            <div className="border border-gray-200 rounded-xl p-8 bg-white">
               {status === "success" ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <Send size={28} className="text-green-400" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
+                    <Send size={28} className="text-green-500" />
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-2">Message Sent!</h3>
-                  <p className="text-white/60">{t("responseTime")}</p>
+                  <h3 className="text-gray-900 font-bold text-xl mb-2">Message Sent!</h3>
+                  <p className="text-gray-500">{t("responseTime")}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       {t("name")} *
                     </label>
                     <input
@@ -94,13 +79,13 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       required
                       value={form.fullName}
                       onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
                       placeholder="Tanaka Hiroshi"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       {t("email")} *
                     </label>
                     <input
@@ -108,29 +93,29 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       required
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
                       placeholder="hello@company.jp"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       {t("service")}
                     </label>
                     <select
                       value={form.service}
                       onChange={(e) => setForm({ ...form, service: e.target.value })}
-                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm appearance-none"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 text-sm appearance-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors bg-white"
                     >
-                      <option value="" className="bg-[#0a0a0f]">{t("selectService")}</option>
+                      <option value="">{t("selectService")}</option>
                       {services.map((s) => (
-                        <option key={s} value={s} className="bg-[#0a0a0f]">{s}</option>
+                        <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       {t("message")} *
                     </label>
                     <textarea
@@ -138,19 +123,19 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                       rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
-                      className="input-glow w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm resize-none"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm resize-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
                       placeholder="Tell us about your project..."
                     />
                   </div>
 
                   {status === "error" && (
-                    <p className="text-red-400 text-sm">Something went wrong. Please try again.</p>
+                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
                   )}
 
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    className="relative overflow-hidden shimmer-top w-full btn-gradient py-3.5 text-base disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="w-full bg-gray-900 text-white font-semibold py-3.5 rounded-lg hover:bg-gray-800 transition-colors text-base disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {status === "sending" ? (
                       <>
@@ -165,7 +150,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                     )}
                   </button>
 
-                  <div className="flex items-center gap-4 text-white/40 text-xs">
+                  <div className="flex items-center gap-4 text-gray-400 text-xs">
                     <div className="flex items-center gap-1.5">
                       <Clock size={12} />
                       {t("responseTime")}
@@ -184,7 +169,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
           <FadeIn direction="right">
             <div className="space-y-6">
               <div>
-                <h3 className="text-white font-bold text-xl mb-6">Get in touch</h3>
+                <h3 className="text-gray-900 font-bold text-xl mb-6">Get in touch</h3>
               </div>
 
               {[
@@ -220,27 +205,27 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                 },
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-4">
-                  <div className="shrink-0 w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                    <item.icon size={18} className="text-blue-400" />
+                  <div className="shrink-0 w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center">
+                    <item.icon size={18} className="text-gray-500" />
                   </div>
                   <div>
-                    <div className="text-white/40 text-xs mb-0.5">{item.label}</div>
+                    <div className="text-gray-400 text-xs mb-0.5">{item.label}</div>
                     {item.href ? (
                       <a
                         href={item.href}
-                        className="text-white/80 hover:text-white transition-colors text-sm"
+                        className="text-gray-700 hover:text-gray-900 transition-colors text-sm"
                       >
                         {item.value}
                       </a>
                     ) : (
-                      <div className="text-white/80 text-sm">{item.value}</div>
+                      <div className="text-gray-700 text-sm">{item.value}</div>
                     )}
                   </div>
                 </div>
               ))}
 
               {/* Trust badges */}
-              <div className="mt-8 p-5 card-glass">
+              <div className="mt-8 border border-gray-200 rounded-xl p-5 bg-gray-50">
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     "200+ Projects",
@@ -248,8 +233,8 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                     "NDA Available",
                     "Fast Turnaround",
                   ].map((badge) => (
-                    <div key={badge} className="flex items-center gap-2 text-white/60 text-xs">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                    <div key={badge} className="flex items-center gap-2 text-gray-500 text-xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                       {badge}
                     </div>
                   ))}

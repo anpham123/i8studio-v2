@@ -16,10 +16,13 @@ export default function ConcernsSection({ locale }: { locale: string }) {
   ];
 
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Common Concerns
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
             {t("title")}
           </h2>
         </FadeIn>
@@ -30,11 +33,11 @@ export default function ConcernsSection({ locale }: { locale: string }) {
             const key = concern.key as "quality" | "deadline" | "communication" | "revisions";
             return (
               <FadeIn key={concern.key} delay={i * 0.1}>
-                <div className="card-glass p-6 text-center hover:border-red-500/20 transition-colors">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                <div className="border border-gray-200 rounded-xl p-6 text-center hover:border-gray-300 hover:shadow-sm transition-all bg-white">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center">
                     <Icon size={22} className="text-red-400" />
                   </div>
-                  <p className="text-white/70 text-sm leading-relaxed">
+                  <p className="text-sm text-gray-600 leading-relaxed">
                     {t(`items.${key}`)}
                   </p>
                 </div>
@@ -45,18 +48,18 @@ export default function ConcernsSection({ locale }: { locale: string }) {
 
         {/* Arrow down */}
         <FadeIn className="flex justify-center mb-8">
-          <div className="flex flex-col items-center gap-1 text-white/30">
+          <div className="flex flex-col items-center gap-1 text-gray-300">
             <ArrowDown size={20} className="animate-bounce" />
           </div>
         </FadeIn>
 
         {/* CTA */}
         <FadeIn className="text-center">
-          <div className="max-w-xl mx-auto card-glass p-8 border-blue-500/20">
-            <p className="text-white/80 text-lg mb-6">{t("cta")}</p>
+          <div className="max-w-xl mx-auto border border-gray-200 rounded-xl p-8 bg-white">
+            <p className="text-gray-900 text-lg font-medium mb-6">{t("cta")}</p>
             <Link
               href={`/${locale}/contact`}
-              className="btn-gradient inline-flex items-center gap-2 px-8 py-4 text-base"
+              className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-base"
             >
               {t("ctaButton")}
             </Link>

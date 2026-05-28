@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
-// Social icons as SVG since lucide-react v1 removed brand icons
+
 const FBIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
@@ -42,13 +42,13 @@ export default function Footer({ settings, services }: FooterProps) {
   ];
 
   return (
-    <footer className="border-t border-white/5 bg-[#080808]">
+    <footer style={{ background: "#111111" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Col 1: Logo + tagline */}
           <div className="col-span-2 lg:col-span-1">
             <Link href={`/${locale}`} className="inline-block mb-4">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              <span className="text-xl font-bold text-white">
                 i8 STUDIO
               </span>
             </Link>
@@ -58,19 +58,19 @@ export default function Footer({ settings, services }: FooterProps) {
             <div className="flex gap-3">
               {settings.socialFacebook && (
                 <a href={settings.socialFacebook} target="_blank" rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-600/20 flex items-center justify-center text-white/40 hover:text-blue-400 transition-all">
+                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
                   <FBIcon />
                 </a>
               )}
               {settings.socialInstagram && (
                 <a href={settings.socialInstagram} target="_blank" rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-pink-600/20 flex items-center justify-center text-white/40 hover:text-pink-400 transition-all">
+                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
                   <IGIcon />
                 </a>
               )}
               {settings.socialLinkedin && (
                 <a href={settings.socialLinkedin} target="_blank" rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-700/20 flex items-center justify-center text-white/40 hover:text-blue-400 transition-all">
+                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
                   <LIIcon />
                 </a>
               )}

@@ -17,22 +17,20 @@ export default function ProcessSection({ locale }: { locale: string }) {
   ];
 
   return (
-    <section id="process" className="py-20 lg:py-28 relative overflow-hidden">
-      {/* Ambient center glow */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(59,130,246,0.06) 0%, transparent 70%)" }}
-      />
+    <section id="process" className="py-20 lg:py-28" style={{ background: "#f5f5f3" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+            Our Process
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
             {t("title")}
           </h2>
         </FadeIn>
 
-        {/* Steps */}
         <div className="relative">
-          {/* Connecting line (desktop) — animated gradient */}
-          <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px animate-line-glow bg-gradient-to-r from-blue-400/0 via-purple-400/60 to-blue-400/0" />
+          {/* Connecting line (desktop) */}
+          <div className="hidden lg:block absolute top-[52px] left-[10%] right-[10%] h-px bg-gray-300" />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
             {steps.map((step, i) => {
@@ -41,18 +39,16 @@ export default function ProcessSection({ locale }: { locale: string }) {
               return (
                 <FadeIn key={step.key} delay={i * 0.1} className="text-center">
                   <div className="relative flex flex-col items-center">
-                    {/* Number */}
-                    <div className="text-xs font-bold text-blue-400/50 mb-2">
+                    <div className="text-xs font-bold text-gray-300 mb-2 tracking-widest">
                       0{i + 1}
                     </div>
-                    {/* Icon circle — glowing pulse */}
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/25 to-purple-500/25 border border-blue-500/40 flex items-center justify-center mb-4 relative z-10 animate-process-glow">
-                      <Icon size={28} className="text-blue-300" />
+                    <div className="w-20 h-20 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-4 relative z-10 shadow-sm">
+                      <Icon size={28} className="text-blue-600" />
                     </div>
-                    <h3 className="text-white font-bold mb-2">
+                    <h3 className="text-gray-900 font-bold mb-2">
                       {t(`steps.${stepKey}.title`)}
                     </h3>
-                    <p className="text-white/50 text-sm leading-relaxed">
+                    <p className="text-sm text-gray-500 leading-relaxed">
                       {t(`steps.${stepKey}.desc`)}
                     </p>
                   </div>
@@ -62,11 +58,10 @@ export default function ProcessSection({ locale }: { locale: string }) {
           </div>
         </div>
 
-        {/* CTA */}
         <FadeIn className="text-center mt-14">
           <Link
             href={`/${locale}/contact`}
-            className="btn-gradient inline-flex items-center gap-2 px-8 py-4 text-base"
+            className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-8 py-4 rounded-lg hover:bg-gray-800 transition-colors text-base"
           >
             {t("cta")}
           </Link>
