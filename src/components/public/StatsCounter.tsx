@@ -16,7 +16,7 @@ export default function StatsCounter() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-20 bg-white border-y border-gray-100">
+    <section ref={ref} className="section-noise py-20 bg-white border-y border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-gray-100">
           {stats.map((stat, i) => (

@@ -19,6 +19,7 @@ interface HeroSliderProps {
   slides: Slide[];
   bgHero?: string;
   overlayOpacity?: number;
+  heroVideo?: string;
 }
 
 const shapes = [
@@ -53,7 +54,7 @@ function FloatingShape({ cfg }: { cfg: typeof shapes[0] }) {
   );
 }
 
-export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: HeroSliderProps) {
+export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7, heroVideo }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const locale = useLocale();
@@ -81,8 +82,36 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: Her
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Background — custom image or default animated gradient */}
-      {bgHero ? (
+      {/* Background — video / custom image / default animated gradient */}
+      {heroVideo ? (
+        <div className="absolute inset-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+          {/* Layer 1: dark overlay */}
+          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.45)" }} />
+          {/* Layer 2: SVG noise at 4% opacity */}
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <filter id="hero-noise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#hero-noise)" />
+            </svg>
+          </div>
+          {/* Layer 3: bottom gradient fade */}
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none"
+            style={{ height: "45%", background: "linear-gradient(to bottom, transparent 0%, #0a0a0a 100%)" }}
+          />
+        </div>
+      ) : bgHero ? (
         <div className="absolute inset-0 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -90,7 +119,6 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: Her
             alt=""
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Dark overlay for text readability */}
           <div
             className="absolute inset-0"
             style={{ background: `rgba(10,10,15,${overlayOpacity})` }}
@@ -250,9 +278,15 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7 }: Her
         )}
       </div>
 
+      {/* Bottom fade — smooth transition to first white section */}
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none z-10"
+        style={{ height: 120, background: "linear-gradient(to bottom, transparent, #ffffff)" }}
+      />
+
       {/* Scroll indicator */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40 z-20"
         animate={{ y: [0, 8, 0] }}
         transition={{ duration: 1.5, repeat: Infinity }}
       >

@@ -28,15 +28,15 @@ export default function NewsSection({ posts, locale }: NewsSectionProps) {
   if (!posts.length) return null;
 
   return (
-    <section className="py-20 lg:py-28 bg-white/[0.01]">
+    <section className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="flex items-end justify-between mb-12">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 font-serif">
             {t("title")}
           </h2>
           <Link
             href={`/${locale}/news`}
-            className="hidden sm:flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+            className="hidden sm:flex items-center gap-1 text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors"
           >
             {t("viewAll")} <ArrowRight size={14} />
           </Link>
@@ -52,32 +52,32 @@ export default function NewsSection({ posts, locale }: NewsSectionProps) {
               <FadeIn key={post.id} delay={i * 0.1}>
                 <Link
                   href={`/${locale}/news/${post.slug}`}
-                  className="group block card-glass overflow-hidden hover:-translate-y-1 hover:border-white/15 transition-all duration-300"
+                  className="group block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white"
                 >
-                  {/* Cover */}
                   {post.coverImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={post.coverImage}
                       alt={title}
                       className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   ) : (
-                    <div className="w-full h-44 bg-gradient-to-br from-blue-900/20 to-purple-900/20" />
+                    <div className="w-full h-44 bg-gray-50" />
                   )}
 
                   <div className="p-5">
-                    <div className="flex items-center gap-2 text-white/40 text-xs mb-3">
+                    <div className="flex items-center gap-2 text-gray-400 text-xs mb-3">
                       <Calendar size={12} />
                       {formatDate(date)}
-                      <span className="ml-1 px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full">
+                      <span className="ml-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">
                         {post.category}
                       </span>
                     </div>
-                    <h3 className="text-white font-bold leading-snug mb-2 group-hover:text-blue-300 transition-colors line-clamp-2">
+                    <h3 className="text-gray-900 font-bold leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
                       {title}
                     </h3>
                     {excerpt && (
-                      <p className="text-white/50 text-sm line-clamp-2">{excerpt}</p>
+                      <p className="text-gray-500 text-sm line-clamp-2">{excerpt}</p>
                     )}
                   </div>
                 </Link>
@@ -89,7 +89,7 @@ export default function NewsSection({ posts, locale }: NewsSectionProps) {
         <FadeIn className="text-center mt-10 sm:hidden">
           <Link
             href={`/${locale}/news`}
-            className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm font-medium"
+            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-500 text-sm font-medium"
           >
             {t("viewAll")} <ArrowRight size={14} />
           </Link>

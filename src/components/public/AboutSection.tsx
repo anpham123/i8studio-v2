@@ -13,7 +13,7 @@ export default function AboutSection({ locale }: { locale: string }) {
   const t = useTranslations("about");
 
   return (
-    <section id="about" className="py-20 lg:py-28" style={{ background: "#fafaf8" }}>
+    <section id="about" className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f7f6f3" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           {/* Left: Text */}
@@ -22,7 +22,7 @@ export default function AboutSection({ locale }: { locale: string }) {
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
                 i8 Studio
               </div>
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-serif">
                 {t("title")}
               </h2>
               <p className="text-base text-gray-600 leading-relaxed mb-4">

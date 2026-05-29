@@ -4,12 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Save, RotateCcw, Globe, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { Loader2, Save, RotateCcw, Globe, Image as ImageIcon, Video, CheckCircle2 } from "lucide-react";
 
 interface BgSettings {
   bgHero: string;
   bgGlobal: string;
   bgOverlayOpacity: string;
+  heroVideo: string;
 }
 
 const PRESETS = [20, 40, 60, 70, 80, 90];
@@ -47,6 +48,7 @@ export default function BackgroundSettingsPage() {
     bgHero: "",
     bgGlobal: "",
     bgOverlayOpacity: "70",
+    heroVideo: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -62,6 +64,7 @@ export default function BackgroundSettingsPage() {
       bgHero: m.bgHero || "",
       bgGlobal: m.bgGlobal || "",
       bgOverlayOpacity: m.bgOverlayOpacity || "70",
+      heroVideo: m.heroVideo || "",
     });
     setLoading(false);
   }, []);
@@ -99,7 +102,7 @@ export default function BackgroundSettingsPage() {
   };
 
   const reset = async () => {
-    const defaults: BgSettings = { bgHero: "", bgGlobal: "", bgOverlayOpacity: "70" };
+    const defaults: BgSettings = { bgHero: "", bgGlobal: "", bgOverlayOpacity: "70", heroVideo: "" };
     setValues(defaults);
     const ok = await saveToAPI(defaults);
     if (ok) {
@@ -147,6 +150,43 @@ export default function BackgroundSettingsPage() {
             label=""
           />
           <PreviewThumb src={values.bgGlobal} label="Toàn trang" opacity={opacity} />
+        </div>
+
+        {/* === Hero video === */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Video size={16} className="text-blue-600" />
+            <h3 className="font-semibold text-gray-800">Video nền Hero (MP4)</h3>
+            {values.heroVideo && (
+              <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Đang bật
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Nhập URL video MP4 để làm nền cho Hero Section (autoplay, loop, muted).
+            Video sẽ ưu tiên hơn ảnh nền Hero. Để trống để dùng ảnh hoặc gradient mặc định.
+          </p>
+          <input
+            type="url"
+            value={values.heroVideo}
+            onChange={(e) => setValues((v) => ({ ...v, heroVideo: e.target.value }))}
+            placeholder="https://example.com/hero-reel.mp4 hoặc /uploads/hero.mp4"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-300"
+          />
+          {values.heroVideo && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+              <Video size={12} />
+              <span className="truncate">{values.heroVideo}</span>
+              <button
+                type="button"
+                onClick={() => setValues((v) => ({ ...v, heroVideo: "" }))}
+                className="ml-auto text-red-400 hover:text-red-600 shrink-0"
+              >
+                Xoá
+              </button>
+            </div>
+          )}
         </div>
 
         {/* === Hero background === */}
@@ -274,6 +314,7 @@ export default function BackgroundSettingsPage() {
             Trạng thái cơ sở dữ liệu (để debug)
           </summary>
           <div className="mt-3 space-y-1 font-mono">
+            <div><span className="text-gray-400">heroVideo:</span> {values.heroVideo || "(trống)"}</div>
             <div><span className="text-gray-400">bgGlobal:</span> {values.bgGlobal || "(trống)"}</div>
             <div><span className="text-gray-400">bgHero:</span> {values.bgHero || "(trống)"}</div>
             <div><span className="text-gray-400">bgOverlayOpacity:</span> {values.bgOverlayOpacity}</div>

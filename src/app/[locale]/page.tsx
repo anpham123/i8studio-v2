@@ -87,6 +87,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
       <HeroSlider
         slides={slides}
         bgHero={settingsMap.bgHero}
+        heroVideo={settingsMap.heroVideo}
         overlayOpacity={Math.min(95, Math.max(0, parseInt(settingsMap.bgOverlayOpacity || "70"))) / 100}
       />
 

@@ -17,13 +17,13 @@ export default function ProcessSection({ locale }: { locale: string }) {
   ];
 
   return (
-    <section id="process" className="py-20 lg:py-28" style={{ background: "#f5f5f3" }}>
+    <section id="process" className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f0efe9" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
             Our Process
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
             {t("title")}
           </h2>
         </FadeIn>

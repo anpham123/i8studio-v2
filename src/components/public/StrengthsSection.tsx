@@ -15,7 +15,7 @@ interface StrengthsSectionProps {
 
 export default function StrengthsSection({ strengthsImage }: StrengthsSectionProps) {
   return (
-    <section className="py-20 lg:py-28 bg-white">
+    <section className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f7f6f3" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Image */}
@@ -58,7 +58,7 @@ export default function StrengthsSection({ strengthsImage }: StrengthsSectionPro
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
                 Why Choose Us
               </div>
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8 leading-tight font-serif">
                 High Quality CG at Competitive Price
               </h2>
 

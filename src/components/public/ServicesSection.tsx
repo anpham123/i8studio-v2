@@ -34,13 +34,13 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
   const t = useTranslations("services");
 
   return (
-    <section id="services" className="py-20 lg:py-28 bg-white">
+    <section id="services" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
             {t("subtitle")}
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-serif">
             {t("title")}
           </h2>
           <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">

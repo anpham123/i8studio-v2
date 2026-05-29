@@ -37,13 +37,13 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
   const displayed = filtered.slice(0, 6);
 
   return (
-    <section id="works" className="py-20 lg:py-28 bg-white">
+    <section id="works" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-12">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
             {t("subtitle")}
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
             {t("title")}
           </h2>
         </FadeIn>
