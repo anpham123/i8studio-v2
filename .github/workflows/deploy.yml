@@ -20,7 +20,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
+          port: 1401
           script: |
             set -e
             cd ~/i8studio-v2
@@ -29,12 +29,9 @@ jobs:
             git pull origin master
 
             echo "🔐 Writing .env file..."
-            cat > .env << 'ENVEOF'
-            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            ENVEOF
+            printf 'NEXTAUTH_SECRET=%s\n' '${{ secrets.NEXTAUTH_SECRET }}' > .env
 
             echo "🐳 Building and restarting containers..."
-            docker compose pull nginx certbot 2>/dev/null || true
             docker compose up --build -d --remove-orphans
 
             echo "🧹 Cleaning up old images..."
