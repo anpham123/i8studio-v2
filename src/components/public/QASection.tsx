@@ -28,7 +28,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
   const displayed = preview ? items.slice(0, 5) : items;
 
   return (
-    <section id="qa" className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f7f6f3" }}>
+    <section id="qa" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-12">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">

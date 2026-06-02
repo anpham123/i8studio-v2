@@ -35,6 +35,9 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
     : works.filter((w) => w.category === activeCategory);
 
   const displayed = filtered.slice(0, 6);
+  // Split into top 2 and bottom 4 (or top half / bottom half)
+  const topRow = displayed.slice(0, 2);
+  const bottomRows = displayed.slice(2);
 
   return (
     <section id="works" className="section-noise py-20 lg:py-28 bg-white">
@@ -43,12 +46,12 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
             {t("subtitle")}
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900">
             {t("title")}
           </h2>
         </FadeIn>
 
-        {/* Filter tabs — simple underline style */}
+        {/* Filter tabs */}
         <FadeIn className="flex flex-wrap justify-center gap-1 mb-10 border-b border-gray-100">
           {categories.map((cat) => (
             <button
@@ -74,78 +77,50 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
             <p className="text-gray-400 text-sm">No works in this category yet.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <>
+            {/* Top row — 2 columns */}
             <AnimatePresence mode="popLayout">
-              {displayed.map((work, i) => {
-                const title = locale === "ja" ? work.titleJa || work.title : work.title;
-                const hasVideo = !!work.videoUrl;
-                const hasImage = !!work.image;
-
-                return (
-                  <motion.div
+              <div className="grid sm:grid-cols-2 gap-5 mb-5">
+                {topRow.map((work, i) => (
+                  <WorkCard
                     key={work.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.97 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.97 }}
-                    transition={{ duration: 0.25, delay: i * 0.04 }}
-                  >
-                    <div
-                      className="group relative overflow-hidden rounded-xl border border-gray-200 cursor-pointer aspect-[4/3] hover:shadow-xl transition-all duration-300 bg-gray-50"
-                      onClick={() => {
-                        if (hasVideo) {
-                          setLightbox({ src: work.videoUrl, alt: title, isVideo: true });
-                        } else if (hasImage) {
-                          setLightbox({ src: work.image, alt: title });
-                        }
-                      }}
-                    >
-                      {hasImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={work.image}
-                          alt={title}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-gray-200">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
-                              <rect x="3" y="3" width="18" height="18" rx="2" />
-                              <path d="m3 9 4-4 4 4 4-4 4 4" />
-                            </svg>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Gradient overlay on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                      {/* Category badge */}
-                      <div className="absolute top-3 left-3">
-                        <span className="text-xs font-medium bg-white/90 text-gray-700 px-2 py-1 rounded-full">
-                          {work.category}
-                        </span>
-                      </div>
-
-                      {/* Hover content */}
-                      <div className="absolute inset-0 flex flex-col justify-end p-5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <h3 className="text-white font-bold text-lg">{title}</h3>
-                        <p className="text-white/70 text-sm">{work.subtitle}</p>
-                        <div className="flex items-center gap-2 mt-3 text-white text-sm font-medium">
-                          {hasVideo ? <Play size={14} /> : <ZoomIn size={14} />}
-                          View Project →
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    work={work}
+                    locale={locale}
+                    index={i}
+                    onOpen={(src, alt, isVideo) => setLightbox({ src, alt, isVideo })}
+                  />
+                ))}
+              </div>
             </AnimatePresence>
-          </div>
+
+            {/* Slogan break — only shown when there are works below */}
+            {bottomRows.length > 0 && (
+              <FadeIn className="text-center py-10 lg:py-14">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight leading-tight">
+                  Photoreal quality,<br />
+                  <span className="text-gray-400">built for Japanese standards.</span>
+                </p>
+              </FadeIn>
+            )}
+
+            {/* Bottom rows — 2 columns */}
+            <AnimatePresence mode="popLayout">
+              <div className="grid sm:grid-cols-2 gap-5">
+                {bottomRows.map((work, i) => (
+                  <WorkCard
+                    key={work.id}
+                    work={work}
+                    locale={locale}
+                    index={i + 2}
+                    onOpen={(src, alt, isVideo) => setLightbox({ src, alt, isVideo })}
+                  />
+                ))}
+              </div>
+            </AnimatePresence>
+          </>
         )}
 
-        <FadeIn className="text-center mt-12">
+        <FadeIn className="text-center mt-14">
           <Link
             href={`/${locale}/works`}
             className="inline-flex items-center gap-2 border border-gray-900 text-gray-900 font-semibold px-8 py-3 rounded-lg hover:bg-gray-900 hover:text-white transition-all duration-300"
@@ -164,5 +139,80 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
         />
       )}
     </section>
+  );
+}
+
+function WorkCard({
+  work,
+  locale,
+  index,
+  onOpen,
+}: {
+  work: Work;
+  locale: string;
+  index: number;
+  onOpen: (src: string, alt: string, isVideo?: boolean) => void;
+}) {
+  const title = locale === "ja" ? work.titleJa || work.title : work.title;
+  const hasVideo = !!work.videoUrl;
+  const hasImage = !!work.image;
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.25, delay: index * 0.04 }}
+    >
+      <div
+        className="group relative overflow-hidden rounded-2xl cursor-pointer aspect-video hover:shadow-xl transition-all duration-300 bg-gray-100"
+        onClick={() => {
+          if (hasVideo) {
+            onOpen(work.videoUrl, title, true);
+          } else if (hasImage) {
+            onOpen(work.image, title);
+          }
+        }}
+      >
+        {hasImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={work.image}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-gray-200">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="m3 9 4-4 4 4 4-4 4 4" />
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Category badge */}
+        <div className="absolute top-4 left-4">
+          <span className="text-xs font-medium bg-white/90 text-gray-700 px-2.5 py-1 rounded-full">
+            {work.category}
+          </span>
+        </div>
+
+        {/* Hover content */}
+        <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+          <h3 className="text-white font-bold text-xl">{title}</h3>
+          <p className="text-white/70 text-sm">{work.subtitle}</p>
+          <div className="flex items-center gap-2 mt-3 text-white text-sm font-medium">
+            {hasVideo ? <Play size={14} /> : <ZoomIn size={14} />}
+            View Project →
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 }

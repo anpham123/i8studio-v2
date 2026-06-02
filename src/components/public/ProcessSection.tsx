@@ -17,7 +17,7 @@ export default function ProcessSection({ locale }: { locale: string }) {
   ];
 
   return (
-    <section id="process" className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f0efe9" }}>
+    <section id="process" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
@@ -29,26 +29,29 @@ export default function ProcessSection({ locale }: { locale: string }) {
         </FadeIn>
 
         <div className="relative">
-          {/* Connecting line (desktop) */}
-          <div className="hidden lg:block absolute top-[52px] left-[10%] right-[10%] h-px bg-gray-300" />
+          {/* Connecting dashed line (desktop) */}
+          <div className="hidden lg:block absolute top-[38px] left-[12%] right-[12%] h-px border-t border-dashed border-gray-200 z-0" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-4">
             {steps.map((step, i) => {
               const Icon = step.icon;
               const stepKey = step.key as "inquiry" | "consultation" | "production" | "review" | "delivery";
               return (
-                <FadeIn key={step.key} delay={i * 0.1} className="text-center">
-                  <div className="relative flex flex-col items-center">
-                    <div className="text-xs font-bold text-gray-300 mb-2 tracking-widest">
-                      0{i + 1}
+                <FadeIn key={step.key} delay={i * 0.1}>
+                  <div className="flex flex-col items-center text-center group">
+                    {/* Step number + icon */}
+                    <div className="relative z-10 mb-5">
+                      <div className="w-16 h-16 rounded-2xl bg-white border border-gray-100 shadow-sm flex items-center justify-center group-hover:border-blue-200 group-hover:shadow-md transition-all duration-300">
+                        <Icon size={24} className="text-gray-700 group-hover:text-blue-600 transition-colors duration-300" />
+                      </div>
+                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold flex items-center justify-center">
+                        {i + 1}
+                      </span>
                     </div>
-                    <div className="w-20 h-20 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-4 relative z-10 shadow-sm">
-                      <Icon size={28} className="text-blue-600" />
-                    </div>
-                    <h3 className="text-gray-900 font-bold mb-2">
+                    <h3 className="text-sm font-bold text-gray-900 mb-1.5">
                       {t(`steps.${stepKey}.title`)}
                     </h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">
+                    <p className="text-xs text-gray-400 leading-relaxed max-w-[140px]">
                       {t(`steps.${stepKey}.desc`)}
                     </p>
                   </div>

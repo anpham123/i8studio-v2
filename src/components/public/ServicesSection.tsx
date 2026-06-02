@@ -59,35 +59,46 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
               <FadeIn key={service.id} delay={i * 0.08}>
                 <Link
                   href={`/${locale}/service/${service.slug}`}
-                  className="group block border border-gray-200 rounded-xl p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-300 bg-white"
+                  className="group block rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 bg-white border border-gray-100"
                 >
-                  <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
-                    <Icon size={22} className="text-blue-600" />
+                  {/* Image area */}
+                  <div className="relative w-full aspect-video overflow-hidden bg-gray-50">
+                    {service.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={service.image}
+                        alt={name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Icon size={40} className="text-gray-200" />
+                      </div>
+                    )}
+                    {/* Category tag */}
+                    <div className="absolute top-3 left-3">
+                      <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full">
+                        <Icon size={11} className="text-blue-600" />
+                        {name}
+                      </span>
+                    </div>
                   </div>
 
-                  {service.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={service.image} alt={name} className="w-full h-40 object-cover rounded-lg mb-4" />
-                  ) : (
-                    <div className="w-full h-40 rounded-lg bg-gray-50 border border-gray-100 mb-4" />
-                  )}
-
-                  <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {name}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-3">
-                    {desc}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    {price && (
-                      <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded">
-                        {price}
+                  {/* Content */}
+                  <div className="p-5">
+                    <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2">
+                      {desc}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      {price && (
+                        <span className="text-xs font-semibold text-gray-900 bg-gray-100 px-3 py-1.5 rounded-full">
+                          {price}
+                        </span>
+                      )}
+                      <span className="ml-auto flex items-center gap-1 text-sm font-medium text-gray-400 group-hover:text-gray-900 transition-colors">
+                        {t("learnMore")} <ArrowRight size={14} />
                       </span>
-                    )}
-                    <span className="ml-auto flex items-center gap-1 text-sm text-gray-400 group-hover:text-blue-600 transition-colors">
-                      {t("learnMore")} <ArrowRight size={14} />
-                    </span>
+                    </div>
                   </div>
                 </Link>
               </FadeIn>

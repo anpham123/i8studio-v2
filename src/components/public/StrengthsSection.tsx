@@ -15,7 +15,7 @@ interface StrengthsSectionProps {
 
 export default function StrengthsSection({ strengthsImage }: StrengthsSectionProps) {
   return (
-    <section className="section-noise py-20 lg:py-28" style={{ backgroundColor: "#f7f6f3" }}>
+    <section className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Image */}
