@@ -40,7 +40,7 @@ export default function InsightsGrid({ flipbooks, locale }: InsightsGridProps) {
             <FadeIn key={book.id} delay={i * 0.08}>
               <div className="group bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300">
                 {/* Cover */}
-                <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 relative">
+                <div className="aspect-video overflow-hidden bg-gradient-to-br from-blue-500/10 to-purple-500/10 relative">
                   {book.coverImage ? (
                     <img
                       src={book.coverImage}
