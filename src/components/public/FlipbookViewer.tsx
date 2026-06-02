@@ -6,146 +6,99 @@ import React, {
   useEffect,
   useCallback,
   forwardRef,
-  createContext,
-  useContext,
 } from "react";
 import HTMLFlipBook from "react-pageflip";
-import { ChevronLeft, ChevronRight, X, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, BookOpen, Loader2 } from "lucide-react";
 
-// ---------------------------------------------------------------------------
-// Minimal types for the pdfjs-dist APIs we use (avoids importing their types,
-// which would pull in the pdfjs-dist v5 copy bundled inside react-pdf@10).
-// ---------------------------------------------------------------------------
-interface PdfViewport {
-  width: number;
-  height: number;
-}
-interface PdfRenderTask {
-  promise: Promise<void>;
-  cancel(): void;
-}
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface PdfViewport { width: number; height: number }
+interface PdfRenderTask { promise: Promise<void>; cancel(): void }
 interface PdfPage {
-  getViewport(params: { scale: number }): PdfViewport;
-  render(params: {
-    canvasContext: CanvasRenderingContext2D;
-    viewport: PdfViewport;
-  }): PdfRenderTask;
+  getViewport(p: { scale: number }): PdfViewport;
+  render(p: { canvasContext: CanvasRenderingContext2D; viewport: PdfViewport }): PdfRenderTask;
   cleanup(): void;
 }
-interface PdfDocument {
+interface PdfDoc {
   numPages: number;
-  getPage(num: number): Promise<PdfPage>;
+  getPage(n: number): Promise<PdfPage>;
   destroy(): void;
 }
 
-// ---------------------------------------------------------------------------
-// Context — shares the loaded PdfDocument with every PageCanvas inside the
-// HTMLFlipBook without prop-drilling through react-pageflip's cloneElement.
-// ---------------------------------------------------------------------------
-const PdfDocCtx = createContext<PdfDocument | null>(null);
-
-// ---------------------------------------------------------------------------
-// PageCanvas — forwardRef div required by react-pageflip, renders one page.
-// ---------------------------------------------------------------------------
-interface PageCanvasProps {
-  pageNumber: number;
-  pageWidth: number;
-  pageHeight: number;
-}
-
-const PageCanvas = forwardRef<HTMLDivElement, PageCanvasProps>(
-  ({ pageNumber, pageWidth, pageHeight }, ref) => {
-    const pdfDoc = useContext(PdfDocCtx);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    useEffect(() => {
-      if (!pdfDoc || !canvasRef.current) return;
-      let cancelled = false;
-      let renderTask: PdfRenderTask | null = null;
-
-      (async () => {
-        try {
-          const page = await pdfDoc.getPage(pageNumber);
-          if (cancelled) { page.cleanup(); return; }
-
-          const native = page.getViewport({ scale: 1 });
-          const scale = pageWidth / native.width;
-          const viewport = page.getViewport({ scale });
-
-          const canvas = canvasRef.current!;
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-
-          const ctx = canvas.getContext("2d")!;
-          renderTask = page.render({ canvasContext: ctx, viewport });
-          await renderTask.promise;
-        } catch {
-          /* cancelled or PDF error — ignore */
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-        renderTask?.cancel();
-      };
-    }, [pdfDoc, pageNumber, pageWidth]);
-
-    return (
-      <div
-        ref={ref}
-        style={{ width: pageWidth, height: pageHeight, overflow: "hidden" }}
-        className="bg-white select-none"
-      >
-        {/* canvas fills width, overflow hidden clips any height mismatch */}
-        <canvas ref={canvasRef} style={{ display: "block", width: "100%" }} />
-      </div>
-    );
-  }
-);
-PageCanvas.displayName = "PageCanvas";
-
-// ---------------------------------------------------------------------------
-// Dimension calculation — called once on open and again on resize.
-// Returns page width/height (A4 ratio ≈ 1:√2) and portrait mode flag.
-// Desktop shows a 2-page spread; mobile shows single page.
-// ---------------------------------------------------------------------------
+// ─── Dimension helper ────────────────────────────────────────────────────────
+// Returns per-page size for A4 ratio (1:√2), fitting inside the viewport.
 function calcDim() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const availH = vh - 56 /* header */ - 64 /* footer */ - 32 /* pad */;
+  const availH = vh - 56 - 64 - 40; // header + footer + padding
   const mobile = vw < 768;
 
   if (mobile) {
-    const w = Math.min(vw - 32, 480);
+    const w = Math.min(vw - 32, 440);
     const h = Math.min(Math.round(w * 1.4142), availH);
-    return { width: Math.round(h / 1.4142), height: h, portrait: true };
+    const fw = Math.round(h / 1.4142);
+    return { width: fw, height: h, portrait: true };
   }
 
-  // 2-page spread: total book width = 2 × page width
-  const bookW = Math.min(vw - 120, 1100);
-  let pw = Math.floor(bookW / 2);
+  // Desktop: 2-page spread — keep generous margin so both pages are fully visible
+  const maxBookW = Math.min(vw - 160, 1200);
+  let pw = Math.floor(maxBookW / 2);
   let ph = Math.round(pw * 1.4142);
   if (ph > availH) { ph = availH; pw = Math.round(ph / 1.4142); }
   return { width: pw, height: ph, portrait: false };
 }
 
-// ---------------------------------------------------------------------------
-// FlipbookViewer — fullscreen modal
-// ---------------------------------------------------------------------------
-interface Props {
-  pdfUrl: string;
-  title?: string;
-  onClose: () => void;
+// ─── Single flip-page (image-based, forwardRef required by react-pageflip) ──
+interface PageProps {
+  imageUrl: string | null;
+  width: number;
+  height: number;
+  density?: "hard" | "soft";
 }
 
-export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
-  const [pdfDoc, setPdfDoc]     = useState<PdfDocument | null>(null);
-  const [numPages, setNumPages] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [loadError, setLoadError]     = useState(false);
-  const [dim, setDim] = useState(calcDim);
+const FlipPage = forwardRef<HTMLDivElement, PageProps>(
+  ({ imageUrl, width, height }, ref) => (
+    <div
+      ref={ref}
+      data-density="soft"
+      style={{ width, height, overflow: "hidden" }}
+      className="bg-white select-none"
+    >
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt=""
+          width={width}
+          height={height}
+          style={{ display: "block", width: "100%", height: "100%", objectFit: "fill" }}
+          draggable={false}
+        />
+      ) : (
+        // Placeholder while this specific page is rendering
+        <div
+          style={{ width, height }}
+          className="flex items-center justify-center bg-gray-50"
+        >
+          <Loader2 size={20} className="text-gray-300 animate-spin" />
+        </div>
+      )}
+    </div>
+  )
+);
+FlipPage.displayName = "FlipPage";
 
-  // Stable ref so keyboard handlers don't need to be re-created on each render
+// ─── Main component ──────────────────────────────────────────────────────────
+interface Props { pdfUrl: string; title?: string; onClose: () => void }
+
+export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
+  const [pageImages, setPageImages] = useState<(string | null)[]>([]);
+  const [totalPages,  setTotalPages]  = useState(0);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [loadError,   setLoadError]   = useState(false);
+  const [dim, setDim] = useState(calcDim);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [ready, setReady] = useState(false); // true when ≥1 page rendered
+
   const bookRef = useRef<{
     pageFlip(): { flipNext(): void; flipPrev(): void };
   } | null>(null);
@@ -164,77 +117,157 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // ── Keyboard ──────────────────────────────────────────────────────────────
+  // ── Keyboard nav ─────────────────────────────────────────────────────────
   const flipNext = useCallback(() => bookRef.current?.pageFlip().flipNext(), []);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip().flipPrev(), []);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === "ArrowDown")  flipNext();
-      else if (e.key === "ArrowLeft"  || e.key === "ArrowUp") flipPrev();
+    const h = (e: KeyboardEvent) => {
+      if      (e.key === "ArrowRight" || e.key === "ArrowDown") flipNext();
+      else if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   flipPrev();
       else if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [flipNext, flipPrev, onClose]);
 
-  // ── Load PDF via pdfjs-dist v3 legacy (CommonJS, webpack-safe) ────────────
+  // ── Pre-render ALL pages to JPEG blob URLs ─────────────────────────────
+  // Strategy: render first 4 pages sequentially (show book immediately),
+  // then render the rest concurrently in background (non-blocking).
   useEffect(() => {
-    let doc: PdfDocument | null = null;
     let cancelled = false;
+    const urls: string[] = [];
+    let pdfDocRef: PdfDoc | null = null;
+
+    const renderPage = async (
+      pdfDoc: PdfDoc,
+      pageNum: number,
+      renderWidth: number
+    ): Promise<string | null> => {
+      if (cancelled) return null;
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const nativeVP = page.getViewport({ scale: 1 });
+
+        // Render at 2× for crisp retina display
+        const scale = (renderWidth / nativeVP.width) * 2;
+        const vp = page.getViewport({ scale });
+
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(vp.width);
+        canvas.height = Math.round(vp.height);
+
+        const ctx = canvas.getContext("2d")!;
+        const task = page.render({ canvasContext: ctx, viewport: vp });
+        await task.promise;
+        page.cleanup();
+
+        if (cancelled) return null;
+
+        return await new Promise<string>((resolve) => {
+          canvas.toBlob(
+            (blob) => resolve(blob ? URL.createObjectURL(blob) : ""),
+            "image/jpeg",
+            0.90 // good quality / size balance
+          );
+        });
+      } catch {
+        return null;
+      }
+    };
 
     (async () => {
       try {
-        // Dynamic import keeps this out of the SSR bundle entirely.
-        // The legacy build is CommonJS-compatible and doesn't trigger the
-        // "Object.defineProperty called on non-object" ESM webpack error.
         const pdfjs = await import(
           /* webpackChunkName: "pdfjs-legacy" */
           "pdfjs-dist/legacy/build/pdf.js"
-        ) as { getDocument(src: string): { promise: Promise<PdfDocument> }; GlobalWorkerOptions: { workerSrc: string }; version: string };
+        ) as {
+          getDocument(src: string): { promise: Promise<PdfDoc> };
+          GlobalWorkerOptions: { workerSrc: string };
+          version: string;
+        };
 
         if (!pdfjs.GlobalWorkerOptions.workerSrc) {
           pdfjs.GlobalWorkerOptions.workerSrc =
             `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
         }
 
-        const task = pdfjs.getDocument(pdfUrl);
-        doc = await task.promise;
-        if (cancelled) { doc.destroy(); return; }
+        const pdfDoc = await pdfjs.getDocument(pdfUrl).promise;
+        if (cancelled) { pdfDoc.destroy(); return; }
+        pdfDocRef = pdfDoc;
 
-        setNumPages(doc.numPages);
-        setPdfDoc(doc);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("[FlipbookViewer] PDF load error:", err);
-          setLoadError(true);
+        const n = pdfDoc.numPages;
+        setTotalPages(n);
+        setPageImages(new Array(n).fill(null));
+
+        const snapWidth = calcDim().width; // stable width for this session
+
+        // ── Phase 1: render first 4 pages sequentially → show book ASAP
+        const firstBatch = Math.min(4, n);
+        for (let i = 1; i <= firstBatch; i++) {
+          const url = await renderPage(pdfDoc, i, snapWidth);
+          if (cancelled) return;
+          urls[i - 1] = url ?? "";
+          setPageImages(prev => {
+            const next = [...prev];
+            next[i - 1] = url;
+            return next;
+          });
+          setLoadedCount(c => c + 1);
+          if (i === 2 || i === firstBatch) setReady(true); // show book after page 2
         }
+
+        // ── Phase 2: render remaining pages concurrently (background)
+        const remaining = Array.from({ length: n - firstBatch }, (_, i) => i + firstBatch + 1);
+        await Promise.all(
+          remaining.map(async (pageNum) => {
+            const url = await renderPage(pdfDoc, pageNum, snapWidth);
+            if (cancelled || !url) return;
+            urls[pageNum - 1] = url;
+            setPageImages(prev => {
+              const next = [...prev];
+              next[pageNum - 1] = url;
+              return next;
+            });
+            setLoadedCount(c => c + 1);
+          })
+        );
+
+      } catch {
+        if (!cancelled) setLoadError(true);
       }
     })();
 
     return () => {
       cancelled = true;
-      doc?.destroy();
+      pdfDocRef?.destroy();
+      // Revoke blob URLs to free memory
+      urls.forEach(u => { if (u) URL.revokeObjectURL(u); });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdfUrl]);
 
-  // ── Derived state ─────────────────────────────────────────────────────────
-  const displayPage = currentPage + 1;
-  const atStart = currentPage === 0;
-  const atEnd   = numPages > 0 && currentPage >= numPages - 1;
-  const loading = !pdfDoc && !loadError;
+  // ── Derived ───────────────────────────────────────────────────────────────
+  const isLoading    = !ready && !loadError;
+  const loadProgress = totalPages > 0 ? Math.round((loadedCount / totalPages) * 100) : 0;
+  const atStart      = currentPage === 0;
+  const atEnd        = totalPages > 0 && currentPage >= totalPages - 1;
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Total book width for the stage container ──────────────────────────────
+  // react-pageflip renders the book at exactly 2×pageWidth (or 1× in portrait)
+  const bookTotalW = dim.portrait ? dim.width : dim.width * 2;
+
   return (
-    /* Backdrop — click outside the book area closes the viewer */
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-[#0d0d14]/96 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: "rgba(8,8,16,0.97)" }}
       onClick={onClose}
     >
-      {/* ── Header bar ──────────────────────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────────────── */}
       <div
-        className="shrink-0 flex items-center justify-between px-5 h-14 bg-black/60 border-b border-white/10"
-        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 flex items-center justify-between px-5 h-14 border-b"
+        style={{ background: "rgba(0,0,0,0.7)", borderColor: "rgba(255,255,255,0.08)" }}
+        onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 min-w-0">
           <BookOpen size={16} className="text-blue-400 shrink-0" />
@@ -242,14 +275,20 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
         </div>
 
         <div className="flex items-center gap-4 shrink-0">
-          {numPages > 0 && (
-            <span className="text-white/40 text-sm tabular-nums hidden sm:block">
-              Page {displayPage}&thinsp;/&thinsp;{numPages}
+          {totalPages > 0 && (
+            <span className="text-white/40 text-xs tabular-nums hidden sm:block">
+              Page {currentPage + 1}&thinsp;/&thinsp;{totalPages}
+            </span>
+          )}
+          {/* Loading progress indicator */}
+          {!ready && totalPages > 0 && (
+            <span className="text-white/40 text-xs hidden sm:block">
+              Rendering {loadProgress}%…
             </span>
           )}
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/15 transition-colors"
             aria-label="Close"
           >
             <X size={16} />
@@ -259,51 +298,69 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
 
       {/* ── Book stage ──────────────────────────────────────────────────── */}
       <div
-        className="flex-1 flex items-center justify-center relative overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="flex-1 flex items-center justify-center relative"
+        style={{ overflow: "hidden" }}
+        onClick={e => e.stopPropagation()}
       >
-        {/* Side navigation arrows */}
-        {numPages > 0 && (
-          <>
-            <button
-              onClick={flipPrev}
-              disabled={atStart}
-              aria-label="Previous page"
-              className="absolute left-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white/60 hover:bg-black/80 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft size={22} />
-            </button>
-            <button
-              onClick={flipNext}
-              disabled={atEnd}
-              aria-label="Next page"
-              className="absolute right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white/60 hover:bg-black/80 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed"
-            >
-              <ChevronRight size={22} />
-            </button>
-          </>
+        {/* Left arrow */}
+        {ready && (
+          <button
+            onClick={flipPrev}
+            disabled={atStart}
+            aria-label="Previous page"
+            className="absolute left-3 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white/60 hover:bg-black/80 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={22} />
+          </button>
+        )}
+
+        {/* Right arrow */}
+        {ready && (
+          <button
+            onClick={flipNext}
+            disabled={atEnd}
+            aria-label="Next page"
+            className="absolute right-3 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white/60 hover:bg-black/80 hover:text-white transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={22} />
+          </button>
         )}
 
         {/* Loading state */}
-        {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
-            <div className="w-10 h-10 rounded-full border-2 border-blue-500/70 border-t-transparent animate-spin" />
-            <span className="text-white/40 text-sm">Loading PDF…</span>
+        {isLoading && (
+          <div className="flex flex-col items-center gap-4 pointer-events-none">
+            <div className="w-12 h-12 rounded-full border-2 border-blue-500/70 border-t-transparent animate-spin" />
+            <span className="text-white/40 text-sm">
+              {totalPages > 0 ? `Đang tải trang… ${loadProgress}%` : "Đang mở PDF…"}
+            </span>
+            {totalPages > 0 && (
+              <div className="w-48 h-1 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-blue-500 transition-all duration-300"
+                  style={{ width: `${loadProgress}%` }}
+                />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Error state */}
         {loadError && (
           <div className="text-center px-6">
-            <p className="text-white/50 text-sm">Failed to load PDF. Please try again.</p>
+            <p className="text-white/50 text-sm">Không thể tải PDF. Vui lòng thử lại.</p>
           </div>
         )}
 
-        {/* HTMLFlipBook — only mounted once the document is ready.
-            key forces a full remount when page dimensions change on resize,
-            ensuring react-pageflip re-initialises its internal geometry. */}
-        {pdfDoc && numPages > 0 && (
-          <PdfDocCtx.Provider value={pdfDoc}>
+        {/* ── HTMLFlipBook ─────────────────────────────────────────────── */}
+        {/* Wrapper with exact book width → ensures flexbox centers correctly */}
+        {ready && pageImages.length > 0 && (
+          <div
+            style={{
+              width: bookTotalW,
+              height: dim.height,
+              // subtle shadow behind the whole book
+              filter: "drop-shadow(0 8px 40px rgba(0,0,0,0.7))",
+            }}
+          >
             <HTMLFlipBook
               key={`${dim.width}x${dim.height}x${dim.portrait}`}
               ref={bookRef as React.Ref<unknown>}
@@ -313,18 +370,18 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
               minWidth={150}
               maxWidth={900}
               minHeight={212}
-              maxHeight={1273}
+              maxHeight={1400}
               showCover={true}
               drawShadow={true}
-              flippingTime={750}
+              flippingTime={700}
               usePortrait={dim.portrait}
               startZIndex={0}
               autoSize={false}
-              maxShadowOpacity={0.35}
-              mobileScrollSupport={false}
+              maxShadowOpacity={0.4}
+              mobileScrollSupport={true}
               clickEventForward={true}
               useMouseEvents={true}
-              swipeDistance={30}
+              swipeDistance={50}
               showPageCorners={true}
               disableFlipByClick={false}
               startPage={0}
@@ -332,40 +389,44 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
               className=""
               style={{}}
             >
-              {Array.from({ length: numPages }, (_, i) => (
-                <PageCanvas
-                  key={i + 1}
-                  pageNumber={i + 1}
-                  pageWidth={dim.width}
-                  pageHeight={dim.height}
+              {pageImages.map((url, i) => (
+                <FlipPage
+                  key={i}
+                  imageUrl={url}
+                  width={dim.width}
+                  height={dim.height}
+                  density={i === 0 || i === pageImages.length - 1 ? "hard" : "soft"}
                 />
               ))}
             </HTMLFlipBook>
-          </PdfDocCtx.Provider>
+          </div>
         )}
       </div>
 
       {/* ── Footer controls ─────────────────────────────────────────────── */}
       <div
-        className="shrink-0 flex items-center justify-center gap-3 h-16 bg-black/60 border-t border-white/10"
-        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 flex items-center justify-center gap-3 h-16 border-t"
+        style={{ background: "rgba(0,0,0,0.7)", borderColor: "rgba(255,255,255,0.08)" }}
+        onClick={e => e.stopPropagation()}
       >
         <button
           onClick={flipPrev}
-          disabled={atStart || !pdfDoc}
+          disabled={atStart || !ready}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white/70 text-sm font-medium hover:bg-white/20 hover:text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
         >
           <ChevronLeft size={15} />
           Previous
         </button>
 
-        <span className="text-white/40 text-sm tabular-nums w-28 text-center">
-          {numPages > 0 ? `Page ${displayPage} / ${numPages}` : ""}
+        <span className="text-white/40 text-sm tabular-nums w-32 text-center select-none">
+          {totalPages > 0
+            ? `Page ${currentPage + 1} / ${totalPages}`
+            : ready ? "—" : "Loading…"}
         </span>
 
         <button
           onClick={flipNext}
-          disabled={atEnd || !pdfDoc}
+          disabled={atEnd || !ready}
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white/70 text-sm font-medium hover:bg-white/20 hover:text-white transition-all disabled:opacity-25 disabled:cursor-not-allowed"
         >
           Next
