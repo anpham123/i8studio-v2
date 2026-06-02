@@ -25,26 +25,25 @@ interface PdfDoc {
 }
 
 // ─── Dimension helper ────────────────────────────────────────────────────────
-// Returns per-page size for A4 ratio (1:√2), fitting inside the viewport.
+// PDF pages are 16:9 landscape. Display single page at a time (portrait mode
+// in react-pageflip = 1 page), maximising width within the viewport.
 function calcDim() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const availH = vh - 56 - 64 - 40; // header + footer + padding
-  const mobile = vw < 768;
+  const availH = vh - 56 - 64 - 40; // header (56) + footer (64) + padding (40)
+  const hPad   = vw < 768 ? 24 : 80;  // side padding
+  const availW = vw - hPad * 2;
 
-  if (mobile) {
-    const w = Math.min(vw - 32, 440);
-    const h = Math.min(Math.round(w * 1.4142), availH);
-    const fw = Math.round(h / 1.4142);
-    return { width: fw, height: h, portrait: true };
+  // 16:9 ratio — fit by width first, then clamp by height
+  let w = Math.min(availW, 1280);
+  let h = Math.round(w * (9 / 16));
+  if (h > availH) {
+    h = availH;
+    w = Math.round(h * (16 / 9));
   }
 
-  // Desktop: 2-page spread — keep generous margin so both pages are fully visible
-  const maxBookW = Math.min(vw - 160, 1200);
-  let pw = Math.floor(maxBookW / 2);
-  let ph = Math.round(pw * 1.4142);
-  if (ph > availH) { ph = availH; pw = Math.round(ph / 1.4142); }
-  return { width: pw, height: ph, portrait: false };
+  // Always single-page display (usePortrait = true)
+  return { width: w, height: h, portrait: true };
 }
 
 // ─── Single flip-page (image-based, forwardRef required by react-pageflip) ──
@@ -367,14 +366,14 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
               width={dim.width}
               height={dim.height}
               size="fixed"
-              minWidth={150}
-              maxWidth={900}
-              minHeight={212}
-              maxHeight={1400}
+              minWidth={280}
+              maxWidth={1280}
+              minHeight={158}
+              maxHeight={720}
               showCover={true}
               drawShadow={true}
-              flippingTime={700}
-              usePortrait={dim.portrait}
+              flippingTime={650}
+              usePortrait={true}
               startZIndex={0}
               autoSize={false}
               maxShadowOpacity={0.4}
