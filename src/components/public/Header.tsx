@@ -85,7 +85,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-24">
+        <div className="flex items-center justify-between h-28">
 
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center shrink-0">
@@ -94,7 +94,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
               <img
                 src={logoImage}
                 alt="i8 STUDIO"
-                style={{ height: logoHeight, maxHeight: 80, width: "auto", objectFit: "contain", display: "block" }}
+                style={{ height: logoHeight, maxHeight: 100, width: "auto", objectFit: "contain", display: "block" }}
               />
             ) : (
               <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
