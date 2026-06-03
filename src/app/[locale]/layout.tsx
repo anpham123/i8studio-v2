@@ -65,7 +65,7 @@ export default async function LocaleLayout({
 
   const logoImage = settingsMap.logoImage || "";
   const logoHeight = Math.min(500, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
-  const headerHeight = Math.min(logoHeight + 20, 200);
+  const headerHeight = 70; // fixed header bar height
 
   return (
     <html lang={params.locale}>
