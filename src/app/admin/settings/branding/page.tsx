@@ -12,7 +12,7 @@ interface BrandingSettings {
   strengthsImage: string;
 }
 
-const HEIGHT_PRESETS = [48, 64, 80, 120, 160, 200, 240];
+const HEIGHT_PRESETS = [48, 64, 80, 100, 120, 160, 200];
 const DEFAULT_HEIGHT = 48;
 
 async function saveToAPI(patch: Partial<BrandingSettings>): Promise<boolean> {
@@ -90,7 +90,7 @@ export default function BrandingSettingsPage() {
     else toast("Lỗi khi khôi phục", "error");
   };
 
-  const parsedHeight = Math.min(240, Math.max(24, parseInt(values.logoHeight || String(DEFAULT_HEIGHT), 10) || DEFAULT_HEIGHT));
+  const parsedHeight = Math.min(500, Math.max(24, parseInt(values.logoHeight || String(DEFAULT_HEIGHT), 10) || DEFAULT_HEIGHT));
 
   if (loading) {
     return (
@@ -149,7 +149,7 @@ export default function BrandingSettingsPage() {
               <input
                 type="range"
                 min="24"
-                max="240"
+                max="500"
                 step="1"
                 value={parsedHeight}
                 onChange={(e) => setValues((v) => ({ ...v, logoHeight: e.target.value }))}

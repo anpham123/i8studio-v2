@@ -64,14 +64,15 @@ export default async function LocaleLayout({
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
   const logoImage = settingsMap.logoImage || "";
-  const logoHeight = Math.min(240, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
+  const logoHeight = Math.min(500, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
+  const headerHeight = Math.min(logoHeight + 20, 200);
 
   return (
     <html lang={params.locale}>
       <body className={`${outfit.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Header logoImage={logoImage} logoHeight={logoHeight} />
-          <main className="pt-32">{children}</main>
+          <main style={{ paddingTop: headerHeight }}>{children}</main>
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
           <ExitIntentPopup />
