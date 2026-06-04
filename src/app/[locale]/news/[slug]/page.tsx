@@ -51,7 +51,7 @@ export default async function NewsArticlePage({ params }: Props) {
   });
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-28 pb-20">
+    <div className="min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
@@ -98,6 +98,6 @@ export default async function NewsArticlePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: content }}
         />
       </article>
-    </main>
+    </div>
   );
 }

@@ -22,8 +22,8 @@ export default async function ContactPage() {
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-20">
+    <div className="min-h-screen">
       <ContactSection settings={settingsMap} />
-    </main>
+    </div>
   );
 }

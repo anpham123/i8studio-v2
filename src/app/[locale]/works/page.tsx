@@ -22,8 +22,8 @@ export default async function WorksPage({ params }: { params: { locale: string }
   const works = await prisma.work.findMany({ orderBy: { order: "asc" } });
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-20">
+    <div className="min-h-screen">
       <WorksSection works={works} locale={locale} />
-    </main>
+    </div>
   );
 }

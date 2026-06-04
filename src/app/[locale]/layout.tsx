@@ -8,6 +8,7 @@ import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import FloatingCTA from "@/components/public/FloatingCTA";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
+import PageTransition from "@/components/public/PageTransition";
 import { prisma } from "@/lib/prisma";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
@@ -64,15 +65,20 @@ export default async function LocaleLayout({
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
   const logoImage = settingsMap.logoImage || "";
-  const logoHeight = Math.min(500, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
-  const headerHeight = 70; // fixed header bar height
+  const logoHeight = Math.min(120, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
+  const headerHeight = logoHeight + 28; // 14px padding top + bottom
 
   return (
     <html lang={params.locale}>
-      <body className={`${outfit.variable} font-sans antialiased`}>
+      <body
+        className={`${outfit.variable} font-sans antialiased`}
+        style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
+      >
         <NextIntlClientProvider messages={messages}>
-          <Header logoImage={logoImage} logoHeight={logoHeight} />
-          <main style={{ paddingTop: headerHeight }}>{children}</main>
+          <Header logoImage={logoImage} logoHeight={logoHeight} headerHeight={headerHeight} />
+          <main style={{ paddingTop: headerHeight }}>
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
           <ExitIntentPopup />

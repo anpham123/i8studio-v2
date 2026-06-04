@@ -29,7 +29,7 @@ export default async function QAPage({ params }: { params: { locale: string } })
   );
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-20">
+    <div className="min-h-screen">
       {qaItems.length > 0 && (
         <script
           type="application/ld+json"
@@ -37,6 +37,6 @@ export default async function QAPage({ params }: { params: { locale: string } })
         />
       )}
       <QASection items={qaItems} locale={locale} />
-    </main>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -10,12 +10,13 @@ import { motion, AnimatePresence } from "framer-motion";
 interface HeaderProps {
   logoImage?: string;
   logoHeight?: number;
+  headerHeight?: number;
 }
 
-export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
-  const [scrolled, setScrolled]       = useState(false);
-  const [mobileOpen, setMobileOpen]   = useState(false);
-  const [aboutOpen, setAboutOpen]     = useState(false);
+export default function Header({ logoImage, logoHeight = 48, headerHeight = 76 }: HeaderProps) {
+  const [scrolled, setScrolled]             = useState(false);
+  const [mobileOpen, setMobileOpen]         = useState(false);
+  const [aboutOpen, setAboutOpen]           = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const aboutRef = useRef<HTMLDivElement>(null);
   const t        = useTranslations("nav");
@@ -23,13 +24,48 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
   const pathname = usePathname();
   const router   = useRouter();
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Transparent only on homepage, while hero is still in view
+  const isHome    = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const transparent = isHome && !scrolled;
 
-  // Close dropdown when clicking outside
+  // Synchronously reset on every navigation before paint
+  useLayoutEffect(() => {
+    // If arriving at home and not scrolled, force transparent immediately
+    if (isHome) {
+      setScrolled(window.scrollY > 80);
+    } else {
+      setScrolled(false);
+    }
+  }, [pathname, isHome]);
+
+  // IntersectionObserver: turn opaque when hero leaves viewport
+  useEffect(() => {
+    if (!isHome) return;
+    let observer: IntersectionObserver | null = null;
+    let onScroll: (() => void) | null = null;
+
+    // slight delay so hero renders in DOM after page transition
+    const timer = setTimeout(() => {
+      const hero = document.getElementById("hero-section");
+      if (!hero) {
+        onScroll = () => setScrolled(window.scrollY > 80);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => setScrolled(!entry.isIntersecting),
+        { threshold: 0.05 }
+      );
+      observer.observe(hero);
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      observer?.disconnect();
+      if (onScroll) window.removeEventListener("scroll", onScroll);
+    };
+  }, [isHome, pathname]);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (aboutRef.current && !aboutRef.current.contains(e.target as Node)) {
@@ -59,12 +95,6 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
     { label: t("qa"),       href: `/${locale}/qa` },
   ];
 
-  const allMobileLinks = [
-    ...topLinks,
-    ...aboutDropdown,
-    ...afterAboutLinks,
-  ];
-
   const toggleLocale = () => {
     const newLocale = locale === "en" ? "ja" : "en";
     const newPath   = pathname.replace(`/${locale}`, `/${newLocale}`);
@@ -72,20 +102,33 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
   };
 
   const linkCls = (href: string) =>
-    `px-3 py-2 text-sm font-medium transition-all duration-200 relative group ${
-      isActive(href)
-        ? "text-gray-900"
-        : "text-gray-500 hover:text-gray-900"
+    `px-3 py-2 text-sm font-medium transition-all duration-300 relative group ${
+      transparent
+        ? isActive(href) ? "text-white" : "text-white/70 hover:text-white"
+        : isActive(href) ? "text-gray-900" : "text-gray-500 hover:text-gray-900"
     }`;
 
+  const underlineCls = (href: string) =>
+    `absolute bottom-0 left-3 right-3 h-[2px] transition-transform duration-200 origin-left ${
+      transparent ? "bg-white" : "bg-gray-900"
+    } ${isActive(href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`;
+
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-[100] bg-white transition-shadow duration-300 ${
-        scrolled ? "shadow-sm" : "border-b border-gray-100"
-      }`}
+    <motion.header
+      className="fixed top-0 left-0 right-0 z-[100]"
+      animate={
+        transparent
+          ? { backgroundColor: "rgba(255,255,255,0)", backdropFilter: "blur(0px)", boxShadow: "none" }
+          : { backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)", boxShadow: "0 1px 24px rgba(0,0,0,0.07)" }
+      }
+      transition={
+        transparent
+          ? { duration: 0 }
+          : { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+      }
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[70px]">
+        <div className="flex items-center justify-between" style={{ height: headerHeight }}>
 
           {/* Logo */}
           <Link href={`/${locale}`} className="flex items-center shrink-0">
@@ -94,10 +137,22 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
               <img
                 src={logoImage}
                 alt="i8 STUDIO"
-                style={{ height: logoHeight, maxHeight: 56, width: "auto", objectFit: "contain", display: "block" }}
+                style={{
+                  height: logoHeight,
+                  width: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                  filter: transparent ? "brightness(0) invert(1)" : "none",
+                  transition: "filter 0.4s ease",
+                }}
               />
             ) : (
-              <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
+              <span
+                className="text-xl font-bold tracking-tight transition-colors duration-300"
+                style={{ color: transparent ? "rgba(255,255,255,0.95)" : "#111827" }}
+              >
+                i8 STUDIO
+              </span>
             )}
           </Link>
 
@@ -106,8 +161,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
             {topLinks.map((link) => (
               <Link key={link.href} href={link.href} className={linkCls(link.href)}>
                 {link.label}
-                {/* Active underline */}
-                <span className={`absolute bottom-0 left-3 right-3 h-[2px] bg-gray-900 transition-transform duration-200 origin-left ${isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
+                <span className={underlineCls(link.href)} />
               </Link>
             ))}
 
@@ -116,10 +170,14 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
               <button
                 onClick={() => setAboutOpen((v) => !v)}
                 onMouseEnter={() => setAboutOpen(true)}
-                className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors duration-200 ${
-                  aboutDropdown.some((l) => isActive(l.href))
-                    ? "text-gray-900"
-                    : "text-gray-500 hover:text-gray-900"
+                className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-all duration-300 ${
+                  transparent
+                    ? aboutDropdown.some((l) => isActive(l.href))
+                      ? "text-white"
+                      : "text-white/70 hover:text-white"
+                    : aboutDropdown.some((l) => isActive(l.href))
+                      ? "text-gray-900"
+                      : "text-gray-500 hover:text-gray-900"
                 }`}
               >
                 About
@@ -158,7 +216,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
             {afterAboutLinks.map((link) => (
               <Link key={link.href} href={link.href} className={linkCls(link.href)}>
                 {link.label}
-                <span className={`absolute bottom-0 left-3 right-3 h-[2px] bg-gray-900 transition-transform duration-200 origin-left ${isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
+                <span className={underlineCls(link.href)} />
               </Link>
             ))}
           </nav>
@@ -167,13 +225,19 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
           <div className="hidden lg:flex items-center gap-3">
             <button
               onClick={toggleLocale}
-              className="text-sm text-gray-400 hover:text-gray-900 transition-colors px-2 py-1 font-medium"
+              className={`text-sm font-medium transition-all duration-300 px-2 py-1 ${
+                transparent ? "text-white/60 hover:text-white" : "text-gray-400 hover:text-gray-900"
+              }`}
             >
               {t("lang")}
             </button>
             <Link
               href={`/${locale}/contact`}
-              className="text-sm px-5 py-2.5 bg-black text-white font-semibold rounded-full hover:bg-gray-700 transition-colors"
+              className={`text-sm px-5 py-2.5 font-semibold rounded-full transition-all duration-300 ${
+                transparent
+                  ? "border border-white/50 text-white hover:bg-white hover:text-gray-900"
+                  : "bg-black text-white hover:bg-gray-700"
+              }`}
             >
               {t("getQuote")}
             </Link>
@@ -182,7 +246,9 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className={`lg:hidden p-2 transition-colors ${
+              transparent ? "text-white/80 hover:text-white" : "text-gray-600 hover:text-gray-900"
+            }`}
             aria-label="Menu"
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -200,7 +266,7 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile menu — animated slide down */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -211,7 +277,6 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
             className="lg:hidden overflow-hidden bg-white border-t border-gray-100"
           >
             <div className="max-w-7xl mx-auto px-4 py-4 space-y-0.5">
-              {/* Top links */}
               {topLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -227,7 +292,6 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
                 </Link>
               ))}
 
-              {/* About expandable */}
               <button
                 onClick={() => setMobileAboutOpen((v) => !v)}
                 className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
@@ -296,6 +360,6 @@ export default function Header({ logoImage, logoHeight = 48 }: HeaderProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

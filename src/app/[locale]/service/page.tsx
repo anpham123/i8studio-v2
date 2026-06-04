@@ -22,8 +22,8 @@ export default async function ServicePage({ params }: { params: { locale: string
   const services = await prisma.service.findMany({ orderBy: { order: "asc" } });
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-20">
+    <div className="min-h-screen">
       <ServicesSection services={services} locale={locale} />
-    </main>
+    </div>
   );
 }

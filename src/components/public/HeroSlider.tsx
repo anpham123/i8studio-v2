@@ -78,7 +78,9 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7, heroV
 
   return (
     <section
+      id="hero-section"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ marginTop: "calc(-1 * var(--header-h, 76px))" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -149,6 +151,12 @@ export default function HeroSlider({ slides, bgHero, overlayOpacity = 0.7, heroV
           />
         </>
       )}
+
+      {/* Top vignette — ensures nav text is always readable */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none z-10"
+        style={{ height: 180, background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)" }}
+      />
 
       {/* Grid pattern 60px */}
       <div

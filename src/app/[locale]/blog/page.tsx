@@ -44,7 +44,7 @@ export default async function BlogPage({
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-28 pb-20">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-16">
@@ -115,6 +115,6 @@ export default async function BlogPage({
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

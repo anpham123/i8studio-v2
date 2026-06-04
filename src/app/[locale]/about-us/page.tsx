@@ -21,9 +21,9 @@ export default async function AboutPage({ params }: { params: { locale: string }
   const { locale } = params;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0f] pt-20">
+    <div className="min-h-screen">
       <AboutSection locale={locale} />
       <StatsCounter />
-    </main>
+    </div>
   );
 }
