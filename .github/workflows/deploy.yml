@@ -32,9 +32,9 @@ jobs:
             git pull origin master
 
             echo "🔐 Writing .env file..."
-            cat > .env << EOF
-            NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-            EOF
+            rm -f .env
+            printf 'NEXTAUTH_SECRET=%s\n' "$(printf '%s' "${NEXTAUTH_SECRET}" | tr -d '\n\r')" > .env
+            echo "   .env written: $(wc -l < .env) line(s)"
 
             echo "🐳 Building and restarting containers..."
             docker compose up --build -d --remove-orphans
