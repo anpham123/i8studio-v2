@@ -16,11 +16,14 @@ jobs:
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 1401
+          envs: NEXTAUTH_SECRET
           script: |
             set -e
             cd ~/i8studio-v2
@@ -29,7 +32,9 @@ jobs:
             git pull origin master
 
             echo "🔐 Writing .env file..."
-            printf 'NEXTAUTH_SECRET=%s\n' '${{ secrets.NEXTAUTH_SECRET }}' > .env
+            cat > .env << EOF
+            NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+            EOF
 
             echo "🐳 Building and restarting containers..."
             docker compose up --build -d --remove-orphans
