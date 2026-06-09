@@ -8,7 +8,7 @@ import { useToast } from "@/components/admin/Toast";
 import { Save } from "lucide-react";
 
 export default function NewWorkPage() {
-  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", image: "", videoUrl: "", order: "0", featured: false });
+  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", type: "still", buildingCategory: "residential", image: "", videoUrl: "", order: "0", featured: false });
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -32,7 +32,7 @@ export default function NewWorkPage() {
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Tên (EN) *</label><input value={form.title} onChange={(e) => set("title", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" /></div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Tên (JA)</label><input value={form.titleJa} onChange={(e) => set("titleJa", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" /></div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Subtitle</label><input value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Subtitle</label><input value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Danh mục</label>
               <select value={form.category} onChange={(e) => set("category", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
@@ -40,6 +40,30 @@ export default function NewWorkPage() {
               </select>
             </div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Thứ tự</label><input type="number" value={form.order} onChange={(e) => set("order", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Kiểu hiển thị (Type)</label>
+              <select value={form.type} onChange={(e) => set("type", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                <option value="still">Still Image</option>
+                <option value="animation">Animation</option>
+                <option value="composite">Photo Composite</option>
+                <option value="vr360">VR 360</option>
+                <option value="walkthrough">VR Walkthrough</option>
+                <option value="ar">AR</option>
+                <option value="digital">Digital Model</option>
+              </select>
+            </div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Thể loại kiến trúc (Category)</label>
+              <select value={form.buildingCategory} onChange={(e) => set("buildingCategory", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                <option value="residential">Residential</option>
+                <option value="apartment">Apartment</option>
+                <option value="resort">Resort</option>
+                <option value="commercial">Commercial</option>
+                <option value="office">Office</option>
+                <option value="public">Public Facility</option>
+                <option value="urban">Urban Development</option>
+              </select>
+            </div>
           </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Video URL (YouTube embed)</label><input value={form.videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/embed/..." className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
           <div className="flex items-center gap-2"><input type="checkbox" id="featured" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} className="rounded" /><label htmlFor="featured" className="text-sm text-gray-700">Nổi bật (hiển thị trên trang chủ)</label></div>

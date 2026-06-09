@@ -10,7 +10,7 @@ import { Save, Trash2, Loader2 } from "lucide-react";
 
 export default function EditWorkPage() {
   const { id } = useParams<{ id: string }>();
-  const [form, setForm] = useState<Record<string, string | boolean>>({});
+  const [form, setForm] = useState<Record<string, string | boolean>>({ type: "still", buildingCategory: "residential" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -49,11 +49,35 @@ export default function EditWorkPage() {
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Subtitle</label><input value={String(form.subtitle || "")} onChange={(e) => set("subtitle", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Danh mục</label>
-              <select value={String(form.category || "3DCG")} onChange={(e) => set("category", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm">
+              <select value={String(form.category || "3DCG")} onChange={(e) => set("category", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
                 <option>3DCG</option><option>Animation</option><option>VR</option><option>BIM</option>
               </select>
             </div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Thứ tự</label><input type="number" value={String(form.order || "0")} onChange={(e) => set("order", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Kiểu hiển thị (Type)</label>
+              <select value={String(form.type || "still")} onChange={(e) => set("type", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                <option value="still">Still Image</option>
+                <option value="animation">Animation</option>
+                <option value="composite">Photo Composite</option>
+                <option value="vr360">VR 360</option>
+                <option value="walkthrough">VR Walkthrough</option>
+                <option value="ar">AR</option>
+                <option value="digital">Digital Model</option>
+              </select>
+            </div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Thể loại kiến trúc (Category)</label>
+              <select value={String(form.buildingCategory || "residential")} onChange={(e) => set("buildingCategory", e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none">
+                <option value="residential">Residential</option>
+                <option value="apartment">Apartment</option>
+                <option value="resort">Resort</option>
+                <option value="commercial">Commercial</option>
+                <option value="office">Office</option>
+                <option value="public">Public Facility</option>
+                <option value="urban">Urban Development</option>
+              </select>
+            </div>
           </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Video URL</label><input value={String(form.videoUrl || "")} onChange={(e) => set("videoUrl", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
           <div className="flex items-center gap-2"><input type="checkbox" id="featured" checked={Boolean(form.featured)} onChange={(e) => set("featured", e.target.checked)} className="rounded" /><label htmlFor="featured" className="text-sm text-gray-700">Nổi bật</label></div>

@@ -21,6 +21,8 @@ export const WorkSchema = z.object({
   titleJa: z.string().max(300).optional().default(""),
   subtitle: z.string().max(300).optional().default(""),
   category: z.enum(["3DCG", "Animation", "VR", "BIM"]).default("3DCG"),
+  type: z.enum(["still", "animation", "composite", "vr360", "walkthrough", "ar", "digital"]).default("still"),
+  buildingCategory: z.enum(["residential", "apartment", "resort", "commercial", "office", "public", "urban"]).default("residential"),
   image: z.string().optional().default(""),
   videoUrl: z.string().optional().default(""),
   order: z.number().int().optional().default(0),

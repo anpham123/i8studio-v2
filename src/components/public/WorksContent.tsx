@@ -17,6 +17,8 @@ interface DBWork {
   titleJa: string;
   subtitle: string;
   category: string;
+  type?: string;
+  buildingCategory?: string;
   image: string;
   videoUrl: string;
   order: number;
@@ -122,56 +124,60 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
       const titleLower = w.title ? w.title.toLowerCase() : "";
 
       // Map DB category (3DCG, Animation, VR, BIM) to Type
-      let type: WorkType = "still";
-      const dbCat = w.category ? w.category.toUpperCase() : "3DCG";
-      if (dbCat === "ANIMATION") {
-        type = "animation";
-      } else if (dbCat === "VR") {
-        if (subtitle.includes("walkthrough") || titleLower.includes("walkthrough")) {
-          type = "walkthrough";
-        } else if (subtitle.includes("ar") || titleLower.includes("ar")) {
-          type = "ar";
-        } else {
-          type = "vr360";
-        }
-      } else if (dbCat === "BIM") {
-        type = "digital";
-      } else { // 3DCG
-        if (subtitle.includes("composite") || titleLower.includes("composite")) {
-          type = "composite";
-        } else if (subtitle.includes("model") || titleLower.includes("model")) {
+      let type: WorkType = (w.type as WorkType) || "still";
+      if (!w.type) {
+        const dbCat = w.category ? w.category.toUpperCase() : "3DCG";
+        if (dbCat === "ANIMATION") {
+          type = "animation";
+        } else if (dbCat === "VR") {
+          if (subtitle.includes("walkthrough") || titleLower.includes("walkthrough")) {
+            type = "walkthrough";
+          } else if (subtitle.includes("ar") || titleLower.includes("ar")) {
+            type = "ar";
+          } else {
+            type = "vr360";
+          }
+        } else if (dbCat === "BIM") {
           type = "digital";
-        } else {
-          type = "still";
+        } else { // 3DCG
+          if (subtitle.includes("composite") || titleLower.includes("composite")) {
+            type = "composite";
+          } else if (subtitle.includes("model") || titleLower.includes("model")) {
+            type = "digital";
+          } else {
+            type = "still";
+          }
         }
       }
 
       // Map Subtitle/Title to Architectural Category
-      let category: WorkCategory = "residential";
-      if (subtitle.includes("residence") || subtitle.includes("house") || subtitle.includes("villa") || subtitle.includes("home") ||
-          titleLower.includes("residence") || titleLower.includes("house") || titleLower.includes("villa") || titleLower.includes("home")) {
-        category = "residential";
-      } else if (subtitle.includes("apartment") || subtitle.includes("condo") || subtitle.includes("mansion") ||
-                 titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("mansion")) {
-        category = "apartment";
-      } else if (subtitle.includes("resort") || subtitle.includes("hotel") || subtitle.includes("pool") || subtitle.includes("sauna") ||
-                 titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("pool") || titleLower.includes("sauna")) {
-        category = "resort";
-      } else if (subtitle.includes("commercial") || subtitle.includes("mall") || subtitle.includes("showroom") || subtitle.includes("shop") || subtitle.includes("store") ||
-                 titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("showroom") || titleLower.includes("shop") || titleLower.includes("store")) {
-        category = "commercial";
-      } else if (subtitle.includes("office") || subtitle.includes("workspace") || subtitle.includes("tower") ||
-                 titleLower.includes("office") || titleLower.includes("workspace") || titleLower.includes("tower")) {
-        category = "office";
-      } else if (subtitle.includes("library") || subtitle.includes("public") || subtitle.includes("museum") || subtitle.includes("temple") || subtitle.includes("facility") ||
-                 titleLower.includes("library") || titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("temple") || titleLower.includes("facility")) {
-        category = "public";
-      } else if (subtitle.includes("urban") || subtitle.includes("city") || subtitle.includes("landscape") || subtitle.includes("street") || subtitle.includes("plan") ||
-                 titleLower.includes("urban") || titleLower.includes("city") || titleLower.includes("landscape") || titleLower.includes("street") || titleLower.includes("plan")) {
-        category = "urban";
-      } else {
-        const categories: WorkCategory[] = ["residential", "resort", "commercial", "public"];
-        category = categories[index % categories.length];
+      let category: WorkCategory = (w.buildingCategory as WorkCategory) || "residential";
+      if (!w.buildingCategory) {
+        if (subtitle.includes("residence") || subtitle.includes("house") || subtitle.includes("villa") || subtitle.includes("home") ||
+            titleLower.includes("residence") || titleLower.includes("house") || titleLower.includes("villa") || titleLower.includes("home")) {
+          category = "residential";
+        } else if (subtitle.includes("apartment") || subtitle.includes("condo") || subtitle.includes("mansion") ||
+                   titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("mansion")) {
+          category = "apartment";
+        } else if (subtitle.includes("resort") || subtitle.includes("hotel") || subtitle.includes("pool") || subtitle.includes("sauna") ||
+                   titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("pool") || titleLower.includes("sauna")) {
+          category = "resort";
+        } else if (subtitle.includes("commercial") || subtitle.includes("mall") || subtitle.includes("showroom") || subtitle.includes("shop") || subtitle.includes("store") ||
+                   titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("showroom") || titleLower.includes("shop") || titleLower.includes("store")) {
+          category = "commercial";
+        } else if (subtitle.includes("office") || subtitle.includes("workspace") || subtitle.includes("tower") ||
+                   titleLower.includes("office") || titleLower.includes("workspace") || titleLower.includes("tower")) {
+          category = "office";
+        } else if (subtitle.includes("library") || subtitle.includes("public") || subtitle.includes("museum") || subtitle.includes("temple") || subtitle.includes("facility") ||
+                   titleLower.includes("library") || titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("temple") || titleLower.includes("facility")) {
+          category = "public";
+        } else if (subtitle.includes("urban") || subtitle.includes("city") || subtitle.includes("landscape") || subtitle.includes("street") || subtitle.includes("plan") ||
+                   titleLower.includes("urban") || titleLower.includes("city") || titleLower.includes("landscape") || titleLower.includes("street") || titleLower.includes("plan")) {
+          category = "urban";
+        } else {
+          const categories: WorkCategory[] = ["residential", "resort", "commercial", "public"];
+          category = categories[index % categories.length];
+        }
       }
 
       // Span layout

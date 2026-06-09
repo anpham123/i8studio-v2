@@ -27,6 +27,8 @@ export default async function WorksPage() {
     titleJa: w.titleJa,
     subtitle: w.subtitle,
     category: w.category,
+    type: w.type,
+    buildingCategory: w.buildingCategory,
     image: w.image,
     videoUrl: w.videoUrl,
     order: w.order,

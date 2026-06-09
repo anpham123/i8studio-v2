@@ -36,16 +36,18 @@ model Post {
 }
 
 model Work {
-  id        String   @id @default(cuid())
-  title     String
-  titleJa   String   @default("")
-  subtitle  String   @default("")
-  category  String   @default("3DCG")
-  image     String   @default("")
-  videoUrl  String   @default("")
-  order     Int      @default(0)
-  featured  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  title            String
+  titleJa          String   @default("")
+  subtitle         String   @default("")
+  category         String   @default("3DCG")      // 3DCG | Animation | VR | BIM
+  type             String   @default("still")     // still | animation | composite | vr360 | walkthrough | ar | digital
+  buildingCategory String   @default("residential") // residential | apartment | resort | commercial | office | public | urban
+  image            String   @default("")
+  videoUrl         String   @default("")           // YouTube embed URL
+  order            Int      @default(0)
+  featured         Boolean  @default(false)
+  createdAt        DateTime @default(now())
 }
 
 model Service {
