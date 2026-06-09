@@ -65,7 +65,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
                     <Send size={28} className="text-green-500" />
                   </div>
-                  <h3 className="text-gray-900 font-bold text-xl mb-2">Message Sent!</h3>
+                  <h3 className="text-gray-900 font-bold text-xl mb-2">{t("messageSent")}</h3>
                   <p className="text-gray-500">{t("responseTime")}</p>
                 </div>
               ) : (
@@ -129,7 +129,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                   </div>
 
                   {status === "error" && (
-                    <p className="text-red-500 text-sm">Something went wrong. Please try again.</p>
+                    <p className="text-red-500 text-sm">{t("errorMessage")}</p>
                   )}
 
                   <button
@@ -140,7 +140,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                     {status === "sending" ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
+                        {t("sending")}
                       </>
                     ) : (
                       <>
@@ -169,7 +169,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
           <FadeIn direction="right">
             <div className="space-y-6">
               <div>
-                <h3 className="text-gray-900 font-bold text-xl mb-6">Get in touch</h3>
+                <h3 className="text-gray-900 font-bold text-xl mb-6">{t("getInTouch")}</h3>
               </div>
 
               {[

@@ -21,11 +21,12 @@ interface Work {
 interface WorksSectionProps {
   works: Work[];
   locale: string;
+  showViewAll?: boolean;
 }
 
 const categories = ["All", "3DCG", "Animation", "VR", "BIM"];
 
-export default function WorksSection({ works, locale }: WorksSectionProps) {
+export default function WorksSection({ works, locale, showViewAll = true }: WorksSectionProps) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
   const t = useTranslations("works");
@@ -74,7 +75,7 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
               <ZoomIn size={24} className="text-gray-300" />
             </div>
-            <p className="text-gray-400 text-sm">No works in this category yet.</p>
+            <p className="text-gray-400 text-sm">{t("emptyCategory")}</p>
           </div>
         ) : (
           <>
@@ -120,14 +121,16 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
           </>
         )}
 
-        <FadeIn className="text-center mt-14">
-          <Link
-            href={`/${locale}/works`}
-            className="inline-flex items-center gap-2 border border-gray-900 text-gray-900 font-semibold px-8 py-3 rounded-lg hover:bg-gray-900 hover:text-white transition-all duration-300"
-          >
-            {t("viewAll")} <ArrowRight size={16} />
-          </Link>
-        </FadeIn>
+        {showViewAll && (
+          <FadeIn className="text-center mt-14">
+            <Link
+              href={`/${locale}/works`}
+              className="inline-flex items-center gap-2 border border-gray-900 text-gray-900 font-semibold px-8 py-3 rounded-lg hover:bg-gray-900 hover:text-white transition-all duration-300"
+            >
+              {t("viewAll")} <ArrowRight size={16} />
+            </Link>
+          </FadeIn>
+        )}
       </div>
 
       {lightbox && (
@@ -156,6 +159,7 @@ function WorkCard({
   const title = locale === "ja" ? work.titleJa || work.title : work.title;
   const hasVideo = !!work.videoUrl;
   const hasImage = !!work.image;
+  const t = useTranslations("works");
 
   return (
     <motion.div
@@ -209,7 +213,7 @@ function WorkCard({
           <p className="text-white/70 text-sm">{work.subtitle}</p>
           <div className="flex items-center gap-2 mt-3 text-white text-sm font-medium">
             {hasVideo ? <Play size={14} /> : <ZoomIn size={14} />}
-            View Project →
+            {t("viewProject")}
           </div>
         </div>
       </div>

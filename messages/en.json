@@ -1,13 +1,17 @@
 {
   "nav": {
-    "service": "Service",
-    "works": "Works",
+    "work": "Work",
+    "service": "Solution",
     "aboutUs": "About Us",
+    "contact": "Contact",
+    "blogs": "Blogs",
+    "works": "Works",
     "insights": "Insights",
     "news": "News",
     "qa": "Q&A",
     "blog": "Blog",
-    "contact": "Contact",
+    "about": "About",
+    "solution": "Solution",
     "getQuote": "Get Quote",
     "lang": "日本語"
   },
@@ -15,6 +19,13 @@
     "cta1": "Get Free Quote",
     "cta2": "View Our Works",
     "trust": "Trusted CG partner for 50+ Japanese companies"
+  },
+  "home": {
+    "hero": {
+      "title": "SUPPORT YOUR IDEAS",
+      "subtitle": "Bring Your Ideas to Life",
+      "description": "We specialize in high-quality architectural renderings, 3DCG, VR, and animation.\nTake your business to the next stage with cutting-edge visual expression."
+    }
   },
   "services": {
     "subtitle": "Service List",
@@ -26,6 +37,8 @@
     "subtitle": "Track Record",
     "title": "Works",
     "viewAll": "View All Works",
+    "viewProject": "View Project →",
+    "emptyCategory": "No works in this category yet.",
     "filters": {
       "all": "All",
       "3dcg": "3DCG",
@@ -51,6 +64,8 @@
   "about": {
     "title": "About us",
     "learnMore": "Learn more",
+    "description1": "We are a Vietnamese CG studio specializing in high-quality 3DCG, Animation, VR, and BIM services for the Japanese architecture and real estate market. Founded in 2019, we've grown to serve 50+ Japanese companies with photorealistic visuals that win client trust.",
+    "description2": "Our team combines Japanese-standard quality expectations with cost-effective production from Vietnam — giving our clients the best of both worlds. We support NDA, work with all major 3D formats, and offer flexible, iterative workflows.",
     "milestones": {
       "2019": "Founded in Da Nang, Vietnam",
       "2020": "First Japanese client partnerships",
@@ -83,11 +98,15 @@
   },
   "contact": {
     "title": "Contact Us",
+    "getInTouch": "Get in touch",
     "name": "Full Name",
     "email": "Email",
     "service": "Service",
     "message": "Message",
     "submit": "Send Message",
+    "sending": "Sending...",
+    "messageSent": "Message Sent!",
+    "errorMessage": "Something went wrong. Please try again.",
     "responseTime": "We respond within 24 hours",
     "nda": "NDA available upon request",
     "selectService": "Select a service",
@@ -98,6 +117,7 @@
     "navigation": "Navigation",
     "services": "Services",
     "contact": "Contact",
+    "workingHours": "Mon–Fri 9:00–18:00 JST",
     "rights": "© 2019-2026 i8STUDIO. All rights reserved.",
     "trust": "Trusted CG partner for 50+ Japanese companies"
   },
@@ -108,9 +128,68 @@
     "page": "Page",
     "of": "of"
   },
+  "solution": {
+    "label": "SOLUTION",
+    "title": "What We Create",
+    "heroLine1": "High-quality visualization for architecture",
+    "heroLine2": "and real estate projects.",
+    "viewWorks": "VIEW WORKS",
+    "ctaSubtitle": "We will propose a solution tailored to your needs.",
+    "ctaTitle": "Let's work together",
+    "ctaButton": "GET IN TOUCH →",
+    "s1": {
+      "desc": "Photorealistic still image rendering. We express the full appeal\nof your project from diverse angles — exterior, interior, and aerial.",
+      "tags": ["Exterior Perspective", "Interior Perspective", "Aerial Image", "Night Rendering"]
+    },
+    "s2": {
+      "desc": "Dynamic video production that conveys the full picture of a project.\nIdeal for promotional tools and exhibition presentations.",
+      "tags": ["Fly-through", "Walk-through", "Exterior Animation"]
+    },
+    "s3": {
+      "desc": "Interactive experiences where you can freely walk around in the browser.\nConfirm spaces realistically before completion.",
+      "tags": ["Browser Compatible", "Interactive", "Free Roam"]
+    },
+    "s4": {
+      "desc": "Experience spaces through 360° panoramic views. Compatible with\nsmartphones and VR headsets for immersive experiences.",
+      "tags": ["Panorama", "Smartphone", "VR Headset"]
+    },
+    "s5": {
+      "desc": "Natural compositing of real photos and CG. Incorporate design\nproposals into existing site photos for realistic presentations.",
+      "tags": ["Photo Composite", "CGI Composite"]
+    },
+    "s6": {
+      "desc": "Digital 3D models replacing traditional physical models.\nUsable across presentations, reviews, and promotions.",
+      "tags": ["3D Model", "Interactive", "Web Compatible"]
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
     "notFound": "Page not found"
+  },
+  "work": {
+    "title": "Works",
+    "filter": "Filter",
+    "typeLabel": "TYPE",
+    "categoryLabel": "CATEGORY",
+    "types": {
+      "still": "Still Image",
+      "animation": "Animation",
+      "composite": "Photo Composite",
+      "vr360": "VR360",
+      "walkthrough": "VR Walkthrough",
+      "ar": "AR",
+      "digital": "Digital Model"
+    },
+    "categories": {
+      "residential": "Residential",
+      "apartment": "Apartment",
+      "resort": "Resort",
+      "commercial": "Commercial",
+      "office": "Office",
+      "public": "Public Facility",
+      "urban": "Urban Development"
+    },
+    "emptyState": "No works match the selected filters."
   }
 }

@@ -158,7 +158,7 @@ export default function Footer({ settings, services }: FooterProps) {
                 </li>
               )}
               {settings.address && <li>{settings.address}</li>}
-              <li className="text-gray-400">Mon–Fri 9:00–18:00 JST</li>
+              <li className="text-gray-400">{t("workingHours")}</li>
             </ul>
           </div>
 

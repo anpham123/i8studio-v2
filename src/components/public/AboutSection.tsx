@@ -9,7 +9,7 @@ const milestones = [
   { year: "2024", key: "2024" },
 ];
 
-export default function AboutSection({ locale }: { locale: string }) {
+export default function AboutSection({ locale, showLearnMore = true }: { locale: string; showLearnMore?: boolean }) {
   const t = useTranslations("about");
 
   return (
@@ -26,23 +26,19 @@ export default function AboutSection({ locale }: { locale: string }) {
                 {t("title")}
               </h2>
               <p className="text-base text-gray-600 leading-relaxed mb-4">
-                We are a Vietnamese CG studio specializing in high-quality 3DCG, Animation,
-                VR, and BIM services for the Japanese architecture and real estate market.
-                Founded in 2019, we&apos;ve grown to serve 50+ Japanese companies with
-                photorealistic visuals that win client trust.
+                {t("description1")}
               </p>
               <p className="text-base text-gray-600 leading-relaxed mb-8">
-                Our team combines Japanese-standard quality expectations with
-                cost-effective production from Vietnam — giving our clients the best
-                of both worlds. We support NDA, work with all major 3D formats, and
-                offer flexible, iterative workflows.
+                {t("description2")}
               </p>
-              <Link
-                href={`/${locale}/about-us`}
-                className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                {t("learnMore")}
-              </Link>
+              {showLearnMore && (
+                <Link
+                  href={`/${locale}/about-us`}
+                  className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  {t("learnMore")}
+                </Link>
+              )}
             </div>
 
             {/* Timeline */}

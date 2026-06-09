@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Outfit } from "next/font/google";
+import { Outfit, Cormorant_Garamond } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import "../globals.css";
@@ -19,6 +19,12 @@ const outfit = Outfit({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-outfit",
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-cormorant",
 });
 
 const locales = ["en", "ja"];
@@ -64,18 +70,16 @@ export default async function LocaleLayout({
 
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
-  const logoImage = settingsMap.logoImage || "";
-  const logoHeight = Math.min(120, Math.max(24, parseInt(settingsMap.logoHeight || "48", 10) || 48));
-  const headerHeight = logoHeight + 28; // 14px padding top + bottom
+  const headerHeight = 76;
 
   return (
     <html lang={params.locale}>
       <body
-        className={`${outfit.variable} font-sans antialiased`}
+        className={`${outfit.variable} ${cormorant.variable} font-sans antialiased`}
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
       >
         <NextIntlClientProvider messages={messages}>
-          <Header logoImage={logoImage} logoHeight={logoHeight} headerHeight={headerHeight} />
+          <Header headerHeight={headerHeight} />
           <main style={{ paddingTop: headerHeight }}>
             <PageTransition>{children}</PageTransition>
           </main>

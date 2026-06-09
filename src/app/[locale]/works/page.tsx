@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
-import WorksSection from "@/components/public/WorksSection";
+import WorksContent from "@/components/public/WorksContent";
 
 export async function generateMetadata({
   params,
@@ -11,19 +11,27 @@ export async function generateMetadata({
   return buildMetadata({
     title: "Works — Portfolio",
     description:
-      "Browse i8 STUDIO's full portfolio: 200+ completed 3DCG, Animation, VR & BIM projects for Japanese architecture and real estate clients.",
+      "Browse our portfolio of architectural visualization, 3DCG, VR, and animation projects for the Japanese market.",
     path: "/works",
     locale: params.locale,
   });
 }
 
-export default async function WorksPage({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export default async function WorksPage() {
   const works = await prisma.work.findMany({ orderBy: { order: "asc" } });
 
-  return (
-    <div className="min-h-screen">
-      <WorksSection works={works} locale={locale} />
-    </div>
-  );
+  // Clean serialization for client components
+  const serializedWorks = works.map((w) => ({
+    id: w.id,
+    title: w.title,
+    titleJa: w.titleJa,
+    subtitle: w.subtitle,
+    category: w.category,
+    image: w.image,
+    videoUrl: w.videoUrl,
+    order: w.order,
+    featured: w.featured,
+  }));
+
+  return <WorksContent initialWorks={serializedWorks} />;
 }
