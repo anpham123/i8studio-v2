@@ -54,7 +54,7 @@ export default function SubscribersPage() {
 
   return (
     <AdminShell title={`Subscribers (${data.length})`} actions={<button onClick={exportCsv} className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50"><Download size={15} /> Xuất CSV</button>}>
-      <DataTable columns={cols} data={data} loading={loading} onDelete={setDel} />
+      <DataTable columns={cols} data={data} loading={loading} onDelete={setDel} searchPlaceholder="Tìm subscriber..." />
       <ConfirmDialog open={!!del} message={`Xóa subscriber "${del?.email}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );

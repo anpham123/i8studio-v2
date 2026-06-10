@@ -99,10 +99,10 @@ export default function AdminDashboard() {
       {/* Quick actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { href: "/admin/posts/new", label: "Tạo bài viết", icon: FileText, color: "blue" },
-          { href: "/admin/works/new", label: "Thêm Work", icon: Image, color: "purple" },
-          { href: "/admin/contacts", label: "Xem liên hệ", icon: Mail, color: "orange" },
-          { href: "/", label: "Xem website", icon: Eye, color: "green", target: "_blank" },
+          { href: "/admin/posts/new", label: "Tạo bài viết", icon: FileText, iconClass: "bg-blue-50 text-blue-600" },
+          { href: "/admin/works/new", label: "Thêm Work", icon: Image, iconClass: "bg-purple-50 text-purple-600" },
+          { href: "/admin/contacts", label: "Xem liên hệ", icon: Mail, iconClass: "bg-orange-50 text-orange-600" },
+          { href: "/", label: "Xem website", icon: Eye, iconClass: "bg-green-50 text-green-600", target: "_blank" },
         ].map((a) => (
           <Link
             key={a.href}
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
             target={a.target as "_blank" | undefined}
             className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all text-center"
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${a.color}-50 text-${a.color}-600`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${a.iconClass}`}>
               <a.icon size={20} />
             </div>
             <span className="text-sm font-medium text-gray-700">{a.label}</span>

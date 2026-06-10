@@ -3,72 +3,164 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Building2, Phone, Globe } from "lucide-react";
 
-const LABELS: Record<string, string> = {
-  companyName: "Tên công ty (EN)",
-  companyNameJa: "Tên công ty (JA)",
-  email: "Email liên hệ",
-  phone: "Số điện thoại",
-  address: "Địa chỉ (EN)",
-  addressJa: "Địa chỉ (JA)",
-  lineUrl: "LINE URL",
-  chatworkUrl: "Chatwork URL",
-  foundedYear: "Năm thành lập",
-  socialFacebook: "Facebook URL",
-  socialInstagram: "Instagram URL",
-  socialLinkedin: "LinkedIn URL",
-};
+interface SettingGroup {
+  title: string;
+  icon: React.ElementType;
+  fields: { key: string; label: string; placeholder?: string }[];
+}
+
+const SETTING_GROUPS: SettingGroup[] = [
+  {
+    title: "Thông tin công ty",
+    icon: Building2,
+    fields: [
+      { key: "companyName", label: "Tên công ty (EN)", placeholder: "i8 STUDIO" },
+      { key: "companyNameJa", label: "Tên công ty (JA)", placeholder: "アイハチ スタジオ" },
+      { key: "foundedYear", label: "Năm thành lập", placeholder: "2020" },
+    ],
+  },
+  {
+    title: "Liên hệ",
+    icon: Phone,
+    fields: [
+      { key: "email", label: "Email liên hệ", placeholder: "info@i8studio.vn" },
+      { key: "phone", label: "Số điện thoại", placeholder: "0914 049 090" },
+      { key: "address", label: "Địa chỉ (EN)", placeholder: "Da Nang, Vietnam" },
+      { key: "addressJa", label: "Địa chỉ (JA)", placeholder: "ベトナム ダナン市" },
+      { key: "lineUrl", label: "LINE URL", placeholder: "https://line.me/..." },
+      { key: "chatworkUrl", label: "Chatwork URL", placeholder: "https://chatwork.com/..." },
+    ],
+  },
+  {
+    title: "Mạng xã hội",
+    icon: Globe,
+    fields: [
+      { key: "socialFacebook", label: "Facebook URL", placeholder: "https://facebook.com/..." },
+      { key: "socialInstagram", label: "Instagram URL", placeholder: "https://instagram.com/..." },
+      { key: "socialLinkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/..." },
+    ],
+  },
+];
 
 export default function SettingsPage() {
   const [values, setValues] = useState<Record<string, string>>({});
+  const [original, setOriginal] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const fetchSettings = useCallback(async () => {
     const res = await fetch("/api/settings");
     const json = await res.json();
-    // API returns { data: { key: value, ... } } map format
     const map = json.data || {};
     setValues(map);
+    setOriginal(map);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
-  const saveSetting = async (key: string) => {
-    setSaving(key);
-    const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ [key]: values[key] || "" }) });
+  const hasChanges = JSON.stringify(values) !== JSON.stringify(original);
+
+  const saveAll = async () => {
+    setSaving(true);
+    // Only send changed keys
+    const changed: Record<string, string> = {};
+    for (const key of Object.keys(values)) {
+      if (values[key] !== original[key]) changed[key] = values[key] || "";
+    }
+    // Also include new keys that weren't in original
+    for (const group of SETTING_GROUPS) {
+      for (const field of group.fields) {
+        if (!(field.key in original) && values[field.key]) {
+          changed[field.key] = values[field.key];
+        }
+      }
+    }
+
+    if (Object.keys(changed).length === 0) {
+      setSaving(false);
+      toast("Không có thay đổi", "info");
+      return;
+    }
+
+    const res = await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(changed),
+    });
     const data = await res.json();
-    setSaving(null);
-    if (data.success) toast("Đã lưu", "success"); else toast("Lỗi", "error");
+    setSaving(false);
+
+    if (data.success) {
+      setOriginal({ ...values });
+      toast("Đã lưu tất cả", "success");
+    } else {
+      toast("Lỗi khi lưu", "error");
+    }
   };
 
   if (loading) return <AdminShell title="Cài đặt"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
 
-  const keys = Object.keys(LABELS);
-
   return (
-    <AdminShell title="Cài đặt hệ thống">
-      <div className="max-w-2xl space-y-3">
-        {keys.map((key) => (
-          <div key={key} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
-            <div className="flex-1 min-w-0">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">{LABELS[key] || key}</label>
-              <input
-                value={values[key] || ""}
-                onChange={(e) => setValues((v) => ({ ...v, [key]: e.target.value }))}
-                onKeyDown={(e) => { if (e.key === "Enter") saveSetting(key); }}
-                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-              />
+    <AdminShell
+      title="Cài đặt hệ thống"
+      actions={
+        <button
+          onClick={saveAll}
+          disabled={saving || !hasChanges}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        >
+          {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+          Lưu tất cả
+        </button>
+      }
+    >
+      <div className="max-w-3xl space-y-6">
+        {SETTING_GROUPS.map((group) => {
+          const Icon = group.icon;
+          return (
+            <div key={group.title} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              {/* Group header */}
+              <div className="flex items-center gap-2.5 px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <Icon size={16} className="text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-800">{group.title}</h3>
+              </div>
+
+              {/* Fields */}
+              <div className="p-6 space-y-4">
+                {group.fields.map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">{field.label}</label>
+                    <input
+                      value={values[field.key] || ""}
+                      onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                      placeholder={field.placeholder}
+                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-gray-300"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <button onClick={() => saveSetting(key)} disabled={saving === key} className="shrink-0 flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 mt-5">
-              {saving === key ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-              Lưu
+          );
+        })}
+
+        {/* Unsaved changes indicator */}
+        {hasChanges && (
+          <div className="sticky bottom-4 bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center justify-between shadow-lg">
+            <span className="text-sm text-blue-700 font-medium">Có thay đổi chưa lưu</span>
+            <button
+              onClick={saveAll}
+              disabled={saving}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              Lưu tất cả
             </button>
           </div>
-        ))}
+        )}
       </div>
     </AdminShell>
   );

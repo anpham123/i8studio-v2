@@ -8,7 +8,8 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { slugify } from "@/lib/utils";
-import { Save, Eye, Trash2, Loader2, ExternalLink } from "lucide-react";
+import { Save, Eye, Trash2, Loader2, ExternalLink, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function EditPostPage() {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +58,9 @@ export default function EditPostPage() {
       title="Chỉnh sửa bài đăng"
       actions={
         <div className="flex gap-2">
+          <Link href="/admin/posts" className="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-50">
+            <ArrowLeft size={15} /> Quay lại
+          </Link>
           <button onClick={() => setShowDelete(true)} className="flex items-center gap-2 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm hover:bg-red-50">
             <Trash2 size={15} />
           </button>
@@ -77,6 +81,7 @@ export default function EditPostPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-5">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />Thông tin bài đăng</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Tiêu đề (EN) *</label>
               <input value={form.title || ""} onChange={(e) => { set("title", e.target.value); if (!form.slug) set("slug", slugify(e.target.value)); }}
@@ -112,7 +117,7 @@ export default function EditPostPage() {
             <RichEditor label="Nội dung (JA)" value={form.contentJa || ""} onChange={(v) => set("contentJa", v)} />
           </div>
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-            <h3 className="font-semibold text-gray-700 text-sm">SEO</h3>
+            <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />SEO</h3>
             <input value={form.metaTitle || ""} onChange={(e) => set("metaTitle", e.target.value)} placeholder="Meta Title"
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" />
             <textarea value={form.metaDescription || ""} onChange={(e) => set("metaDescription", e.target.value)} rows={2} placeholder="Meta Description"
@@ -121,7 +126,7 @@ export default function EditPostPage() {
         </div>
         <div className="space-y-5">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-            <h3 className="font-semibold text-gray-700 text-sm">Thiết lập</h3>
+            <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2"><span className="w-1.5 h-1.5 bg-purple-500 rounded-full" />Thiết lập</h3>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Danh mục</label>
               <select value={form.category || "NEWS"} onChange={(e) => set("category", e.target.value)}

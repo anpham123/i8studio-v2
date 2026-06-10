@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Image, Wrench,
@@ -10,21 +9,65 @@ import {
   Settings, LogOut, X, ChevronRight, Brush,
 } from "lucide-react";
 
-const menuItems = [
-  { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
-  { href: "/admin/posts", label: "Bài đăng", icon: FileText },
-  { href: "/admin/works", label: "Works", icon: Image },
-  { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
-  { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
-  { href: "/admin/qa", label: "Q&A", icon: HelpCircle },
-  { href: "/admin/flipbooks", label: "Flipbooks", icon: BookOpenCheck },
-  { href: "/admin/contacts", label: "Liên hệ", icon: Mail },
-  { href: "/admin/subscribers", label: "Subscribers", icon: Users },
-  { href: "/admin/media", label: "Media", icon: Folder },
-  { href: "/admin/settings/branding", label: "Thương hiệu", icon: Brush },
-  { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
+/* ------------------------------------------------------------------ */
+/*  Menu structure — grouped by section                                */
+/* ------------------------------------------------------------------ */
+interface MenuItem {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  exact?: boolean;
+  badge?: "contacts";
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const menuGroups: MenuGroup[] = [
+  {
+    title: "",
+    items: [
+      { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
+    ],
+  },
+  {
+    title: "NỘI DUNG",
+    items: [
+      { href: "/admin/posts", label: "Bài đăng", icon: FileText },
+      { href: "/admin/works", label: "Works", icon: Image },
+      { href: "/admin/flipbooks", label: "Flipbooks", icon: BookOpenCheck },
+    ],
+  },
+  {
+    title: "DỊCH VỤ",
+    items: [
+      { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
+      { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
+      { href: "/admin/qa", label: "Q&A", icon: HelpCircle },
+    ],
+  },
+  {
+    title: "KHÁCH HÀNG",
+    items: [
+      { href: "/admin/contacts", label: "Liên hệ", icon: Mail, badge: "contacts" },
+      { href: "/admin/subscribers", label: "Subscribers", icon: Users },
+    ],
+  },
+  {
+    title: "HỆ THỐNG",
+    items: [
+      { href: "/admin/media", label: "Media", icon: Folder },
+      { href: "/admin/settings/branding", label: "Thương hiệu", icon: Brush },
+      { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
+    ],
+  },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 interface SidebarProps {
   unreadContacts?: number;
   mobileOpen?: boolean;
@@ -47,33 +90,49 @@ export default function Sidebar({ unreadContacts = 0, mobileOpen, onCloseMobile 
         <p className="text-slate-400 text-xs mt-0.5">Admin Panel</p>
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
-        {menuItems.map((item) => {
-          const active = isActive(item.href, item.exact);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onCloseMobile}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all group ${
-                active
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Icon size={18} className="shrink-0" />
-              <span className="flex-1">{item.label}</span>
-              {item.href === "/admin/contacts" && unreadContacts > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                  {unreadContacts > 99 ? "99+" : unreadContacts}
-                </span>
-              )}
-              {active && <ChevronRight size={14} className="opacity-60" />}
-            </Link>
-          );
-        })}
+      {/* Menu groups */}
+      <nav className="flex-1 px-3 py-3 overflow-y-auto">
+        {menuGroups.map((group, gi) => (
+          <div key={gi} className={gi > 0 ? "mt-5" : ""}>
+            {/* Section header */}
+            {group.title && (
+              <div className="px-3 mb-2 text-[10px] font-bold tracking-[0.12em] text-slate-500 uppercase">
+                {group.title}
+              </div>
+            )}
+
+            {/* Items */}
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const active = isActive(item.href, item.exact);
+                const Icon = item.icon;
+                const showBadge = item.badge === "contacts" && unreadContacts > 0;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onCloseMobile}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all group ${
+                      active
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "text-slate-300 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    <span className="flex-1">{item.label}</span>
+                    {showBadge && (
+                      <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        {unreadContacts > 99 ? "99+" : unreadContacts}
+                      </span>
+                    )}
+                    {active && <ChevronRight size={14} className="opacity-60" />}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Logout */}

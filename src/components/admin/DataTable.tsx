@@ -55,23 +55,46 @@ export default function DataTable<T extends { id: string }>({
     }, row);
   };
 
+  // Client-side search: when no onSearch callback is provided, filter locally
+  const searched = useMemo(() => {
+    if (onSearch || !search.trim()) return data;
+    const q = search.toLowerCase();
+    return data.filter((row) =>
+      columns.some((col) => {
+        const val = getValue(row, String(col.key));
+        return val != null && String(val).toLowerCase().includes(q);
+      })
+    );
+  }, [data, search, onSearch, columns]);
+
+  // Sort
   const sorted = useMemo(() => {
-    if (!sortKey || onPageChange) return data; // server-side sorting
-    return [...data].sort((a, b) => {
+    if (!sortKey || onPageChange) return searched;
+    return [...searched].sort((a, b) => {
       const av = getValue(a, sortKey);
       const bv = getValue(b, sortKey);
+      const numA = Number(av);
+      const numB = Number(bv);
+      // Numeric sort if both are numbers
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return sortDir === "asc" ? numA - numB : numB - numA;
+      }
       const cmp = String(av ?? "").localeCompare(String(bv ?? ""));
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [data, sortKey, sortDir, onPageChange]);
+  }, [searched, sortKey, sortDir, onPageChange]);
+
+  const resultCount = searched.length;
+  const totalCount = data.length;
+  const isFiltered = !onSearch && search.trim() && resultCount !== totalCount;
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Toolbar */}
       {(searchable || filters) && (
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           {searchable && (
-            <div className="relative flex-1">
+            <div className="relative flex-1 min-w-0">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text" value={search}
@@ -81,7 +104,11 @@ export default function DataTable<T extends { id: string }>({
               />
             </div>
           )}
-          {filters && <div className="flex gap-2">{filters}</div>}
+          {filters && <div className="flex gap-2 shrink-0">{filters}</div>}
+          {/* Result count */}
+          <div className="text-xs text-gray-400 shrink-0 self-center">
+            {loading ? "" : isFiltered ? `${resultCount}/${totalCount} kết quả` : `${totalCount} mục`}
+          </div>
         </div>
       )}
 
@@ -121,7 +148,7 @@ export default function DataTable<T extends { id: string }>({
             ) : sorted.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + 1} className="px-4 py-12 text-center text-gray-400 text-sm">
-                  {emptyText}
+                  {search.trim() ? "Không tìm thấy kết quả" : emptyText}
                 </td>
               </tr>
             ) : (

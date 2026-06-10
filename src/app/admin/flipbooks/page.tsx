@@ -41,12 +41,12 @@ export default function FlipbooksPage() {
     { key: "title", label: "Tiêu đề", sortable: true },
     { key: "pdfUrl", label: "File PDF", render: (v) => <a href={String(v)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline text-xs"><ExternalLink size={12} /> PDF</a> },
     { key: "active", label: "Trạng thái", render: (v) => <span className={`text-xs px-2 py-0.5 rounded-full ${v ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"}`}>{v ? "Hiện" : "Ẩn"}</span> },
-    { key: "order", label: "Thứ tự" },
+    { key: "order", label: "Thứ tự", sortable: true },
   ];
 
   return (
-    <AdminShell title="Flipbooks" actions={<Link href="/admin/flipbooks/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
-      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/flipbooks/${r.id}`)} onDelete={setDel} />
+    <AdminShell title={`Flipbooks (${data.length})`} actions={<Link href="/admin/flipbooks/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
+      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/flipbooks/${r.id}`)} onDelete={setDel} searchPlaceholder="Tìm flipbook..." />
       <ConfirmDialog open={!!del} message={`Xóa flipbook "${del?.title}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );

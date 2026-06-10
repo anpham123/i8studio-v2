@@ -45,8 +45,8 @@ export default function CaseStudiesPage() {
   ];
 
   return (
-    <AdminShell title="Case Studies" actions={<Link href="/admin/case-studies/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
-      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/case-studies/${r.id}`)} onDelete={setDel} />
+    <AdminShell title={`Case Studies (${data.length})`} actions={<Link href="/admin/case-studies/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
+      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/case-studies/${r.id}`)} onDelete={setDel} searchPlaceholder="Tìm case study..." />
       <ConfirmDialog open={!!del} message={`Xóa case study "${del?.title}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );

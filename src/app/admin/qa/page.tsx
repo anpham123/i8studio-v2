@@ -40,12 +40,12 @@ export default function QAPage() {
   const cols: Column<QA>[] = [
     { key: "question", label: "Câu hỏi (EN)", sortable: true },
     { key: "questionJa", label: "Câu hỏi (JA)" },
-    { key: "order", label: "Thứ tự" },
+    { key: "order", label: "Thứ tự", sortable: true },
   ];
 
   return (
-    <AdminShell title="Q&A" actions={<Link href="/admin/qa/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
-      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/qa/${r.id}`)} onDelete={setDel} />
+    <AdminShell title={`Q&A (${data.length})`} actions={<Link href="/admin/qa/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
+      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/qa/${r.id}`)} onDelete={setDel} searchPlaceholder="Tìm câu hỏi..." />
       <ConfirmDialog open={!!del} message={`Xóa câu hỏi "${del?.question}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );
