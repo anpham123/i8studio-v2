@@ -1,0 +1,17 @@
+i8studio_app  | ==> Running Prisma DB Push...
+i8studio_app  | Prisma schema loaded from prisma/schema.prisma
+i8studio_app  | Datasource "db": SQLite database "i8studio.db" at "file:/app/prisma/data/i8studio.db"
+i8studio_app  | 
+i8studio_app  | The database is already in sync with the Prisma schema.
+i8studio_app  | 
+i8studio_app  | Running generate... (Use --skip-generate to skip the generators)
+i8studio_app  | Error: Can't write to /usr/local/lib/node_modules/prisma please make sure you install "prisma" with the right permissions.
+i8studio_app  | ==> Running Prisma DB Push...
+i8studio_app  | Prisma schema loaded from prisma/schema.prisma
+i8studio_app  | Datasource "db": SQLite database "i8studio.db" at "file:/app/prisma/data/i8studio.db"
+i8studio_app  | 
+i8studio_app  | The database is already in sync with the Prisma schema.
+i8studio_app  | 
+i8studio_app  | Running generate... (Use --skip-generate to skip the generators)
+i8studio_app  | Error: Can't write to /usr/local/lib/node_modules/prisma please make sure you install "prisma" with the right permissions.
+i8studio_app  | ==> Running Prisma DB Push...
