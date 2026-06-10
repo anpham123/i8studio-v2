@@ -4,9 +4,6 @@ on:
   push:
     branches: [master]
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     name: Build & Deploy
@@ -47,20 +44,3 @@ jobs:
 
             echo "✅ Deploy complete!"
             docker compose ps
-            echo "🐳 Container logs (last 50 lines):"
-            docker compose logs --tail=50 app
-
-      - name: Fetch app logs from VPS
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no -p 1401 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd ~/i8studio-v2 && docker compose logs --tail=200 app" > app_logs.txt
-
-      - name: Commit and push app logs
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add app_logs.txt
-          git commit -m "chore: update app logs [skip ci]" || exit 0
-          git push origin master
