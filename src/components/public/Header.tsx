@@ -13,7 +13,7 @@ interface HeaderProps {
   headerHeight?: number;
 }
 
-export default function Header({ headerHeight = 76 }: HeaderProps) {
+export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }: HeaderProps) {
   const [, setScrolled]                    = useState(false);
   const [mobileOpen, setMobileOpen]         = useState(false);
   const t        = useTranslations("nav");
@@ -109,10 +109,20 @@ export default function Header({ headerHeight = 76 }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between" style={{ height: headerHeight }}>
 
-          {/* Logo — stacked i ✿ / studio */}
-          <Link href={`/${locale}`} className="flex flex-col shrink-0 leading-[1.1]">
-            <span className="text-[26px] font-normal text-[#111] tracking-tight">i ✿</span>
-            <span className="text-[12px] font-normal text-[#111] tracking-[0.06em]">studio</span>
+          {/* Logo */}
+          <Link href={`/${locale}`} className="flex items-center shrink-0">
+            {logoImage ? (
+              <img
+                src={logoImage}
+                alt="i8 studio logo"
+                style={{ height: logoHeight, width: "auto", objectFit: "contain" }}
+              />
+            ) : (
+              <div className="flex flex-col leading-[1.1]">
+                <span className="text-[26px] font-normal text-[#111] tracking-tight">i ✿</span>
+                <span className="text-[12px] font-normal text-[#111] tracking-[0.06em]">studio</span>
+              </div>
+            )}
           </Link>
 
           {/* Desktop Nav */}

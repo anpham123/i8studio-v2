@@ -79,7 +79,7 @@ export default async function LocaleLayout({
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
       >
         <NextIntlClientProvider messages={messages}>
-          <Header headerHeight={headerHeight} />
+          <Header headerHeight={headerHeight} logoImage={settingsMap.logoImage} logoHeight={parseInt(settingsMap.logoHeight) || 48} />
           <main style={{ paddingTop: headerHeight }}>
             <PageTransition>{children}</PageTransition>
           </main>

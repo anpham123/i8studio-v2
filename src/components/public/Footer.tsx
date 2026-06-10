@@ -68,7 +68,15 @@ export default function Footer({ settings, services }: FooterProps) {
           {/* Col 1: Logo + tagline + social */}
           <div className="col-span-2 lg:col-span-1">
             <Link href={`/${locale}`} className="inline-block mb-3">
-              <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
+              {settings.logoImage ? (
+                <img
+                  src={settings.logoImage}
+                  alt="i8 studio logo"
+                  style={{ height: Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
+                />
+              ) : (
+                <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
+              )}
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed mb-5">
               {t("tagline")}
