@@ -9,7 +9,27 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { Plus } from "lucide-react";
 
-interface Work { id: string; title: string; category: string; order: number; featured: boolean; image: string; }
+const typeMap: Record<string, string> = {
+  still: "Still Image",
+  animation: "Animation",
+  composite: "Photo Composite",
+  vr360: "VR 360",
+  walkthrough: "VR Walkthrough",
+  ar: "AR",
+  digital: "Digital Model",
+};
+
+const buildingCategoryMap: Record<string, string> = {
+  residential: "Residential",
+  apartment: "Apartment",
+  resort: "Resort",
+  commercial: "Commercial",
+  office: "Office",
+  public: "Public Facility",
+  urban: "Urban Development",
+};
+
+interface Work { id: string; title: string; category: string; type?: string; buildingCategory?: string; order: number; featured: boolean; image: string; }
 
 export default function WorksPage() {
   const [data, setData] = useState<Work[]>([]);
@@ -42,7 +62,9 @@ export default function WorksPage() {
   const columns: Column<Work>[] = [
     { key: "image", label: "Ảnh", render: (v) => v ? <img src={String(v)} className="w-12 h-10 object-cover rounded" alt="" /> : <div className="w-12 h-10 bg-gray-100 rounded" /> },
     { key: "title", label: "Tên", sortable: true },
-    { key: "category", label: "Loại", render: (v) => <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded">{String(v)}</span> },
+    { key: "category", label: "Danh mục", render: (v) => <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded">{String(v)}</span> },
+    { key: "type", label: "Kiểu hiển thị", render: (v) => <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{typeMap[String(v)] || String(v || "still")}</span> },
+    { key: "buildingCategory", label: "Thể loại", render: (v) => <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">{buildingCategoryMap[String(v)] || String(v || "residential")}</span> },
     { key: "order", label: "Thứ tự", sortable: true },
     { key: "featured", label: "Nổi bật", render: (v) => v ? <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">✓</span> : null },
   ];
