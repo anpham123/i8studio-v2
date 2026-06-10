@@ -4,12 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Type, ImageIcon, CheckCircle2, RotateCcw, Save } from "lucide-react";
+import { Loader2, Type, CheckCircle2, RotateCcw, Save } from "lucide-react";
 
 interface BrandingSettings {
   logoImage: string;
   logoHeight: string;
-  strengthsImage: string;
 }
 
 const HEIGHT_PRESETS = [32, 40, 48, 56, 64, 80, 100];
@@ -26,21 +25,10 @@ async function saveToAPI(patch: Partial<BrandingSettings>): Promise<boolean> {
   return data.success === true;
 }
 
-function ImagePreview({ src, label }: { src: string; label: string }) {
-  if (!src) return null;
-  return (
-    <div className="mt-3 rounded-xl overflow-hidden border border-gray-200" style={{ maxHeight: 120 }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={label} className="w-full object-contain bg-gray-50" style={{ maxHeight: 120 }} />
-    </div>
-  );
-}
-
 export default function BrandingSettingsPage() {
   const [values, setValues] = useState<BrandingSettings>({
     logoImage: "",
     logoHeight: String(DEFAULT_HEIGHT),
-    strengthsImage: "",
   });
   const [loading, setLoading] = useState(true);
   const [savingHeight, setSavingHeight] = useState(false);
@@ -53,7 +41,6 @@ export default function BrandingSettingsPage() {
     setValues({
       logoImage: m.logoImage || "",
       logoHeight: m.logoHeight || String(DEFAULT_HEIGHT),
-      strengthsImage: m.strengthsImage || "",
     });
     setLoading(false);
   }, []);
@@ -75,15 +62,8 @@ export default function BrandingSettingsPage() {
     else toast("Không thể lưu — vui lòng thử lại", "error");
   };
 
-  const handleStrengthsChange = useCallback(async (url: string) => {
-    setValues((v) => ({ ...v, strengthsImage: url }));
-    const ok = await saveToAPI({ strengthsImage: url });
-    if (ok) toast(url ? "Ảnh Strengths đã lưu" : "Đã xoá ảnh Strengths", "success");
-    else toast("Không thể lưu — vui lòng thử lại", "error");
-  }, [toast]);
-
   const resetAll = async () => {
-    const defaults: BrandingSettings = { logoImage: "", logoHeight: String(DEFAULT_HEIGHT), strengthsImage: "" };
+    const defaults: BrandingSettings = { logoImage: "", logoHeight: String(DEFAULT_HEIGHT) };
     setValues(defaults);
     const ok = await saveToAPI(defaults);
     if (ok) toast("Đã khôi phục mặc định", "success");
@@ -124,10 +104,10 @@ export default function BrandingSettingsPage() {
 
           <ImageUpload value={values.logoImage} onChange={handleLogoChange} label="" />
 
-          {/* Live preview against dark header background */}
+          {/* Live preview against white header background */}
           {values.logoImage && (
             <div className="mt-4 rounded-xl overflow-hidden border border-gray-200">
-              <div className="bg-[#0a0a0f]/95 px-6 flex items-center" style={{ height: Math.max(parsedHeight + 16, 56) }}>
+              <div className="bg-white px-6 flex items-center border-b border-gray-100" style={{ height: Math.max(parsedHeight + 16, 56) }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={values.logoImage}
@@ -196,25 +176,6 @@ export default function BrandingSettingsPage() {
           </div>
         </div>
 
-        {/* === Strengths image === */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-1">
-            <ImageIcon size={16} className="text-purple-600" />
-            <h3 className="font-semibold text-gray-800">Ảnh section &quot;Strengths&quot;</h3>
-            {values.strengthsImage && (
-              <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
-                <CheckCircle2 size={12} /> Đang bật
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 mb-4">
-            Thay thế placeholder &quot;Studio Portfolio&quot; ở section Why Choose Us.
-            Tự động lưu khi upload. Để trống để dùng placeholder mặc định.
-          </p>
-          <ImageUpload value={values.strengthsImage} onChange={handleStrengthsChange} label="" />
-          <ImagePreview src={values.strengthsImage} label="Strengths image preview" />
-        </div>
-
         {/* === Info === */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
           <strong>Lưu ý:</strong> Ảnh upload tự động lưu ngay. Kích thước logo cần nhấn{" "}
@@ -241,7 +202,6 @@ export default function BrandingSettingsPage() {
           <div className="mt-3 space-y-1 font-mono">
             <div><span className="text-gray-400">logoImage:</span> {values.logoImage || "(trống)"}</div>
             <div><span className="text-gray-400">logoHeight:</span> {values.logoHeight}</div>
-            <div><span className="text-gray-400">strengthsImage:</span> {values.strengthsImage || "(trống)"}</div>
           </div>
           <button type="button" onClick={fetchSettings} className="mt-3 text-blue-600 underline text-xs">
             Tải lại từ DB

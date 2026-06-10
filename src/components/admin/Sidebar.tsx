@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 
 import { signOut } from "next-auth/react";
 import {
-  LayoutDashboard, FileText, Image, Wrench, MessageSquare, Handshake,
-  BookOpen, HelpCircle, Play, BookOpenCheck, Mail, Users, Folder,
-  Settings, LogOut, X, ChevronRight, Palette, Brush,
+  LayoutDashboard, FileText, Image, Wrench,
+  BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
+  Settings, LogOut, X, ChevronRight, Brush,
 } from "lucide-react";
 
 const menuItems = [
@@ -15,16 +15,12 @@ const menuItems = [
   { href: "/admin/posts", label: "Bài đăng", icon: FileText },
   { href: "/admin/works", label: "Works", icon: Image },
   { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
-  { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquare },
-  { href: "/admin/partners", label: "Đối tác", icon: Handshake },
   { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
   { href: "/admin/qa", label: "Q&A", icon: HelpCircle },
-  { href: "/admin/slides", label: "Slides", icon: Play },
   { href: "/admin/flipbooks", label: "Flipbooks", icon: BookOpenCheck },
   { href: "/admin/contacts", label: "Liên hệ", icon: Mail },
   { href: "/admin/subscribers", label: "Subscribers", icon: Users },
   { href: "/admin/media", label: "Media", icon: Folder },
-  { href: "/admin/settings/background", label: "Giao diện nền", icon: Palette },
   { href: "/admin/settings/branding", label: "Thương hiệu", icon: Brush },
   { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
 ];

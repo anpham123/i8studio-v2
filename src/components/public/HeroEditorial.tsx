@@ -1,82 +1,162 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 /* ------------------------------------------------------------------ */
-/*  Masonry image data                                                 */
+/*  Layout templates for the masonry grid                              */
+/* ------------------------------------------------------------------ */
+const TILE_LAYOUTS = [
+  { span: "col-span-1", aspect: "aspect-[4/3]" },
+  { span: "col-span-2", aspect: "aspect-[16/9]" },
+  { span: "col-span-1", aspect: "aspect-[3/4]" },
+  { span: "col-span-1", aspect: "aspect-[4/3]" },
+  { span: "col-span-1", aspect: "aspect-[1/1]" },
+  { span: "col-span-2", aspect: "aspect-[21/9]" },
+  { span: "col-span-1", aspect: "aspect-[4/3]" },
+  { span: "col-span-1", aspect: "aspect-[3/4]" },
+  { span: "col-span-2", aspect: "aspect-[16/9]" },
+  { span: "col-span-1", aspect: "aspect-[4/3]" },
+  { span: "col-span-1", aspect: "aspect-[1/1]" },
+  { span: "col-span-1", aspect: "aspect-[4/3]" },
+];
+
+/* Fallback palette when no image */
+const PLACEHOLDER_COLORS = [
+  "#c8c2b8", "#b8b0a4", "#a8a498", "#d4cec4",
+  "#bcb8ae", "#c4c0b8", "#d0c8be", "#bab4aa",
+  "#ccc6bc", "#a4a098", "#b0aca2", "#c0bab0",
+];
+
+/* ------------------------------------------------------------------ */
+/*  Props                                                              */
 /* ------------------------------------------------------------------ */
 interface HeroImage {
-  bg: string;
+  url: string;
   alt: string;
-  span: string;        // Tailwind grid span classes
-  aspect: string;      // aspect-ratio class
-  imageUrl?: string;
 }
 
-const heroImages: HeroImage[] = [
-  { bg: "#c8c2b8", alt: "Exterior building",  span: "col-span-1",                aspect: "aspect-[4/3]" },
-  { bg: "#b8b0a4", alt: "Plaza view",         span: "col-span-2",                aspect: "aspect-[16/9]" },
-  { bg: "#a8a498", alt: "Aerial shot",        span: "col-span-1",                aspect: "aspect-[3/4]" },
-  { bg: "#d4cec4", alt: "Pool interior",      span: "col-span-1",                aspect: "aspect-[4/3]" },
-  { bg: "#bcb8ae", alt: "Autumn scene",       span: "col-span-1",                aspect: "aspect-[1/1]" },
-  { bg: "#c4c0b8", alt: "Night scene",        span: "col-span-2",                aspect: "aspect-[21/9]" },
-  { bg: "#d0c8be", alt: "Garden view",        span: "col-span-1",                aspect: "aspect-[4/3]" },
-  { bg: "#bab4aa", alt: "Interior living",    span: "col-span-1",                aspect: "aspect-[3/4]" },
-  { bg: "#ccc6bc", alt: "Residential facade", span: "col-span-2",                aspect: "aspect-[16/9]" },
-  { bg: "#a4a098", alt: "Rooftop view",       span: "col-span-1",                aspect: "aspect-[4/3]" },
-  { bg: "#b0aca2", alt: "Commercial tower",   span: "col-span-1",                aspect: "aspect-[1/1]" },
-  { bg: "#c0bab0", alt: "Urban landscape",    span: "col-span-1",                aspect: "aspect-[4/3]" },
-];
+interface HeroEditorialProps {
+  images?: HeroImage[];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Staggered reveal for each masonry tile                             */
+/* ------------------------------------------------------------------ */
+function MasonryTile({
+  image,
+  layout,
+  index,
+  fallbackColor,
+}: {
+  image?: HeroImage;
+  layout: (typeof TILE_LAYOUTS)[0];
+  index: number;
+  fallbackColor: string;
+}) {
+  const hasImage = image?.url;
+
+  return (
+    <motion.div
+      className={`${layout.span} ${layout.aspect} relative overflow-hidden rounded-sm`}
+      initial={{ opacity: 0, y: 30, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        duration: 0.7,
+        delay: 0.6 + index * 0.06,
+        ease: [0.21, 0.47, 0.32, 0.98],
+      }}
+    >
+      {hasImage ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={image.url}
+          alt={image.alt}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
+          loading={index < 4 ? "eager" : "lazy"}
+        />
+      ) : (
+        <div
+          className="absolute inset-0 transition-transform duration-700 ease-out hover:scale-105"
+          style={{ backgroundColor: fallbackColor }}
+        />
+      )}
+      {/* Subtle hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+    </motion.div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-export default function HeroEditorial() {
+export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
   const t = useTranslations("home");
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Parallax: text moves slightly faster than grid on scroll
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const gridY = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <section className="bg-white">
+    <section ref={sectionRef} className="bg-white relative overflow-hidden">
       {/* ========== TEXT ========== */}
-      <div className="max-w-[900px] mx-auto text-center pt-[88px] pb-12 px-6">
-        {/* Main heading — serif */}
-        <h1 className="font-serif text-[64px] md:text-[72px] font-normal text-[#111] tracking-[0.02em] leading-[1.1] mb-5">
+      <motion.div
+        className="max-w-[900px] mx-auto text-center pt-[88px] pb-12 px-6"
+        style={{ y: textY, opacity: textOpacity }}
+      >
+        <motion.h1
+          className="font-serif text-[56px] sm:text-[64px] md:text-[72px] font-normal text-[#111] tracking-[0.02em] leading-[1.1] mb-5"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+        >
           {t("hero.title")}
-        </h1>
+        </motion.h1>
 
-        {/* Japanese subtitle — serif */}
-        <p className="font-serif text-[28px] md:text-[32px] font-light text-[#222] tracking-[0.12em] mb-8">
+        <motion.p
+          className="font-serif text-[24px] sm:text-[28px] md:text-[32px] font-light text-[#222] tracking-[0.12em] mb-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
+        >
           {t("hero.subtitle")}
-        </p>
+        </motion.p>
 
-        {/* Description */}
-        <p className="text-[14px] text-[#888] leading-[2] max-w-[640px] mx-auto whitespace-pre-line">
+        <motion.p
+          className="text-[14px] text-[#888] leading-[2] max-w-[640px] mx-auto whitespace-pre-line"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+        >
           {t("hero.description")}
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       {/* ========== MASONRY GRID ========== */}
-      <div className="max-w-[1400px] mx-auto px-[60px] pb-16">
+      <motion.div
+        className="max-w-[1400px] mx-auto px-4 sm:px-8 md:px-[60px] pb-20"
+        style={{ y: gridY }}
+      >
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          {heroImages.map((img, i) => (
-            <div
+          {TILE_LAYOUTS.map((layout, i) => (
+            <MasonryTile
               key={i}
-              className={`${img.span} ${img.aspect} relative overflow-hidden rounded-sm`}
-            >
-              <div
-                className="absolute inset-0 transition-transform duration-700 hover:scale-105"
-                style={{
-                  backgroundColor: img.bg,
-                  backgroundImage: img.imageUrl
-                    ? `url(${img.imageUrl})`
-                    : undefined,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              />
-            </div>
+              image={images[i]}
+              layout={layout}
+              index={i}
+              fallbackColor={PLACEHOLDER_COLORS[i]}
+            />
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

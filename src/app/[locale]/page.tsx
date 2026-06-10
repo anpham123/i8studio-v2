@@ -6,7 +6,6 @@ export const revalidate = 0;
 
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";
-import ContactSection from "@/components/public/ContactSection";
 
 export async function generateMetadata({
   params,
@@ -24,11 +23,21 @@ export async function generateMetadata({
 }
 
 export default async function HomePage() {
-  const settings = await prisma.setting.findMany();
-  const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
-
   const orgJsonLd = organizationJsonLd();
   const siteJsonLd = websiteJsonLd();
+
+  // Fetch featured works for hero masonry grid
+  const works = await prisma.work.findMany({
+    where: { image: { not: "" } },
+    orderBy: [{ featured: "desc" }, { order: "asc" }],
+    take: 12,
+    select: { id: true, title: true, image: true },
+  });
+
+  const heroImages = works.map((w) => ({
+    url: w.image,
+    alt: w.title,
+  }));
 
   return (
     <>
@@ -42,10 +51,7 @@ export default async function HomePage() {
       />
 
       {/* Hero */}
-      <HeroEditorial />
-
-      {/* Contact */}
-      <ContactSection settings={settingsMap} />
+      <HeroEditorial images={heroImages} />
     </>
   );
 }
