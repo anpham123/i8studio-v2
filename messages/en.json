@@ -124,9 +124,17 @@
   "insights": {
     "title": "Insights",
     "subtitle": "Our publications and newsletters",
+    "description": "This is a newsletter that brings you the latest updates on i8 STUDIO's projects and activities. We share timely insights, project highlights, expert interviews, and current topics related to 3DCG, Animation, VR & BIM.",
     "readNow": "Read Now",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "subscribe": "Subscribe to our newsletter",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "privacyNote": "The information you provide will be used solely for sending you email newsletters and contacting you with updates from i8 STUDIO. Your information will not be shared with third parties without your consent.",
+    "subscribeButton": "Subscribe",
+    "subscribeSuccess": "Thank you for subscribing!",
+    "subscribeError": "Something went wrong. Please try again."
   },
   "solution": {
     "label": "SOLUTION",
@@ -160,6 +168,33 @@
     "s6": {
       "desc": "Digital 3D models replacing traditional physical models.\nUsable across presentations, reviews, and promotions.",
       "tags": ["3D Model", "Interactive", "Web Compatible"]
+    }
+  },
+  "strengths": {
+    "subtitle": "Why Choose Us",
+    "title": "Our Strengths",
+    "description": "We combine Japanese-standard quality with cost-effective production from Vietnam, giving you the best of both worlds.",
+    "items": {
+      "quality": {
+        "title": "Japanese-Standard Quality",
+        "desc": "Photorealistic renders that meet the highest expectations of Japanese clients."
+      },
+      "price": {
+        "title": "Cost-Effective Pricing",
+        "desc": "30-50% lower costs compared to Japanese domestic studios, without compromising quality."
+      },
+      "communication": {
+        "title": "Seamless Communication",
+        "desc": "Japanese-speaking project managers ensure smooth collaboration."
+      },
+      "nda": {
+        "title": "NDA & Confidentiality",
+        "desc": "We sign NDA for every project and strictly protect your information."
+      },
+      "turnaround": {
+        "title": "Fast Turnaround",
+        "desc": "Dedicated teams deliver on schedule with built-in revision rounds."
+      }
     }
   },
   "common": {

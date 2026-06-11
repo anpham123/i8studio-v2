@@ -7,9 +7,10 @@ interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
   label?: string;
+  aspectHint?: string;
 }
 
-export default function ImageUpload({ value, onChange, label = "Ảnh" }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHint }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +54,7 @@ export default function ImageUpload({ value, onChange, label = "Ảnh" }: ImageU
       <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
       {value ? (
         <div className="relative inline-block">
-          <img src={value} alt="" className="max-h-48 rounded-lg border border-gray-200 object-cover" />
+          <img src={value} alt="" className={`rounded-lg border border-gray-200 object-cover ${aspectHint === "16:9" ? "w-full max-w-md aspect-video" : "max-h-48"}`} />
           <button
             type="button" onClick={() => onChange("")}
             className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"
@@ -81,7 +82,7 @@ export default function ImageUpload({ value, onChange, label = "Ảnh" }: ImageU
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Kéo thả hoặc click để chọn</p>
-                <p className="text-xs mt-0.5">JPG, PNG, WebP · Tối đa 50MB</p>
+                <p className="text-xs mt-0.5">JPG, PNG, WebP · Tối đa 50MB{aspectHint ? ` · Tỷ lệ ${aspectHint}` : ""}</p>
               </div>
             </div>
           )}

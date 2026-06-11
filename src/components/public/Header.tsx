@@ -69,11 +69,12 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
     pathname === href || pathname.startsWith(href + "/");
 
   const navLinks = [
-    { label: t("work"),    href: `/${locale}/works` },
+    { label: t("work"),     href: `/${locale}/works` },
     { label: t("solution"), href: `/${locale}/solution` },
-    { label: t("aboutUs"), href: `/${locale}/about-us` },
-    { label: t("contact"), href: `/${locale}/contact` },
-    { label: t("blogs"),   href: `/${locale}/news` },
+    { label: t("insights"), href: `/${locale}/insights` },
+    { label: t("aboutUs"),  href: `/${locale}/about-us` },
+    { label: t("contact"),  href: `/${locale}/contact` },
+    { label: t("blogs"),    href: `/${locale}/news` },
   ];
 
   const toggleLocale = () => {

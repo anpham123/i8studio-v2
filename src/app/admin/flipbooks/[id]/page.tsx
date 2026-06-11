@@ -89,7 +89,7 @@ export default function EditFlipbookPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <ImageUpload label="Ảnh bìa (tùy chọn)" value={String(form.coverImage || "")} onChange={(url) => set("coverImage", url)} />
+          <ImageUpload label="Ảnh bìa (tỷ lệ 16:9)" value={String(form.coverImage || "")} onChange={(url) => set("coverImage", url)} aspectHint="16:9" />
         </div>
       </div>
       <ConfirmDialog open={showDel} message={`Xóa flipbook "${form.title}"?`} onConfirm={async () => { await fetch(`/api/flipbooks/${id}`, { method: "DELETE" }); router.push("/admin/flipbooks"); }} onCancel={() => setShowDel(false)} />

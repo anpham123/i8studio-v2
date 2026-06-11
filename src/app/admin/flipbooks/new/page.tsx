@@ -85,7 +85,7 @@ export default function NewFlipbookPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <ImageUpload label="Ảnh bìa (tùy chọn)" value={form.coverImage} onChange={(url) => set("coverImage", url)} />
+          <ImageUpload label="Ảnh bìa (tỷ lệ 16:9)" value={form.coverImage} onChange={(url) => set("coverImage", url)} aspectHint="16:9" />
         </div>
       </div>
     </AdminShell>
