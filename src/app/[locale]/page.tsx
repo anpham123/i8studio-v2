@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR: regenerate every 60 seconds
+export const revalidate = 60;
 
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";

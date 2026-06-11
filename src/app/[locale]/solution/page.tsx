@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
 import SolutionContent from "@/components/public/SolutionContent";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR: regenerate every 60 seconds
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,

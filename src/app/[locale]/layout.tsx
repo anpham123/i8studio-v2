@@ -12,8 +12,8 @@ import PageTransition from "@/components/public/PageTransition";
 import { prisma } from "@/lib/prisma";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR: regenerate layout data every 120 seconds
+export const revalidate = 120;
 
 const outfit = Outfit({
   subsets: ["latin"],
