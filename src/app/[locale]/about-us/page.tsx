@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import AboutSection from "@/components/public/AboutSection";
+import WorkflowSection from "@/components/public/WorkflowSection";
 import StatsCounter from "@/components/public/StatsCounter";
 
 export async function generateMetadata({
@@ -23,6 +24,7 @@ export default async function AboutPage({ params }: { params: { locale: string }
   return (
     <div className="min-h-screen">
       <AboutSection locale={locale} showLearnMore={false} />
+      <WorkflowSection />
       <StatsCounter />
     </div>
   );

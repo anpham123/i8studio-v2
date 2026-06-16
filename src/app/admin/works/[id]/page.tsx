@@ -1,14 +1,74 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
+import VideoUpload from "@/components/admin/VideoUpload";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { Save, Trash2, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+/* ------------------------------------------------------------------ */
+/*  Stable sub-components — OUTSIDE the page component to avoid       */
+/*  re-creation on every render (which causes focus loss)             */
+/* ------------------------------------------------------------------ */
+function InputField({
+  value,
+  onChange,
+  label,
+  placeholder,
+  type = "text",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+      />
+    </div>
+  );
+}
+
+function SelectField({
+  value,
+  onChange,
+  label,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  label: string;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+      >
+        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page component                                                     */
+/* ------------------------------------------------------------------ */
 export default function EditWorkPage() {
   const { id } = useParams<{ id: string }>();
   const [form, setForm] = useState<Record<string, string | boolean>>({ type: "still", buildingCategory: "residential" });
@@ -17,7 +77,8 @@ export default function EditWorkPage() {
   const [showDelete, setShowDelete] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
+
+  const set = useCallback((k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v })), []);
 
   useEffect(() => {
     fetch(`/api/works/${id}`).then((r) => r.json()).then((d) => { if (d.data) setForm({ ...d.data, order: String(d.data.order) }); setLoading(false); });
@@ -38,32 +99,6 @@ export default function EditWorkPage() {
   };
 
   if (loading) return <AdminShell title="Chỉnh sửa Work"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
-
-  const InputField = ({ k, label, placeholder, type = "text" }: { k: string; label: string; placeholder?: string; type?: string }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <input
-        type={type}
-        value={String(form[k] || "")}
-        onChange={(e) => set(k, type === "number" ? e.target.value : e.target.value)}
-        placeholder={placeholder}
-        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-      />
-    </div>
-  );
-
-  const SelectField = ({ k, label, options }: { k: string; label: string; options: { value: string; label: string }[] }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <select
-        value={String(form[k] || options[0]?.value || "")}
-        onChange={(e) => set(k, e.target.value)}
-        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
-      >
-        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-    </div>
-  );
 
   return (
     <AdminShell
@@ -93,10 +128,10 @@ export default function EditWorkPage() {
             </h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <InputField k="title" label="Tên (EN)" />
-                <InputField k="titleJa" label="Tên (JA)" />
+                <InputField value={String(form.title || "")} onChange={(v) => set("title", v)} label="Tên (EN)" />
+                <InputField value={String(form.titleJa || "")} onChange={(v) => set("titleJa", v)} label="Tên (JA)" />
               </div>
-              <InputField k="subtitle" label="Subtitle" placeholder="Mô tả ngắn..." />
+              <InputField value={String(form.subtitle || "")} onChange={(v) => set("subtitle", v)} label="Subtitle" placeholder="Mô tả ngắn..." />
             </div>
           </div>
 
@@ -108,13 +143,13 @@ export default function EditWorkPage() {
             </h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <SelectField k="category" label="Danh mục" options={[
+                <SelectField value={String(form.category || "3DCG")} onChange={(v) => set("category", v)} label="Danh mục" options={[
                   { value: "3DCG", label: "3DCG" },
                   { value: "Animation", label: "Animation" },
                   { value: "VR", label: "VR" },
                   { value: "BIM", label: "BIM" },
                 ]} />
-                <SelectField k="type" label="Kiểu hiển thị" options={[
+                <SelectField value={String(form.type || "still")} onChange={(v) => set("type", v)} label="Kiểu hiển thị" options={[
                   { value: "still", label: "Still Image" },
                   { value: "animation", label: "Animation" },
                   { value: "composite", label: "Photo Composite" },
@@ -125,7 +160,7 @@ export default function EditWorkPage() {
                 ]} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <SelectField k="buildingCategory" label="Thể loại kiến trúc" options={[
+                <SelectField value={String(form.buildingCategory || "residential")} onChange={(v) => set("buildingCategory", v)} label="Thể loại kiến trúc" options={[
                   { value: "residential", label: "Residential" },
                   { value: "apartment", label: "Apartment" },
                   { value: "resort", label: "Resort" },
@@ -134,7 +169,7 @@ export default function EditWorkPage() {
                   { value: "public", label: "Public Facility" },
                   { value: "urban", label: "Urban Development" },
                 ]} />
-                <InputField k="order" label="Thứ tự" type="number" />
+                <InputField value={String(form.order || "0")} onChange={(v) => set("order", v)} label="Thứ tự" type="number" />
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <input type="checkbox" id="featured" checked={Boolean(form.featured)} onChange={(e) => set("featured", e.target.checked)} className="rounded border-gray-300" />
@@ -161,7 +196,7 @@ export default function EditWorkPage() {
               <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
               Video
             </h3>
-            <InputField k="videoUrl" label="Video URL" placeholder="https://youtube.com/..." />
+            <VideoUpload label="" value={String(form.videoUrl || "")} onChange={(url) => set("videoUrl", url)} />
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/utils";
 type Props = { params: { locale: string; slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await prisma.post.findUnique({
+  const post = await prisma.post.findFirst({
     where: { slug: params.slug, status: "PUBLISHED", category: "BLOG" },
   });
   if (!post) return {};
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { locale, slug } = params;
-  const post = await prisma.post.findUnique({
+  const post = await prisma.post.findFirst({
     where: { slug, status: "PUBLISHED", category: "BLOG" },
   });
   if (!post) notFound();

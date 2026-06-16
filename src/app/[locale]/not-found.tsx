@@ -10,7 +10,7 @@ export default function NotFound() {
           The page you are looking for does not exist or has been moved.
         </p>
         <Link
-          href="/en"
+          href="/"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-500 hover:to-purple-500 transition-all"
         >
           Back to Home
@@ -19,3 +19,4 @@ export default function NotFound() {
     </main>
   );
 }
+

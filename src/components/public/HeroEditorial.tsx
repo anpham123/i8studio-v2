@@ -5,31 +5,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
 /* ------------------------------------------------------------------ */
-/*  Layout templates for the masonry grid                              */
-/* ------------------------------------------------------------------ */
-const TILE_LAYOUTS = [
-  { span: "col-span-1", aspect: "aspect-[4/3]" },
-  { span: "col-span-2", aspect: "aspect-[16/9]" },
-  { span: "col-span-1", aspect: "aspect-[3/4]" },
-  { span: "col-span-1", aspect: "aspect-[4/3]" },
-  { span: "col-span-1", aspect: "aspect-[1/1]" },
-  { span: "col-span-2", aspect: "aspect-[21/9]" },
-  { span: "col-span-1", aspect: "aspect-[4/3]" },
-  { span: "col-span-1", aspect: "aspect-[3/4]" },
-  { span: "col-span-2", aspect: "aspect-[16/9]" },
-  { span: "col-span-1", aspect: "aspect-[4/3]" },
-  { span: "col-span-1", aspect: "aspect-[1/1]" },
-  { span: "col-span-1", aspect: "aspect-[4/3]" },
-];
-
-/* Fallback palette when no image */
-const PLACEHOLDER_COLORS = [
-  "#c8c2b8", "#b8b0a4", "#a8a498", "#d4cec4",
-  "#bcb8ae", "#c4c0b8", "#d0c8be", "#bab4aa",
-  "#ccc6bc", "#a4a098", "#b0aca2", "#c0bab0",
-];
-
-/* ------------------------------------------------------------------ */
 /*  Props                                                              */
 /* ------------------------------------------------------------------ */
 interface HeroImage {
@@ -41,30 +16,75 @@ interface HeroEditorialProps {
   images?: HeroImage[];
 }
 
+/* Fallback palette when no image */
+const PLACEHOLDER_COLORS = [
+  "#c8c2b8", "#b8b0a4", "#a8a498", "#d4cec4",
+  "#bcb8ae", "#c4c0b8", "#d0c8be", "#bab4aa",
+  "#ccc6bc", "#a4a098", "#b0aca2", "#c0bab0",
+  "#c8c4bc", "#b4b0a8", "#d0cac0",
+];
+
+/*
+ * Masonry layout definition:
+ * Each row defines its items with flex ratios + aspect ratios
+ * to create an editorial, varied-height grid.
+ */
+const MASONRY_ROWS = [
+  // Row 1: 3 items — small portrait | wide landscape | medium
+  [
+    { flex: 1, aspect: "3/4" },
+    { flex: 1.8, aspect: "16/9" },
+    { flex: 1.2, aspect: "4/3" },
+  ],
+  // Row 2: 3 items — medium | square | wide
+  [
+    { flex: 1, aspect: "4/5" },
+    { flex: 1, aspect: "1/1" },
+    { flex: 1.6, aspect: "16/10" },
+  ],
+  // Row 3: 2 items — wide cinematic | portrait
+  [
+    { flex: 2, aspect: "21/9" },
+    { flex: 1, aspect: "3/4" },
+  ],
+  // Row 4: 3 items — square | wide | portrait
+  [
+    { flex: 1, aspect: "1/1" },
+    { flex: 1.8, aspect: "16/9" },
+    { flex: 0.8, aspect: "3/5" },
+  ],
+  // Row 5: 2 items — medium | ultra-wide
+  [
+    { flex: 1.2, aspect: "4/3" },
+    { flex: 1.8, aspect: "2/1" },
+  ],
+];
+
 /* ------------------------------------------------------------------ */
-/*  Staggered reveal for each masonry tile                             */
+/*  Staggered reveal for each tile                                     */
 /* ------------------------------------------------------------------ */
-function MasonryTile({
+function GridTile({
   image,
-  layout,
   index,
   fallbackColor,
+  aspect,
 }: {
   image?: HeroImage;
-  layout: (typeof TILE_LAYOUTS)[0];
   index: number;
   fallbackColor: string;
+  aspect: string;
 }) {
   const hasImage = image?.url;
 
   return (
     <motion.div
-      className={`${layout.span} ${layout.aspect} relative overflow-hidden rounded-sm`}
+      className="relative overflow-hidden rounded-[3px]"
+      style={{ aspectRatio: aspect }}
       initial={{ opacity: 0, y: 30, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
         duration: 0.7,
-        delay: 0.6 + index * 0.06,
+        delay: 0.6 + index * 0.05,
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
     >
@@ -73,8 +93,8 @@ function MasonryTile({
         <img
           src={image.url}
           alt={image.alt}
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-105"
-          loading={index < 4 ? "eager" : "lazy"}
+          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-105"
+          loading={index < 6 ? "eager" : "lazy"}
         />
       ) : (
         <div
@@ -105,8 +125,11 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
   const gridY = useTransform(scrollYProgress, [0, 1], [0, -30]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
+  // Flatten rows to get tile index mapping
+  let tileIndex = 0;
+
   return (
-    <section ref={sectionRef} className="bg-white relative overflow-hidden">
+    <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
       {/* ========== TEXT ========== */}
       <motion.div
         className="max-w-[900px] mx-auto text-center pt-[88px] pb-12 px-6"
@@ -145,16 +168,29 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         className="max-w-[1400px] mx-auto px-4 sm:px-8 md:px-[60px] pb-20"
         style={{ y: gridY }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          {TILE_LAYOUTS.map((layout, i) => (
-            <MasonryTile
-              key={i}
-              image={images[i]}
-              layout={layout}
-              index={i}
-              fallbackColor={PLACEHOLDER_COLORS[i]}
-            />
-          ))}
+        <div className="flex flex-col gap-2">
+          {MASONRY_ROWS.map((row, rowIdx) => {
+            const rowItems = row.map((item) => {
+              const currentIndex = tileIndex;
+              tileIndex++;
+              return { ...item, tileIdx: currentIndex };
+            });
+
+            return (
+              <div key={rowIdx} className="flex gap-2" style={{ alignItems: "stretch" }}>
+                {rowItems.map((item) => (
+                  <div key={item.tileIdx} style={{ flex: item.flex, minWidth: 0 }}>
+                    <GridTile
+                      image={images[item.tileIdx]}
+                      index={item.tileIdx}
+                      fallbackColor={PLACEHOLDER_COLORS[item.tileIdx % PLACEHOLDER_COLORS.length]}
+                      aspect={item.aspect}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </motion.div>
     </section>

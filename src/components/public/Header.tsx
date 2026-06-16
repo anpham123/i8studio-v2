@@ -116,7 +116,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
               <img
                 src={logoImage}
                 alt="i8 studio logo"
-                style={{ height: logoHeight, width: "auto", objectFit: "contain" }}
+                style={{ height: logoHeight, width: "auto", objectFit: "contain", mixBlendMode: "multiply" }}
               />
             ) : (
               <div className="flex flex-col leading-[1.1]">

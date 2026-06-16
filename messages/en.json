@@ -71,6 +71,32 @@
       "2020": "First Japanese client partnerships",
       "2022": "200+ projects completed",
       "2024": "50+ active Japanese clients"
+    },
+    "workflow": {
+      "title": "Workflow",
+      "subtitle": "How we work with you",
+      "steps": [
+        {
+          "title": "Consultation",
+          "description": "Initial discussion of project requirements and goals"
+        },
+        {
+          "title": "Quotation",
+          "description": "Detailed proposal with pricing and timeline"
+        },
+        {
+          "title": "Production",
+          "description": "3D modeling, rendering, and animation work"
+        },
+        {
+          "title": "Review & Revision",
+          "description": "Client feedback and iterative refinement"
+        },
+        {
+          "title": "Delivery",
+          "description": "Final files delivered in required formats"
+        }
+      ]
     }
   },
   "caseStudies": {
@@ -110,7 +136,8 @@
     "responseTime": "We respond within 24 hours",
     "nda": "NDA available upon request",
     "selectService": "Select a service",
-    "workingHours": "Mon-Fri 9:00-18:00 JST"
+    "workingHours": "Mon-Fri 9:00-18:00 JST",
+    "followUs": "Follow us"
   },
   "footer": {
     "tagline": "High-quality CG outsourcing for Japanese architecture market",

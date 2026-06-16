@@ -11,6 +11,7 @@ interface Slide {
   label: string;
   bg: string;
   imageUrl?: string;
+  videoUrl?: string;
 }
 
 interface Section {
@@ -158,7 +159,16 @@ function GallerySlider({ slides }: { slides: Slide[] }) {
             className="min-w-full h-full relative"
             style={{ backgroundColor: slide.bg }}
           >
-            {slide.imageUrl && (
+            {slide.videoUrl ? (
+              <video
+                src={slide.videoUrl}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : slide.imageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={slide.imageUrl}
@@ -166,7 +176,7 @@ function GallerySlider({ slides }: { slides: Slide[] }) {
                 className="absolute inset-0 w-full h-full object-cover"
                 loading={i === 0 ? "eager" : "lazy"}
               />
-            )}
+            ) : null}
             {/* Slide label pill */}
             <span
               className="absolute bottom-[18px] left-[18px] text-[11px] px-3.5 py-[5px] rounded-[20px] z-10"
@@ -243,6 +253,7 @@ interface WorkItem {
   title: string;
   titleJa: string;
   image: string;
+  videoUrl?: string;
 }
 
 interface SolutionContentProps {
@@ -264,6 +275,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         label: locale === "ja" && w.titleJa ? w.titleJa : w.title,
         bg: "#e5e2de",
         imageUrl: w.image,
+        videoUrl: w.videoUrl || undefined,
       }));
     }
     return sec.fallbackSlides;
@@ -346,11 +358,6 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           </div>
         );
 
-        const galleryPanel = (
-          <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-            <GallerySlider slides={slides} />
-          </div>
-        );
 
         return (
           <div
@@ -360,12 +367,18 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
             {isTextLeft ? (
               <>
                 {textPanel}
-                {galleryPanel}
+                <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
+                  <GallerySlider slides={slides} />
+                </div>
               </>
             ) : (
               <>
-                <div className="order-2 lg:order-1">{galleryPanel}</div>
-                <div className="order-1 lg:order-2">{textPanel}</div>
+                <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
+                  <GallerySlider slides={slides} />
+                </div>
+                <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
+                  {textPanel}
+                </div>
               </>
             )}
           </div>

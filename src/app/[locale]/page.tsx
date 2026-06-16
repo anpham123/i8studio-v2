@@ -30,7 +30,7 @@ export default async function HomePage() {
   const works = await prisma.work.findMany({
     where: { image: { not: "" } },
     orderBy: [{ featured: "desc" }, { order: "asc" }],
-    take: 12,
+    take: 15,
     select: { id: true, title: true, image: true },
   });
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
+import VideoUpload from "@/components/admin/VideoUpload";
 import { useToast } from "@/components/admin/Toast";
 import { Save } from "lucide-react";
 
@@ -65,7 +66,7 @@ export default function NewWorkPage() {
               </select>
             </div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Video URL (YouTube embed)</label><input value={form.videoUrl} onChange={(e) => set("videoUrl", e.target.value)} placeholder="https://www.youtube.com/embed/..." className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Video (MP4, WebM, MOV)</label><VideoUpload label="" value={form.videoUrl} onChange={(url) => set("videoUrl", url)} /></div>
           <div className="flex items-center gap-2"><input type="checkbox" id="featured" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} className="rounded" /><label htmlFor="featured" className="text-sm text-gray-700">Nổi bật (hiển thị trên trang chủ)</label></div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

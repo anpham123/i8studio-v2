@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -11,13 +13,37 @@ const schema = z.object({
   message: z.string().min(1).max(5000),
 });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const contacts = await prisma.contactSubmission.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    });
-    return NextResponse.json({ data: contacts });
+    const { searchParams } = req.nextUrl;
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const search = searchParams.get("search") || "";
+    const readFilter = searchParams.get("read"); // "true" | "false" | null
+
+    const where = {
+      ...(search && {
+        OR: [
+          { fullName: { contains: search } },
+          { email: { contains: search } },
+        ],
+      }),
+      ...(readFilter === "true" && { read: true }),
+      ...(readFilter === "false" && { read: false }),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.contactSubmission.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.contactSubmission.count({ where }),
+    ]);
+    return NextResponse.json({ data, total, page, limit });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }

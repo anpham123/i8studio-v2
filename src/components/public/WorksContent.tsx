@@ -94,7 +94,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
   const locale = useLocale();
   const [selectedTypes, setSelectedTypes] = useState<WorkType[]>([]);
   const [selectedCats, setSelectedCats] = useState<WorkCategory[]>([]);
-  const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean; type?: string } | null>(null);
 
   const toggleType = (key: WorkType) =>
     setSelectedTypes((prev) =>
@@ -262,9 +262,9 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                   key={work.id}
                   onClick={() => {
                     if (work.videoUrl) {
-                      setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true });
+                      setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
                     } else if (work.image) {
-                      setLightbox({ src: work.image, alt: work.title });
+                      setLightbox({ src: work.image, alt: work.title, type: work.type });
                     }
                   }}
                   className={`relative overflow-hidden group cursor-pointer ${
@@ -304,6 +304,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
           src={lightbox.src}
           alt={lightbox.alt}
           isVideo={lightbox.isVideo}
+          type={lightbox.type}
           onClose={() => setLightbox(null)}
         />
       )}
