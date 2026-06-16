@@ -114,3 +114,30 @@ export const SettingSchema = z.object({
   key: z.string().min(1),
   value: z.string(),
 });
+
+export const BlogPostSchema = z.object({
+  slug: z.string().min(1).max(500),
+  category: z.string().max(200).optional().default(""),
+  eyebrow: z.string().max(300).optional().default(""),
+  title: z.string().min(1).max(500),
+  titleJp: z.string().max(500).optional().default(""),
+  subtitle: z.string().optional().default(""),
+  heroImage: z.string().optional().default(""),
+  introDropcap: z.string().optional().default(""),
+  introPullquote: z.string().optional().default(""),
+  sections: z.string().optional().default("[]"),
+  comparisonBefore: z.string().optional().default(""),
+  comparisonAfter: z.string().optional().default(""),
+  insightHeading: z.string().optional().default(""),
+  insightBody: z.string().optional().default(""),
+  excerpt: z.string().optional().default(""),
+  coverImage: z.string().optional().default(""),
+  author: z.string().max(200).optional().default(""),
+  authorRole: z.string().max(200).optional().default(""),
+  readTime: z.number().int().optional().default(5),
+  publishedAt: z.string().nullable().optional(),
+  isPublished: z.boolean().optional().default(false),
+  isFeatured: z.boolean().optional().default(false),
+  locale: z.enum(["ja", "en"]).optional().default("ja"),
+});
+

@@ -1,0 +1,106 @@
+import type { SectionData } from "./CheckcamSection";
+
+export default function StageSection({ data }: { data: SectionData }) {
+  return (
+    <section className="bg-[var(--surface)] py-[70px] sm:py-[100px]">
+      <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center ${
+            data.reverse ? "lg:[&>*:first-child]:order-2" : ""
+          }`}
+        >
+          {/* Image column */}
+          <div className="relative">
+            <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm overflow-hidden">
+              {data.image && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={data.image}
+                  alt={data.title.replace(/<[^>]*>/g, "")}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            {data.caption && (
+              <p className="text-[12px] text-[var(--ink-muted)] italic mt-3 leading-relaxed">
+                {data.caption}
+              </p>
+            )}
+          </div>
+
+          {/* Text column */}
+          <div>
+            <div className="font-serif text-[60px] sm:text-[80px] leading-none text-[var(--accent)] opacity-20 font-light mb-4">
+              {data.num}
+            </div>
+
+            <div className="flex items-center gap-3 mb-6">
+              {data.eyebrow && (
+                <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em]">
+                  {data.eyebrow}
+                </span>
+              )}
+              {data.eyebrowBadge && (
+                <span className="bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] px-2 py-1 rounded">
+                  {data.eyebrowBadge}
+                </span>
+              )}
+            </div>
+
+            <h2
+              className="font-serif text-[26px] sm:text-[32px] font-light leading-[1.4] text-[var(--ink)] mb-8"
+              dangerouslySetInnerHTML={{ __html: data.title }}
+            />
+
+            {data.body.map((p, i) => (
+              <p
+                key={i}
+                className="text-[var(--ink-light)] leading-[2] mb-5 text-[14px] sm:text-[15px]"
+                dangerouslySetInnerHTML={{ __html: p }}
+              />
+            ))}
+
+            {data.tags && (
+              <div className="mt-8">
+                {data.tags.ok && data.tags.ok.length > 0 && (
+                  <>
+                    <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
+                      改善された点
+                    </span>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {data.tags.ok.map((t, i) => (
+                        <span
+                          key={i}
+                          className="border border-[var(--accent)]/40 text-[var(--accent)] text-[12px] px-3 py-1 rounded-sm"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {data.tags.ng && data.tags.ng.length > 0 && (
+                  <>
+                    <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
+                      まだ不足している要素
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {data.tags.ng.map((t, i) => (
+                        <span
+                          key={i}
+                          className="border border-red-400/40 text-red-500/70 text-[12px] px-3 py-1 rounded-sm"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -7,6 +7,16 @@
   --text-primary: #111111;
   --text-secondary: #666666;
   --text-muted: #999999;
+
+  /* Blog editorial tokens */
+  --ink: #1a1a1a;
+  --ink-light: #5a5a5a;
+  --ink-muted: #9a9a9a;
+  --surface: #fafaf8;
+  --surface-warm: #f5f3ef;
+  --accent: #b8935a;
+  --accent-light: #e8dcc8;
+  --line: #e2dfd8;
 }
 
 html {

@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Outfit, Cormorant_Garamond } from "next/font/google";
+import { Outfit, Cormorant_Garamond, Noto_Serif_JP } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import "../globals.css";
@@ -25,6 +25,12 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-cormorant",
+});
+
+const notoSerifJP = Noto_Serif_JP({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-noto-serif",
 });
 
 const locales = ["en", "ja"];
@@ -75,7 +81,7 @@ export default async function LocaleLayout({
   return (
     <html lang={params.locale}>
       <body
-        className={`${outfit.variable} ${cormorant.variable} font-sans antialiased`}
+        className={`${outfit.variable} ${cormorant.variable} ${notoSerifJP.variable} font-sans antialiased`}
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
       >
         <NextIntlClientProvider messages={messages}>

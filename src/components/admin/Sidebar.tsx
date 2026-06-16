@@ -36,6 +36,7 @@ const menuGroups: MenuGroup[] = [
     title: "NỘI DUNG",
     items: [
       { href: "/admin/posts", label: "Bài đăng", icon: FileText },
+      { href: "/admin/blog-posts", label: "Blog Posts", icon: BookOpen },
       { href: "/admin/works", label: "Works", icon: Image },
       { href: "/admin/flipbooks", label: "Flipbooks", icon: BookOpenCheck },
     ],

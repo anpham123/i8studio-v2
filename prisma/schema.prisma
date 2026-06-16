@@ -177,3 +177,46 @@ model Flipbook {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+model BlogPost {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+
+  // Hero section
+  category         String   @default("")
+  eyebrow          String   @default("")
+  title            String
+  titleJp          String   @default("")
+  subtitle         String   @default("")
+  heroImage        String   @default("")
+
+  // Intro section
+  introDropcap     String   @default("")
+  introPullquote   String   @default("")
+
+  // Main content sections — stored as JSON array
+  sections         String   @default("[]")
+
+  // Comparison / Insight blocks
+  comparisonBefore String   @default("")
+  comparisonAfter  String   @default("")
+  insightHeading   String   @default("")
+  insightBody      String   @default("")
+
+  // Metadata
+  excerpt          String   @default("")
+  coverImage       String   @default("")
+  author           String   @default("")
+  authorRole       String   @default("")
+  readTime         Int      @default(5)
+  publishedAt      DateTime @default(now())
+  isPublished      Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+
+  // Multilingual
+  locale           String   @default("ja")
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+

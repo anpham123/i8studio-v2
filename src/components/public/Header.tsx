@@ -74,7 +74,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
     { label: t("insights"), href: `/${locale}/insights` },
     { label: t("aboutUs"),  href: `/${locale}/about-us` },
     { label: t("contact"),  href: `/${locale}/contact` },
-    { label: t("blogs"),    href: `/${locale}/news` },
+    { label: t("blogs"),    href: `/${locale}/blogs` },
   ];
 
   const toggleLocale = () => {
