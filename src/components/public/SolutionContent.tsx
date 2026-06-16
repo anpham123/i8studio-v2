@@ -147,7 +147,7 @@ function getYouTubeId(url: string): string | null {
 
 /** Check if URL is a direct video file */
 function isDirectVideo(url: string): boolean {
-  return /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
 }
 
 function GallerySlider({ slides }: { slides: Slide[] }) {
