@@ -160,14 +160,28 @@ function GallerySlider({ slides }: { slides: Slide[] }) {
             style={{ backgroundColor: slide.bg }}
           >
             {slide.videoUrl ? (
-              <video
-                src={slide.videoUrl}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <>
+                {/* Show image as poster while video loads */}
+                {slide.imageUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={slide.imageUrl}
+                    alt={slide.label}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+                <video
+                  src={slide.videoUrl}
+                  poster={slide.imageUrl || undefined}
+                  preload="auto"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ zIndex: 1 }}
+                />
+              </>
             ) : slide.imageUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
