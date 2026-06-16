@@ -36,7 +36,7 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl ffmpeg
 
 # Install Prisma CLI for running migrations at startup
 RUN npm install -g prisma@5.22.0
