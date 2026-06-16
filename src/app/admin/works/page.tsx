@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminShell from "@/components/admin/AdminShell";
@@ -32,12 +32,87 @@ const buildingCategoryMap: Record<string, string> = {
 
 interface Work { id: string; title: string; category: string; type?: string; buildingCategory?: string; order: number; featured: boolean; image: string; }
 
+/* ------------------------------------------------------------------ */
+/*  Sliding pill tab bar                                                */
+/* ------------------------------------------------------------------ */
+function TabBar({
+  tabs,
+  active,
+  counts,
+  total,
+  onChange,
+}: {
+  tabs: typeof TYPE_TABS;
+  active: string;
+  counts: Record<string, number>;
+  total: number;
+  onChange: (key: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [pill, setPill] = useState({ left: 0, width: 0 });
+
+  // Measure the active tab and slide the pill indicator
+  useLayoutEffect(() => {
+    const activeEl = tabRefs.current.get(active);
+    const container = containerRef.current;
+    if (activeEl && container) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeEl.getBoundingClientRect();
+      setPill({
+        left: tabRect.left - containerRect.left,
+        width: tabRect.width,
+      });
+    }
+  }, [active]);
+
+  return (
+    <div ref={containerRef} className="relative flex flex-wrap gap-1 mb-5">
+      {/* Sliding pill background */}
+      <div
+        className="absolute top-0 h-full rounded-full bg-blue-600 shadow-sm pointer-events-none"
+        style={{
+          left: pill.left,
+          width: pill.width,
+          transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      />
+
+      {tabs.map((tab) => {
+        const count = tab.key ? (counts[tab.key] || 0) : total;
+        const isActive = active === tab.key;
+        return (
+          <button
+            key={tab.key}
+            ref={(el) => { if (el) tabRefs.current.set(tab.key, el); }}
+            onClick={() => onChange(tab.key)}
+            className={`relative z-10 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${
+              isActive
+                ? "text-white"
+                : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+            }`}
+          >
+            {tab.label}
+            <span className={`ml-1.5 transition-colors duration-200 ${isActive ? "text-blue-200" : "text-gray-400"}`}>
+              {count}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main page                                                          */
+/* ------------------------------------------------------------------ */
 export default function WorksPage() {
   const [data, setData] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Work | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -59,6 +134,20 @@ export default function WorksPage() {
     setDeleteTarget(null);
     setDeleting(false);
     fetchData();
+  };
+
+  // Smooth tab switch with fade transition
+  const handleTabChange = (key: string) => {
+    if (key === typeFilter) return;
+    setTransitioning(true);
+    // Short fade-out, then switch, then fade-in
+    setTimeout(() => {
+      setTypeFilter(key);
+      // Allow DOM to update, then fade in
+      requestAnimationFrame(() => {
+        setTransitioning(false);
+      });
+    }, 150);
   };
 
   // Filter by type tab
@@ -100,43 +189,38 @@ export default function WorksPage() {
     <AdminShell
       title={`Works (${filteredData.length})`}
       actions={
-        <Link href="/admin/works/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+        <Link href="/admin/works/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
           <Plus size={16} /> Thêm mới
         </Link>
       }
     >
-      {/* Type filter tabs */}
-      <div className="flex flex-wrap gap-1.5 mb-5">
-        {TYPE_TABS.map((tab) => {
-          const count = tab.key ? (typeCounts[tab.key] || 0) : data.length;
-          const active = typeFilter === tab.key;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setTypeFilter(tab.key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                active
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {tab.label}
-              <span className={`ml-1.5 ${active ? "text-blue-200" : "text-gray-400"}`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      {/* Sliding tab bar */}
+      <TabBar
+        tabs={TYPE_TABS}
+        active={typeFilter}
+        counts={typeCounts}
+        total={data.length}
+        onChange={handleTabChange}
+      />
+
+      {/* Content with fade transition */}
+      <div
+        className="transition-all duration-200 ease-out"
+        style={{
+          opacity: transitioning ? 0 : 1,
+          transform: transitioning ? "translateY(6px)" : "translateY(0)",
+        }}
+      >
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          loading={loading}
+          onEdit={(r) => router.push(`/admin/works/${r.id}`)}
+          onDelete={setDeleteTarget}
+          searchPlaceholder="Tìm work..."
+        />
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        loading={loading}
-        onEdit={(r) => router.push(`/admin/works/${r.id}`)}
-        onDelete={setDeleteTarget}
-        searchPlaceholder="Tìm work..."
-      />
       <ConfirmDialog
         open={!!deleteTarget}
         message={`Xóa "${deleteTarget?.title}"?`}

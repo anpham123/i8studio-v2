@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import DataTable, { Column } from "@/components/admin/DataTable";
@@ -13,6 +13,72 @@ interface Contact { id: string; fullName: string; email: string; service: string
 
 type FilterTab = "all" | "unread" | "read";
 
+/* ------------------------------------------------------------------ */
+/*  Sliding pill tab bar                                                */
+/* ------------------------------------------------------------------ */
+function TabBar({
+  tabs,
+  active,
+  onChange,
+}: {
+  tabs: { key: FilterTab; label: string; count: number; color?: string }[];
+  active: FilterTab;
+  onChange: (key: FilterTab) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [pill, setPill] = useState({ left: 0, width: 0 });
+
+  useLayoutEffect(() => {
+    const activeEl = tabRefs.current.get(active);
+    const container = containerRef.current;
+    if (activeEl && container) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeEl.getBoundingClientRect();
+      setPill({
+        left: tabRect.left - containerRect.left,
+        width: tabRect.width,
+      });
+    }
+  }, [active]);
+
+  const activeTab = tabs.find((t) => t.key === active);
+  const pillColor = activeTab?.key === "unread" ? "bg-blue-600" : "bg-gray-800";
+
+  return (
+    <div ref={containerRef} className="relative flex gap-1 mb-5">
+      {/* Sliding pill */}
+      <div
+        className={`absolute top-0 h-full rounded-full ${pillColor} shadow-sm pointer-events-none`}
+        style={{
+          left: pill.left,
+          width: pill.width,
+          transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s",
+        }}
+      />
+
+      {tabs.map((tab) => {
+        const isActive = active === tab.key;
+        return (
+          <button
+            key={tab.key}
+            ref={(el) => { if (el) tabRefs.current.set(tab.key, el); }}
+            onClick={() => onChange(tab.key)}
+            className={`relative z-10 px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 ${
+              isActive ? "text-white" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+            }`}
+          >
+            {tab.label}
+            <span className={`ml-1.5 transition-colors duration-200 ${isActive ? "opacity-60" : "text-gray-400"}`}>
+              {tab.count}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function ContactsPage() {
   const [data, setData] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +86,7 @@ export default function ContactsPage() {
   const [del, setDel] = useState<Contact | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -57,6 +124,16 @@ export default function ContactsPage() {
     toast(`Đã đánh dấu ${unreadItems.length} liên hệ đã đọc`, "success");
     setMarkingAll(false);
     fetchData();
+  };
+
+  // Smooth tab switch
+  const handleTabChange = (key: FilterTab) => {
+    if (key === filter) return;
+    setTransitioning(true);
+    setTimeout(() => {
+      setFilter(key);
+      requestAnimationFrame(() => setTransitioning(false));
+    }, 150);
   };
 
   const unreadCount = data.filter((c) => !c.read).length;
@@ -110,7 +187,7 @@ export default function ContactsPage() {
           <button
             onClick={markAllRead}
             disabled={markingAll}
-            className="flex items-center gap-2 border border-blue-200 text-blue-600 px-3.5 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 disabled:opacity-50"
+            className="flex items-center gap-2 border border-blue-200 text-blue-600 px-3.5 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 disabled:opacity-50 transition-colors"
           >
             <CheckCheck size={15} />
             {markingAll ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
@@ -118,32 +195,27 @@ export default function ContactsPage() {
         ) : null
       }
     >
-      {/* Filter tabs */}
-      <div className="flex gap-1.5 mb-5">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              filter === tab.key
-                ? tab.key === "unread" ? "bg-blue-600 text-white" : "bg-gray-800 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {tab.label}
-            <span className={`ml-1.5 ${filter === tab.key ? "opacity-60" : "text-gray-400"}`}>{tab.count}</span>
-          </button>
-        ))}
+      {/* Sliding tab bar */}
+      <TabBar tabs={filterTabs} active={filter} onChange={handleTabChange} />
+
+      {/* Content with fade transition */}
+      <div
+        className="transition-all duration-200 ease-out"
+        style={{
+          opacity: transitioning ? 0 : 1,
+          transform: transitioning ? "translateY(6px)" : "translateY(0)",
+        }}
+      >
+        <DataTable
+          columns={cols}
+          data={filteredData}
+          loading={loading}
+          onEdit={(r) => router.push(`/admin/contacts/${r.id}`)}
+          onDelete={setDel}
+          searchPlaceholder="Tìm liên hệ..."
+        />
       </div>
 
-      <DataTable
-        columns={cols}
-        data={filteredData}
-        loading={loading}
-        onEdit={(r) => router.push(`/admin/contacts/${r.id}`)}
-        onDelete={setDel}
-        searchPlaceholder="Tìm liên hệ..."
-      />
       <ConfirmDialog open={!!del} message={`Xóa liên hệ "${del?.fullName}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );
