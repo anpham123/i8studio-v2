@@ -128,6 +128,28 @@ const SECTIONS: Section[] = [
 /* ------------------------------------------------------------------ */
 /*  Gallery Slider (self-contained per section)                        */
 /* ------------------------------------------------------------------ */
+
+/** Extract YouTube video ID from various URL formats */
+function getYouTubeId(url: string): string | null {
+  if (!url) return null;
+  // Handle youtu.be/ID, youtube.com/watch?v=ID, youtube.com/embed/ID
+  const patterns = [
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+/** Check if URL is a direct video file */
+function isDirectVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+}
+
 function GallerySlider({ slides }: { slides: Slide[] }) {
   const [idx, setIdx] = useState(0);
   const total = slides.length;
@@ -153,57 +175,95 @@ function GallerySlider({ slides }: { slides: Slide[] }) {
           transition: "transform 0.45s cubic-bezier(.4,0,.2,1)",
         }}
       >
-        {slides.map((slide, i) => (
-          <div
-            key={i}
-            className="min-w-full h-full relative"
-            style={{ backgroundColor: slide.bg }}
-          >
-            {slide.videoUrl ? (
-              <>
-                {/* Show image as poster while video loads */}
-                {slide.imageUrl && (
+        {slides.map((slide, i) => {
+          const ytId = slide.videoUrl ? getYouTubeId(slide.videoUrl) : null;
+          const directVideo = slide.videoUrl && isDirectVideo(slide.videoUrl);
+
+          return (
+            <div
+              key={i}
+              className="min-w-full h-full relative"
+              style={{ backgroundColor: slide.bg }}
+            >
+              {/* YouTube embed */}
+              {ytId ? (
+                <>
+                  {/* Poster image shown instantly while iframe loads */}
+                  {slide.imageUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={slide.imageUrl}
+                      alt={slide.label}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <iframe
+                    src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full border-0"
+                    style={{ zIndex: 1 }}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    title={slide.label}
+                  />
+                </>
+              ) : directVideo ? (
+                <>
+                  {/* Poster image shown instantly while video buffers */}
+                  {slide.imageUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={slide.imageUrl}
+                      alt={slide.label}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+                  <video
+                    src={slide.videoUrl}
+                    poster={slide.imageUrl || undefined}
+                    preload="auto"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ zIndex: 1 }}
+                  />
+                </>
+              ) : slide.videoUrl ? (
+                /* Non-playable video format (e.g. .mov) — show image only */
+                slide.imageUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={slide.imageUrl}
                     alt={slide.label}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                )}
-                <video
-                  src={slide.videoUrl}
-                  poster={slide.imageUrl || undefined}
-                  preload="auto"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
+                ) : null
+              ) : slide.imageUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={slide.imageUrl}
+                  alt={slide.label}
                   className="absolute inset-0 w-full h-full object-cover"
-                  style={{ zIndex: 1 }}
+                  loading={i === 0 ? "eager" : "lazy"}
                 />
-              </>
-            ) : slide.imageUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={slide.imageUrl}
-                alt={slide.label}
-                className="absolute inset-0 w-full h-full object-cover"
-                loading={i === 0 ? "eager" : "lazy"}
-              />
-            ) : null}
-            {/* Slide label pill */}
-            <span
-              className="absolute bottom-[18px] left-[18px] text-[11px] px-3.5 py-[5px] rounded-[20px] z-10"
-              style={{
-                background: "rgba(255,255,255,0.92)",
-                color: "#555",
-                border: "0.5px solid #ddd",
-              }}
-            >
-              {slide.label}
-            </span>
-          </div>
-        ))}
+              ) : null}
+
+              {/* Slide label pill */}
+              <span
+                className="absolute bottom-[18px] left-[18px] text-[11px] px-3.5 py-[5px] rounded-[20px] z-10"
+                style={{
+                  background: "rgba(255,255,255,0.92)",
+                  color: "#555",
+                  border: "0.5px solid #ddd",
+                }}
+              >
+                {slide.label}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Prev arrow */}
