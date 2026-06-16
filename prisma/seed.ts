@@ -345,6 +345,7 @@ async function main() {
     { key: "socialFacebook", value: "" },
     { key: "socialInstagram", value: "" },
     { key: "socialLinkedin", value: "" },
+    { key: "socialYoutube", value: "" },
   ];
 
   for (const setting of settings) {

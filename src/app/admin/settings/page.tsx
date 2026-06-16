@@ -40,6 +40,7 @@ const SETTING_GROUPS: SettingGroup[] = [
       { key: "socialFacebook", label: "Facebook URL", placeholder: "https://facebook.com/..." },
       { key: "socialInstagram", label: "Instagram URL", placeholder: "https://instagram.com/..." },
       { key: "socialLinkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/..." },
+      { key: "socialYoutube", label: "YouTube URL", placeholder: "https://youtube.com/..." },
     ],
   },
 ];
