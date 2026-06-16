@@ -52,12 +52,12 @@ export default function Footer({ settings, services }: FooterProps) {
   const locale = useLocale();
 
   const navLinks = [
-    { label: navT("works"),    href: `/${locale}/works` },
-    { label: navT("service"),  href: `/${locale}/service` },
-    { label: navT("aboutUs"),  href: `/${locale}/about-us` },
+    { label: navT("work"),     href: `/${locale}/works` },
+    { label: navT("solution"), href: `/${locale}/solution` },
     { label: navT("insights"), href: `/${locale}/insights` },
-    { label: navT("news"),     href: `/${locale}/news` },
+    { label: navT("aboutUs"),  href: `/${locale}/about-us` },
     { label: navT("contact"),  href: `/${locale}/contact` },
+    { label: navT("blogs"),    href: `/${locale}/blogs` },
   ];
 
   return (
