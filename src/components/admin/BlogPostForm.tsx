@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/admin/Toast";
 import { slugify } from "@/lib/utils";
-import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2 } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
+import RichEditor from "@/components/admin/RichEditor";
 
 interface Section {
   type: "checkcam" | "stage" | "insight" | "comparison";
@@ -17,6 +18,7 @@ interface Section {
   image: string;
   reverse: boolean;
   caption: string;
+  additionalImages: string[];
   tags: { label: string; ok: string[]; ng: string[] };
   grid: { label: string; image: string }[];
 }
@@ -31,6 +33,7 @@ const emptySection = (): Section => ({
   image: "",
   reverse: false,
   caption: "",
+  additionalImages: [],
   tags: { label: "", ok: [], ng: [] },
   grid: [],
 });
@@ -96,7 +99,11 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
   });
 
   const [sections, setSections] = useState<Section[]>(() => {
-    try { return JSON.parse(initial?.sections || "[]"); } catch { return []; }
+    try {
+      const parsed = JSON.parse(initial?.sections || "[]");
+      // Ensure additionalImages array exists on each section
+      return parsed.map((s: Section) => ({ ...emptySection(), ...s, additionalImages: s.additionalImages || [] }));
+    } catch { return []; }
   });
   const [saving, setSaving] = useState(false);
 
@@ -131,6 +138,23 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
   };
   const addBodyParagraph = (si: number) => {
     setSections((s) => s.map((sec, j) => j === si ? { ...sec, body: [...sec.body, ""] } : sec));
+  };
+  const removeBodyParagraph = (si: number, bi: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si || sec.body.length <= 1) return sec;
+      return { ...sec, body: sec.body.filter((_, k) => k !== bi) };
+    }));
+  };
+
+  // Additional images management
+  const addAdditionalImage = (si: number, url: string) => {
+    setSections((s) => s.map((sec, j) => j === si ? { ...sec, additionalImages: [...(sec.additionalImages || []), url] } : sec));
+  };
+  const removeAdditionalImage = (si: number, imgIdx: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      return { ...sec, additionalImages: (sec.additionalImages || []).filter((_, k) => k !== imgIdx) };
+    }));
   };
 
   const handleSave = async () => {
@@ -206,8 +230,8 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
         <h3 className="text-sm font-bold text-gray-700 mb-4">📖 Intro Section</h3>
         <div className="space-y-4">
           <div>
-            <label className={labelCls}>Dropcap Paragraph (hỗ trợ &lt;strong&gt;)</label>
-            <textarea value={form.introDropcap} onChange={(e) => set("introDropcap", e.target.value)} className={inputCls} rows={4} />
+            <label className={labelCls}>Dropcap Paragraph</label>
+            <RichEditor value={form.introDropcap} onChange={(v) => set("introDropcap", v)} />
           </div>
           <div>
             <label className={labelCls}>Pullquote</label>
@@ -269,21 +293,57 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                 <input value={sec.title} onChange={(e) => updateSection(si, "title", e.target.value)} className={inputCls} />
               </div>
 
-              {/* Body paragraphs */}
+              {/* Body paragraphs — Rich text editor */}
               <div className="mt-3">
                 <label className={labelCls}>Body Paragraphs</label>
                 {sec.body.map((p, bi) => (
-                  <textarea key={bi} value={p} onChange={(e) => updateBody(si, bi, e.target.value)} className={`${inputCls} mb-2`} rows={2} placeholder={`Paragraph ${bi + 1}`} />
+                  <div key={bi} className="mb-3 relative">
+                    <RichEditor value={p} onChange={(v) => updateBody(si, bi, v)} />
+                    {sec.body.length > 1 && (
+                      <button
+                        onClick={() => removeBodyParagraph(si, bi)}
+                        className="absolute -top-1 -right-1 bg-red-100 text-red-500 rounded-full p-0.5 hover:bg-red-200"
+                        title="Xóa paragraph"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
                 ))}
                 <button onClick={() => addBodyParagraph(si)} className="text-xs text-blue-500 hover:text-blue-600">+ Thêm paragraph</button>
               </div>
 
-              {(sec.type === "stage" || sec.type === "checkcam") && (
-                <div className="mt-3">
-                  <label className={labelCls}>Image</label>
-                  <ImageUpload value={sec.image} onChange={(v) => updateSection(si, "image", v)} />
+              {/* Image upload — available for ALL section types */}
+              <div className="mt-3">
+                <label className={labelCls}>
+                  Section Image {sec.type === "stage" && <span className="text-red-500">*</span>}
+                </label>
+                <ImageUpload value={sec.image} onChange={(v) => updateSection(si, "image", v)} />
+              </div>
+
+              {/* Additional images */}
+              <div className="mt-3">
+                <label className={labelCls}>Ảnh bổ sung (Additional Images)</label>
+                <div className="flex flex-wrap gap-3 mb-2">
+                  {(sec.additionalImages || []).map((img, imgIdx) => (
+                    <div key={imgIdx} className="relative w-24 h-20 rounded border border-gray-200 overflow-hidden group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img} alt={`Additional ${imgIdx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => removeAdditionalImage(si, imgIdx)}
+                        className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
+                <ImageUpload
+                  value=""
+                  onChange={(v) => { if (v) addAdditionalImage(si, v); }}
+                  label="Thêm ảnh bổ sung"
+                />
+              </div>
 
               {sec.type === "stage" && (
                 <div className="mt-3 flex items-center gap-2">
@@ -313,7 +373,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
           </div>
           <div>
             <label className={labelCls}>Body</label>
-            <textarea value={form.insightBody} onChange={(e) => set("insightBody", e.target.value)} className={inputCls} rows={4} />
+            <RichEditor value={form.insightBody} onChange={(v) => set("insightBody", v)} />
           </div>
         </div>
       </div>

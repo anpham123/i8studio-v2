@@ -140,3 +140,24 @@ main {
     box-shadow: 0 6px 32px rgba(99, 102, 241, 0.6);
   }
 }
+
+/* Blog rich text content styles */
+.blog-content mark {
+  background-color: #fff3a0;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.blog-content strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.blog-content em {
+  font-style: italic;
+}
+/* Gold accent text from Tiptap color */
+.blog-content span[style*="color: rgb(184, 147, 90)"],
+.blog-content span[style*="color:#b8935a"],
+.blog-content span[style*="color: #b8935a"] {
+  font-weight: 500;
+}
+

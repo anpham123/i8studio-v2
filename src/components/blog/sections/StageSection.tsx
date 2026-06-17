@@ -30,7 +30,7 @@ export default function StageSection({ data }: { data: SectionData }) {
 
           {/* Text column */}
           <div>
-            <div className="font-serif text-[60px] sm:text-[80px] leading-none text-[var(--accent)] opacity-20 font-light mb-4">
+            <div className="font-display text-[60px] sm:text-[80px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
               {data.num}
             </div>
 
@@ -48,17 +48,19 @@ export default function StageSection({ data }: { data: SectionData }) {
             </div>
 
             <h2
-              className="font-serif text-[26px] sm:text-[32px] font-light leading-[1.4] text-[var(--ink)] mb-8"
+              className="font-serif text-[26px] sm:text-[32px] font-medium leading-[1.4] text-[var(--ink)] mb-8"
               dangerouslySetInnerHTML={{ __html: data.title }}
             />
 
-            {data.body.map((p, i) => (
-              <p
-                key={i}
-                className="text-[var(--ink-light)] leading-[2] mb-5 text-[14px] sm:text-[15px]"
-                dangerouslySetInnerHTML={{ __html: p }}
-              />
-            ))}
+            <div className="blog-content">
+              {data.body.map((p, i) => (
+                <p
+                  key={i}
+                  className="text-[var(--ink-light)] leading-[2] mb-5 text-[14px] sm:text-[15px]"
+                  dangerouslySetInnerHTML={{ __html: p }}
+                />
+              ))}
+            </div>
 
             {data.tags && (
               <div className="mt-8">
@@ -100,6 +102,18 @@ export default function StageSection({ data }: { data: SectionData }) {
             )}
           </div>
         </div>
+
+        {/* Additional images */}
+        {data.additionalImages && data.additionalImages.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 mt-12">
+            {data.additionalImages.map((img, i) => (
+              <div key={i} className="aspect-[4/3] rounded-sm overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img} alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

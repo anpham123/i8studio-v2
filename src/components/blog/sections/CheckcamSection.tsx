@@ -8,6 +8,7 @@ export interface SectionData {
   image?: string;
   reverse?: boolean;
   caption?: string;
+  additionalImages?: string[];
   tags?: {
     label?: string;
     ok?: string[];
@@ -22,7 +23,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-12 sm:mb-16">
-          <div className="font-serif text-[80px] sm:text-[120px] leading-none text-[var(--accent)] opacity-30 font-light">
+          <div className="font-display text-[80px] sm:text-[120px] leading-none text-[var(--accent)]/40 font-bold tracking-tight">
             {data.num}
           </div>
           <div className="flex-1">
@@ -39,11 +40,19 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
               )}
             </div>
             <h2
-              className="font-serif text-[28px] sm:text-[36px] font-light leading-[1.4]"
+              className="font-serif text-[28px] sm:text-[36px] font-medium leading-[1.4]"
               dangerouslySetInnerHTML={{ __html: data.title }}
             />
           </div>
         </div>
+
+        {/* Main image (if provided and no grid) */}
+        {data.image && (!data.grid || data.grid.length === 0) && (
+          <div className="relative aspect-[16/9] mb-12 rounded-sm overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={data.image} alt={data.title.replace(/<[^>]*>/g, "")} className="w-full h-full object-cover" />
+          </div>
+        )}
 
         {/* 5-cell grid */}
         {data.grid && data.grid.length > 0 && (
@@ -71,7 +80,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
 
         {/* 2-column body + tags */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-          <div>
+          <div className="blog-content">
             {data.body.map((p, i) => (
               <p
                 key={i}
@@ -119,6 +128,18 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
             </div>
           )}
         </div>
+
+        {/* Additional images */}
+        {data.additionalImages && data.additionalImages.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 mt-12">
+            {data.additionalImages.map((img, i) => (
+              <div key={i} className="aspect-[4/3] rounded-sm overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img} alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
