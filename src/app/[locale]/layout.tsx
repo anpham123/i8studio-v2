@@ -9,6 +9,7 @@ import Footer from "@/components/public/Footer";
 import FloatingCTA from "@/components/public/FloatingCTA";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
 import PageTransition from "@/components/public/PageTransition";
+import PageViewTracker from "@/components/public/PageViewTracker";
 import { prisma } from "@/lib/prisma";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
@@ -92,6 +93,7 @@ export default async function LocaleLayout({
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
           <ExitIntentPopup />
+          <PageViewTracker />
         </NextIntlClientProvider>
       </body>
     </html>

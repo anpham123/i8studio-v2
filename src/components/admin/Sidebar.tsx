@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, FileText, Image, Wrench,
   BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
-  Settings, LogOut, X, ChevronRight, Brush,
+  Settings, LogOut, X, ChevronRight, Brush, BarChart3,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -30,6 +30,7 @@ const menuGroups: MenuGroup[] = [
     title: "",
     items: [
       { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
+      { href: "/admin/analytics", label: "Thống kê truy cập", icon: BarChart3 },
     ],
   },
   {
