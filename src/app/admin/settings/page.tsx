@@ -8,7 +8,7 @@ import { Loader2, Save, Building2, Phone, Globe } from "lucide-react";
 interface SettingGroup {
   title: string;
   icon: React.ElementType;
-  fields: { key: string; label: string; placeholder?: string }[];
+  fields: { key: string; label: string; placeholder?: string; type?: "text" | "textarea" }[];
 }
 
 const SETTING_GROUPS: SettingGroup[] = [
@@ -41,6 +41,39 @@ const SETTING_GROUPS: SettingGroup[] = [
       { key: "socialInstagram", label: "Instagram URL", placeholder: "https://instagram.com/..." },
       { key: "socialLinkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/..." },
       { key: "socialYoutube", label: "YouTube URL", placeholder: "https://youtube.com/..." },
+    ],
+  },
+  {
+    title: "Giới thiệu (About Us) - Nội dung",
+    icon: Building2,
+    fields: [
+      { key: "aboutTitle", label: "Tiêu đề (EN)", placeholder: "About us" },
+      { key: "aboutTitleJa", label: "Tiêu đề (JA)", placeholder: "会社概要" },
+      { key: "aboutDesc1", label: "Mô tả dòng 1 (EN)", type: "textarea" },
+      { key: "aboutDesc1Ja", label: "Mô tả dòng 1 (JA)", type: "textarea" },
+      { key: "aboutDesc2", label: "Mô tả dòng 2 (EN)", type: "textarea" },
+      { key: "aboutDesc2Ja", label: "Mô tả dòng 2 (JA)", type: "textarea" },
+    ],
+  },
+  {
+    title: "Giới thiệu (About Us) - Mốc lịch sử (Milestones)",
+    icon: Globe,
+    fields: [
+      { key: "aboutMilestone1Year", label: "Mốc 1 - Năm", placeholder: "2019" },
+      { key: "aboutMilestone1Text", label: "Mốc 1 - Nội dung (EN)", placeholder: "Founded in Da Nang, Vietnam" },
+      { key: "aboutMilestone1TextJa", label: "Mốc 1 - Nội dung (JA)", placeholder: "ベトナム・ダナンで創業" },
+      
+      { key: "aboutMilestone2Year", label: "Mốc 2 - Năm", placeholder: "2020" },
+      { key: "aboutMilestone2Text", label: "Mốc 2 - Nội dung (EN)", placeholder: "First Japanese client partnerships" },
+      { key: "aboutMilestone2TextJa", label: "Mốc 2 - Nội dung (JA)", placeholder: "日本のクライアントとの取引開始" },
+      
+      { key: "aboutMilestone3Year", label: "Mốc 3 - Năm", placeholder: "2022" },
+      { key: "aboutMilestone3Text", label: "Mốc 3 - Nội dung (EN)", placeholder: "200+ projects completed" },
+      { key: "aboutMilestone3TextJa", label: "Mốc 3 - Nội dung (JA)", placeholder: "200件以上のプロジェクト完了" },
+      
+      { key: "aboutMilestone4Year", label: "Mốc 4 - Năm", placeholder: "2024" },
+      { key: "aboutMilestone4Text", label: "Mốc 4 - Nội dung (EN)", placeholder: "50+ active Japanese clients" },
+      { key: "aboutMilestone4TextJa", label: "Mốc 4 - Nội dung (JA)", placeholder: "50社以上のアクティブな日本のクライアント" },
     ],
   },
 ];
@@ -135,12 +168,22 @@ export default function SettingsPage() {
                 {group.fields.map((field) => (
                   <div key={field.key}>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">{field.label}</label>
-                    <input
-                      value={values[field.key] || ""}
-                      onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
-                      placeholder={field.placeholder}
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-gray-300"
-                    />
+                    {field.type === "textarea" ? (
+                      <textarea
+                        value={values[field.key] || ""}
+                        onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                        placeholder={field.placeholder}
+                        rows={4}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-gray-300 resize-y"
+                      />
+                    ) : (
+                      <input
+                        value={values[field.key] || ""}
+                        onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                        placeholder={field.placeholder}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-gray-300"
+                      />
+                    )}
                   </div>
                 ))}
               </div>

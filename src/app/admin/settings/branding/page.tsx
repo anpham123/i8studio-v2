@@ -9,6 +9,9 @@ import { Loader2, Type, CheckCircle2, RotateCcw, Save } from "lucide-react";
 interface BrandingSettings {
   logoImage: string;
   logoHeight: string;
+  aboutImageTeam: string;
+  aboutImageOffice: string;
+  aboutImageQuality: string;
 }
 
 const HEIGHT_PRESETS = [32, 40, 48, 56, 64, 80, 100];
@@ -29,6 +32,9 @@ export default function BrandingSettingsPage() {
   const [values, setValues] = useState<BrandingSettings>({
     logoImage: "",
     logoHeight: String(DEFAULT_HEIGHT),
+    aboutImageTeam: "",
+    aboutImageOffice: "",
+    aboutImageQuality: "",
   });
   const [loading, setLoading] = useState(true);
   const [savingHeight, setSavingHeight] = useState(false);
@@ -41,6 +47,9 @@ export default function BrandingSettingsPage() {
     setValues({
       logoImage: m.logoImage || "",
       logoHeight: m.logoHeight || String(DEFAULT_HEIGHT),
+      aboutImageTeam: m.aboutImageTeam || "",
+      aboutImageOffice: m.aboutImageOffice || "",
+      aboutImageQuality: m.aboutImageQuality || "",
     });
     setLoading(false);
   }, []);
@@ -54,6 +63,27 @@ export default function BrandingSettingsPage() {
     else toast("Không thể lưu — vui lòng thử lại", "error");
   }, [toast]);
 
+  const handleAboutImageTeamChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, aboutImageTeam: url }));
+    const ok = await saveToAPI({ aboutImageTeam: url });
+    if (ok) toast(url ? "Đã lưu ảnh Our Team" : "Đã xoá ảnh Our Team", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleAboutImageOfficeChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, aboutImageOffice: url }));
+    const ok = await saveToAPI({ aboutImageOffice: url });
+    if (ok) toast(url ? "Đã lưu ảnh Da Nang Office" : "Đã xoá ảnh Da Nang Office", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleAboutImageQualityChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, aboutImageQuality: url }));
+    const ok = await saveToAPI({ aboutImageQuality: url });
+    if (ok) toast(url ? "Đã lưu ảnh Quality First" : "Đã xoá ảnh Quality First", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
   const saveHeight = async () => {
     setSavingHeight(true);
     const ok = await saveToAPI({ logoHeight: values.logoHeight });
@@ -63,7 +93,13 @@ export default function BrandingSettingsPage() {
   };
 
   const resetAll = async () => {
-    const defaults: BrandingSettings = { logoImage: "", logoHeight: String(DEFAULT_HEIGHT) };
+    const defaults: BrandingSettings = {
+      logoImage: "",
+      logoHeight: String(DEFAULT_HEIGHT),
+      aboutImageTeam: "",
+      aboutImageOffice: "",
+      aboutImageQuality: "",
+    };
     setValues(defaults);
     const ok = await saveToAPI(defaults);
     if (ok) toast("Đã khôi phục mặc định", "success");
@@ -176,6 +212,31 @@ export default function BrandingSettingsPage() {
           </div>
         </div>
 
+        {/* === About Us Images === */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
+          <div>
+            <h3 className="font-semibold text-gray-800">Hình ảnh Giới thiệu (About Us)</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Tải lên hình ảnh thực tế cho phần giới thiệu (Our Team, Văn phòng Đà Nẵng, Chất lượng hàng đầu).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Our Team (Ảnh chính)</label>
+              <ImageUpload value={values.aboutImageTeam} onChange={handleAboutImageTeamChange} label="Tải lên ảnh Team" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Da Nang Office</label>
+              <ImageUpload value={values.aboutImageOffice} onChange={handleAboutImageOfficeChange} label="Tải lên ảnh văn phòng" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Quality First</label>
+              <ImageUpload value={values.aboutImageQuality} onChange={handleAboutImageQualityChange} label="Tải lên ảnh chất lượng" />
+            </div>
+          </div>
+        </div>
+
         {/* === Info === */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
           <strong>Lưu ý:</strong> Ảnh upload tự động lưu ngay. Kích thước logo cần nhấn{" "}
@@ -202,6 +263,9 @@ export default function BrandingSettingsPage() {
           <div className="mt-3 space-y-1 font-mono">
             <div><span className="text-gray-400">logoImage:</span> {values.logoImage || "(trống)"}</div>
             <div><span className="text-gray-400">logoHeight:</span> {values.logoHeight}</div>
+            <div><span className="text-gray-400">aboutImageTeam:</span> {values.aboutImageTeam || "(trống)"}</div>
+            <div><span className="text-gray-400">aboutImageOffice:</span> {values.aboutImageOffice || "(trống)"}</div>
+            <div><span className="text-gray-400">aboutImageQuality:</span> {values.aboutImageQuality || "(trống)"}</div>
           </div>
           <button type="button" onClick={fetchSettings} className="mt-3 text-blue-600 underline text-xs">
             Tải lại từ DB

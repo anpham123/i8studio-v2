@@ -3,6 +3,7 @@ import { buildMetadata } from "@/lib/seo";
 import AboutSection from "@/components/public/AboutSection";
 import WorkflowSection from "@/components/public/WorkflowSection";
 import StatsCounter from "@/components/public/StatsCounter";
+import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata({
   params,
@@ -21,9 +22,12 @@ export async function generateMetadata({
 export default async function AboutPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
+  const settings = await prisma.setting.findMany();
+  const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+
   return (
     <div className="min-h-screen">
-      <AboutSection locale={locale} showLearnMore={false} />
+      <AboutSection locale={locale} showLearnMore={false} settings={settingsMap} />
       <WorkflowSection />
       <StatsCounter />
     </div>
