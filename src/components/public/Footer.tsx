@@ -129,7 +129,7 @@ export default function Footer({ settings, services }: FooterProps) {
               {t("services")}
             </h4>
             <ul className="space-y-2.5">
-              {services.slice(0, 6).map((s) => {
+              {services.filter((s) => !s.slug.includes("bim")).slice(0, 6).map((s) => {
                 const name = locale === "ja" ? s.nameJa || s.name : s.name;
                 return (
                   <li key={s.slug}>
