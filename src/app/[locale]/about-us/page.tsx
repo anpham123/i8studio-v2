@@ -29,7 +29,7 @@ export default async function AboutPage({ params }: { params: { locale: string }
     <div className="min-h-screen">
       <AboutSection locale={locale} showLearnMore={false} settings={settingsMap} />
       <WorkflowSection />
-      <StatsCounter />
+      <StatsCounter settings={settingsMap} />
     </div>
   );
 }

@@ -4,16 +4,30 @@ import CountUp from "react-countup";
 import { useInView, motion } from "framer-motion";
 import { useRef } from "react";
 
-const stats = [
+const defaultStats = [
   { value: 200,  suffix: "+", label: "Projects Completed" },
   { value: 50,   suffix: "+", label: "Happy Clients" },
   { value: 2019, suffix: "",  label: "Founded Since" },
   { value: 5,    suffix: "+", label: "Countries Served" },
 ];
 
-export default function StatsCounter() {
+interface StatsCounterProps {
+  settings?: Record<string, string>;
+}
+
+export default function StatsCounter({ settings }: StatsCounterProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  // Build stats from settings or use defaults
+  const stats = defaultStats.map((def, i) => {
+    const idx = i + 1;
+    return {
+      value: parseInt(settings?.[`stat${idx}Value`] || "") || def.value,
+      suffix: settings?.[`stat${idx}Suffix`] ?? def.suffix,
+      label: settings?.[`stat${idx}Label`] || def.label,
+    };
+  });
 
   return (
     <section ref={ref} className="section-noise py-20 bg-white border-y border-gray-100">

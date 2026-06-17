@@ -77,6 +77,27 @@ const SETTING_GROUPS: SettingGroup[] = [
       { key: "aboutMilestone4TextJa", label: "Mốc 4 - Nội dung (JA)", placeholder: "50社以上のアクティブな日本のクライアント" },
     ],
   },
+  {
+    title: "Thống kê (Stats Counter)",
+    icon: Globe,
+    fields: [
+      { key: "stat1Value", label: "Thống kê 1 - Số", placeholder: "200" },
+      { key: "stat1Suffix", label: "Thống kê 1 - Hậu tố", placeholder: "+" },
+      { key: "stat1Label", label: "Thống kê 1 - Nhãn", placeholder: "Projects Completed" },
+
+      { key: "stat2Value", label: "Thống kê 2 - Số", placeholder: "50" },
+      { key: "stat2Suffix", label: "Thống kê 2 - Hậu tố", placeholder: "+" },
+      { key: "stat2Label", label: "Thống kê 2 - Nhãn", placeholder: "Happy Clients" },
+
+      { key: "stat3Value", label: "Thống kê 3 - Số", placeholder: "2019" },
+      { key: "stat3Suffix", label: "Thống kê 3 - Hậu tố", placeholder: "" },
+      { key: "stat3Label", label: "Thống kê 3 - Nhãn", placeholder: "Founded Since" },
+
+      { key: "stat4Value", label: "Thống kê 4 - Số", placeholder: "5" },
+      { key: "stat4Suffix", label: "Thống kê 4 - Hậu tố", placeholder: "+" },
+      { key: "stat4Label", label: "Thống kê 4 - Nhãn", placeholder: "Countries Served" },
+    ],
+  },
 ];
 
 export default function SettingsPage() {
