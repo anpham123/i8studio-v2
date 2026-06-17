@@ -29,6 +29,7 @@ const SETTING_GROUPS: SettingGroup[] = [
       { key: "phone", label: "Số điện thoại", placeholder: "0914 049 090" },
       { key: "address", label: "Địa chỉ (EN)", placeholder: "Da Nang, Vietnam" },
       { key: "addressJa", label: "Địa chỉ (JA)", placeholder: "ベトナム ダナン市" },
+      { key: "workingHours", label: "Giờ làm việc", placeholder: "Mon-Fri 9:00-18:00 JST" },
       { key: "lineUrl", label: "LINE URL", placeholder: "https://line.me/..." },
       { key: "chatworkUrl", label: "Chatwork URL", placeholder: "https://chatwork.com/..." },
     ],

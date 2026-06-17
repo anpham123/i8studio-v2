@@ -200,7 +200,7 @@ export default function ContactSection({ settings }: ContactSectionProps) {
                 {
                   icon: Clock,
                   label: "Working Hours",
-                  value: t("workingHours"),
+                  value: settings.workingHours || t("workingHours"),
                   href: null,
                 },
               ].map((item) => (
