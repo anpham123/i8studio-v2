@@ -30,33 +30,34 @@ const PLACEHOLDER_COLORS = [
  * to create an editorial, varied-height grid.
  */
 const MASONRY_ROWS = [
-  // Row 1: 3 items — small portrait | wide landscape | medium
+  // Row 1: 4 portrait images — 3:5
   [
-    { flex: 1, aspect: "3/4" },
-    { flex: 1.8, aspect: "16/9" },
-    { flex: 1.2, aspect: "4/3" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
   ],
-  // Row 2: 3 items — medium | square | wide
+  // Row 2: 1 wide cinematic — 16:9
   [
-    { flex: 1, aspect: "4/5" },
-    { flex: 1, aspect: "1/1" },
-    { flex: 1.6, aspect: "16/10" },
+    { flex: 1, aspect: "16/9" },
   ],
-  // Row 3: 2 items — wide cinematic | portrait
+  // Row 3: 4 portrait images — 3:5
   [
-    { flex: 2, aspect: "21/9" },
-    { flex: 1, aspect: "3/4" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
   ],
-  // Row 4: 3 items — square | wide | portrait
+  // Row 4: 1 wide cinematic — 16:9
   [
-    { flex: 1, aspect: "1/1" },
-    { flex: 1.8, aspect: "16/9" },
-    { flex: 0.8, aspect: "3/5" },
+    { flex: 1, aspect: "16/9" },
   ],
-  // Row 5: 2 items — medium | ultra-wide
+  // Row 5: 4 portrait images — 3:5
   [
-    { flex: 1.2, aspect: "4/3" },
-    { flex: 1.8, aspect: "2/1" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
   ],
 ];
 
