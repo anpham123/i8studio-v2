@@ -256,44 +256,84 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
           {filtered.length === 0 ? (
             <p className="text-[14px] text-[#999] mt-8">{t("emptyState")}</p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {filtered.map((work) => (
-                <div
-                  key={work.id}
-                  onClick={() => {
-                    if (work.videoUrl) {
-                      setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
-                    } else if (work.image) {
-                      setLightbox({ src: work.image, alt: work.title, type: work.type });
-                    }
-                  }}
-                  className={`relative overflow-hidden group cursor-pointer ${
-                    work.span === "wide"
-                      ? "col-span-2 aspect-[16/10]"
-                      : "col-span-1 aspect-[3/4]"
-                  }`}
-                >
-                  {/* Image */}
-                  <div
-                    className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]"
-                    style={{
-                      backgroundColor: work.bg,
-                      backgroundImage: work.image ? `url(${work.image})` : undefined,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
-                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
-                      <div className="text-white text-[18px] font-semibold tracking-wide">{work.title}</div>
-                      <div className="text-white/70 text-[14px] mt-1.5">
-                        {t(`types.${work.type}`)}
-                      </div>
+            <div className="flex flex-col gap-3">
+              {/* Group items: 4 portrait + 1 wide, repeat */}
+              {Array.from({ length: Math.ceil(filtered.length / 5) }).map((_, groupIdx) => {
+                const start = groupIdx * 5;
+                const portraitItems = filtered.slice(start, start + 4);
+                const wideItem = filtered[start + 4];
+
+                return (
+                  <div key={groupIdx}>
+                    {/* 4 portrait images — 3:5 ratio */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {portraitItems.map((work) => (
+                        <div
+                          key={work.id}
+                          onClick={() => {
+                            if (work.videoUrl) {
+                              setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
+                            } else if (work.image) {
+                              setLightbox({ src: work.image, alt: work.title, type: work.type });
+                            }
+                          }}
+                          className="relative overflow-hidden group cursor-pointer aspect-[3/5]"
+                        >
+                          <div
+                            className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]"
+                            style={{
+                              backgroundColor: work.bg,
+                              backgroundImage: work.image ? `url(${work.image})` : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
+                            <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
+                              <div className="text-white text-[18px] font-semibold tracking-wide">{work.title}</div>
+                              <div className="text-white/70 text-[14px] mt-1.5">
+                                {t(`types.${work.type}`)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
+
+                    {/* 1 wide image — 16:9 ratio */}
+                    {wideItem && (
+                      <div
+                        className="relative overflow-hidden group cursor-pointer aspect-[16/9] mt-3"
+                        onClick={() => {
+                          if (wideItem.videoUrl) {
+                            setLightbox({ src: wideItem.videoUrl, alt: wideItem.title, isVideo: true, type: wideItem.type });
+                          } else if (wideItem.image) {
+                            setLightbox({ src: wideItem.image, alt: wideItem.title, type: wideItem.type });
+                          }
+                        }}
+                      >
+                        <div
+                          className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]"
+                          style={{
+                            backgroundColor: wideItem.bg,
+                            backgroundImage: wideItem.image ? `url(${wideItem.image})` : undefined,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
+                          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
+                            <div className="text-white text-[20px] font-semibold tracking-wide">{wideItem.title}</div>
+                            <div className="text-white/70 text-[14px] mt-1.5">
+                              {t(`types.${wideItem.type}`)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </main>
