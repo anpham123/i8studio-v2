@@ -41,23 +41,11 @@ const MASONRY_ROWS = [
   [
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 3: 4 portrait images — 3:5
-  [
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-  ],
-  // Row 4: 1 wide cinematic — 16:9
+  // Row 3: 3 landscape images — 16:9
   [
     { flex: 1, aspect: "16/9" },
-  ],
-  // Row 5: 4 portrait images — 3:5
-  [
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
   ],
 ];
 
