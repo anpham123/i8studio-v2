@@ -47,6 +47,12 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
   ],
+  // Row 4: 3 landscape images — 16:9
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
 ];
 
 /* ------------------------------------------------------------------ */
