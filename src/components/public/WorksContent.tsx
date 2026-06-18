@@ -284,10 +284,10 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                     }}
                   />
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end p-4">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
-                      <div className="text-white text-[14px] font-medium">{work.title}</div>
-                      <div className="text-white/70 text-[12px] mt-0.5">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
+                      <div className="text-white text-[18px] font-semibold tracking-wide">{work.title}</div>
+                      <div className="text-white/70 text-[14px] mt-1.5">
                         {t(`types.${work.type}`)}
                       </div>
                     </div>
