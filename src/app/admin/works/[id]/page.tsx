@@ -198,6 +198,27 @@ export default function EditWorkPage() {
             </h3>
             <VideoUpload label="" value={String(form.videoUrl || "")} onChange={(url) => set("videoUrl", url)} />
           </div>
+
+          {/* Card: VR360 URL */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full" />
+              VR360 URL
+            </h3>
+            <InputField
+              value={String(form.vrUrl || "")}
+              onChange={(v) => set("vrUrl", v)}
+              label="VR Tour URL (iframe)"
+              placeholder="https://vr.i8studio.vn/360/..."
+            />
+            {form.vrUrl && (
+              <div className="mt-3 text-xs text-gray-500">
+                <a href={String(form.vrUrl)} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                  Mở VR Tour ↗
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -45,6 +45,7 @@ model Work {
   buildingCategory String   @default("residential") // residential | apartment | resort | commercial | office | public | urban
   image            String   @default("")
   videoUrl         String   @default("")           // YouTube embed URL
+  vrUrl            String   @default("")           // VR360 iframe URL (e.g. https://vr.i8studio.vn/360/...)
   order            Int      @default(0)
   featured         Boolean  @default(false)
   createdAt        DateTime @default(now())

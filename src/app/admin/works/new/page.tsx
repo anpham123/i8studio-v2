@@ -9,7 +9,7 @@ import { useToast } from "@/components/admin/Toast";
 import { Save } from "lucide-react";
 
 export default function NewWorkPage() {
-  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", type: "still", buildingCategory: "residential", image: "", videoUrl: "", order: "0", featured: false });
+  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", type: "still", buildingCategory: "residential", image: "", videoUrl: "", vrUrl: "", order: "0", featured: false });
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -67,6 +67,7 @@ export default function NewWorkPage() {
             </div>
           </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Video (MP4, WebM, MOV)</label><VideoUpload label="" value={form.videoUrl} onChange={(url) => set("videoUrl", url)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1.5">VR360 URL (iframe)</label><input value={form.vrUrl} onChange={(e) => set("vrUrl", e.target.value)} placeholder="https://vr.i8studio.vn/360/..." className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" /></div>
           <div className="flex items-center gap-2"><input type="checkbox" id="featured" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} className="rounded" /><label htmlFor="featured" className="text-sm text-gray-700">Nổi bật (hiển thị trên trang chủ)</label></div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

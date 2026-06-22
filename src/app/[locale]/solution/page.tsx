@@ -25,15 +25,15 @@ export default async function SolutionPage() {
   const works = await prisma.work.findMany({
     where: { image: { not: "" } },
     orderBy: { order: "asc" },
-    select: { title: true, titleJa: true, image: true, type: true, videoUrl: true },
+    select: { title: true, titleJa: true, image: true, type: true, videoUrl: true, vrUrl: true },
   });
 
   // Group works by type → { still: [...], animation: [...], ... }
-  const worksByType: Record<string, { title: string; titleJa: string; image: string; videoUrl: string }[]> = {};
+  const worksByType: Record<string, { title: string; titleJa: string; image: string; videoUrl: string; vrUrl?: string }[]> = {};
   for (const w of works) {
     const t = w.type || "still";
     if (!worksByType[t]) worksByType[t] = [];
-    worksByType[t].push({ title: w.title, titleJa: w.titleJa, image: w.image, videoUrl: w.videoUrl });
+    worksByType[t].push({ title: w.title, titleJa: w.titleJa, image: w.image, videoUrl: w.videoUrl, vrUrl: w.vrUrl || undefined });
   }
 
   return (

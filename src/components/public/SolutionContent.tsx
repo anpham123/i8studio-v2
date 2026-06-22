@@ -12,6 +12,7 @@ interface Slide {
   bg: string;
   imageUrl?: string;
   videoUrl?: string;
+  vrUrl?: string;
 }
 
 interface Section {
@@ -150,7 +151,7 @@ function isDirectVideo(url: string): boolean {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
 }
 
-function GallerySlider({ slides, isPanorama = false }: { slides: Slide[]; isPanorama?: boolean }) {
+function GallerySlider({ slides, isPanorama = false, onVrClick }: { slides: Slide[]; isPanorama?: boolean; onVrClick?: (url: string, title: string) => void }) {
   const [idx, setIdx] = useState(0);
   const total = slides.length;
 
@@ -261,6 +262,21 @@ function GallerySlider({ slides, isPanorama = false }: { slides: Slide[]; isPano
               >
                 {slide.label}
               </span>
+
+              {/* VR360 open button */}
+              {slide.vrUrl && onVrClick && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onVrClick(slide.vrUrl!, slide.label); }}
+                  className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium text-white bg-black/70 hover:bg-black/90 backdrop-blur-sm transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 8a2 2 0 012-2h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8z" />
+                    <circle cx="8" cy="12" r="2" />
+                    <circle cx="16" cy="12" r="2" />
+                  </svg>
+                  VR 360°
+                </button>
+              )}
             </div>
           );
         })}
@@ -328,6 +344,7 @@ interface WorkItem {
   titleJa: string;
   image: string;
   videoUrl?: string;
+  vrUrl?: string;
 }
 
 interface SolutionContentProps {
@@ -350,10 +367,14 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         bg: "#e5e2de",
         imageUrl: w.image,
         videoUrl: w.videoUrl || undefined,
+        vrUrl: w.vrUrl || undefined,
       }));
     }
     return sec.fallbackSlides;
   }
+
+  // VR modal state
+  const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
 
   return (
     <div className="bg-white">
@@ -437,13 +458,13 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               <>
                 {textPanel}
                 <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
               </>
             ) : (
               <>
                 <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
                 <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
                   {textPanel}
@@ -470,6 +491,36 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           {t("ctaButton")}
         </Link>
       </div>
+
+      {/* ========== VR360 FULLSCREEN MODAL ========== */}
+      {vrModal && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
+          <div className="relative w-[95vw] h-[90vh] max-w-[1600px]" onClick={(e) => e.stopPropagation()}>
+            {/* Close button */}
+            <button
+              onClick={() => setVrModal(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white text-sm flex items-center gap-1.5 transition-colors z-10"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+              Close
+            </button>
+            {/* Title */}
+            <div className="absolute -top-10 left-0 text-white/70 text-sm">
+              {vrModal.title}
+            </div>
+            {/* Iframe */}
+            <iframe
+              src={vrModal.url}
+              className="w-full h-full rounded-lg border-0"
+              allowFullScreen
+              allow="accelerometer; gyroscope; xr-spatial-tracking"
+              title={vrModal.title}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

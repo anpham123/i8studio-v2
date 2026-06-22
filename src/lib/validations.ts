@@ -25,6 +25,7 @@ export const WorkSchema = z.object({
   buildingCategory: z.enum(["residential", "apartment", "resort", "commercial", "office", "public", "urban"]).default("residential"),
   image: z.string().optional().default(""),
   videoUrl: z.string().optional().default(""),
+  vrUrl: z.string().optional().default(""),
   order: z.number().int().optional().default(0),
   featured: z.boolean().optional().default(false),
 });
