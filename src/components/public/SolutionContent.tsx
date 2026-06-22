@@ -150,7 +150,7 @@ function isDirectVideo(url: string): boolean {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
 }
 
-function GallerySlider({ slides }: { slides: Slide[] }) {
+function GallerySlider({ slides, isPanorama = false }: { slides: Slide[]; isPanorama?: boolean }) {
   const [idx, setIdx] = useState(0);
   const total = slides.length;
 
@@ -245,7 +245,7 @@ function GallerySlider({ slides }: { slides: Slide[] }) {
                 <img
                   src={slide.imageUrl}
                   alt={slide.label}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className={`absolute inset-0 w-full h-full object-cover ${isPanorama ? 'animate-pan-360' : ''}`}
                   loading={i === 0 ? "eager" : "lazy"}
                 />
               ) : null}
@@ -383,24 +383,19 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               isTextLeft ? "lg:border-r-[0.5px] border-[#e8e8e8]" : ""
             }`}
           >
-            <div className="text-[12px] text-[#ccc] tracking-[0.1em] mb-4">
-              {sec.num}
-            </div>
-            <div className="text-[28px] font-light tracking-[0.02em] text-[#111] mb-1">
+            <div className="text-[32px] font-normal tracking-[0.02em] text-[#111] mb-6">
+              <span className="text-[#bbb] mr-2">{sec.num}.</span>
               {sec.titleEn}
             </div>
-            <div className="text-[13px] text-[#999] mb-5">
-              {sec.titleJp}
-            </div>
-            <div className="text-[13px] text-[#666] leading-[2] mb-[22px] whitespace-pre-line">
+            <div className="text-[15px] text-[#444] leading-[2] mb-[22px] whitespace-pre-line">
               {t(sec.descKey)}
             </div>
             <div className="flex flex-wrap gap-1.5 mb-8">
               {(t.raw(sec.tagsKey) as string[]).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] px-3 py-1 rounded-[20px] text-[#888]"
-                  style={{ border: "0.5px solid #ccc" }}
+                  className="text-[12px] px-3.5 py-1.5 rounded-[20px] text-[#555]"
+                  style={{ border: "0.5px solid #bbb" }}
                 >
                   {tag}
                 </span>
@@ -442,13 +437,13 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               <>
                 {textPanel}
                 <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} />
                 </div>
               </>
             ) : (
               <>
                 <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} />
                 </div>
                 <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
                   {textPanel}

@@ -84,7 +84,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
   };
 
   const linkCls = (href: string) =>
-    `px-3 py-2 text-[14px] font-medium transition-all duration-300 relative group ${
+    `px-3 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-all duration-300 relative group ${
       isActive(href) ? "text-[#111]" : "text-gray-500 hover:text-[#111]"
     }`;
 
@@ -120,8 +120,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
               />
             ) : (
               <div className="flex flex-col leading-[1.1]">
-                <span className="text-[26px] font-normal text-[#111] tracking-tight">i ✿</span>
-                <span className="text-[12px] font-normal text-[#111] tracking-[0.06em]">studio</span>
+                <span className="text-[30px] font-medium text-[#111] tracking-tight">i ✿</span>
+                <span className="text-[13px] font-medium text-[#111] tracking-[0.08em]">studio</span>
               </div>
             )}
           </Link>

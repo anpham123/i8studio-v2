@@ -161,3 +161,14 @@ main {
   font-weight: 500;
 }
 
+/* VR360 auto-pan animation */
+@keyframes pan360 {
+  0% { object-position: 0% 50%; }
+  50% { object-position: 100% 50%; }
+  100% { object-position: 0% 50%; }
+}
+
+.animate-pan-360 {
+  animation: pan360 12s ease-in-out infinite;
+  object-fit: cover;
+}

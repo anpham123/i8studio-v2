@@ -288,7 +288,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                               backgroundPosition: "center",
                             }}
                           />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end justify-center pb-10 p-4">
                             <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
                               <div className="text-white text-[18px] font-semibold tracking-wide">{work.title}</div>
                               <div className="text-white/70 text-[14px] mt-1.5">
@@ -321,7 +321,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                             backgroundPosition: "center",
                           }}
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center p-4">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end justify-center pb-10 p-4">
                           <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
                             <div className="text-white text-[20px] font-semibold tracking-wide">{wideItem.title}</div>
                             <div className="text-white/70 text-[14px] mt-1.5">
