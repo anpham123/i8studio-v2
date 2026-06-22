@@ -127,11 +127,11 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
       {/* ========== TEXT ========== */}
       <motion.div
-        className="max-w-[900px] mx-auto text-center pt-[88px] pb-12 px-6"
+        className="max-w-[900px] mx-auto text-center pt-[60px] pb-6 px-6"
         style={{ y: textY, opacity: textOpacity }}
       >
         <motion.h1
-          className="font-serif text-[56px] sm:text-[64px] md:text-[72px] font-normal text-[#111] tracking-[0.02em] leading-[1.1] mb-5"
+          className="font-serif text-[36px] sm:text-[42px] md:text-[48px] font-normal text-[#111] tracking-[0.02em] leading-[1.15] mb-3"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -140,7 +140,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         </motion.h1>
 
         <motion.p
-          className="font-serif text-[24px] sm:text-[28px] md:text-[32px] font-light text-[#222] tracking-[0.12em] mb-8"
+          className="font-serif text-[18px] sm:text-[20px] md:text-[22px] font-light text-[#222] tracking-[0.12em] mb-4"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -149,7 +149,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         </motion.p>
 
         <motion.p
-          className="text-[14px] text-[#888] leading-[2] max-w-[640px] mx-auto whitespace-pre-line"
+          className="text-[13px] text-[#888] leading-[1.8] max-w-[640px] mx-auto whitespace-pre-line"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
