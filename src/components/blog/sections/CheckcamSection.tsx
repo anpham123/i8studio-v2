@@ -19,7 +19,7 @@ export interface SectionData {
 
 export default function CheckcamSection({ data }: { data: SectionData }) {
   return (
-    <section className="bg-[#1a1814] text-white py-[70px] sm:py-[100px]">
+    <section className="bg-[#faf8f3] text-[var(--ink)] py-[70px] sm:py-[100px]">
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-12 sm:mb-16">
@@ -60,7 +60,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
             {data.grid.map((cell, i) => (
               <div
                 key={i}
-                className="relative aspect-[4/3] bg-gradient-to-br from-[#2a2520] to-[#1a1814] border border-white/10 overflow-hidden rounded-sm"
+                className="relative aspect-[4/3] bg-gradient-to-br from-[#f0ede6] to-[#e8e4dc] border border-[var(--line)] overflow-hidden rounded-sm"
               >
                 {cell.image && (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -70,7 +70,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 )}
-                <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 text-[10px] tracking-wider rounded-sm">
+                <div className="absolute top-2 left-2 bg-white/80 text-[var(--ink)] px-2 py-1 text-[10px] tracking-wider rounded-sm">
                   {cell.label}
                 </div>
               </div>
@@ -84,7 +84,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
             {data.body.map((p, i) => (
               <p
                 key={i}
-                className="text-white/70 leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
+                className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                 dangerouslySetInnerHTML={{ __html: p }}
               />
             ))}
@@ -93,7 +93,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
             <div>
               {data.tags.ok && data.tags.ok.length > 0 && (
                 <div className="mb-6">
-                  <span className="text-white/40 text-[11px] uppercase tracking-[0.16em] block mb-3">
+                  <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
                     {data.tags.label || "確認できること"}
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -110,7 +110,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
               )}
               {data.tags.ng && data.tags.ng.length > 0 && (
                 <div>
-                  <span className="text-white/40 text-[11px] uppercase tracking-[0.16em] block mb-3">
+                  <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
                     まだ不足している要素
                   </span>
                   <div className="flex flex-wrap gap-2">

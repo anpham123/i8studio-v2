@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
+import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 /* ------------------------------------------------------------------ */
 /*  Slide & Section data                                               */
@@ -151,7 +152,7 @@ function isDirectVideo(url: string): boolean {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
 }
 
-function GallerySlider({ slides, isPanorama = false, onVrClick }: { slides: Slide[]; isPanorama?: boolean; onVrClick?: (url: string, title: string) => void }) {
+function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrClick }: { slides: Slide[]; isPanorama?: boolean; isComposite?: boolean; onVrClick?: (url: string, title: string) => void }) {
   const [idx, setIdx] = useState(0);
   const total = slides.length;
 
@@ -165,6 +166,58 @@ function GallerySlider({ slides, isPanorama = false, onVrClick }: { slides: Slid
   );
 
   if (total === 0) return null;
+
+  // Composite before/after mode: show pairs as comparison sliders
+  if (isComposite && total >= 2) {
+    const pairIdx = Math.floor(idx / 2) * 2; // snap to pair
+    const beforeSlide = slides[pairIdx];
+    const afterSlide = slides[pairIdx + 1] || slides[pairIdx];
+    const totalPairs = Math.ceil(total / 2);
+    const currentPair = Math.floor(pairIdx / 2);
+
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Before/After comparison */}
+        <BeforeAfterSlider
+          before={beforeSlide.imageUrl || ""}
+          after={afterSlide.imageUrl || ""}
+          beforeLabel={beforeSlide.label}
+          afterLabel={afterSlide.label}
+        />
+
+        {/* Navigation arrows for pairs */}
+        {totalPairs > 1 && (
+          <>
+            <button
+              onClick={() => setIdx(((currentPair - 1 + totalPairs) % totalPairs) * 2)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button
+              onClick={() => setIdx(((currentPair + 1) % totalPairs) * 2)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
+          </>
+        )}
+
+        {/* Dots */}
+        {totalPairs > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+            {Array.from({ length: totalPairs }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i * 2)}
+                className={`w-2 h-2 rounded-full transition-colors ${i === currentPair ? "bg-white" : "bg-white/40"}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -458,13 +511,13 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               <>
                 {textPanel}
                 <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
               </>
             ) : (
               <>
                 <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
+                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
                 <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
                   {textPanel}

@@ -160,7 +160,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
 
       {/* ========== MASONRY GRID ========== */}
       <motion.div
-        className="max-w-[1400px] mx-auto px-4 sm:px-8 md:px-[60px] pb-20"
+        className="w-full px-0 pb-20"
         style={{ y: gridY }}
       >
         <div className="flex flex-col gap-2">

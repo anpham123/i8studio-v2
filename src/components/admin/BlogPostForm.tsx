@@ -181,8 +181,8 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
   return (
     <div className="space-y-6">
-      {/* Save bar */}
-      <div className="flex items-center justify-between">
+      {/* Save bar — sticky at top */}
+      <div className="flex items-center justify-between sticky top-0 z-20 bg-gray-50 -mx-6 px-6 py-3 border-b border-gray-100 -mt-6 mb-2">
         <h2 className="text-lg font-semibold text-gray-800">{isEdit ? "Chỉnh sửa Blog Post" : "Tạo Blog Post mới"}</h2>
         <button
           onClick={handleSave}
@@ -198,9 +198,9 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
       <div className={cardCls}>
         <h3 className="text-sm font-bold text-gray-700 mb-4">🎨 Hero Section</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+          <div className="md:col-span-2">
             <label className={labelCls}>Tiêu đề (hỗ trợ &lt;br&gt;)</label>
-            <input value={form.title} onChange={(e) => set("title", e.target.value)} onBlur={handleTitleBlur} className={inputCls} placeholder="Mastering the Art of<br>Architectural CG" />
+            <textarea value={form.title} onChange={(e) => set("title", e.target.value)} onBlur={handleTitleBlur} className={inputCls} rows={2} placeholder="Mastering the Art of Architectural CG" />
           </div>
           <div>
             <label className={labelCls}>Slug</label>
