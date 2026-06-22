@@ -21,6 +21,7 @@ interface DBWork {
   buildingCategory?: string;
   image: string;
   videoUrl: string;
+  vrUrl?: string;
   order: number;
   featured: boolean;
 }
@@ -34,6 +35,7 @@ interface Work {
   span: "wide" | "narrow";
   image?: string;
   videoUrl?: string;
+  vrUrl?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -95,6 +97,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
   const [selectedTypes, setSelectedTypes] = useState<WorkType[]>([]);
   const [selectedCats, setSelectedCats] = useState<WorkCategory[]>([]);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean; type?: string } | null>(null);
+  const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
 
   const toggleType = (key: WorkType) =>
     setSelectedTypes((prev) =>
@@ -190,6 +193,7 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
         category,
         image: w.image,
         videoUrl: w.videoUrl,
+        vrUrl: w.vrUrl,
         bg: placeholderColors[index % placeholderColors.length],
         span: span as "wide" | "narrow"
       };
@@ -271,7 +275,9 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                         <div
                           key={work.id}
                           onClick={() => {
-                            if (work.videoUrl) {
+                            if (work.vrUrl) {
+                              setVrModal({ url: work.vrUrl, title: work.title });
+                            } else if (work.videoUrl) {
                               setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
                             } else if (work.image) {
                               setLightbox({ src: work.image, alt: work.title, type: work.type });
@@ -305,7 +311,9 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
                       <div
                         className="relative overflow-hidden group cursor-pointer aspect-[16/9] mt-3"
                         onClick={() => {
-                          if (wideItem.videoUrl) {
+                          if (wideItem.vrUrl) {
+                            setVrModal({ url: wideItem.vrUrl, title: wideItem.title });
+                          } else if (wideItem.videoUrl) {
                             setLightbox({ src: wideItem.videoUrl, alt: wideItem.title, isVideo: true, type: wideItem.type });
                           } else if (wideItem.image) {
                             setLightbox({ src: wideItem.image, alt: wideItem.title, type: wideItem.type });
@@ -347,6 +355,31 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
           type={lightbox.type}
           onClose={() => setLightbox(null)}
         />
+      )}
+
+      {/* VR360 Fullscreen Modal */}
+      {vrModal && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
+          <div className="relative w-[95vw] h-[90vh] max-w-[1600px]" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setVrModal(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white text-sm flex items-center gap-1.5 transition-colors z-10"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+              Close
+            </button>
+            <div className="absolute -top-10 left-0 text-white/70 text-sm">{vrModal.title}</div>
+            <iframe
+              src={vrModal.url}
+              className="w-full h-full rounded-lg border-0"
+              allowFullScreen
+              allow="accelerometer; gyroscope; xr-spatial-tracking"
+              title={vrModal.title}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

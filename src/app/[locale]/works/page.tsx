@@ -31,6 +31,7 @@ export default async function WorksPage() {
     buildingCategory: w.buildingCategory,
     image: w.image,
     videoUrl: w.videoUrl,
+    vrUrl: w.vrUrl,
     order: w.order,
     featured: w.featured,
   }));
