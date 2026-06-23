@@ -127,7 +127,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
       {/* ========== TEXT ========== */}
       <motion.div
-        className="max-w-[800px] mx-auto text-center pt-[80px] pb-1 px-6"
+        className="max-w-[800px] mx-auto text-center pt-[70px] pb-0 px-6"
         style={{ y: textY, opacity: textOpacity }}
       >
         <motion.h1
