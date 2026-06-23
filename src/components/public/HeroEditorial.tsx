@@ -127,12 +127,12 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
       {/* ========== TEXT ========== */}
       <motion.div
-        className="max-w-[900px] mx-auto text-center pt-[24px] pb-2 px-6"
+        className="max-w-[800px] mx-auto text-center pt-4 pb-1 px-6"
         style={{ y: textY, opacity: textOpacity }}
       >
         <motion.h1
-          className="font-serif text-[36px] sm:text-[42px] md:text-[48px] font-normal text-[#111] tracking-[0.02em] leading-[1.15] mb-1"
-          initial={{ opacity: 0, y: 40 }}
+          className="font-serif text-[28px] sm:text-[32px] md:text-[36px] font-normal text-[#111] tracking-[0.02em] leading-[1.1] mb-0.5"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
         >
@@ -140,8 +140,8 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         </motion.h1>
 
         <motion.p
-          className="font-serif text-[18px] sm:text-[20px] md:text-[22px] font-light text-[#222] tracking-[0.12em] mb-2"
-          initial={{ opacity: 0, y: 30 }}
+          className="font-serif text-[15px] sm:text-[16px] md:text-[18px] font-light text-[#444] tracking-[0.08em] mb-1.5"
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
         >
@@ -149,8 +149,8 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         </motion.p>
 
         <motion.p
-          className="text-[13px] text-[#888] leading-[1.8] max-w-[640px] mx-auto whitespace-pre-line"
-          initial={{ opacity: 0, y: 20 }}
+          className="text-[12px] text-[#999] leading-[1.7] max-w-[560px] mx-auto whitespace-pre-line"
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
         >
@@ -160,7 +160,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
 
       {/* ========== MASONRY GRID ========== */}
       <motion.div
-        className="w-full px-0 pb-8"
+        className="w-full px-0 pb-4"
         style={{ y: gridY }}
       >
         <div className="flex flex-col gap-2">
