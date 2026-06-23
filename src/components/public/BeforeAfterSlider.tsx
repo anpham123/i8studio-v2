@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface BeforeAfterSliderProps {
   before: string;
@@ -15,9 +15,24 @@ export default function BeforeAfterSlider({
   beforeLabel = "Before",
   afterLabel = "After",
 }: BeforeAfterSliderProps) {
-  const [pos, setPos] = useState(50); // percentage
+  const [pos, setPos] = useState(50);
+  const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+
+  // Measure container width
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    ro.observe(el);
+    setContainerWidth(el.offsetWidth);
+    return () => ro.disconnect();
+  }, []);
 
   const updatePos = useCallback((clientX: number) => {
     if (!containerRef.current) return;
@@ -27,26 +42,46 @@ export default function BeforeAfterSlider({
     setPos(pct);
   }, []);
 
-  const onMouseDown = useCallback(() => { dragging.current = true; }, []);
-  const onMouseUp = useCallback(() => { dragging.current = false; }, []);
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    dragging.current = true;
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    updatePos(e.clientX);
+  }, [updatePos]);
+
+  const onPointerUp = useCallback(() => { dragging.current = false; }, []);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (dragging.current) updatePos(e.clientX);
   }, [updatePos]);
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
-    updatePos(e.touches[0].clientX);
-  }, [updatePos]);
+  // If before and after are the same image, show normal image (no slider)
+  if (!before || !after || before === after) {
+    return (
+      <div className="relative w-full h-full overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={after || before}
+          alt={afterLabel}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <span
+          className="absolute bottom-[18px] left-[18px] text-[11px] px-3.5 py-[5px] rounded-[20px] z-10"
+          style={{ background: "rgba(255,255,255,0.92)", color: "#555", border: "0.5px solid #ddd" }}
+        >
+          {beforeLabel}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
       className="relative w-full h-full select-none cursor-col-resize overflow-hidden"
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-      onMouseMove={onMouseMove}
-      onTouchMove={onTouchMove}
-      onClick={(e) => updatePos(e.clientX)}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerMove={onPointerMove}
+      style={{ touchAction: "none" }}
     >
       {/* After image (bottom layer — full) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -66,20 +101,27 @@ export default function BeforeAfterSlider({
         <img
           src={before}
           alt={beforeLabel}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : "100vw", maxWidth: "none" }}
+          className="absolute inset-0 h-full object-cover"
+          style={{ width: containerWidth > 0 ? `${containerWidth}px` : "100%", maxWidth: "none" }}
           draggable={false}
         />
       </div>
 
       {/* Divider line */}
       <div
-        className="absolute top-0 bottom-0 w-[2px] bg-white shadow-lg z-10"
-        style={{ left: `${pos}%`, transform: "translateX(-50%)" }}
+        className="absolute top-0 bottom-0 w-[3px] z-10"
+        style={{
+          left: `${pos}%`,
+          transform: "translateX(-50%)",
+          background: "white",
+          boxShadow: "0 0 8px rgba(0,0,0,0.4)",
+        }}
       >
         {/* Handle circle */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white flex items-center justify-center"
+          style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.3)" }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2.5" strokeLinecap="round">
             <path d="M8 5l-5 7 5 7" />
             <path d="M16 5l5 7-5 7" />
           </svg>
@@ -88,14 +130,14 @@ export default function BeforeAfterSlider({
 
       {/* Labels */}
       <span
-        className="absolute top-4 left-4 text-[11px] px-3 py-1 rounded-full z-10"
-        style={{ background: "rgba(0,0,0,0.6)", color: "white" }}
+        className="absolute top-4 left-4 text-[11px] font-medium px-3 py-1.5 rounded-full z-10 pointer-events-none"
+        style={{ background: "rgba(0,0,0,0.65)", color: "white", backdropFilter: "blur(4px)" }}
       >
         {beforeLabel}
       </span>
       <span
-        className="absolute top-4 right-4 text-[11px] px-3 py-1 rounded-full z-10"
-        style={{ background: "rgba(0,0,0,0.6)", color: "white" }}
+        className="absolute top-4 right-4 text-[11px] font-medium px-3 py-1.5 rounded-full z-10 pointer-events-none"
+        style={{ background: "rgba(0,0,0,0.65)", color: "white", backdropFilter: "blur(4px)" }}
       >
         {afterLabel}
       </span>
