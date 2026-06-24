@@ -14,6 +14,7 @@ interface HeroImage {
 
 interface HeroEditorialProps {
   images?: HeroImage[];
+  limit?: number;
 }
 
 /* Fallback palette when no image */
@@ -30,24 +31,36 @@ const PLACEHOLDER_COLORS = [
  * to create an editorial, varied-height grid.
  */
 const MASONRY_ROWS = [
-  // Row 1: 4 portrait images — 3:5
+  // Row 1: 4 portrait images — 3:5 (Cumulative: 4)
   [
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
   ],
-  // Row 2: 1 wide cinematic — 16:9
+  // Row 2: 1 wide cinematic — 16:9 (Cumulative: 5)
   [
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 3: 3 landscape images — 16:9
+  // Row 3: 3 landscape images — 16:9 (Cumulative: 8)
   [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 4: 3 landscape images — 16:9
+  // Row 4: 3 landscape images — 16:9 (Cumulative: 11)
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  // Row 5: 3 landscape images — 16:9 (Cumulative: 14)
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  // Row 6: 3 landscape images — 16:9 (Cumulative: 17)
   [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
@@ -106,7 +119,7 @@ function GridTile({
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
+export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorialProps) {
   const t = useTranslations("home");
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -122,6 +135,10 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
 
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
+
+  // Determine active rows based on limit setting
+  const rowCount = limit <= 5 ? 2 : limit <= 8 ? 3 : limit <= 11 ? 4 : limit <= 14 ? 5 : 6;
+  const activeRows = MASONRY_ROWS.slice(0, rowCount);
 
   return (
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
@@ -164,7 +181,7 @@ export default function HeroEditorial({ images = [] }: HeroEditorialProps) {
         style={{ y: gridY }}
       >
         <div className="flex flex-col gap-2">
-          {MASONRY_ROWS.map((row, rowIdx) => {
+          {activeRows.map((row, rowIdx) => {
             const rowItems = row.map((item) => {
               const currentIndex = tileIndex;
               tileIndex++;

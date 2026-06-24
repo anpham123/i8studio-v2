@@ -8,7 +8,13 @@ import { Loader2, Save, Building2, Phone, Globe } from "lucide-react";
 interface SettingGroup {
   title: string;
   icon: React.ElementType;
-  fields: { key: string; label: string; placeholder?: string; type?: "text" | "textarea" }[];
+  fields: {
+    key: string;
+    label: string;
+    placeholder?: string;
+    type?: "text" | "textarea" | "select";
+    options?: { value: string; label: string }[];
+  }[];
 }
 
 const SETTING_GROUPS: SettingGroup[] = [
@@ -96,6 +102,24 @@ const SETTING_GROUPS: SettingGroup[] = [
       { key: "stat4Value", label: "Thống kê 4 - Số", placeholder: "5" },
       { key: "stat4Suffix", label: "Thống kê 4 - Hậu tố", placeholder: "+" },
       { key: "stat4Label", label: "Thống kê 4 - Nhãn", placeholder: "Countries Served" },
+    ],
+  },
+  {
+    title: "Cài đặt trang chủ",
+    icon: Globe,
+    fields: [
+      {
+        key: "homeWorksLimit",
+        label: "Số lượng ảnh hiển thị trang chủ (Masonry Grid)",
+        type: "select",
+        options: [
+          { value: "5", label: "5 ảnh (2 hàng)" },
+          { value: "8", label: "8 ảnh (3 hàng)" },
+          { value: "11", label: "11 ảnh (4 hàng — Mặc định)" },
+          { value: "14", label: "14 ảnh (5 hàng)" },
+          { value: "17", label: "17 ảnh (6 hàng)" },
+        ],
+      },
     ],
   },
 ];
@@ -198,6 +222,17 @@ export default function SettingsPage() {
                         rows={4}
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-gray-300 resize-y"
                       />
+                    ) : field.type === "select" ? (
+                      <select
+                        value={values[field.key] || ""}
+                        onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                      >
+                        <option value="">-- Mặc định --</option>
+                        {field.options?.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
                     ) : (
                       <input
                         value={values[field.key] || ""}

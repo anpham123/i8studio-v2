@@ -26,11 +26,17 @@ export default async function HomePage() {
   const orgJsonLd = organizationJsonLd();
   const siteJsonLd = websiteJsonLd();
 
+  // Fetch homeWorksLimit setting
+  const limitSetting = await prisma.setting.findUnique({
+    where: { key: "homeWorksLimit" },
+  });
+  const limit = limitSetting ? (parseInt(limitSetting.value) || 11) : 11;
+
   // Fetch featured works for hero masonry grid
   const works = await prisma.work.findMany({
     where: { image: { not: "" } },
     orderBy: [{ featured: "desc" }, { order: "asc" }],
-    take: 15,
+    take: limit,
     select: { id: true, title: true, image: true },
   });
 
@@ -51,7 +57,7 @@ export default async function HomePage() {
       />
 
       {/* Hero */}
-      <HeroEditorial images={heroImages} />
+      <HeroEditorial images={heroImages} limit={limit} />
     </>
   );
 }
