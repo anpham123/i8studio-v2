@@ -31,36 +31,93 @@ const PLACEHOLDER_COLORS = [
  * to create an editorial, varied-height grid.
  */
 const MASONRY_ROWS = [
-  // Row 1: 4 portrait images — 3:5 (Cumulative: 4)
+  // Block 1 (Rows 1-6)
   [
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
   ],
-  // Row 2: 1 wide cinematic — 16:9 (Cumulative: 5)
   [
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 3: 3 landscape images — 16:9 (Cumulative: 8)
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  // Row 4: 3 landscape images — 16:9 (Cumulative: 11)
   [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 5: 3 landscape images — 16:9 (Cumulative: 14)
   [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
   ],
-  // Row 6: 3 landscape images — 16:9 (Cumulative: 17)
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+
+  // Block 2 (Rows 7-12)
+  [
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+
+  // Block 3 (Rows 13-18)
+  [
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
   [
     { flex: 1, aspect: "16/9" },
     { flex: 1, aspect: "16/9" },
@@ -136,8 +193,16 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
 
-  // Determine active rows based on limit setting
-  const rowCount = limit <= 5 ? 2 : limit <= 8 ? 3 : limit <= 11 ? 4 : limit <= 14 ? 5 : 6;
+  // Determine active rows dynamically by summing cumulative items until we reach limit
+  let cumulativeItems = 0;
+  let rowCount = 0;
+  for (let i = 0; i < MASONRY_ROWS.length; i++) {
+    cumulativeItems += MASONRY_ROWS[i].length;
+    rowCount = i + 1;
+    if (cumulativeItems >= limit) {
+      break;
+    }
+  }
   const activeRows = MASONRY_ROWS.slice(0, rowCount);
 
   return (
