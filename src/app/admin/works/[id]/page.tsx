@@ -185,10 +185,21 @@ export default function EditWorkPage() {
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              Ảnh đại diện
+              {form.type === "composite" ? "Ảnh sau khi ghép (After)" : "Ảnh đại diện"}
             </h3>
             <ImageUpload label="" value={String(form.image || "")} onChange={(url) => set("image", url)} />
           </div>
+
+          {/* Card: Ảnh Before */}
+          {form.type === "composite" && (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full" />
+                Ảnh trước khi ghép (Before)
+              </h3>
+              <ImageUpload label="" value={String(form.beforeImage || "")} onChange={(url) => set("beforeImage", url)} />
+            </div>
+          )}
 
           {/* Card: Video */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

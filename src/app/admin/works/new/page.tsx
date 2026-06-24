@@ -9,7 +9,7 @@ import { useToast } from "@/components/admin/Toast";
 import { Save } from "lucide-react";
 
 export default function NewWorkPage() {
-  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", type: "still", buildingCategory: "residential", image: "", videoUrl: "", vrUrl: "", order: "0", featured: false });
+  const [form, setForm] = useState({ title: "", titleJa: "", subtitle: "", category: "3DCG", type: "still", buildingCategory: "residential", image: "", beforeImage: "", videoUrl: "", vrUrl: "", order: "0", featured: false });
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -71,8 +71,13 @@ export default function NewWorkPage() {
           <div className="flex items-center gap-2"><input type="checkbox" id="featured" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} className="rounded" /><label htmlFor="featured" className="text-sm text-gray-700">Nổi bật (hiển thị trên trang chủ)</label></div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <ImageUpload label="Ảnh" value={form.image} onChange={(url) => set("image", url)} />
+          <ImageUpload label={form.type === "composite" ? "Ảnh đại diện (After / Sau khi ghép)" : "Ảnh đại diện / Ảnh chính"} value={form.image} onChange={(url) => set("image", url)} />
         </div>
+        {form.type === "composite" && (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <ImageUpload label="Ảnh trước khi ghép (Before)" value={form.beforeImage} onChange={(url) => set("beforeImage", url)} />
+          </div>
+        )}
       </div>
     </AdminShell>
   );

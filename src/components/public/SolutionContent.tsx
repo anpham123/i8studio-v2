@@ -12,6 +12,7 @@ interface Slide {
   label: string;
   bg: string;
   imageUrl?: string;
+  beforeImageUrl?: string;
   videoUrl?: string;
   vrUrl?: string;
 }
@@ -153,6 +154,7 @@ function isDirectVideo(url: string): boolean {
 }
 
 function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrClick }: { slides: Slide[]; isPanorama?: boolean; isComposite?: boolean; onVrClick?: (url: string, title: string) => void }) {
+  const locale = useLocale();
   const [idx, setIdx] = useState(0);
   const total = slides.length;
 
@@ -166,58 +168,6 @@ function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrCl
   );
 
   if (total === 0) return null;
-
-  // Composite before/after mode: show pairs as comparison sliders
-  if (isComposite && total >= 2) {
-    const pairIdx = Math.floor(idx / 2) * 2; // snap to pair
-    const beforeSlide = slides[pairIdx];
-    const afterSlide = slides[pairIdx + 1] || slides[pairIdx];
-    const totalPairs = Math.ceil(total / 2);
-    const currentPair = Math.floor(pairIdx / 2);
-
-    return (
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Before/After comparison */}
-        <BeforeAfterSlider
-          before={beforeSlide.imageUrl || ""}
-          after={afterSlide.imageUrl || ""}
-          beforeLabel={beforeSlide.label}
-          afterLabel={afterSlide.label}
-        />
-
-        {/* Navigation arrows for pairs */}
-        {totalPairs > 1 && (
-          <>
-            <button
-              onClick={() => setIdx(((currentPair - 1 + totalPairs) % totalPairs) * 2)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
-            </button>
-            <button
-              onClick={() => setIdx(((currentPair + 1) % totalPairs) * 2)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow hover:bg-white transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
-            </button>
-          </>
-        )}
-
-        {/* Dots */}
-        {totalPairs > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-            {Array.from({ length: totalPairs }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIdx(i * 2)}
-                className={`w-2 h-2 rounded-full transition-colors ${i === currentPair ? "bg-white" : "bg-white/40"}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -296,12 +246,21 @@ function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrCl
                 ) : null
               ) : slide.imageUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={slide.imageUrl}
-                  alt={slide.label}
-                  className={`absolute inset-0 w-full h-full object-cover ${isPanorama ? 'animate-pan-360' : ''}`}
-                  loading={i === 0 ? "eager" : "lazy"}
-                />
+                isComposite && slide.beforeImageUrl ? (
+                  <BeforeAfterSlider
+                    before={slide.beforeImageUrl}
+                    after={slide.imageUrl}
+                    beforeLabel={locale === "ja" ? "合成前" : "Before"}
+                    afterLabel={locale === "ja" ? "合成後" : "After"}
+                  />
+                ) : (
+                  <img
+                    src={slide.imageUrl}
+                    alt={slide.label}
+                    className={`absolute inset-0 w-full h-full object-cover ${isPanorama ? 'animate-pan-360' : ''}`}
+                    loading={i === 0 ? "eager" : "lazy"}
+                  />
+                )
               ) : null}
 
               {/* Slide label pill */}
@@ -396,6 +355,7 @@ interface WorkItem {
   title: string;
   titleJa: string;
   image: string;
+  beforeImage?: string;
   videoUrl?: string;
   vrUrl?: string;
 }
@@ -419,6 +379,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         label: locale === "ja" && w.titleJa ? w.titleJa : w.title,
         bg: "#e5e2de",
         imageUrl: w.image,
+        beforeImageUrl: w.beforeImage || undefined,
         videoUrl: w.videoUrl || undefined,
         vrUrl: w.vrUrl || undefined,
       }));
