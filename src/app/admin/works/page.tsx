@@ -178,10 +178,58 @@ export default function WorksPage() {
       key: "buildingCategory", label: "Thể loại",
       render: (v) => <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{buildingCategoryMap[String(v)] || String(v || "residential")}</span>,
     },
-    { key: "order", label: "Thứ tự", sortable: true },
     {
-      key: "featured", label: "Nổi bật",
-      render: (v) => v ? <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-medium">★ Nổi bật</span> : null,
+      key: "order", label: "Thứ tự", sortable: true,
+      render: (v, row) => (
+        <input
+          type="number"
+          value={row.order}
+          onChange={(e) => {
+            const val = parseInt(e.target.value) || 0;
+            setData((prev) => prev.map((w) => w.id === row.id ? { ...w, order: val } : w));
+          }}
+          onBlur={async (e) => {
+            const val = parseInt(e.target.value) || 0;
+            const res = await fetch(`/api/works/${row.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ order: val }),
+            });
+            const json = await res.json();
+            if (json.data) toast("Đã cập nhật thứ tự", "success");
+            else toast("Lỗi khi cập nhật", "error");
+          }}
+          className="w-16 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400 bg-white"
+        />
+      ),
+    },
+    {
+      key: "featured", label: "Nổi bật", sortable: true,
+      render: (v, row) => (
+        <div className="flex items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={Boolean(row.featured)}
+            onChange={async (e) => {
+              const checked = e.target.checked;
+              setData((prev) => prev.map((w) => w.id === row.id ? { ...w, featured: checked } : w));
+              const res = await fetch(`/api/works/${row.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ featured: checked }),
+              });
+              const json = await res.json();
+              if (json.data) toast("Đã cập nhật nổi bật", "success");
+              else {
+                toast("Lỗi khi cập nhật", "error");
+                setData((prev) => prev.map((w) => w.id === row.id ? { ...w, featured: !checked } : w));
+              }
+            }}
+            className="rounded border-gray-300 h-4 w-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          {row.featured && <span className="text-[10px] text-amber-500 font-semibold">★</span>}
+        </div>
+      ),
     },
   ];
 
