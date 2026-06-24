@@ -2,8 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Check } from "lucide-react";
+import { X } from "lucide-react";
 import Lightbox from "@/components/public/Lightbox";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -36,6 +37,7 @@ interface Work {
   image?: string;
   videoUrl?: string;
   vrUrl?: string;
+  clientName?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -59,55 +61,33 @@ const WORKS: Work[] = [
 const TYPE_KEYS: WorkType[] = ["still", "animation", "composite", "vr360", "walkthrough", "ar", "digital"];
 const CAT_KEYS: WorkCategory[] = ["residential", "apartment", "resort", "commercial", "office", "public", "urban"];
 
-/* ------------------------------------------------------------------ */
-/*  Checkbox component                                                 */
-/* ------------------------------------------------------------------ */
-function FilterCheckbox({
-  checked,
-  label,
-  onChange,
-}: {
-  checked: boolean;
-  label: string;
-  onChange: () => void;
-}) {
-  return (
-    <div
-      className="flex items-center gap-3 px-2 py-[7px] -mx-2 rounded cursor-pointer hover:bg-[#f8f8f8] transition-colors"
-      onClick={onChange}
-    >
-      <span
-        className={`w-4 h-4 rounded-[3px] border flex items-center justify-center shrink-0 transition-colors ${
-          checked ? "bg-[#111] border-[#111]" : "border-[#ccc] bg-white"
-        }`}
-      >
-        {checked && <Check size={11} className="text-white" strokeWidth={3} />}
-      </span>
-      <span className="text-[14px] text-[#333] font-normal select-none">{label}</span>
-    </div>
-  );
+interface WorksContentProps {
+  initialWorks?: DBWork[];
+  settings?: Record<string, string>;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main component                                                     */
-/* ------------------------------------------------------------------ */
-export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[] }) {
+export default function WorksContent({ initialWorks, settings = {} }: WorksContentProps) {
   const t = useTranslations("work");
   const locale = useLocale();
-  const [selectedTypes, setSelectedTypes] = useState<WorkType[]>([]);
-  const [selectedCats, setSelectedCats] = useState<WorkCategory[]>([]);
+
+  const [activeType, setActiveType] = useState<WorkType | "all">("all");
+  const [activeCat, setActiveCat] = useState<WorkCategory | "all">("all");
+
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean; type?: string } | null>(null);
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const toggleType = (key: WorkType) =>
-    setSelectedTypes((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+  // Social Links
+  const socialLinks = {
+    facebook: settings.socialFacebook || "https://facebook.com/i8studio",
+    instagram: settings.socialInstagram || "https://instagram.com/i8studio",
+    linkedin: settings.socialLinkedin || "https://linkedin.com/company/i8studio",
+    youtube: settings.socialYoutube || "https://youtube.com/@i8studio",
+  };
 
-  const toggleCat = (key: WorkCategory) =>
-    setSelectedCats((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+  const showAllLabel = locale === "ja" ? "すべて表示" : locale === "vi" ? "Tất cả" : "Show all";
+  const ctaTitle = locale === "ja" ? "プロジェクトのご相談はこちら" : locale === "vi" ? "Trao đổi với chúng tôi về dự án tiếp theo của bạn." : "Talk to us about your next projects.";
+  const ctaBtn = locale === "ja" ? "お見積り・ご提案" : locale === "vi" ? "Yêu cầu báo giá" : "Request a Proposal";
 
   // Dynamic mapper for database works
   const mappedWorks = useMemo(() => {
@@ -195,157 +175,345 @@ export default function WorksContent({ initialWorks }: { initialWorks?: DBWork[]
         videoUrl: w.videoUrl,
         vrUrl: w.vrUrl,
         bg: placeholderColors[index % placeholderColors.length],
-        span: span as "wide" | "narrow"
+        span: span as "wide" | "narrow",
+        clientName: w.subtitle
       };
     });
   }, [initialWorks, locale]);
 
   const filtered = useMemo(() => {
     return mappedWorks.filter((w) => {
-      const typeOk = selectedTypes.length === 0 || selectedTypes.includes(w.type);
-      const catOk = selectedCats.length === 0 || selectedCats.includes(w.category);
+      const typeOk = activeType === "all" || w.type === activeType;
+      const catOk = activeCat === "all" || w.category === activeCat;
       return typeOk && catOk;
     });
-  }, [mappedWorks, selectedTypes, selectedCats]);
+  }, [mappedWorks, activeType, activeCat]);
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="flex px-[60px] pt-[80px] pb-16 gap-12">
-        {/* ========== SIDEBAR ========== */}
-        <aside className="w-[260px] shrink-0 hidden md:block">
-          {/* Page title */}
-          <h1 className="text-[32px] font-normal text-[#111] mb-8">{t("title")}</h1>
+      <div className="flex max-w-[1920px] mx-auto px-6 md:px-[60px] pt-24 md:pt-[120px] pb-24 gap-12">
+        
+        {/* ========== DESKTOP SIDEBAR ========== */}
+        <aside className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin">
+          <div>
+            {/* Page title */}
+            <h1 className="text-[32px] font-normal text-[#111] tracking-[0.03em] font-serif mb-6">{t("title")}</h1>
 
-          {/* Filter heading */}
-          <div className="text-[16px] font-medium text-[#111] mb-1">{t("filter")}</div>
-          <div className="border-b-[0.5px] border-[#e0e0e0] mb-6" />
+            {/* Filter heading */}
+            <div className="text-[14px] font-semibold text-[#111] tracking-[0.08em] uppercase mb-1">{t("filter")}</div>
+            <div className="border-b-[0.5px] border-[#e5e5e5] mb-5" />
 
-          {/* TYPE group */}
-          <div className="text-[11px] uppercase tracking-[0.16em] text-[#999] mb-4">
-            {t("typeLabel")}
-          </div>
-          <div className="flex flex-col gap-0">
-            {TYPE_KEYS.map((key) => (
-              <FilterCheckbox
-                key={key}
-                checked={selectedTypes.includes(key)}
-                label={t(`types.${key}`)}
-                onChange={() => toggleType(key)}
-              />
-            ))}
-          </div>
-          <div className="border-b-[0.5px] border-[#e0e0e0] my-6" />
+            {/* TYPE group */}
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+              {t("typeLabel")}
+            </div>
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={() => setActiveType("all")}
+                className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                  activeType === "all"
+                    ? "text-[#111] font-semibold border-[#111]"
+                    : "text-[#777] hover:text-[#111] border-transparent"
+                }`}
+              >
+                {showAllLabel}
+              </button>
+              {TYPE_KEYS.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveType(key)}
+                  className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                    activeType === key
+                      ? "text-[#111] font-semibold border-[#111]"
+                      : "text-[#777] hover:text-[#111] border-transparent"
+                  }`}
+                >
+                  {t(`types.${key}`)}
+                </button>
+              ))}
+            </div>
 
-          {/* CATEGORY group */}
-          <div className="text-[11px] uppercase tracking-[0.16em] text-[#999] mb-4">
-            {t("categoryLabel")}
+            <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
+
+            {/* CATEGORY group */}
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+              {t("categoryLabel")}
+            </div>
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={() => setActiveCat("all")}
+                className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                  activeCat === "all"
+                    ? "text-[#111] font-semibold border-[#111]"
+                    : "text-[#777] hover:text-[#111] border-transparent"
+                }`}
+              >
+                {showAllLabel}
+              </button>
+              {CAT_KEYS.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveCat(key)}
+                  className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                    activeCat === key
+                      ? "text-[#111] font-semibold border-[#111]"
+                      : "text-[#777] hover:text-[#111] border-transparent"
+                  }`}
+                >
+                  {t(`categories.${key}`)}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col gap-0">
-            {CAT_KEYS.map((key) => (
-              <FilterCheckbox
-                key={key}
-                checked={selectedCats.includes(key)}
-                label={t(`categories.${key}`)}
-                onChange={() => toggleCat(key)}
-              />
-            ))}
+
+          {/* CTA & Social Links */}
+          <div className="pt-6 border-t border-[#e5e5e5] mt-6">
+            <p className="text-[14px] font-semibold text-[#111] tracking-wide mb-2.5 leading-snug">
+              {ctaTitle}
+            </p>
+            <a
+              href="/contact"
+              className="text-[12px] font-semibold tracking-wider uppercase text-black hover:text-neutral-600 transition-colors border-b border-black pb-0.5 inline-block"
+            >
+              {ctaBtn}
+            </a>
+
+            {/* Socials */}
+            <div className="flex gap-4 mt-6 text-[#999]">
+              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Facebook">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                </svg>
+              </a>
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Instagram">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z" />
+                </svg>
+              </a>
+              <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="LinkedIn">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+                </svg>
+              </a>
+              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="YouTube">
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.35 29 29 0 0 0-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" />
+                </svg>
+              </a>
+            </div>
           </div>
         </aside>
 
         {/* ========== MASONRY GRID ========== */}
         <main className="flex-1 min-w-0">
-          {/* Mobile: page title */}
-          <h1 className="text-[32px] font-normal text-[#111] mb-6 md:hidden">{t("title")}</h1>
+          {/* Mobile: page title & filter trigger */}
+          <div className="flex items-center justify-between mb-8 md:hidden">
+            <h1 className="text-[32px] font-normal text-[#111] tracking-[0.03em] font-serif">{t("title")}</h1>
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="border border-[#111] text-[#111] text-[12px] uppercase tracking-[0.1em] font-semibold px-5 py-2 hover:bg-[#111] hover:text-white transition-colors duration-300"
+            >
+              {t("filter")}
+            </button>
+          </div>
 
           {filtered.length === 0 ? (
             <p className="text-[14px] text-[#999] mt-8">{t("emptyState")}</p>
           ) : (
-            <div className="flex flex-col gap-3">
-              {/* Group items: 4 portrait + 1 wide, repeat */}
-              {Array.from({ length: Math.ceil(filtered.length / 5) }).map((_, groupIdx) => {
-                const start = groupIdx * 5;
-                const portraitItems = filtered.slice(start, start + 4);
-                const wideItem = filtered[start + 4];
-
-                return (
-                  <div key={groupIdx}>
-                    {/* 4 portrait images — 3:5 ratio */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {portraitItems.map((work) => (
-                        <div
-                          key={work.id}
-                          onClick={() => {
-                            if (work.vrUrl) {
-                              setVrModal({ url: work.vrUrl, title: work.title });
-                            } else if (work.videoUrl) {
-                              setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
-                            } else if (work.image) {
-                              setLightbox({ src: work.image, alt: work.title, type: work.type });
-                            }
-                          }}
-                          className="relative overflow-hidden group cursor-pointer aspect-[3/5]"
-                        >
-                          <div
-                            className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]"
-                            style={{
-                              backgroundColor: work.bg,
-                              backgroundImage: work.image ? `url(${work.image})` : undefined,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end justify-center pb-10 p-4">
-                            <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
-                              <div className="text-white text-[18px] font-semibold tracking-wide">{work.title}</div>
-                              <div className="text-white/70 text-[14px] mt-1.5">
-                                {t(`types.${work.type}`)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* 1 wide image — 16:9 ratio */}
-                    {wideItem && (
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full">
+              {filtered.map((work) => (
+                <div
+                  key={work.id}
+                  onClick={() => {
+                    if (work.vrUrl) {
+                      setVrModal({ url: work.vrUrl, title: work.title });
+                    } else if (work.videoUrl) {
+                      setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
+                    } else if (work.image) {
+                      setLightbox({ src: work.image, alt: work.title, type: work.type });
+                    }
+                  }}
+                  className="break-inside-avoid w-full group cursor-pointer inline-block"
+                >
+                  <div className="relative overflow-hidden w-full bg-gray-50 rounded-[3px] transition-transform duration-500 ease-out">
+                    {work.image ? (
+                      <img
+                        src={work.image}
+                        alt={work.title}
+                        className="w-full h-auto object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                      />
+                    ) : (
                       <div
-                        className="relative overflow-hidden group cursor-pointer aspect-[16/9] mt-3"
-                        onClick={() => {
-                          if (wideItem.vrUrl) {
-                            setVrModal({ url: wideItem.vrUrl, title: wideItem.title });
-                          } else if (wideItem.videoUrl) {
-                            setLightbox({ src: wideItem.videoUrl, alt: wideItem.title, isVideo: true, type: wideItem.type });
-                          } else if (wideItem.image) {
-                            setLightbox({ src: wideItem.image, alt: wideItem.title, type: wideItem.type });
-                          }
+                        className="w-full transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                        style={{
+                          backgroundColor: work.bg,
+                          aspectRatio: work.span === "wide" ? "16/10" : "3/4"
                         }}
-                      >
-                        <div
-                          className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.02]"
-                          style={{
-                            backgroundColor: wideItem.bg,
-                            backgroundImage: wideItem.image ? `url(${wideItem.image})` : undefined,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end justify-center pb-10 p-4">
-                          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 text-center">
-                            <div className="text-white text-[20px] font-semibold tracking-wide">{wideItem.title}</div>
-                            <div className="text-white/70 text-[14px] mt-1.5">
-                              {t(`types.${wideItem.type}`)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      />
                     )}
                   </div>
-                );
-              })}
+                  <div className="mt-3.5 mb-2">
+                    <h3 className="text-[15px] font-normal text-[#111] tracking-[0.03em] leading-tight mb-1">
+                      <span className="bg-left-bottom bg-gradient-to-r from-gray-900 to-gray-900 bg-[length:0%_1px] bg-no-repeat group-hover:bg-[length:100%_1px] transition-[background-size] duration-500 pb-0.5">
+                        {work.title}
+                      </span>
+                    </h3>
+                    <p className="text-[12px] text-[#777] font-light tracking-[0.05em] uppercase">
+                      {work.clientName || t(`types.${work.type}`)}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </main>
       </div>
+
+      {/* ========== MOBILE DRAWER FILTER ========== */}
+      <AnimatePresence>
+        {isFilterOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm md:hidden"
+              onClick={() => setIsFilterOpen(false)}
+            />
+
+            {/* Content Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed right-0 top-0 bottom-0 z-[1000] w-[85vw] max-w-[340px] bg-white p-8 flex flex-col justify-between overflow-y-auto md:hidden shadow-2xl"
+            >
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-[24px] font-normal text-[#111] tracking-[0.03em] font-serif">{t("title")}</h2>
+                  <button onClick={() => setIsFilterOpen(false)} className="text-gray-500 hover:text-black">
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* TYPE group */}
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                  {t("typeLabel")}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setActiveType("all");
+                      setIsFilterOpen(false);
+                    }}
+                    className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                      activeType === "all"
+                        ? "text-[#111] font-semibold border-[#111]"
+                        : "text-[#777] hover:text-[#111] border-transparent"
+                    }`}
+                  >
+                    {showAllLabel}
+                  </button>
+                  {TYPE_KEYS.map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setActiveType(key);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                        activeType === key
+                          ? "text-[#111] font-semibold border-[#111]"
+                          : "text-[#777] hover:text-[#111] border-transparent"
+                      }`}
+                    >
+                      {t(`types.${key}`)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
+
+                {/* CATEGORY group */}
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                  {t("categoryLabel")}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => {
+                      setActiveCat("all");
+                      setIsFilterOpen(false);
+                    }}
+                    className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                      activeCat === "all"
+                        ? "text-[#111] font-semibold border-[#111]"
+                        : "text-[#777] hover:text-[#111] border-transparent"
+                    }`}
+                  >
+                    {showAllLabel}
+                  </button>
+                  {CAT_KEYS.map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setActiveCat(key);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                        activeCat === key
+                          ? "text-[#111] font-semibold border-[#111]"
+                          : "text-[#777] hover:text-[#111] border-transparent"
+                      }`}
+                    >
+                      {t(`categories.${key}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drawer CTA & Socials */}
+              <div className="pt-6 border-t border-[#e5e5e5] mt-8">
+                <p className="text-[14px] font-semibold text-[#111] tracking-wide mb-2.5 leading-snug">
+                  {ctaTitle}
+                </p>
+                <a
+                  href="/contact"
+                  className="text-[12px] font-semibold tracking-wider uppercase text-black hover:text-neutral-600 transition-colors border-b border-black pb-0.5 inline-block"
+                >
+                  {ctaBtn}
+                </a>
+
+                {/* Socials */}
+                <div className="flex gap-4 mt-6 text-[#999]">
+                  <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Facebook">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                  </a>
+                  <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Instagram">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2z" />
+                    </svg>
+                  </a>
+                  <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="LinkedIn">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+                    </svg>
+                  </a>
+                  <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="YouTube">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.35 29 29 0 0 0-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {lightbox && (
         <Lightbox

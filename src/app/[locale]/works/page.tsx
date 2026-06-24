@@ -19,6 +19,12 @@ export async function generateMetadata({
 
 export default async function WorksPage() {
   const works = await prisma.work.findMany({ orderBy: { order: "asc" } });
+  const settings = await prisma.setting.findMany();
+
+  const settingsMap = settings.reduce((acc, curr) => {
+    acc[curr.key] = curr.value;
+    return acc;
+  }, {} as Record<string, string>);
 
   // Clean serialization for client components
   const serializedWorks = works.map((w) => ({
@@ -36,5 +42,5 @@ export default async function WorksPage() {
     featured: w.featured,
   }));
 
-  return <WorksContent initialWorks={serializedWorks} />;
+  return <WorksContent initialWorks={serializedWorks} settings={settingsMap} />;
 }
