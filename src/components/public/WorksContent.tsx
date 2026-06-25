@@ -220,10 +220,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveType("all")}
-                className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                   activeType === "all"
-                    ? "text-[#111] font-semibold border-[#111]"
-                    : "text-[#777] hover:text-[#111] border-transparent"
+                    ? "text-[#111] font-medium border-[#111]"
+                    : "text-[#555] hover:text-[#111] border-transparent"
                 }`}
               >
                 {showAllLabel}
@@ -232,10 +232,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <button
                   key={key}
                   onClick={() => setActiveType(key)}
-                  className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                     activeType === key
-                      ? "text-[#111] font-semibold border-[#111]"
-                      : "text-[#777] hover:text-[#111] border-transparent"
+                      ? "text-[#111] font-medium border-[#111]"
+                      : "text-[#555] hover:text-[#111] border-transparent"
                   }`}
                 >
                   {t(`types.${key}`)}
@@ -252,10 +252,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveCat("all")}
-                className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                   activeCat === "all"
-                    ? "text-[#111] font-semibold border-[#111]"
-                    : "text-[#777] hover:text-[#111] border-transparent"
+                    ? "text-[#111] font-medium border-[#111]"
+                    : "text-[#555] hover:text-[#111] border-transparent"
                 }`}
               >
                 {showAllLabel}
@@ -264,10 +264,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <button
                   key={key}
                   onClick={() => setActiveCat(key)}
-                  className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                     activeCat === key
-                      ? "text-[#111] font-semibold border-[#111]"
-                      : "text-[#777] hover:text-[#111] border-transparent"
+                      ? "text-[#111] font-medium border-[#111]"
+                      : "text-[#555] hover:text-[#111] border-transparent"
                   }`}
                 >
                   {t(`categories.${key}`)}
@@ -419,10 +419,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                       setActiveType("all");
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                       activeType === "all"
-                        ? "text-[#111] font-semibold border-[#111]"
-                        : "text-[#777] hover:text-[#111] border-transparent"
+                        ? "text-[#111] font-medium border-[#111]"
+                        : "text-[#555] hover:text-[#111] border-transparent"
                     }`}
                   >
                     {showAllLabel}
@@ -434,10 +434,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         setActiveType(key);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                         activeType === key
-                          ? "text-[#111] font-semibold border-[#111]"
-                          : "text-[#777] hover:text-[#111] border-transparent"
+                          ? "text-[#111] font-medium border-[#111]"
+                          : "text-[#555] hover:text-[#111] border-transparent"
                       }`}
                     >
                       {t(`types.${key}`)}
@@ -457,10 +457,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                       setActiveCat("all");
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                       activeCat === "all"
-                        ? "text-[#111] font-semibold border-[#111]"
-                        : "text-[#777] hover:text-[#111] border-transparent"
+                        ? "text-[#111] font-medium border-[#111]"
+                        : "text-[#555] hover:text-[#111] border-transparent"
                     }`}
                   >
                     {showAllLabel}
@@ -472,10 +472,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         setActiveCat(key);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[13px] py-1 transition-colors font-serif tracking-wide block w-full border-l-2 pl-3 ${
+                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
                         activeCat === key
-                          ? "text-[#111] font-semibold border-[#111]"
-                          : "text-[#777] hover:text-[#111] border-transparent"
+                          ? "text-[#111] font-medium border-[#111]"
+                          : "text-[#555] hover:text-[#111] border-transparent"
                       }`}
                     >
                       {t(`categories.${key}`)}
