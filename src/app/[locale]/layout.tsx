@@ -44,25 +44,34 @@ const locales = ["en", "ja"];
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://i8studio.vn";
 
-export const metadata: Metadata = {
-  title: {
-    default: "i8 STUDIO — 3DCG, Animation, VR & BIM",
-    template: "%s | i8 STUDIO",
-  },
-  description:
-    "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
-  metadataBase: new URL(SITE_URL),
-  openGraph: {
-    siteName: "i8 STUDIO",
-    images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "i8 STUDIO" }],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: ["/og-default.jpg"],
-  },
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await prisma.setting.findMany();
+  const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+  const logoImageName = settingsMap.logoImage ? settingsMap.logoImage.split("/").pop() : "1";
+
+  return {
+    title: {
+      default: "i8 STUDIO — 3DCG, Animation, VR & BIM",
+      template: "%s | i8 STUDIO",
+    },
+    description:
+      "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
+    metadataBase: new URL(SITE_URL),
+    openGraph: {
+      siteName: "i8 STUDIO",
+      images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "i8 STUDIO" }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: ["/og-default.jpg"],
+    },
+    robots: { index: true, follow: true },
+    icons: {
+      icon: `/api/favicon?v=${logoImageName}`,
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,
