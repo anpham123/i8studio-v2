@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import Lightbox from "@/components/public/Lightbox";
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,6 +77,11 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean; type?: string } | null>(null);
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Social Links
   const socialLinks = {
@@ -107,8 +113,8 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
       const titleLower = w.title ? w.title.toLowerCase() : "";
 
       // Map DB category (3DCG, Animation, VR, BIM) to Type
-      let type: WorkType = (w.type as WorkType) || "still";
-      if (!w.type) {
+      let type: WorkType = (w.type?.toLowerCase() as WorkType) || "still";
+      if (!w.type || (type === "still" && w.category && w.category.toUpperCase() !== "3DCG")) {
         const dbCat = w.category ? w.category.toUpperCase() : "3DCG";
         if (dbCat === "ANIMATION") {
           type = "animation";
@@ -131,6 +137,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             type = "still";
           }
         }
+      }
+
+      if (type as string === "vr") {
+        type = "vr360";
       }
 
       // Map Subtitle/Title to Architectural Category
@@ -526,8 +536,8 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
       )}
 
       {/* VR360 Fullscreen Modal */}
-      {vrModal && (
-        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
+      {mounted && vrModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
           <div className="relative w-[95vw] h-[90vh] max-w-[1600px]" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setVrModal(null)}
@@ -547,7 +557,8 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
               title={vrModal.title}
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

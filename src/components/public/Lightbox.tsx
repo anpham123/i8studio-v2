@@ -35,7 +35,7 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
     };
   }, [onClose]);
 
-  const is360 = type === "vr360";
+  const is360 = type?.toLowerCase() === "vr360" || type?.toLowerCase() === "vr";
 
   // Don't render on server or before mount
   if (!mounted) return null;

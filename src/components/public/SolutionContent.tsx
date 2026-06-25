@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
+import { createPortal } from "react-dom";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 /* ------------------------------------------------------------------ */
@@ -389,6 +390,11 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
 
   // VR modal state
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="bg-white">
@@ -507,8 +513,8 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
       </div>
 
       {/* ========== VR360 FULLSCREEN MODAL ========== */}
-      {vrModal && (
-        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
+      {mounted && vrModal && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center" onClick={() => setVrModal(null)}>
           <div className="relative w-[95vw] h-[90vh] max-w-[1600px]" onClick={(e) => e.stopPropagation()}>
             {/* Close button */}
             <button
@@ -533,7 +539,8 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               title={vrModal.title}
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
