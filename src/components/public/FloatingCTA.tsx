@@ -34,7 +34,7 @@ export default function FloatingCTA() {
       >
         <Link
           href={`/${locale}/contact`}
-          className="btn-gradient pulse-glow flex items-center gap-2 px-6 py-3 rounded-full shadow-xl shadow-blue-500/25"
+          className="bg-black/75 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md flex items-center gap-2 px-6 py-3 rounded-full shadow-lg shadow-black/10 transition-all duration-300 font-medium"
         >
           <MessageSquare size={16} />
           {t("getQuote")}
@@ -65,10 +65,10 @@ export default function FloatingCTA() {
             </a>
             <Link
               href={`/${locale}/contact`}
-              className="flex flex-col items-center gap-1 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white"
+              className="flex flex-col items-center gap-1 py-1.5 rounded-lg bg-white text-black hover:bg-white/90 transition-colors"
             >
               <MessageSquare size={16} />
-              <span className="text-xs font-medium">{t("getQuote")}</span>
+              <span className="text-xs font-semibold">{t("getQuote")}</span>
             </Link>
           </div>
         </div>
