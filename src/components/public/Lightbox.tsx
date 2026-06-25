@@ -74,7 +74,9 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           {is360 ? (
-            <Panorama360Viewer src={src} />
+            <div className="w-[85vw] h-[75vh] max-w-[1200px] rounded-xl overflow-hidden relative">
+              <Panorama360Viewer src={src} />
+            </div>
           ) : isVideo ? (
             src.startsWith("/uploads/") ? (
               <video
