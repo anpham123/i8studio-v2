@@ -72,7 +72,7 @@ export default function Footer({ settings, services }: FooterProps) {
                 <img
                   src={settings.logoImage}
                   alt="i8 studio logo"
-                  style={{ height: Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
+                  style={{ height: parseInt(settings.logoFooterHeight) || Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
                 />
               ) : (
                 <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
