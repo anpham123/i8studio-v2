@@ -418,12 +418,8 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         const isTextLeft = sec.layout === "text-left";
         const slides = getSlidesForSection(sec);
 
-        const textPanel = (
-          <div
-            className={`flex-1 min-w-[320px] px-8 sm:px-14 py-10 flex flex-col justify-center ${
-              isTextLeft ? "lg:border-r-[0.5px] border-[#e8e8e8]" : ""
-            }`}
-          >
+        const textContents = (
+          <>
             <div className="text-[32px] font-normal tracking-[0.02em] text-[#111] mb-4">
               <span className="text-[#bbb] mr-2">{sec.num}.</span>
               {sec.titleEn}
@@ -465,9 +461,8 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
                 </svg>
               </span>
             </Link>
-          </div>
+          </>
         );
-
 
         return (
           <div
@@ -476,18 +471,20 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           >
             {isTextLeft ? (
               <>
-                {textPanel}
-                <div className="flex-[1.7] relative overflow-hidden aspect-[16/9]">
+                <div className="w-full lg:w-[37%] shrink-0 px-8 sm:px-14 py-10 flex flex-col justify-center lg:border-r-[0.5px] border-[#e8e8e8]">
+                  {textContents}
+                </div>
+                <div className="w-full lg:w-[63%] shrink-0 relative overflow-hidden aspect-[16/9]">
                   <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
               </>
             ) : (
               <>
-                <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden aspect-[16/9]">
+                <div className="order-2 lg:order-1 w-full lg:w-[63%] shrink-0 relative overflow-hidden aspect-[16/9]">
                   <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
-                <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
-                  {textPanel}
+                <div className="order-1 lg:order-2 w-full lg:w-[37%] shrink-0 px-8 sm:px-14 py-10 flex flex-col justify-center">
+                  {textContents}
                 </div>
               </>
             )}
