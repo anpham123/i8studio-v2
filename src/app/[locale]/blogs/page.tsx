@@ -38,7 +38,9 @@ export default async function BlogIndexPage({ params }: Props) {
             Blog
           </h1>
           <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[500px] mx-auto">
-            制作プロセス、技術的インサイト、建築CG業界のトレンド
+            {locale === "ja"
+              ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
+              : "Production process, technical insights, and architectural CG trends."}
           </p>
         </div>
       </section>
