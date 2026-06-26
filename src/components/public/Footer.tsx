@@ -46,7 +46,7 @@ const SOCIAL = [
   { key: "socialYoutube",   Icon: IconYoutube,   label: "YouTube" },
 ];
 
-export default function Footer({ settings, services }: FooterProps) {
+export default function Footer({ settings }: FooterProps) {
   const t     = useTranslations("footer");
   const navT  = useTranslations("nav");
   const locale = useLocale();
@@ -63,10 +63,10 @@ export default function Footer({ settings, services }: FooterProps) {
   return (
     <footer className="bg-[#fafafa] border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
 
           {/* Col 1: Logo + tagline + social */}
-          <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+          <div>
             <Link href={`/${locale}`} className="inline-block mb-3">
               {settings.logoImage ? (
                 <img
@@ -123,29 +123,7 @@ export default function Footer({ settings, services }: FooterProps) {
             </ul>
           </div>
 
-          {/* Col 3: Services */}
-          <div>
-            <h4 className="text-gray-900 font-semibold text-sm mb-4 uppercase tracking-widest text-xs">
-              {t("services")}
-            </h4>
-            <ul className="space-y-2.5">
-              {services.filter((s) => !s.slug.includes("bim")).slice(0, 6).map((s) => {
-                const name = locale === "ja" ? s.nameJa || s.name : s.name;
-                return (
-                  <li key={s.slug}>
-                    <Link
-                      href={`/${locale}/service/${s.slug}`}
-                      className="text-gray-500 hover:text-gray-900 text-sm transition-colors"
-                    >
-                      {name}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Col 4: Contact */}
+          {/* Col 3: Contact */}
           <div>
             <h4 className="text-gray-900 font-semibold text-sm mb-4 uppercase tracking-widest text-xs">
               {t("contact")}
