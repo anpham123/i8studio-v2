@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { createPortal } from "react-dom";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
+import Lightbox from "@/components/public/Lightbox";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Slide & Section data                                               */
@@ -154,31 +156,58 @@ function isDirectVideo(url: string): boolean {
   return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(url);
 }
 
-function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrClick }: { slides: Slide[]; isPanorama?: boolean; isComposite?: boolean; onVrClick?: (url: string, title: string) => void }) {
-  const locale = useLocale();
-  const [idx, setIdx] = useState(0);
-  const total = slides.length;
+function HorizontalScrollGallery({
+  slides,
+  isComposite = false,
+  onVrClick,
+  onImageClick,
+}: {
+  slides: Slide[];
+  isComposite?: boolean;
+  onVrClick?: (url: string, title: string) => void;
+  onImageClick?: (url: string, title: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showLeftBtn, setShowLeftBtn] = useState(false);
+  const [showRightBtn, setShowRightBtn] = useState(false);
 
-  const prev = useCallback(
-    () => setIdx((i) => (i - 1 + total) % total),
-    [total]
-  );
-  const next = useCallback(
-    () => setIdx((i) => (i + 1) % total),
-    [total]
-  );
+  const checkScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    setShowLeftBtn(el.scrollLeft > 5);
+    setShowRightBtn(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+  };
 
-  if (total === 0) return null;
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [slides]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = containerRef.current;
+    if (!el) return;
+    const amount = el.clientWidth * 0.75;
+    el.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
+
+  if (slides.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Track */}
+    <div className="relative group/gallery w-full h-full flex items-center bg-[#fafafa] py-6 px-4 md:px-8">
+      {/* Scrollable Container */}
       <div
-        className="flex h-full"
-        style={{
-          transform: `translateX(-${idx * 100}%)`,
-          transition: "transform 0.45s cubic-bezier(.4,0,.2,1)",
-        }}
+        ref={containerRef}
+        className="flex gap-5 items-center overflow-x-auto w-full py-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent scroll-smooth select-none"
       >
         {slides.map((slide, i) => {
           const ytId = slide.videoUrl ? getYouTubeId(slide.videoUrl) : null;
@@ -187,13 +216,20 @@ function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrCl
           return (
             <div
               key={i}
-              className="min-w-full h-full relative"
-              style={{ backgroundColor: slide.bg }}
+              className="relative shrink-0 h-[180px] sm:h-[240px] md:h-[280px] lg:h-[320px] w-auto rounded-lg overflow-hidden shadow-md border border-gray-200 bg-white group/item cursor-pointer"
+              onClick={() => {
+                if (slide.vrUrl && onVrClick) {
+                  onVrClick(slide.vrUrl, slide.label);
+                } else if (slide.videoUrl && onImageClick) {
+                  onImageClick(slide.videoUrl, slide.label);
+                } else if (slide.imageUrl && onImageClick) {
+                  onImageClick(slide.imageUrl, slide.label);
+                }
+              }}
             >
-              {/* YouTube embed */}
+              {/* YouTube embed or thumbnail */}
               {ytId ? (
-                <>
-                  {/* Poster image shown instantly while iframe loads */}
+                <div className="h-full aspect-video relative bg-black">
                   {slide.imageUrl && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -202,148 +238,92 @@ function GallerySlider({ slides, isPanorama = false, isComposite = false, onVrCl
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
-                  <iframe
-                    src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full border-0"
-                    style={{ zIndex: 1 }}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    title={slide.label}
-                  />
-                </>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover/item:bg-black/40 transition-colors">
+                    <span className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform duration-300">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
               ) : directVideo ? (
-                <>
-                  {/* Poster image shown instantly while video buffers */}
-                  {slide.imageUrl && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={slide.imageUrl}
-                      alt={slide.label}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  )}
+                <div className="h-full aspect-video relative bg-black">
                   <video
                     src={slide.videoUrl}
                     poster={slide.imageUrl || undefined}
-                    preload="auto"
-                    autoPlay
+                    preload="metadata"
                     muted
-                    loop
                     playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ zIndex: 1 }}
+                    className="w-full h-full object-cover"
                   />
-                </>
-              ) : slide.videoUrl ? (
-                /* Non-playable video format (e.g. .mov) — show image only */
-                slide.imageUrl ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/item:bg-black/35 transition-colors">
+                    <span className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover/item:scale-110 transition-transform duration-300">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-gray-900 ml-0.5">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              ) : slide.imageUrl ? (
+                isComposite && slide.beforeImageUrl ? (
+                  <div className="h-full aspect-video relative">
+                    <BeforeAfterSlider
+                      before={slide.beforeImageUrl}
+                      after={slide.imageUrl}
+                      beforeLabel="Before"
+                      afterLabel="After"
+                    />
+                  </div>
+                ) : (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={slide.imageUrl}
                     alt={slide.label}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : null
-              ) : slide.imageUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                isComposite && slide.beforeImageUrl ? (
-                  <BeforeAfterSlider
-                    before={slide.beforeImageUrl}
-                    after={slide.imageUrl}
-                    beforeLabel={locale === "ja" ? "合成前" : "Before"}
-                    afterLabel={locale === "ja" ? "合成後" : "After"}
-                  />
-                ) : (
-                  <img
-                    src={slide.imageUrl}
-                    alt={slide.label}
-                    className={`absolute inset-0 w-full h-full object-cover ${isPanorama ? 'animate-pan-360' : ''}`}
-                    loading={i === 0 ? "eager" : "lazy"}
+                    className="h-full w-auto object-contain transition-transform duration-500 ease-out group-hover/item:scale-[1.02]"
+                    loading="lazy"
                   />
                 )
               ) : null}
 
-              {/* Slide label pill */}
-              <span
-                className="absolute bottom-[18px] left-[18px] text-[11px] px-3.5 py-[5px] rounded-[20px] z-10"
-                style={{
-                  background: "rgba(255,255,255,0.92)",
-                  color: "#555",
-                  border: "0.5px solid #ddd",
-                }}
-              >
+              {/* Label Pill overlay */}
+              <span className="absolute bottom-3 left-3 text-[10px] px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 shadow-sm border border-gray-200/50 pointer-events-none">
                 {slide.label}
               </span>
 
-              {/* VR360 open button */}
-              {slide.vrUrl && onVrClick && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onVrClick(slide.vrUrl!, slide.label); }}
-                  className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium text-white bg-black/70 hover:bg-black/90 backdrop-blur-sm transition-colors"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {/* VR Icon overlay if VR link */}
+              {slide.vrUrl && (
+                <span className="absolute top-3 right-3 bg-blue-600 text-white p-1.5 rounded-full shadow-md z-10 pointer-events-none">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M2 8a2 2 0 012-2h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8z" />
                     <circle cx="8" cy="12" r="2" />
                     <circle cx="16" cy="12" r="2" />
                   </svg>
-                  VR 360°
-                </button>
+                </span>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Prev arrow */}
-      {total > 1 && (
+      {/* Navigation Buttons (Left/Right Arrows) */}
+      {showLeftBtn && (
         <button
-          onClick={prev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer hover:shadow-[0_0_0_1px_#ccc]"
-          style={{
-            background: "rgba(255,255,255,0.9)",
-            border: "0.5px solid #ddd",
-          }}
-          aria-label="Previous"
+          onClick={() => scroll("left")}
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 border border-gray-200 shadow-md flex items-center justify-center hover:bg-white hover:shadow-lg transition-all duration-200 z-10"
+          aria-label="Scroll left"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ChevronLeft size={20} className="text-gray-700" />
         </button>
       )}
 
-      {/* Next arrow */}
-      {total > 1 && (
+      {showRightBtn && (
         <button
-          onClick={next}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-[42px] h-[42px] rounded-full flex items-center justify-center cursor-pointer hover:shadow-[0_0_0_1px_#ccc]"
-          style={{
-            background: "rgba(255,255,255,0.9)",
-            border: "0.5px solid #ddd",
-          }}
-          aria-label="Next"
+          onClick={() => scroll("right")}
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 border border-gray-200 shadow-md flex items-center justify-center hover:bg-white hover:shadow-lg transition-all duration-200 z-10"
+          aria-label="Scroll right"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <ChevronRight size={20} className="text-gray-700" />
         </button>
-      )}
-
-      {/* Dots */}
-      {total > 1 && (
-        <div className="absolute bottom-4 right-[18px] flex gap-1.5">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIdx(i)}
-              className="w-1.5 h-1.5 rounded-full cursor-pointer transition-colors duration-200"
-              style={{
-                background: i === idx ? "#111" : "rgba(0,0,0,0.18)",
-              }}
-              aria-label={`Slide ${i + 1}`}
-            />
-          ))}
-        </div>
       )}
     </div>
   );
@@ -390,6 +370,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
 
   // VR modal state
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -474,14 +455,24 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
                 <div className="w-full lg:w-[37%] shrink-0 px-8 sm:px-14 py-10 flex flex-col justify-center lg:border-r-[0.5px] border-[#e8e8e8]">
                   {textContents}
                 </div>
-                <div className="w-full lg:w-[63%] shrink-0 relative overflow-hidden aspect-[16/9]">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
+                <div className="w-full lg:w-[63%] shrink-0 relative overflow-hidden">
+                  <HorizontalScrollGallery
+                    slides={slides}
+                    isComposite={sec.workType === 'composite'}
+                    onVrClick={(url, title) => setVrModal({ url, title })}
+                    onImageClick={(src, alt) => setLightbox({ src, alt, isVideo: isDirectVideo(src) || getYouTubeId(src) !== null })}
+                  />
                 </div>
               </>
             ) : (
               <>
-                <div className="order-2 lg:order-1 w-full lg:w-[63%] shrink-0 relative overflow-hidden aspect-[16/9]">
-                  <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
+                <div className="order-2 lg:order-1 w-full lg:w-[63%] shrink-0 relative overflow-hidden">
+                  <HorizontalScrollGallery
+                    slides={slides}
+                    isComposite={sec.workType === 'composite'}
+                    onVrClick={(url, title) => setVrModal({ url, title })}
+                    onImageClick={(src, alt) => setLightbox({ src, alt, isVideo: isDirectVideo(src) || getYouTubeId(src) !== null })}
+                  />
                 </div>
                 <div className="order-1 lg:order-2 w-full lg:w-[37%] shrink-0 px-8 sm:px-14 py-10 flex flex-col justify-center">
                   {textContents}
@@ -538,6 +529,16 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           </div>
         </div>,
         document.body
+      )}
+
+      {/* ========== LIGHTBOX MODAL ========== */}
+      {lightbox && (
+        <Lightbox
+          src={lightbox.src}
+          alt={lightbox.alt}
+          isVideo={lightbox.isVideo}
+          onClose={() => setLightbox(null)}
+        />
       )}
     </div>
   );
