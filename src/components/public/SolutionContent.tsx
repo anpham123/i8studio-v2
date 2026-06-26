@@ -472,18 +472,18 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         return (
           <div
             key={sec.num}
-            className="flex flex-col lg:flex-row lg:h-[460px] border-t-[0.5px] border-[#e8e8e8] overflow-hidden"
+            className="flex flex-col lg:flex-row border-t-[0.5px] border-[#e8e8e8] overflow-hidden"
           >
             {isTextLeft ? (
               <>
                 {textPanel}
-                <div className="flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
+                <div className="flex-[1.7] relative overflow-hidden aspect-[16/9]">
                   <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
               </>
             ) : (
               <>
-                <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden min-h-[400px] lg:min-h-0">
+                <div className="order-2 lg:order-1 flex-[1.7] relative overflow-hidden aspect-[16/9]">
                   <GallerySlider slides={slides} isPanorama={sec.workType === 'vr360'} isComposite={sec.workType === 'composite'} onVrClick={sec.workType === 'vr360' ? (url, title) => setVrModal({ url, title }) : undefined} />
                 </div>
                 <div className="order-1 lg:order-2 flex-1 min-w-[320px]">
