@@ -19,7 +19,7 @@ export default async function BlogIndexPage({ params }: Props) {
   const { locale } = params;
 
   const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
+    where: { isPublished: true, locale },
     orderBy: { publishedAt: "desc" },
   });
 

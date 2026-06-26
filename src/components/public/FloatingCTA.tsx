@@ -47,7 +47,7 @@ export default function FloatingCTA() {
           hidden ? "translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="bg-[#0d0d14]/95 backdrop-blur-md border-t border-white/10 px-4 py-3">
+        <div className="bg-[#0d0d14]/95 backdrop-blur-md border-t border-white/10 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <div className="grid grid-cols-3 gap-2">
             <a
               href="tel:0914049090"
