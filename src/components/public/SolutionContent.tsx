@@ -399,7 +399,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
   return (
     <div className="bg-white">
       {/* ========== HERO ========== */}
-      <div className="text-center pt-[72px] pb-14 px-6 sm:px-[60px]">
+      <div className="text-center pt-8 pb-6 px-6 sm:px-[60px]">
         <p className="text-[11px] uppercase tracking-[0.16em] text-[#aaa] mb-4">
           {t("label")}
         </p>
