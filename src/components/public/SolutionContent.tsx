@@ -420,18 +420,18 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
 
         const textPanel = (
           <div
-            className={`flex-1 min-w-[320px] px-8 sm:px-14 py-14 flex flex-col justify-center ${
+            className={`flex-1 min-w-[320px] px-8 sm:px-14 py-10 flex flex-col justify-center ${
               isTextLeft ? "lg:border-r-[0.5px] border-[#e8e8e8]" : ""
             }`}
           >
-            <div className="text-[32px] font-normal tracking-[0.02em] text-[#111] mb-6">
+            <div className="text-[32px] font-normal tracking-[0.02em] text-[#111] mb-4">
               <span className="text-[#bbb] mr-2">{sec.num}.</span>
               {sec.titleEn}
             </div>
-            <div className="text-[15px] text-[#444] leading-[2] mb-[22px] whitespace-pre-line">
+            <div className="text-[15px] text-[#444] leading-[2] mb-4 whitespace-pre-line">
               {t(sec.descKey)}
             </div>
-            <div className="flex flex-wrap gap-1.5 mb-8">
+            <div className="flex flex-wrap gap-1.5 mb-5">
               {(t.raw(sec.tagsKey) as string[]).map((tag) => (
                 <span
                   key={tag}
@@ -472,7 +472,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
         return (
           <div
             key={sec.num}
-            className="flex flex-col lg:flex-row lg:h-[560px] border-t-[0.5px] border-[#e8e8e8] overflow-hidden"
+            className="flex flex-col lg:flex-row lg:h-[460px] border-t-[0.5px] border-[#e8e8e8] overflow-hidden"
           >
             {isTextLeft ? (
               <>
