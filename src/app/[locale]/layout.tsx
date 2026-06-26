@@ -11,6 +11,7 @@ import ExitIntentPopup from "@/components/public/ExitIntentPopup";
 import PageTransition from "@/components/public/PageTransition";
 import PageViewTracker from "@/components/public/PageViewTracker";
 import { prisma } from "@/lib/prisma";
+import CustomCursor from "@/components/public/CustomCursor";
 
 // Always fetch fresh settings — never serve a cached layout with stale bg config
 // ISR: regenerate layout data every 120 seconds
@@ -109,6 +110,11 @@ export default async function LocaleLayout({
           <FloatingCTA />
           <ExitIntentPopup />
           <PageViewTracker />
+          <CustomCursor
+            cursorImage={settingsMap.cursorImage}
+            cursorEnabled={settingsMap.cursorEnabled === "true"}
+            cursorSize={parseInt(settingsMap.cursorSize) || 32}
+          />
         </NextIntlClientProvider>
       </body>
     </html>

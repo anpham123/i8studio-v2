@@ -172,3 +172,18 @@ main {
   animation: pan360 12s ease-in-out infinite;
   object-fit: cover;
 }
+
+/* Custom Cursor branding */
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
+  .custom-cursor-active iframe,
+  .custom-cursor-active input,
+  .custom-cursor-active textarea,
+  .custom-cursor-active select,
+  .custom-cursor-active [contenteditable] {
+    cursor: auto !important;
+  }
+}

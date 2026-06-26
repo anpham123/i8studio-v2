@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Type, CheckCircle2, RotateCcw, Save } from "lucide-react";
+import { Loader2, Type, CheckCircle2, RotateCcw, Save, MousePointer } from "lucide-react";
 
 interface BrandingSettings {
   logoImage: string;
@@ -13,11 +13,17 @@ interface BrandingSettings {
   aboutImageTeam: string;
   aboutImageOffice: string;
   aboutImageQuality: string;
+  cursorImage: string;
+  cursorEnabled: string;
+  cursorSize: string;
 }
 
 const HEIGHT_PRESETS = [32, 40, 48, 56, 64, 80, 100];
 const DEFAULT_HEIGHT = 48;
 const DEFAULT_FOOTER_HEIGHT = 40;
+
+const CURSOR_PRESETS = [24, 32, 40, 48, 56, 64];
+const DEFAULT_CURSOR_SIZE = 32;
 
 async function saveToAPI(patch: Partial<BrandingSettings>): Promise<boolean> {
   const res = await fetch("/api/settings", {
@@ -38,6 +44,9 @@ export default function BrandingSettingsPage() {
     aboutImageTeam: "",
     aboutImageOffice: "",
     aboutImageQuality: "",
+    cursorImage: "",
+    cursorEnabled: "false",
+    cursorSize: String(DEFAULT_CURSOR_SIZE),
   });
   const [loading, setLoading] = useState(true);
   const [savingHeight, setSavingHeight] = useState(false);
@@ -55,6 +64,9 @@ export default function BrandingSettingsPage() {
       aboutImageTeam: m.aboutImageTeam || "",
       aboutImageOffice: m.aboutImageOffice || "",
       aboutImageQuality: m.aboutImageQuality || "",
+      cursorImage: m.cursorImage || "",
+      cursorEnabled: m.cursorEnabled || "false",
+      cursorSize: m.cursorSize || String(DEFAULT_CURSOR_SIZE),
     });
     setLoading(false);
   }, []);
@@ -89,6 +101,30 @@ export default function BrandingSettingsPage() {
     else toast("Không thể lưu — vui lòng thử lại", "error");
   }, [toast]);
 
+  const handleCursorImageChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, cursorImage: url }));
+    const ok = await saveToAPI({ cursorImage: url });
+    if (ok) toast(url ? "Đã lưu ảnh con trỏ chuột" : "Đã xoá ảnh con trỏ chuột", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleCursorEnabledChange = useCallback(async (enabled: boolean) => {
+    const val = enabled ? "true" : "false";
+    setValues((v) => ({ ...v, cursorEnabled: val }));
+    const ok = await saveToAPI({ cursorEnabled: val });
+    if (ok) toast(enabled ? "Đã bật con trỏ chuột thương hiệu" : "Đã tắt con trỏ chuột thương hiệu", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const [savingCursorSize, setSavingCursorSize] = useState(false);
+  const saveCursorSize = async () => {
+    setSavingCursorSize(true);
+    const ok = await saveToAPI({ cursorSize: values.cursorSize });
+    setSavingCursorSize(false);
+    if (ok) toast(`Kích thước con trỏ chuột đã lưu: ${values.cursorSize}px`, "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  };
+
   const saveHeight = async () => {
     setSavingHeight(true);
     const ok = await saveToAPI({ logoHeight: values.logoHeight });
@@ -113,6 +149,9 @@ export default function BrandingSettingsPage() {
       aboutImageTeam: "",
       aboutImageOffice: "",
       aboutImageQuality: "",
+      cursorImage: "",
+      cursorEnabled: "false",
+      cursorSize: String(DEFAULT_CURSOR_SIZE),
     };
     setValues(defaults);
     const ok = await saveToAPI(defaults);
@@ -298,6 +337,98 @@ export default function BrandingSettingsPage() {
           </div>
         </div>
 
+        {/* === Custom Cursor Logo === */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
+          <div className="flex items-center gap-2 mb-1">
+            <MousePointer size={16} className="text-blue-600" />
+            <h3 className="font-semibold text-gray-800">Con trỏ chuột thương hiệu (Custom Cursor)</h3>
+            {values.cursorEnabled === "true" && values.cursorImage && (
+              <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Đang hoạt động
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500">
+            Thay thế con trỏ chuột mặc định bằng ảnh logo/icon thương hiệu trên tất cả trang public (chỉ hoạt động trên thiết bị di chuột để đảm bảo tối ưu trải nghiệm). Nên dùng ảnh định dạng PNG hoặc SVG nền trong suốt, kích thước tỷ lệ vuông (đẹp nhất từ 24px - 48px).
+          </p>
+
+          {/* Toggle Enable Custom Cursor */}
+          <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+            <div>
+              <span className="text-sm font-medium text-gray-700">Trạng thái con trỏ chuột</span>
+              <p className="text-xs text-gray-400">Bật hoặc tắt con trỏ chuột thương hiệu</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={values.cursorEnabled === "true"}
+                onChange={(e) => handleCursorEnabledChange(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          <ImageUpload
+            value={values.cursorImage}
+            onChange={handleCursorImageChange}
+            label="Ảnh con trỏ chuột (PNG/SVG)"
+          />
+
+          {/* Cursor size control */}
+          <div className="border-t border-gray-100 pt-5">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Kích thước con trỏ chuột (px)</h4>
+            <div className="flex items-center gap-4 mb-3">
+              <input
+                type="range"
+                min="16"
+                max="80"
+                step="1"
+                value={parseInt(values.cursorSize, 10) || DEFAULT_CURSOR_SIZE}
+                onChange={(e) => setValues((v) => ({ ...v, cursorSize: e.target.value }))}
+                className="flex-1 h-2 rounded-full cursor-pointer accent-blue-600"
+              />
+              <input
+                type="number"
+                min="16"
+                max="120"
+                value={parseInt(values.cursorSize, 10) || DEFAULT_CURSOR_SIZE}
+                onChange={(e) => setValues((v) => ({ ...v, cursorSize: e.target.value }))}
+                className="w-20 text-center border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-500">px</span>
+            </div>
+
+            {/* Presets */}
+            <div className="grid grid-cols-6 gap-2 mb-4">
+              {CURSOR_PRESETS.map((px) => (
+                <button
+                  key={px}
+                  type="button"
+                  onClick={() => setValues((v) => ({ ...v, cursorSize: String(px) }))}
+                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    (parseInt(values.cursorSize, 10) || DEFAULT_CURSOR_SIZE) === px
+                      ? "border-blue-400 bg-blue-50 text-blue-700"
+                      : "border-gray-200 text-gray-500 hover:border-gray-300"
+                  }`}
+                >
+                  {px}px
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={saveCursorSize}
+              disabled={savingCursorSize}
+              className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {savingCursorSize ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              Lưu kích thước con trỏ
+            </button>
+          </div>
+        </div>
+
         {/* === About Us Images === */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
           <div>
@@ -353,6 +484,9 @@ export default function BrandingSettingsPage() {
             <div><span className="text-gray-400">aboutImageTeam:</span> {values.aboutImageTeam || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageOffice:</span> {values.aboutImageOffice || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageQuality:</span> {values.aboutImageQuality || "(trống)"}</div>
+            <div><span className="text-gray-400">cursorImage:</span> {values.cursorImage || "(trống)"}</div>
+            <div><span className="text-gray-400">cursorEnabled:</span> {values.cursorEnabled}</div>
+            <div><span className="text-gray-400">cursorSize:</span> {values.cursorSize}</div>
           </div>
           <button type="button" onClick={fetchSettings} className="mt-3 text-blue-600 underline text-xs">
             Tải lại từ DB
