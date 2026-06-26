@@ -400,13 +400,13 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
     <div className="bg-white">
       {/* ========== HERO ========== */}
       <div className="text-center pt-8 pb-6 px-6 sm:px-[60px]">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-[#aaa] mb-4">
+        <p className="text-[11px] uppercase tracking-[0.16em] text-[#aaa] mb-2">
           {t("label")}
         </p>
-        <h1 className="text-[36px] sm:text-[42px] font-light tracking-[0.04em] text-[#111] mb-3">
+        <h1 className="text-[36px] sm:text-[42px] font-light tracking-[0.04em] text-[#111] mb-2">
           {t("title")}
         </h1>
-        <p className="text-[13px] text-[#888] leading-[2]">
+        <p className="text-[13px] text-[#888] leading-[1.7]">
           {t("heroLine1")}
           <br />
           {t("heroLine2")}
