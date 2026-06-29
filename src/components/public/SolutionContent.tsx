@@ -584,7 +584,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
             className="flex items-center justify-center w-full h-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full max-w-[90vw] max-h-[90vh] bg-neutral-900 p-2 sm:p-4 rounded-lg border border-neutral-800 shadow-2xl overflow-hidden flex items-center justify-center">
+            <div className="w-full h-full max-w-[90vw] max-h-[90vh] bg-neutral-900 p-2 sm:p-4 rounded-lg border border-neutral-800 shadow-2xl overflow-hidden flex items-center justify-center">
               <BeforeAfterSlider
                 beforeImage={compositeModal.beforeImage}
                 afterImage={compositeModal.afterImage}
