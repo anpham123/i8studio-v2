@@ -17,6 +17,13 @@ interface HeroEditorialProps {
   limit?: number;
 }
 
+interface MasonryItem {
+  flex: number;
+  aspect: string;
+  maxHeight?: string;
+  tileIdx: number;
+}
+
 /* Fallback palette when no image */
 const PLACEHOLDER_COLORS = [
   "#c8c2b8", "#b8b0a4", "#a8a498", "#d4cec4",
@@ -39,7 +46,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
   ],
   [
     { flex: 1, aspect: "16/9" },
@@ -70,7 +77,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
   ],
   [
     { flex: 1, aspect: "16/9" },
@@ -101,7 +108,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
   ],
   [
     { flex: 1, aspect: "16/9" },
@@ -133,18 +140,20 @@ function GridTile({
   index,
   fallbackColor,
   aspect,
+  maxHeight,
 }: {
   image?: HeroImage;
   index: number;
   fallbackColor: string;
   aspect: string;
+  maxHeight?: string;
 }) {
   const hasImage = image?.url;
 
   return (
     <motion.div
       className="relative overflow-hidden rounded-[3px]"
-      style={{ aspectRatio: aspect }}
+      style={{ aspectRatio: aspect, maxHeight: maxHeight || undefined }}
       initial={{ opacity: 0, y: 30, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -255,13 +264,14 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
 
             return (
               <div key={rowIdx} className="flex gap-2" style={{ alignItems: "stretch" }}>
-                {rowItems.map((item) => (
+                {rowItems.map((item: MasonryItem) => (
                   <div key={item.tileIdx} style={{ flex: item.flex, minWidth: 0 }}>
                     <GridTile
                       image={images[item.tileIdx]}
                       index={item.tileIdx}
                       fallbackColor={PLACEHOLDER_COLORS[item.tileIdx % PLACEHOLDER_COLORS.length]}
                       aspect={item.aspect}
+                      maxHeight={item.maxHeight}
                     />
                   </div>
                 ))}
