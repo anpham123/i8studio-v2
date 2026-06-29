@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { createPortal } from "react-dom";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 import Lightbox from "@/components/public/Lightbox";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Slide & Section data                                               */
@@ -161,11 +161,13 @@ function HorizontalScrollGallery({
   isComposite = false,
   onVrClick,
   onImageClick,
+  onCompositeClick,
 }: {
   slides: Slide[];
   isComposite?: boolean;
   onVrClick?: (url: string, title: string) => void;
   onImageClick?: (url: string, title: string) => void;
+  onCompositeClick?: (before: string, after: string, title: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showLeftBtn, setShowLeftBtn] = useState(false);
@@ -220,6 +222,8 @@ function HorizontalScrollGallery({
               onClick={() => {
                 if (slide.vrUrl && onVrClick) {
                   onVrClick(slide.vrUrl, slide.label);
+                } else if (isComposite && slide.beforeImageUrl && slide.imageUrl && onCompositeClick) {
+                  onCompositeClick(slide.beforeImageUrl, slide.imageUrl, slide.label);
                 } else if (slide.videoUrl && onImageClick) {
                   onImageClick(slide.videoUrl, slide.label);
                 } else if (slide.imageUrl && onImageClick) {
@@ -371,11 +375,26 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
   // VR modal state
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
+  const [compositeModal, setCompositeModal] = useState<{ beforeImage: string; afterImage: string; title: string } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Scroll lock + ESC key handler for full-screen composite modal
+  useEffect(() => {
+    if (!compositeModal) return;
+    document.body.style.overflow = "hidden";
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCompositeModal(null);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [compositeModal]);
 
   return (
     <div className="bg-white">
@@ -461,6 +480,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
                     isComposite={sec.workType === 'composite'}
                     onVrClick={(url, title) => setVrModal({ url, title })}
                     onImageClick={(src, alt) => setLightbox({ src, alt, isVideo: isDirectVideo(src) || getYouTubeId(src) !== null })}
+                    onCompositeClick={(before, after, title) => setCompositeModal({ beforeImage: before, afterImage: after, title })}
                   />
                 </div>
               </>
@@ -472,6 +492,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
                     isComposite={sec.workType === 'composite'}
                     onVrClick={(url, title) => setVrModal({ url, title })}
                     onImageClick={(src, alt) => setLightbox({ src, alt, isVideo: isDirectVideo(src) || getYouTubeId(src) !== null })}
+                    onCompositeClick={(before, after, title) => setCompositeModal({ beforeImage: before, afterImage: after, title })}
                   />
                 </div>
                 <div className="order-1 lg:order-2 w-full lg:w-[37%] shrink-0 px-8 sm:px-14 py-10 flex flex-col justify-center">
@@ -539,6 +560,42 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           isVideo={lightbox.isVideo}
           onClose={() => setLightbox(null)}
         />
+      )}
+
+      {/* ========== COMPOSITE FULLSCREEN MODAL ========== */}
+      {mounted && compositeModal && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center p-4 sm:p-8 select-none"
+          onClick={() => setCompositeModal(null)}
+        >
+          <button 
+            onClick={(e) => { e.stopPropagation(); setCompositeModal(null); }}
+            className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white z-[10000] transition"
+            aria-label="Close"
+          >
+            <X size={24} />
+          </button>
+          
+          <div 
+            className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-neutral-900 p-2 sm:p-4 rounded-lg border border-neutral-800 shadow-2xl">
+              <BeforeAfterSlider
+                beforeImage={compositeModal.beforeImage}
+                afterImage={compositeModal.afterImage}
+                beforeLabel={locale === "ja" ? "BEFORE" : "BEFORE"}
+                afterLabel={locale === "ja" ? "AFTER" : "AFTER"}
+                aspectRatio="16/10"
+                initialPosition={50}
+              />
+            </div>
+            <p className="text-center text-white/50 text-[11px] uppercase tracking-[0.24em] mt-6">
+              {locale === "ja" ? "← ドラッグして比較 →" : "Drag the handle to compare ↔"}
+            </p>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

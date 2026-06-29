@@ -36,6 +36,8 @@ export default function BeforeAfterSlider({
   const [isDragging, setIsDragging] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const hasDraggedRef = useRef<boolean>(false);
 
   // Aspect ratio check & warning
   useEffect(() => {
@@ -133,12 +135,23 @@ export default function BeforeAfterSlider({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only left click
     setIsDragging(true);
+    hasDraggedRef.current = false;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
     updatePosition(e.clientX, e.clientY);
   };
 
   useEffect(() => {
     if (!isDragging) return;
-    const handleMove = (e: MouseEvent) => updatePosition(e.clientX, e.clientY);
+    const handleMove = (e: MouseEvent) => {
+      if (dragStartRef.current) {
+        const dx = e.clientX - dragStartRef.current.x;
+        const dy = e.clientY - dragStartRef.current.y;
+        if (Math.sqrt(dx * dx + dy * dy) > 5) {
+          hasDraggedRef.current = true;
+        }
+      }
+      updatePosition(e.clientX, e.clientY);
+    };
     const handleUp = () => setIsDragging(false);
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", handleUp);
@@ -152,12 +165,21 @@ export default function BeforeAfterSlider({
   const handleTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
     setIsDragging(true);
+    hasDraggedRef.current = false;
+    dragStartRef.current = { x: t.clientX, y: t.clientY };
     updatePosition(t.clientX, t.clientY);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const t = e.touches[0];
+    if (dragStartRef.current) {
+      const dx = t.clientX - dragStartRef.current.x;
+      const dy = t.clientY - dragStartRef.current.y;
+      if (Math.sqrt(dx * dx + dy * dy) > 5) {
+        hasDraggedRef.current = true;
+      }
+    }
     updatePosition(t.clientX, t.clientY);
   };
 
@@ -165,6 +187,11 @@ export default function BeforeAfterSlider({
 
   // Click-to-jump handler
   const handleClick = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      return;
+    }
     if (!isDragging) {
       updatePosition(e.clientX, e.clientY);
     }
