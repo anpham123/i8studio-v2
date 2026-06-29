@@ -377,9 +377,13 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
   const [compositeModal, setCompositeModal] = useState<{ beforeImage: string; afterImage: string; title: string } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [vh, setVh] = useState(typeof window !== "undefined" ? window.innerHeight : 800);
 
   useEffect(() => {
     setMounted(true);
+    const handleResize = () => setVh(window.innerHeight);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Scroll lock + ESC key handler for full-screen composite modal
@@ -577,24 +581,25 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
           </button>
           
           <div 
-            className="w-full max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw]"
+            className="flex items-center justify-center w-full h-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-neutral-900 p-2 sm:p-4 rounded-lg border border-neutral-800 shadow-2xl">
+            <div className="w-full max-w-[90vw] max-h-[90vh] bg-neutral-900 p-2 sm:p-4 rounded-lg border border-neutral-800 shadow-2xl overflow-hidden flex items-center justify-center">
               <BeforeAfterSlider
                 beforeImage={compositeModal.beforeImage}
                 afterImage={compositeModal.afterImage}
                 beforeLabel={locale === "ja" ? "BEFORE" : "BEFORE"}
                 afterLabel={locale === "ja" ? "AFTER" : "AFTER"}
                 autoAspect={true}
-                maxHeight={800}
+                maxHeight={Math.floor(vh * 0.85)}
                 initialPosition={50}
               />
             </div>
-            <p className="text-center text-white/50 text-[11px] uppercase tracking-[0.24em] mt-6">
-              {locale === "ja" ? "← ドラッグして比較 →" : "Drag the handle to compare ↔"}
-            </p>
           </div>
+          
+          <p className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 text-[11px] uppercase tracking-[0.24em] pointer-events-none z-[10000]">
+            {locale === "ja" ? "← ドラッグして比較 →" : "Drag the handle to compare ↔"}
+          </p>
         </div>,
         document.body
       )}
