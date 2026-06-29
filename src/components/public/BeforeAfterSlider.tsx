@@ -47,6 +47,19 @@ export default function BeforeAfterSlider({
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const [detectedRatio, setDetectedRatio] = useState<string | null>(null);
+  const [viewportRatio, setViewportRatio] = useState(1.6);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const updateRatio = () => {
+      const allowedW = window.innerWidth * 0.9;
+      const allowedH = window.innerHeight * 0.85;
+      setViewportRatio(allowedW / allowedH);
+    };
+    updateRatio();
+    window.addEventListener("resize", updateRatio);
+    return () => window.removeEventListener("resize", updateRatio);
+  }, []);
 
   // Aspect ratio check & warning + auto-detect ratio
   useEffect(() => {
@@ -286,7 +299,21 @@ export default function BeforeAfterSlider({
     containerClass += " w-full h-full";
   } else if (autoAspect) {
     containerStyle.aspectRatio = detectedRatio || "16/10";
-    if (preferHeightOverWidth) {
+    
+    let isHeightConstrained = preferHeightOverWidth;
+    if (detectedRatio && !preferHeightOverWidth) {
+      const [wStr, hStr] = detectedRatio.split("/");
+      const imgW = parseFloat(wStr);
+      const imgH = parseFloat(hStr);
+      if (imgW && imgH) {
+        const imgRatio = imgW / imgH;
+        if (imgRatio < viewportRatio) {
+          isHeightConstrained = true;
+        }
+      }
+    }
+
+    if (isHeightConstrained) {
       containerStyle.height = "100%";
       containerStyle.width = "auto";
       containerClass += " h-full";
