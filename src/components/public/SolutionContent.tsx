@@ -420,7 +420,7 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               ))}
             </div>
             <Link
-              href={`/${locale}/works`}
+              href={sec.workType === "composite" ? `/${locale}/solution/photo-composite` : `/${locale}/works`}
               className="group inline-flex items-center gap-2.5 self-start"
             >
               <span className="text-[12px] text-[#111] tracking-[0.08em]">

@@ -222,3 +222,19 @@ model BlogPost {
   updatedAt        DateTime @updatedAt
 }
 
+model CompositeExample {
+  id          String   @id @default(cuid())
+  title       String
+  titleJp     String?
+  category    String   // e.g. "Residential", "Commercial"
+  location    String?
+  beforeImage String   // URL to before/site photo
+  afterImage  String   // URL to after/composite
+  isFeatured  Boolean  @default(false) // featured = shows in the hero slider position
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+

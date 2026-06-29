@@ -9,5 +9,10 @@ if [ -f "./prisma/seed-blog.js" ]; then
   node ./prisma/seed-blog.js
 fi
 
+if [ -f "./prisma/seed-composite.js" ]; then
+  echo "==> Seeding composite data..."
+  node ./prisma/seed-composite.js
+fi
+
 echo "==> Starting Next.js server..."
 exec node server.js

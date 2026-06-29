@@ -143,3 +143,16 @@ export const BlogPostSchema = z.object({
   locale: z.enum(["ja", "en"]).optional().default("ja"),
 });
 
+export const CompositeExampleSchema = z.object({
+  title: z.string().min(1).max(300),
+  titleJp: z.string().max(300).optional().default(""),
+  category: z.string().min(1).max(100),
+  location: z.string().max(300).optional().default(""),
+  beforeImage: z.string().min(1),
+  afterImage: z.string().min(1),
+  isFeatured: z.boolean().optional().default(false),
+  order: z.number().int().optional().default(0),
+  isPublished: z.boolean().optional().default(true),
+});
+
+

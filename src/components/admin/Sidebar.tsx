@@ -46,6 +46,7 @@ const menuGroups: MenuGroup[] = [
     title: "DỊCH VỤ",
     items: [
       { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
+      { href: "/admin/composite-examples", label: "Photo Composite", icon: Image },
       { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
       { href: "/admin/qa", label: "Q&A", icon: HelpCircle },
     ],
