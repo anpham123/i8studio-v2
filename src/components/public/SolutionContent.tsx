@@ -270,12 +270,13 @@ function HorizontalScrollGallery({
                 </div>
               ) : slide.imageUrl ? (
                 isComposite && slide.beforeImageUrl ? (
-                  <div className="h-full aspect-video relative">
+                  <div className="h-full aspect-[16/10] relative">
                     <BeforeAfterSlider
                       before={slide.beforeImageUrl}
                       after={slide.imageUrl}
                       beforeLabel="Before"
                       afterLabel="After"
+                      fillContainer={true}
                     />
                   </div>
                 ) : (

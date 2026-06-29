@@ -14,6 +14,7 @@ type Props = {
   orientation?: "horizontal" | "vertical"; // default: "horizontal"
   initialPosition?: number; // 0-100, default: 50
   aspectRatio?: string; // e.g. "16/10", "4/3", "1/1" — default "16/10" for new
+  fillContainer?: boolean;
 };
 
 export default function BeforeAfterSlider({
@@ -28,6 +29,7 @@ export default function BeforeAfterSlider({
   orientation = "horizontal",
   initialPosition = 50,
   aspectRatio, // Keep optional for backward compatibility
+  fillContainer = false,
 }: Props) {
   const finalBeforeImage = beforeImage || before || "";
   const finalAfterImage = afterImage || after || "";
@@ -271,10 +273,10 @@ export default function BeforeAfterSlider({
       aria-valuemax={100}
       aria-label="Before/After comparison slider"
       tabIndex={0}
-      className={`relative w-full overflow-hidden select-none bg-gray-100 outline-none ${
+      className={`relative overflow-hidden select-none bg-gray-100 outline-none ${
         isHorizontal ? "cursor-ew-resize" : "cursor-ns-resize"
-      } ${aspectRatio ? "" : "h-full"}`}
-      style={aspectRatio ? { aspectRatio } : undefined}
+      } ${fillContainer ? "w-full h-full" : "w-full h-full"}`}
+      style={fillContainer ? undefined : (aspectRatio ? { aspectRatio } : undefined)}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
