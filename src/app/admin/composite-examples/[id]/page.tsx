@@ -83,6 +83,8 @@ export default function EditCompositeExamplePage() {
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [aspectRatioWarning, setAspectRatioWarning] = useState("");
+  const [beforeDimensions, setBeforeDimensions] = useState<{w: number, h: number} | null>(null);
+  const [afterDimensions, setAfterDimensions] = useState<{w: number, h: number} | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -111,44 +113,51 @@ export default function EditCompositeExamplePage() {
       });
   }, [id, toast]);
 
-  // Monitor image aspect ratios
+  // Monitor Before Image dimensions
   useEffect(() => {
-    if (!form.beforeImage || !form.afterImage) {
-      setAspectRatioWarning("");
+    if (!form.beforeImage) {
+      setBeforeDimensions(null);
       return;
     }
-    const imgBefore = new Image();
-    const imgAfter = new Image();
-    let beforeRatio = 0;
-    let afterRatio = 0;
+    const img = new Image();
+    img.onload = () => {
+      setBeforeDimensions({ w: img.naturalWidth, h: img.naturalHeight });
+    };
+    img.src = String(form.beforeImage);
+  }, [form.beforeImage]);
 
-    const checkRatios = () => {
-      if (beforeRatio && afterRatio) {
-        const diff = Math.abs(beforeRatio - afterRatio);
-        if (diff > 0.03) { // 3% tolerance
-          setAspectRatioWarning(
-            `Cảnh báo: Tỷ lệ của ảnh Trước (${beforeRatio.toFixed(2)}) và ảnh Sau (${afterRatio.toFixed(
-              2
-            )}) không khớp nhau. Slider hoạt động tốt nhất khi 2 ảnh có cùng tỷ lệ kích thước.`
-          );
-        } else {
-          setAspectRatioWarning("");
-        }
+  // Monitor After Image dimensions
+  useEffect(() => {
+    if (!form.afterImage) {
+      setAfterDimensions(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      setAfterDimensions({ w: img.naturalWidth, h: img.naturalHeight });
+    };
+    img.src = String(form.afterImage);
+  }, [form.afterImage]);
+
+  // Monitor aspect ratio consistency
+  useEffect(() => {
+    if (beforeDimensions && afterDimensions) {
+      const beforeRatio = beforeDimensions.w / beforeDimensions.h;
+      const afterRatio = afterDimensions.w / afterDimensions.h;
+      const diff = Math.abs(beforeRatio - afterRatio);
+      if (diff > 0.05) { // 5% tolerance
+        setAspectRatioWarning(
+          `Cảnh báo: Tỷ lệ kích thước của ảnh Trước (${beforeRatio.toFixed(2)}) và ảnh Sau (${afterRatio.toFixed(
+            2
+          )}) không khớp nhau. Slider hoạt động tốt nhất khi hai ảnh có cùng tỷ lệ.`
+        );
+      } else {
+        setAspectRatioWarning("");
       }
-    };
-
-    imgBefore.onload = () => {
-      beforeRatio = imgBefore.naturalWidth / imgBefore.naturalHeight;
-      checkRatios();
-    };
-    imgAfter.onload = () => {
-      afterRatio = imgAfter.naturalWidth / imgAfter.naturalHeight;
-      checkRatios();
-    };
-
-    imgBefore.src = String(form.beforeImage);
-    imgAfter.src = String(form.afterImage);
-  }, [form.beforeImage, form.afterImage]);
+    } else {
+      setAspectRatioWarning("");
+    }
+  }, [beforeDimensions, afterDimensions]);
 
   const save = async () => {
     if (!form.title) {
@@ -329,6 +338,11 @@ export default function EditCompositeExamplePage() {
               Ảnh Gốc (Before/Site Photo) *
             </h3>
             <ImageUpload label="" value={String(form.beforeImage || "")} onChange={(url) => set("beforeImage", url)} />
+            {beforeDimensions && (
+              <p className="text-xs text-gray-500 mt-2">
+                Kích thước: {beforeDimensions.w} × {beforeDimensions.h} (Tỷ lệ: {(beforeDimensions.w / beforeDimensions.h).toFixed(2)})
+              </p>
+            )}
           </div>
 
           {/* Card: After Image */}
@@ -338,6 +352,11 @@ export default function EditCompositeExamplePage() {
               Ảnh Ghép (After/Composite) *
             </h3>
             <ImageUpload label="" value={String(form.afterImage || "")} onChange={(url) => set("afterImage", url)} />
+            {afterDimensions && (
+              <p className="text-xs text-gray-500 mt-2">
+                Kích thước: {afterDimensions.w} × {afterDimensions.h} (Tỷ lệ: {(afterDimensions.w / afterDimensions.h).toFixed(2)})
+              </p>
+            )}
           </div>
         </div>
       </div>

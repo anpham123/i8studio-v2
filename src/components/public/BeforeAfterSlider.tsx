@@ -15,6 +15,9 @@ type Props = {
   initialPosition?: number; // 0-100, default: 50
   aspectRatio?: string; // e.g. "16/10", "4/3", "1/1" — default "16/10" for new
   fillContainer?: boolean;
+  autoAspect?: boolean;
+  maxHeight?: number;
+  preferHeightOverWidth?: boolean;
 };
 
 export default function BeforeAfterSlider({
@@ -30,6 +33,9 @@ export default function BeforeAfterSlider({
   initialPosition = 50,
   aspectRatio, // Keep optional for backward compatibility
   fillContainer = false,
+  autoAspect = false,
+  maxHeight = 600,
+  preferHeightOverWidth = false,
 }: Props) {
   const finalBeforeImage = beforeImage || before || "";
   const finalAfterImage = afterImage || after || "";
@@ -40,8 +46,9 @@ export default function BeforeAfterSlider({
   const containerRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
+  const [detectedRatio, setDetectedRatio] = useState<string | null>(null);
 
-  // Aspect ratio check & warning
+  // Aspect ratio check & warning + auto-detect ratio
   useEffect(() => {
     if (!finalBeforeImage || !finalAfterImage) return;
 
@@ -70,12 +77,15 @@ export default function BeforeAfterSlider({
     };
     imgAfter.onload = () => {
       afterRatio = imgAfter.naturalWidth / imgAfter.naturalHeight;
+      if (autoAspect) {
+        setDetectedRatio(`${imgAfter.naturalWidth}/${imgAfter.naturalHeight}`);
+      }
       checkRatios();
     };
 
     imgBefore.src = finalBeforeImage;
     imgAfter.src = finalAfterImage;
-  }, [finalBeforeImage, finalAfterImage]);
+  }, [finalBeforeImage, finalAfterImage, autoAspect]);
 
   // First-load hint animation: 50 -> 43 -> 57 -> 50 on mount if no interaction
   useEffect(() => {
@@ -264,6 +274,37 @@ export default function BeforeAfterSlider({
     ? { left: `${position}%`, top: 0, bottom: 0, width: "2px", transform: "translateX(-50%)" }
     : { top: `${position}%`, left: 0, right: 0, height: "2px", transform: "translateY(-50%)" };
 
+  const containerStyle: React.CSSProperties = {};
+  let containerClass = "relative overflow-hidden select-none bg-gray-100 outline-none";
+  if (isHorizontal) {
+    containerClass += " cursor-ew-resize";
+  } else {
+    containerClass += " cursor-ns-resize";
+  }
+
+  if (fillContainer) {
+    containerClass += " w-full h-full";
+  } else if (autoAspect) {
+    containerStyle.aspectRatio = detectedRatio || "16/10";
+    if (preferHeightOverWidth) {
+      containerStyle.height = "100%";
+      containerStyle.width = "auto";
+      containerClass += " h-full";
+    } else {
+      containerStyle.width = "100%";
+      containerStyle.height = "auto";
+    }
+    if (maxHeight) {
+      containerStyle.maxHeight = `${maxHeight}px`;
+    }
+  } else if (aspectRatio) {
+    containerStyle.aspectRatio = aspectRatio;
+    containerClass += " w-full";
+  } else {
+    containerStyle.aspectRatio = "16/10"; // fallback
+    containerClass += " w-full";
+  }
+
   return (
     <div
       ref={containerRef}
@@ -273,10 +314,8 @@ export default function BeforeAfterSlider({
       aria-valuemax={100}
       aria-label="Before/After comparison slider"
       tabIndex={0}
-      className={`relative overflow-hidden select-none bg-gray-100 outline-none ${
-        isHorizontal ? "cursor-ew-resize" : "cursor-ns-resize"
-      } ${fillContainer ? "w-full h-full" : "w-full h-full"}`}
-      style={fillContainer ? undefined : (aspectRatio ? { aspectRatio } : undefined)}
+      className={containerClass}
+      style={containerStyle}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}

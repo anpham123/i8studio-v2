@@ -270,15 +270,14 @@ function HorizontalScrollGallery({
                 </div>
               ) : slide.imageUrl ? (
                 isComposite && slide.beforeImageUrl ? (
-                  <div className="h-full aspect-[16/10] relative">
-                    <BeforeAfterSlider
-                      before={slide.beforeImageUrl}
-                      after={slide.imageUrl}
-                      beforeLabel="Before"
-                      afterLabel="After"
-                      fillContainer={true}
-                    />
-                  </div>
+                  <BeforeAfterSlider
+                    before={slide.beforeImageUrl}
+                    after={slide.imageUrl}
+                    beforeLabel="Before"
+                    afterLabel="After"
+                    autoAspect={true}
+                    preferHeightOverWidth={true}
+                  />
                 ) : (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -587,7 +586,8 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
                 afterImage={compositeModal.afterImage}
                 beforeLabel={locale === "ja" ? "BEFORE" : "BEFORE"}
                 afterLabel={locale === "ja" ? "AFTER" : "AFTER"}
-                aspectRatio="16/10"
+                autoAspect={true}
+                maxHeight={800}
                 initialPosition={50}
               />
             </div>

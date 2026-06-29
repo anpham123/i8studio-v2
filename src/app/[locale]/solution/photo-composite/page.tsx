@@ -100,7 +100,8 @@ export default async function PhotoCompositePage({
             afterLabel={locale === "ja" ? "合成後 (COMPOSITE)" : "COMPOSITE"}
             beforeAlt="Original Site Photograph"
             afterAlt="Final Photo Composite Render"
-            aspectRatio="16/10"
+            autoAspect={true}
+            maxHeight={750}
           />
           <div className="mt-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 px-1">
             <div>
@@ -154,7 +155,7 @@ export default async function PhotoCompositePage({
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-start">
               {gridExamples.map((ex) => {
                 const exTitle = locale === "ja" && ex.titleJp ? ex.titleJp : ex.title;
                 return (
@@ -164,7 +165,8 @@ export default async function PhotoCompositePage({
                       afterImage={ex.afterImage}
                       beforeLabel={locale === "ja" ? "Before" : "ORIGINAL"}
                       afterLabel={locale === "ja" ? "After" : "COMPOSITE"}
-                      aspectRatio="4/3"
+                      autoAspect={true}
+                      maxHeight={500}
                     />
                     <div className="mt-4 px-1">
                       <p className="text-[14px] text-gray-900 font-semibold tracking-wide">{exTitle}</p>
