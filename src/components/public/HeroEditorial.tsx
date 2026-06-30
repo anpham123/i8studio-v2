@@ -133,16 +133,6 @@ const MASONRY_ROWS = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Helper to get context-appropriate max-width for image sizes      */
-/* ------------------------------------------------------------------ */
-function getMaxWidth(aspect: string): string {
-  if (aspect === "21/9") return "1200px";
-  if (aspect === "16/9") return "900px";
-  if (aspect === "3/5") return "500px";
-  return "none";
-}
-
-/* ------------------------------------------------------------------ */
 /*  Staggered reveal for each tile                                     */
 /* ------------------------------------------------------------------ */
 function GridTile({
@@ -151,14 +141,12 @@ function GridTile({
   fallbackColor,
   aspect,
   maxHeight,
-  maxWidth,
 }: {
   image?: HeroImage;
   index: number;
   fallbackColor: string;
   aspect: string;
   maxHeight?: string;
-  maxWidth?: string;
 }) {
   const hasImage = image?.url;
 
@@ -168,7 +156,6 @@ function GridTile({
       style={{
         aspectRatio: aspect,
         maxHeight: maxHeight || undefined,
-        maxWidth: maxWidth || undefined,
       }}
       initial={{ opacity: 0, y: 30, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -292,7 +279,6 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
                       fallbackColor={PLACEHOLDER_COLORS[item.tileIdx % PLACEHOLDER_COLORS.length]}
                       aspect={item.aspect}
                       maxHeight={item.maxHeight}
-                      maxWidth={getMaxWidth(item.aspect)}
                     />
                   </div>
                 ))}
