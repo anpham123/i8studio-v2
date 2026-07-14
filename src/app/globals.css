@@ -149,7 +149,6 @@ main {
 }
 .blog-content strong {
   font-weight: 500;
-  color: var(--ink);
 }
 .blog-content em {
   font-style: italic;

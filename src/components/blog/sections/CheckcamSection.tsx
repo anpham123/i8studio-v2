@@ -21,7 +21,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
   const checkLabel = locale === "ja" ? "確認できること" : "What can be confirmed";
   const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
   return (
-    <section className="bg-[#faf8f3] text-[var(--ink)] py-[70px] sm:py-[100px]">
+    <section className="bg-[#faf8f3] py-[70px] sm:py-[100px]">
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-12 sm:mb-16">
@@ -42,7 +42,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
               )}
             </div>
             <h2
-              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4]"
+              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
               dangerouslySetInnerHTML={{ __html: data.title }}
             />
           </div>
