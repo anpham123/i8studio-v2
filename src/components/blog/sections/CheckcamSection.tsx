@@ -80,56 +80,64 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
           </div>
         )}
 
-        {/* 2-column body + tags */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
-          <div className="blog-content">
-            {data.body.map((p, i) => (
-              <p
-                key={i}
-                className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
-                dangerouslySetInnerHTML={{ __html: p }}
-              />
-            ))}
-          </div>
-          {data.tags && (
-            <div>
-              {data.tags.ok && data.tags.ok.length > 0 && (
-                <div className="mb-6">
-                  <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                    {data.tags.label || checkLabel}
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {data.tags.ok.map((t, i) => (
-                      <span
-                        key={i}
-                        className="border border-[var(--accent)]/40 text-[var(--accent-light)] text-[12px] px-3 py-1 rounded-sm"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {data.tags.ng && data.tags.ng.length > 0 && (
+        {/* Body + tags */}
+        {(() => {
+          const hasTags = data.tags && (
+            (data.tags.ok && data.tags.ok.length > 0) ||
+            (data.tags.ng && data.tags.ng.length > 0)
+          );
+          return (
+            <div className={hasTags ? "grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12" : ""}>
+              <div className="blog-content">
+                {data.body.map((p, i) => (
+                  <p
+                    key={i}
+                    className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
+                    dangerouslySetInnerHTML={{ __html: p }}
+                  />
+                ))}
+              </div>
+              {hasTags && data.tags && (
                 <div>
-                  <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                    {missingLabel}
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {data.tags.ng.map((t, i) => (
-                      <span
-                        key={i}
-                        className="border border-red-400/30 text-red-300/80 text-[12px] px-3 py-1 rounded-sm"
-                      >
-                        {t}
+                  {data.tags.ok && data.tags.ok.length > 0 && (
+                    <div className="mb-6">
+                      <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
+                        {data.tags.label || checkLabel}
                       </span>
-                    ))}
-                  </div>
+                      <div className="flex flex-wrap gap-2">
+                        {data.tags.ok.map((t, i) => (
+                          <span
+                            key={i}
+                            className="border border-[var(--accent)]/40 text-[var(--accent-light)] text-[12px] px-3 py-1 rounded-sm"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {data.tags.ng && data.tags.ng.length > 0 && (
+                    <div>
+                      <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
+                        {missingLabel}
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {data.tags.ng.map((t, i) => (
+                          <span
+                            key={i}
+                            className="border border-red-400/30 text-red-300/80 text-[12px] px-3 py-1 rounded-sm"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
