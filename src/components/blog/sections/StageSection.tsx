@@ -32,7 +32,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
           {/* Text column */}
           <div>
-            <div className="font-display text-[60px] sm:text-[80px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
+            <div className="font-display text-[40px] sm:text-[52px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
               {data.num}
             </div>
 
@@ -50,7 +50,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
             </div>
 
             <h2
-              className="font-serif text-[26px] sm:text-[32px] font-medium leading-[1.4] text-[var(--ink)] mb-8"
+              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-6"
               dangerouslySetInnerHTML={{ __html: data.title }}
             />
 

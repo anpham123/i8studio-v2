@@ -25,7 +25,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-12 sm:mb-16">
-          <div className="font-display text-[80px] sm:text-[120px] leading-none text-[var(--accent)]/40 font-bold tracking-tight">
+          <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight">
             {data.num}
           </div>
           <div className="flex-1">
@@ -42,7 +42,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
               )}
             </div>
             <h2
-              className="font-serif text-[28px] sm:text-[36px] font-medium leading-[1.4]"
+              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4]"
               dangerouslySetInnerHTML={{ __html: data.title }}
             />
           </div>
