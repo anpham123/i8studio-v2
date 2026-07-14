@@ -14,9 +14,16 @@ import type { SectionData } from "@/components/blog/sections/CheckcamSection";
 type Props = { params: { locale: string; slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await prisma.blogPost.findFirst({
-    where: { slug: params.slug, isPublished: true },
+  // First try to find post matching current locale
+  let post = await prisma.blogPost.findFirst({
+    where: { slug: params.slug, isPublished: true, locale: params.locale },
   });
+  // Fallback: find any published post with this slug
+  if (!post) {
+    post = await prisma.blogPost.findFirst({
+      where: { slug: params.slug, isPublished: true },
+    });
+  }
   if (!post) return {};
 
   return buildMetadata({
@@ -30,11 +37,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
-  const { slug } = params;
+  const { locale, slug } = params;
 
-  const post = await prisma.blogPost.findFirst({
-    where: { slug, isPublished: true },
+  // First try to find post matching current locale
+  let post = await prisma.blogPost.findFirst({
+    where: { slug, isPublished: true, locale },
   });
+  // Fallback: find any published post with this slug (cross-locale)
+  if (!post) {
+    post = await prisma.blogPost.findFirst({
+      where: { slug, isPublished: true },
+    });
+  }
   if (!post) notFound();
 
   // Parse sections JSON
@@ -49,7 +63,7 @@ export default async function BlogDetailPage({ params }: Props) {
   const articleLd = articleJsonLd({
     title: post.title.replace(/<[^>]*>/g, ""),
     description: post.excerpt || post.subtitle || "",
-    url: `${siteUrl}/${params.locale}/blogs/${slug}`,
+    url: `${siteUrl}/${locale}/blogs/${slug}`,
     imageUrl: post.heroImage || post.coverImage || undefined,
     datePublished: post.publishedAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),
@@ -69,6 +83,7 @@ export default async function BlogDetailPage({ params }: Props) {
         title={post.title}
         subtitle={post.subtitle || undefined}
         heroImage={post.heroImage || undefined}
+        locale={locale}
       />
 
       {/* Intro */}
@@ -81,9 +96,9 @@ export default async function BlogDetailPage({ params }: Props) {
       {sections.map((section, idx) => {
         switch (section.type) {
           case "checkcam":
-            return <CheckcamSection key={idx} data={section} />;
+            return <CheckcamSection key={idx} data={section} locale={locale} />;
           case "stage":
-            return <StageSection key={idx} data={section} />;
+            return <StageSection key={idx} data={section} locale={locale} />;
           case "insight":
             return <InsightSection key={idx} data={section} />;
           default:
@@ -118,7 +133,7 @@ export default async function BlogDetailPage({ params }: Props) {
       )}
 
       {/* Footer */}
-      <BlogFooter />
+      <BlogFooter locale={locale} />
     </article>
   );
 }

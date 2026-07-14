@@ -17,7 +17,9 @@ export interface SectionData {
   grid?: { label: string; image?: string }[];
 }
 
-export default function CheckcamSection({ data }: { data: SectionData }) {
+export default function CheckcamSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {
+  const checkLabel = locale === "ja" ? "確認できること" : "What can be confirmed";
+  const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
   return (
     <section className="bg-[#faf8f3] text-[var(--ink)] py-[70px] sm:py-[100px]">
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
@@ -94,7 +96,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
               {data.tags.ok && data.tags.ok.length > 0 && (
                 <div className="mb-6">
                   <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                    {data.tags.label || "確認できること"}
+                    {data.tags.label || checkLabel}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {data.tags.ok.map((t, i) => (
@@ -111,7 +113,7 @@ export default function CheckcamSection({ data }: { data: SectionData }) {
               {data.tags.ng && data.tags.ng.length > 0 && (
                 <div>
                   <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                    まだ不足している要素
+                    {missingLabel}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {data.tags.ng.map((t, i) => (

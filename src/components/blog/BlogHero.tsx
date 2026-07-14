@@ -4,13 +4,17 @@ export default function BlogHero({
   title,
   subtitle,
   heroImage,
+  locale = "ja",
 }: {
   category: string;
   eyebrow?: string;
   title: string;
   subtitle?: string;
   heroImage?: string;
+  locale?: string;
 }) {
+  const categoryLabel = locale === "ja" ? "カテゴリー" : "Category";
+
   return (
     <section className="relative">
       {/* Eyebrow top-right */}
@@ -51,7 +55,7 @@ export default function BlogHero({
           {/* Category */}
           {category && (
             <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-6">
-              <span className="opacity-60 text-[var(--ink-muted)]">カテゴリー</span>
+              <span className="opacity-60 text-[var(--ink-muted)]">{categoryLabel}</span>
               <span className="ml-3">{category}</span>
             </div>
           )}
@@ -73,3 +77,4 @@ export default function BlogHero({
     </section>
   );
 }
+

@@ -1,6 +1,8 @@
 import type { SectionData } from "./CheckcamSection";
 
-export default function StageSection({ data }: { data: SectionData }) {
+export default function StageSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {
+  const improvedLabel = locale === "ja" ? "改善された点" : "Improvements made";
+  const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
   return (
     <section className="bg-[var(--surface)] py-[70px] sm:py-[100px]">
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
@@ -67,7 +69,7 @@ export default function StageSection({ data }: { data: SectionData }) {
                 {data.tags.ok && data.tags.ok.length > 0 && (
                   <>
                     <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                      改善された点
+                      {improvedLabel}
                     </span>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {data.tags.ok.map((t, i) => (
@@ -84,7 +86,7 @@ export default function StageSection({ data }: { data: SectionData }) {
                 {data.tags.ng && data.tags.ng.length > 0 && (
                   <>
                     <span className="text-[var(--ink-muted)] text-[11px] uppercase tracking-[0.16em] block mb-3">
-                      まだ不足している要素
+                      {missingLabel}
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {data.tags.ng.map((t, i) => (
