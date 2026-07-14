@@ -77,7 +77,7 @@ export default async function BlogIndexPage({ params }: Props) {
                   </span>
                 </div>
                 <h2
-                  className="font-serif text-[24px] sm:text-[28px] font-light text-[var(--ink)] leading-[1.4] mb-4"
+                  className="font-serif text-[22px] sm:text-[26px] font-light text-[var(--ink)] leading-[1.4] mb-4"
                   dangerouslySetInnerHTML={{ __html: featured.title }}
                 />
                 {featured.excerpt && (
@@ -86,7 +86,7 @@ export default async function BlogIndexPage({ params }: Props) {
                   </p>
                 )}
                 <span className="text-[var(--accent)] text-[13px] font-medium tracking-wider uppercase group-hover:underline">
-                  Read more →
+                  {locale === "ja" ? "続きを読む →" : "Read more →"}
                 </span>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default async function BlogIndexPage({ params }: Props) {
                     </span>
                   </div>
                   <h3
-                    className="font-serif text-[20px] sm:text-[22px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
+                    className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
                     dangerouslySetInnerHTML={{ __html: post.title }}
                   />
                   {post.excerpt && (
@@ -136,7 +136,7 @@ export default async function BlogIndexPage({ params }: Props) {
                     </p>
                   )}
                   <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
-                    Read more →
+                    {locale === "ja" ? "続きを読む →" : "Read more →"}
                   </span>
                 </div>
               </Link>

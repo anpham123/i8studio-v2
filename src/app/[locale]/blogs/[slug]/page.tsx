@@ -118,13 +118,13 @@ export default async function BlogDetailPage({ params }: Props) {
           <div className="max-w-[780px] mx-auto px-6 sm:px-10">
             {post.insightHeading && (
               <h3
-                className="font-serif text-[26px] sm:text-[34px] font-light leading-[1.5] text-[var(--ink)] mb-10"
+                className="font-serif text-[20px] sm:text-[26px] font-light leading-[1.5] text-[var(--ink)] mb-8"
                 dangerouslySetInnerHTML={{ __html: post.insightHeading }}
               />
             )}
             {post.insightBody && (
               <p
-                className="text-[15px] sm:text-[16px] leading-[2] text-[var(--ink-light)]"
+                className="text-[14px] sm:text-[15px] leading-[2] text-[var(--ink-light)]"
                 dangerouslySetInnerHTML={{ __html: post.insightBody }}
               />
             )}

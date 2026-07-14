@@ -11,7 +11,7 @@ export default function ComparisonSection({
     <section className="bg-[var(--surface)] py-[70px] sm:py-[100px]">
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         <div className="text-center mb-10">
-          <h3 className="font-serif text-[28px] sm:text-[34px] font-light text-[var(--ink)]">
+          <h3 className="font-serif text-[22px] sm:text-[28px] font-light text-[var(--ink)]">
             Before → After
           </h3>
         </div>
