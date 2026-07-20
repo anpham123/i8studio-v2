@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deploy script for demo.i8studio.vn — run on VPS 103.7.41.110
+# Deploy script for i8studio.vn — run on VPS 103.7.41.110
 # Usage: bash deploy.sh [--no-cache]
 set -e
 
@@ -24,4 +24,4 @@ echo "==> Container status:"
 docker-compose ps
 
 echo ""
-echo "Deployed! https://demo.i8studio.vn"
+echo "Deployed! https://i8studio.vn"

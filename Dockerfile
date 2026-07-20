@@ -26,7 +26,7 @@ COPY . .
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PUBLIC_SITE_URL=https://demo.i8studio.vn
+ENV NEXT_PUBLIC_SITE_URL=https://i8studio.vn
 
 RUN npm run build
 

@@ -1,6 +1,6 @@
 # 📖 Hướng dẫn sử dụng Admin Panel — i8 STUDIO
 
-> **URL Admin**: [https://demo.i8studio.vn/admin](https://demo.i8studio.vn/admin)
+> **URL Admin**: [https://i8studio.vn/admin](https://i8studio.vn/admin)
 >
 > Đây là tài liệu hướng dẫn chi tiết cách sử dụng trang quản trị (Admin Panel) để nhập bài đăng, quản lý nội dung và chỉnh sửa website i8 STUDIO.
 
@@ -26,7 +26,7 @@
 
 ## 1. Đăng nhập
 
-1. Truy cập: `https://demo.i8studio.vn/admin`
+1. Truy cập: `https://i8studio.vn/admin`
 2. Nhập **Email** và **Mật khẩu** được cấp
 3. Nhấn **Đăng nhập**
 

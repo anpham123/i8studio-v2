@@ -1,9 +1,9 @@
 #!/bin/bash
-# First-time SSL certificate setup for demo.i8studio.vn
+# First-time SSL certificate setup for i8studio.vn
 # Run once on the VPS after initial docker-compose up
 set -e
 
-DOMAIN="demo.i8studio.vn"
+DOMAIN="i8studio.vn"
 EMAIL="info@i8studio.vn"
 DATA_PATH="./data/certbot"
 
