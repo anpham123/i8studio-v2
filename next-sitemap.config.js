@@ -5,10 +5,12 @@ const LOCALES = ["en", "ja"];
 const STATIC_PATHS = [
   "",
   "/news",
-  "/blog",
+  "/blogs",
   "/works",
   "/about-us",
   "/service",
+  "/solution",
+  "/solution/photo-composite",
   "/qa",
   "/case-studies",
   "/insights",
@@ -41,13 +43,17 @@ module.exports = {
       const { PrismaClient } = require("@prisma/client");
       const prisma = new PrismaClient();
 
-      const [posts, services, caseStudies] = await Promise.all([
+      const [posts, services, caseStudies, blogPosts] = await Promise.all([
         prisma.post.findMany({
           where: { status: "PUBLISHED" },
           select: { slug: true, category: true, updatedAt: true },
         }),
         prisma.service.findMany({ select: { slug: true } }),
         prisma.caseStudy.findMany({ select: { slug: true } }),
+        prisma.blogPost.findMany({
+          where: { isPublished: true },
+          select: { slug: true },
+        }),
       ]);
 
       for (const locale of LOCALES) {
@@ -67,6 +73,11 @@ module.exports = {
             await config.transform(config, `/${locale}/case-studies/${cs.slug}`)
           );
         }
+        for (const bp of blogPosts) {
+          results.push(
+            await config.transform(config, `/${locale}/blogs/${bp.slug}`)
+          );
+        }
       }
 
       await prisma.$disconnect();
@@ -77,3 +88,4 @@ module.exports = {
     return results;
   },
 };
+

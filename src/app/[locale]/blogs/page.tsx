@@ -8,7 +8,7 @@ type Props = { params: { locale: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildMetadata({
-    title: "Blog",
+    title: "Blog — Articles & Insights",
     description: "Insights, case studies, and behind-the-scenes from i8 STUDIO's architectural visualization work.",
     path: "/blogs",
     locale: params.locale,

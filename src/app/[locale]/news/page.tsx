@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return buildMetadata({
-    title: "News",
+    title: "News — Latest Updates",
     description:
       "Latest news and updates from i8 STUDIO — your trusted 3DCG, Animation, VR & BIM partner.",
     path: "/news",

@@ -11,7 +11,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return buildMetadata({
-    title: "About Us",
+    title: "About Us — Our Story & Team",
     description:
       "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. We specialize in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market. 50+ Japanese clients, 200+ projects.",
     path: "/about-us",

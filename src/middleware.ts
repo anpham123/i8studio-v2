@@ -22,6 +22,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // 301 redirect: legacy /blog → /blogs
+  const blogRedirect = pathname.match(/^\/(en|ja)\/blog(?:\/(.*))?$/);
+  if (blogRedirect) {
+    const [, locale, rest] = blogRedirect;
+    const dest = rest ? `/${locale}/blogs/${rest}` : `/${locale}/blogs`;
+    return NextResponse.redirect(new URL(dest, request.url), 301);
+  }
+
   // Apply i18n middleware for public routes
   if (!pathname.startsWith("/admin") && !pathname.startsWith("/api")) {
     return intlMiddleware(request);
