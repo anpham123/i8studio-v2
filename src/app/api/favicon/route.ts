@@ -13,10 +13,13 @@ export async function GET() {
     let iconBuffer: Buffer | null = null;
     let contentType = "image/x-icon";
 
-    if (settingsMap.logoImage) {
-      const imagePath = settingsMap.logoImage.startsWith("/")
-        ? path.join(process.cwd(), "public", settingsMap.logoImage)
-        : settingsMap.logoImage;
+    // Use dedicated favicon if set, otherwise fall back to logo
+    const iconSource = settingsMap.faviconImage || settingsMap.logoImage;
+
+    if (iconSource) {
+      const imagePath = iconSource.startsWith("/")
+        ? path.join(process.cwd(), "public", iconSource)
+        : iconSource;
 
       if (fs.existsSync(imagePath)) {
         // Resize using sharp to 48x48 PNG

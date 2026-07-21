@@ -4,12 +4,13 @@ import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Type, CheckCircle2, RotateCcw, Save, MousePointer } from "lucide-react";
+import { Loader2, Type, CheckCircle2, RotateCcw, Save, MousePointer, Globe2 } from "lucide-react";
 
 interface BrandingSettings {
   logoImage: string;
   logoHeight: string;
   logoFooterHeight: string;
+  faviconImage: string;
   aboutImageTeam: string;
   aboutImageOffice: string;
   aboutImageQuality: string;
@@ -41,6 +42,7 @@ export default function BrandingSettingsPage() {
     logoImage: "",
     logoHeight: String(DEFAULT_HEIGHT),
     logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
+    faviconImage: "",
     aboutImageTeam: "",
     aboutImageOffice: "",
     aboutImageQuality: "",
@@ -61,6 +63,7 @@ export default function BrandingSettingsPage() {
       logoImage: m.logoImage || "",
       logoHeight: m.logoHeight || String(DEFAULT_HEIGHT),
       logoFooterHeight: m.logoFooterHeight || String(DEFAULT_FOOTER_HEIGHT),
+      faviconImage: m.faviconImage || "",
       aboutImageTeam: m.aboutImageTeam || "",
       aboutImageOffice: m.aboutImageOffice || "",
       aboutImageQuality: m.aboutImageQuality || "",
@@ -77,6 +80,13 @@ export default function BrandingSettingsPage() {
     setValues((v) => ({ ...v, logoImage: url }));
     const ok = await saveToAPI({ logoImage: url });
     if (ok) toast(url ? "Logo đã lưu" : "Đã xoá logo", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleFaviconChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, faviconImage: url }));
+    const ok = await saveToAPI({ faviconImage: url });
+    if (ok) toast(url ? "Favicon đã lưu" : "Đã xoá favicon (sẽ dùng logo)", "success");
     else toast("Không thể lưu — vui lòng thử lại", "error");
   }, [toast]);
 
@@ -146,6 +156,7 @@ export default function BrandingSettingsPage() {
       logoImage: "",
       logoHeight: String(DEFAULT_HEIGHT),
       logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
+      faviconImage: "",
       aboutImageTeam: "",
       aboutImageOffice: "",
       aboutImageQuality: "",
@@ -335,6 +346,44 @@ export default function BrandingSettingsPage() {
               Lưu kích thước Footer
             </button>
           </div>
+        </div>
+
+        {/* === Favicon === */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Globe2 size={16} className="text-blue-600" />
+            <h3 className="font-semibold text-gray-800">Favicon (Icon tab trình duyệt)</h3>
+            {values.faviconImage && (
+              <span className="ml-auto text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Đang bật
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            Upload ảnh riêng cho favicon (icon hiển thị trên tab trình duyệt). Nên dùng ảnh vuông, PNG trong suốt, kích thước 48×48px hoặc lớn hơn.
+            Nếu để trống sẽ dùng logo website.
+          </p>
+
+          <ImageUpload value={values.faviconImage} onChange={handleFaviconChange} label="" />
+
+          {/* Live preview */}
+          {(values.faviconImage || values.logoImage) && (
+            <div className="mt-4 rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gray-100 px-4 py-3 flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={values.faviconImage || values.logoImage}
+                  alt="Favicon preview"
+                  className="w-5 h-5 object-contain"
+                />
+                <span className="text-sm text-gray-600 truncate">i8 STUDIO — 3DCG, Animation, VR &amp; BIM</span>
+                <span className="ml-auto text-gray-400 text-xs">×</span>
+              </div>
+              <p className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">
+                Xem thử — favicon trên tab trình duyệt {values.faviconImage ? "(ảnh riêng)" : "(dùng logo)"}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* === Custom Cursor Logo === */}
