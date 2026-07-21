@@ -336,7 +336,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                   key={work.id}
                   onClick={() => {
                     if (work.vrUrl) {
-                      setVrModal({ url: work.vrUrl, title: work.title });
+                      window.open(work.vrUrl, '_blank', 'noopener,noreferrer');
                     } else if (work.videoUrl) {
                       setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
                     } else if (work.image) {

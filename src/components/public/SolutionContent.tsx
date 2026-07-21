@@ -220,8 +220,8 @@ function HorizontalScrollGallery({
               key={i}
               className="relative shrink-0 h-[180px] sm:h-[240px] md:h-[280px] lg:h-[320px] w-auto rounded-lg overflow-hidden shadow-md border border-gray-200 bg-white group/item cursor-pointer"
               onClick={() => {
-                if (slide.vrUrl && onVrClick) {
-                  onVrClick(slide.vrUrl, slide.label);
+                if (slide.vrUrl) {
+                  window.open(slide.vrUrl, '_blank', 'noopener,noreferrer');
                 } else if (isComposite && slide.beforeImageUrl && slide.imageUrl && onCompositeClick) {
                   onCompositeClick(slide.beforeImageUrl, slide.imageUrl, slide.label);
                 } else if (slide.videoUrl && onImageClick) {
