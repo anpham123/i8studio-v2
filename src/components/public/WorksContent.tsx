@@ -554,7 +554,6 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
               className="w-full h-full rounded-lg border-0"
               allowFullScreen
               allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               title={vrModal.title}
             />
             <a
