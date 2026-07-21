@@ -220,8 +220,8 @@ function HorizontalScrollGallery({
               key={i}
               className="relative shrink-0 h-[180px] sm:h-[240px] md:h-[280px] lg:h-[320px] w-auto rounded-lg overflow-hidden shadow-md border border-gray-200 bg-white group/item cursor-pointer"
               onClick={() => {
-                if (slide.vrUrl) {
-                  window.open(slide.vrUrl, '_blank', 'noopener,noreferrer');
+                if (slide.vrUrl && onVrClick) {
+                  onVrClick(slide.vrUrl, slide.label);
                 } else if (isComposite && slide.beforeImageUrl && slide.imageUrl && onCompositeClick) {
                   onCompositeClick(slide.beforeImageUrl, slide.imageUrl, slide.label);
                 } else if (slide.videoUrl && onImageClick) {
@@ -553,9 +553,19 @@ export default function SolutionContent({ worksByType = {}, settings = {} }: Sol
               src={vrModal.url}
               className="w-full h-full rounded-lg border-0"
               allowFullScreen
-              allow="accelerometer; gyroscope; xr-spatial-tracking"
+              allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               title={vrModal.title}
             />
+            {/* Fallback link if iframe blocked */}
+            <a
+              href={vrModal.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-3 right-3 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-lg hover:bg-white transition-colors shadow-md"
+            >
+              ↗ Open in new tab
+            </a>
           </div>
         </div>,
         document.body

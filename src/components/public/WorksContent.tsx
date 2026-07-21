@@ -336,7 +336,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                   key={work.id}
                   onClick={() => {
                     if (work.vrUrl) {
-                      window.open(work.vrUrl, '_blank', 'noopener,noreferrer');
+                      setVrModal({ url: work.vrUrl, title: work.title });
                     } else if (work.videoUrl) {
                       setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
                     } else if (work.image) {
@@ -553,9 +553,18 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
               src={vrModal.url}
               className="w-full h-full rounded-lg border-0"
               allowFullScreen
-              allow="accelerometer; gyroscope; xr-spatial-tracking"
+              allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               title={vrModal.title}
             />
+            <a
+              href={vrModal.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-3 right-3 bg-white/90 text-gray-800 text-xs px-3 py-1.5 rounded-lg hover:bg-white transition-colors shadow-md"
+            >
+              ↗ Open in new tab
+            </a>
           </div>
         </div>,
         document.body
