@@ -49,6 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await prisma.setting.findMany();
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
   const logoImageName = settingsMap.logoImage ? settingsMap.logoImage.split("/").pop() : "1";
+  const faviconKey = settingsMap.faviconImage ? settingsMap.faviconImage.split("/").pop() : logoImageName;
 
   return {
     title: {
@@ -69,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     robots: { index: true, follow: true },
     icons: {
-      icon: `/api/favicon?v=${logoImageName}`,
+      icon: `/api/favicon?v=${faviconKey}`,
     },
   };
 }
