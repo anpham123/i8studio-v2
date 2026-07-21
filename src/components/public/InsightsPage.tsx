@@ -25,9 +25,10 @@ interface Flipbook {
 interface InsightsPageProps {
   flipbooks: Flipbook[];
   locale: string;
+  settings?: Record<string, string>;
 }
 
-export default function InsightsPage({ flipbooks, locale }: InsightsPageProps) {
+export default function InsightsPage({ flipbooks, locale, settings = {} }: InsightsPageProps) {
   const [activeBook, setActiveBook] = useState<Flipbook | null>(null);
   const [subForm, setSubForm] = useState({ firstName: "", lastName: "", email: "" });
   const [subStatus, setSubStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -136,7 +137,7 @@ export default function InsightsPage({ flipbooks, locale }: InsightsPageProps) {
               {/* Description */}
               <div className="mb-8">
                 <p className="text-gray-500 text-[15px] leading-relaxed">
-                  {t("description")}
+                  {(locale === "ja" ? settings.insightsDescriptionJa : settings.insightsDescription) || t("description")}
                 </p>
               </div>
 

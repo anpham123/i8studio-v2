@@ -20,19 +20,27 @@ export async function generateMetadata({
 export default async function InsightsRoute({ params }: { params: { locale: string } }) {
   const { locale } = params;
 
-  const flipbooks = await prisma.flipbook.findMany({
-    where: { active: true },
-    orderBy: { order: "asc" },
-    select: {
-      id: true,
-      title: true,
-      titleJa: true,
-      description: true,
-      descriptionJa: true,
-      coverImage: true,
-      pdfUrl: true,
-    },
-  });
+  const [flipbooks, settingsRows] = await Promise.all([
+    prisma.flipbook.findMany({
+      where: { active: true },
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        title: true,
+        titleJa: true,
+        description: true,
+        descriptionJa: true,
+        coverImage: true,
+        pdfUrl: true,
+      },
+    }),
+    prisma.setting.findMany({
+      where: { key: { in: ["insightsDescription", "insightsDescriptionJa"] } },
+    }),
+  ]);
 
-  return <InsightsPage flipbooks={flipbooks} locale={locale} />;
+  const settings: Record<string, string> = {};
+  for (const s of settingsRows) settings[s.key] = s.value;
+
+  return <InsightsPage flipbooks={flipbooks} locale={locale} settings={settings} />;
 }

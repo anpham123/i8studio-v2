@@ -105,6 +105,32 @@ const SETTING_GROUPS: SettingGroup[] = [
     ],
   },
   {
+    title: "Nội dung trang Insights",
+    icon: Globe,
+    fields: [
+      { key: "insightsDescription", label: "Mô tả (EN)", type: "textarea", placeholder: "This is a newsletter that brings you the latest updates..." },
+      { key: "insightsDescriptionJa", label: "Mô tả (JA)", type: "textarea", placeholder: "i8 STUDIOのプロジェクトや活動に関する最新情報..." },
+    ],
+  },
+  {
+    title: "Nội dung trang Solution",
+    icon: Globe,
+    fields: [
+      { key: "solutionS1Desc", label: "01. Still Image — Mô tả (EN)", type: "textarea", placeholder: "Photorealistic still image rendering..." },
+      { key: "solutionS1DescJa", label: "01. Still Image — Mô tả (JA)", type: "textarea", placeholder: "フォトリアルな静止画レンダリング..." },
+      { key: "solutionS2Desc", label: "02. Animation — Mô tả (EN)", type: "textarea", placeholder: "Dynamic video production..." },
+      { key: "solutionS2DescJa", label: "02. Animation — Mô tả (JA)", type: "textarea", placeholder: "プロジェクトの全体像をダイナミックに..." },
+      { key: "solutionS3Desc", label: "03. VR Walkthrough — Mô tả (EN)", type: "textarea", placeholder: "Interactive experiences where you can freely walk around..." },
+      { key: "solutionS3DescJa", label: "03. VR Walkthrough — Mô tả (JA)", type: "textarea", placeholder: "ブラウザ上で自由に歩き回れる..." },
+      { key: "solutionS4Desc", label: "04. VR 360 — Mô tả (EN)", type: "textarea", placeholder: "Experience spaces through 360° panoramic views..." },
+      { key: "solutionS4DescJa", label: "04. VR 360 — Mô tả (JA)", type: "textarea", placeholder: "360°パノラマビューで空間を体験..." },
+      { key: "solutionS5Desc", label: "05. Photo Composite — Mô tả (EN)", type: "textarea", placeholder: "Natural compositing of real photos and CG..." },
+      { key: "solutionS5DescJa", label: "05. Photo Composite — Mô tả (JA)", type: "textarea", placeholder: "実写とCGの自然な合成..." },
+      { key: "solutionS6Desc", label: "06. Digital Model — Mô tả (EN)", type: "textarea", placeholder: "Digital 3D models replacing traditional physical models..." },
+      { key: "solutionS6DescJa", label: "06. Digital Model — Mô tả (JA)", type: "textarea", placeholder: "従来の物理模型に代わるデジタル3Dモデル..." },
+    ],
+  },
+  {
     title: "Cài đặt trang chủ",
     icon: Globe,
     fields: [

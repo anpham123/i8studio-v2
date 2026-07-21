@@ -22,11 +22,27 @@ export async function generateMetadata({
 
 export default async function SolutionPage() {
   // Fetch works grouped by type for solution gallery slides
-  const works = await prisma.work.findMany({
-    where: { image: { not: "" } },
-    orderBy: { order: "asc" },
-    select: { title: true, titleJa: true, image: true, beforeImage: true, type: true, videoUrl: true, vrUrl: true },
-  });
+  const [works, settingsRows] = await Promise.all([
+    prisma.work.findMany({
+      where: { image: { not: "" } },
+      orderBy: { order: "asc" },
+      select: { title: true, titleJa: true, image: true, beforeImage: true, type: true, videoUrl: true, vrUrl: true },
+    }),
+    prisma.setting.findMany({
+      where: {
+        key: {
+          in: [
+            "solutionS1Desc", "solutionS1DescJa",
+            "solutionS2Desc", "solutionS2DescJa",
+            "solutionS3Desc", "solutionS3DescJa",
+            "solutionS4Desc", "solutionS4DescJa",
+            "solutionS5Desc", "solutionS5DescJa",
+            "solutionS6Desc", "solutionS6DescJa",
+          ],
+        },
+      },
+    }),
+  ]);
 
   // Group works by type → { still: [...], animation: [...], ... }
   const worksByType: Record<string, { title: string; titleJa: string; image: string; beforeImage: string; videoUrl: string; vrUrl?: string }[]> = {};
@@ -36,9 +52,12 @@ export default async function SolutionPage() {
     worksByType[t].push({ title: w.title, titleJa: w.titleJa, image: w.image, beforeImage: w.beforeImage, videoUrl: w.videoUrl, vrUrl: w.vrUrl || undefined });
   }
 
+  const settings: Record<string, string> = {};
+  for (const s of settingsRows) settings[s.key] = s.value;
+
   return (
     <div className="min-h-screen bg-white">
-      <SolutionContent worksByType={worksByType} />
+      <SolutionContent worksByType={worksByType} settings={settings} />
     </div>
   );
 }

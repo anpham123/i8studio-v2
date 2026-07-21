@@ -347,12 +347,13 @@ interface WorkItem {
 
 interface SolutionContentProps {
   worksByType?: Record<string, WorkItem[]>;
+  settings?: Record<string, string>;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Main page content                                                  */
 /* ------------------------------------------------------------------ */
-export default function SolutionContent({ worksByType = {} }: SolutionContentProps) {
+export default function SolutionContent({ worksByType = {}, settings = {} }: SolutionContentProps) {
   const t = useTranslations("solution");
   const locale = useLocale();
 
@@ -429,7 +430,11 @@ export default function SolutionContent({ worksByType = {} }: SolutionContentPro
               {sec.titleEn}
             </div>
             <div className="text-[15px] text-[#444] leading-[2] mb-4 whitespace-pre-line">
-              {t(sec.descKey)}
+              {(() => {
+                const sNum = sec.num.replace(/^0/, "");
+                const settingsKey = locale === "ja" ? `solutionS${sNum}DescJa` : `solutionS${sNum}Desc`;
+                return settings[settingsKey] || t(sec.descKey);
+              })()}
             </div>
             <div className="flex flex-wrap gap-1.5 mb-5">
               {(t.raw(sec.tagsKey) as string[]).map((tag) => (
