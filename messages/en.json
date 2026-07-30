@@ -2,6 +2,7 @@
   "nav": {
     "work": "Work",
     "service": "Solution",
+    "price": "PRICE",
     "aboutUs": "About Us",
     "contact": "Contact",
     "blogs": "Blogs",
@@ -13,7 +14,32 @@
     "about": "About",
     "solution": "Solution",
     "getQuote": "Get Quote",
-    "lang": "日本語"
+    "lang": "日本語",
+    "workSub": {
+      "cgPerspective": "CG Perspective",
+      "cgVideo": "CG Video",
+      "photoComposite": "Photo Compositing",
+      "virtualStaging": "Virtual Staging",
+      "vr360": "VR360",
+      "vrWalkthrough": "VR Walkthrough",
+      "digitalModel": "Digital Model",
+      "ar": "AR",
+      "exeContent": "EXE Content"
+    },
+    "aboutSub": {
+      "companyOverview": "Company Overview",
+      "portfolio": "Portfolio",
+      "workflow": "Workflow",
+      "collection": "Collection",
+      "qa": "Q&A"
+    },
+    "blogSub": {
+      "caseStudy": "Case Study",
+      "techniqueSharing": "Technique Sharing",
+      "knowledge": "Knowledge",
+      "ai": "AI Column",
+      "lifeGallery": "I8 Life Gallery"
+    }
   },
   "hero": {
     "cta1": "Get Free Quote",

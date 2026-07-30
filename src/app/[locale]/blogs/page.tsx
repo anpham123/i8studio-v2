@@ -5,7 +5,18 @@ import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
 
-type Props = { params: { locale: string } };
+type Props = {
+  params: { locale: string };
+  searchParams: { category?: string };
+};
+
+const CATEGORIES = [
+  { key: "case-study", labelJa: "ケーススタディ", labelEn: "Case Study" },
+  { key: "technique", labelJa: "技術共有", labelEn: "Technique Sharing" },
+  { key: "knowledge", labelJa: "建築知識", labelEn: "Knowledge" },
+  { key: "ai", labelJa: "AI特集", labelEn: "AI Column" },
+  { key: "life-gallery", labelJa: "I8 ライフギャラリー", labelEn: "I8 Life Gallery" },
+];
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildMetadata({
@@ -16,16 +27,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function BlogIndexPage({ params }: Props) {
+export default async function BlogIndexPage({ params, searchParams }: Props) {
   const { locale } = params;
+  const activeCategory = searchParams.category;
+
+  const where: Record<string, unknown> = { isPublished: true };
+  if (activeCategory) {
+    where.category = activeCategory;
+  }
 
   const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true },
+    where,
     orderBy: { publishedAt: "desc" },
   });
 
-  const featured = posts.find((p) => p.isFeatured);
+  const featured = !activeCategory ? posts.find((p) => p.isFeatured) : undefined;
   const rest = posts.filter((p) => p.id !== featured?.id);
+  const isJa = locale === "ja";
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
@@ -39,12 +57,41 @@ export default async function BlogIndexPage({ params }: Props) {
             Blog
           </h1>
           <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[500px] mx-auto">
-            {locale === "ja"
+            {isJa
               ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
               : "Production process, technical insights, and architectural CG trends."}
           </p>
         </div>
       </section>
+
+      {/* Category filter */}
+      <div className="max-w-[1200px] mx-auto px-6 sm:px-10 mb-10">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/${locale}/blogs`}
+            className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide uppercase transition-colors ${
+              !activeCategory
+                ? "bg-[#111] text-white"
+                : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
+            }`}
+          >
+            {isJa ? "すべて" : "All"}
+          </Link>
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.key}
+              href={`/${locale}/blogs?category=${cat.key}`}
+              className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
+                activeCategory === cat.key
+                  ? "bg-[#111] text-white"
+                  : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
+              }`}
+            >
+              {isJa ? cat.labelJa : cat.labelEn}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 pb-20">
         {/* Featured post */}
@@ -87,7 +134,7 @@ export default async function BlogIndexPage({ params }: Props) {
                   </p>
                 )}
                 <span className="text-[var(--accent)] text-[13px] font-medium tracking-wider uppercase group-hover:underline">
-                  {locale === "ja" ? "続きを読む →" : "Read more →"}
+                  {isJa ? "続きを読む →" : "Read more →"}
                 </span>
               </div>
             </div>
@@ -137,7 +184,7 @@ export default async function BlogIndexPage({ params }: Props) {
                     </p>
                   )}
                   <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
-                    {locale === "ja" ? "続きを読む →" : "Read more →"}
+                    {isJa ? "続きを読む →" : "Read more →"}
                   </span>
                 </div>
               </Link>
@@ -148,9 +195,16 @@ export default async function BlogIndexPage({ params }: Props) {
         {/* Empty state */}
         {posts.length === 0 && (
           <div className="text-center py-20">
-            <p className="font-serif text-[24px] text-[var(--ink-muted)] font-light">
-              Coming soon...
+            <p className="font-serif text-[24px] text-[var(--ink-muted)] font-light mb-4">
+              {activeCategory
+                ? (isJa ? "この カテゴリの記事はまだありません" : "No articles in this category yet")
+                : "Coming soon..."}
             </p>
+            {activeCategory && (
+              <Link href={`/${locale}/blogs`} className="text-[var(--accent)] text-sm font-medium hover:underline">
+                {isJa ? "すべての記事を見る →" : "View all articles →"}
+              </Link>
+            )}
           </div>
         )}
       </div>

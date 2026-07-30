@@ -2,6 +2,7 @@
   "nav": {
     "work": "実績",
     "service": "ソリューション",
+    "price": "PRICE",
     "aboutUs": "私たちについて",
     "contact": "お問い合わせ",
     "blogs": "ブログ",
@@ -13,7 +14,32 @@
     "about": "会社情報",
     "solution": "ソリューション",
     "getQuote": "見積もり",
-    "lang": "English"
+    "lang": "English",
+    "workSub": {
+      "cgPerspective": "CGパース",
+      "cgVideo": "CG動画",
+      "photoComposite": "写真合成",
+      "virtualStaging": "バーチャルステージング",
+      "vr360": "VR360",
+      "vrWalkthrough": "VR Walkthrough",
+      "digitalModel": "デジタル模型",
+      "ar": "AR",
+      "exeContent": "EXEコンテンツ"
+    },
+    "aboutSub": {
+      "companyOverview": "会社概要",
+      "portfolio": "ポートフォリオ",
+      "workflow": "ワークフロー",
+      "collection": "コレクション",
+      "qa": "Q&A"
+    },
+    "blogSub": {
+      "caseStudy": "ケーススタディ",
+      "techniqueSharing": "テクニック共有",
+      "knowledge": "ナレッジ",
+      "ai": "AI特集",
+      "lifeGallery": "I8 Life Gallery"
+    }
   },
   "hero": {
     "cta1": "無料見積もりを取得",
