@@ -1,3 +1,4 @@
+import { sanitizeHtml } from "@/lib/sanitize";
 import type { SectionData } from "./CheckcamSection";
 
 export default function StageSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {
@@ -51,7 +52,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
             <h2
               className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-6"
-              dangerouslySetInnerHTML={{ __html: data.title }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
             />
 
             <div className="blog-content">
@@ -59,7 +60,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                 <p
                   key={i}
                   className="text-[var(--ink-light)] leading-[2] mb-5 text-[14px] sm:text-[15px]"
-                  dangerouslySetInnerHTML={{ __html: p }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
                 />
               ))}
             </div>

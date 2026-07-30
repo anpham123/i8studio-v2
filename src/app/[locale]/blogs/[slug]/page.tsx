@@ -10,6 +10,7 @@ import CheckcamSection from "@/components/blog/sections/CheckcamSection";
 import StageSection from "@/components/blog/sections/StageSection";
 import InsightSection from "@/components/blog/sections/InsightSection";
 import type { SectionData } from "@/components/blog/sections/CheckcamSection";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Props = { params: { locale: string; slug: string } };
 
@@ -119,13 +120,13 @@ export default async function BlogDetailPage({ params }: Props) {
             {post.insightHeading && (
               <h3
                 className="font-serif text-[20px] sm:text-[26px] font-light leading-[1.5] text-[var(--ink)] mb-8"
-                dangerouslySetInnerHTML={{ __html: post.insightHeading }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.insightHeading) }}
               />
             )}
             {post.insightBody && (
               <p
                 className="text-[14px] sm:text-[15px] leading-[2] text-[var(--ink-light)]"
-                dangerouslySetInnerHTML={{ __html: post.insightBody }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.insightBody) }}
               />
             )}
           </div>

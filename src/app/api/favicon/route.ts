@@ -17,11 +17,17 @@ export async function GET() {
     const iconSource = settingsMap.faviconImage || settingsMap.logoImage;
 
     if (iconSource) {
+      // Prevent path traversal attacks
+      const publicDir = path.join(process.cwd(), "public");
       const imagePath = iconSource.startsWith("/")
-        ? path.join(process.cwd(), "public", iconSource)
+        ? path.join(publicDir, iconSource)
         : iconSource;
 
-      if (fs.existsSync(imagePath)) {
+      // Ensure resolved path stays within public directory
+      const resolvedPath = path.resolve(imagePath);
+      if (!resolvedPath.startsWith(path.resolve(publicDir))) {
+        // Path traversal attempt — fall through to fallback
+      } else if (fs.existsSync(resolvedPath)) {
         // Resize using sharp to 48x48 PNG
         iconBuffer = await sharp(imagePath)
           .resize(48, 48, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })

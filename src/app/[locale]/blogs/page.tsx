@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Props = { params: { locale: string } };
 
@@ -78,7 +79,7 @@ export default async function BlogIndexPage({ params }: Props) {
                 </div>
                 <h2
                   className="font-serif text-[22px] sm:text-[26px] font-light text-[var(--ink)] leading-[1.4] mb-4"
-                  dangerouslySetInnerHTML={{ __html: featured.title }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(featured.title) }}
                 />
                 {featured.excerpt && (
                   <p className="text-[14px] text-[var(--ink-light)] leading-[1.8] line-clamp-3 mb-6">
@@ -128,7 +129,7 @@ export default async function BlogIndexPage({ params }: Props) {
                   </div>
                   <h3
                     className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
-                    dangerouslySetInnerHTML={{ __html: post.title }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.title) }}
                   />
                   {post.excerpt && (
                     <p className="text-[14px] text-[var(--ink-light)] leading-[1.7] line-clamp-3 mb-4">

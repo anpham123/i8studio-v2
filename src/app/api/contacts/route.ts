@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic"
 
@@ -50,6 +51,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit contact form submissions
+  const ip = getClientIp(req);
+  const { allowed } = checkRateLimit(`contacts:${ip}`, RATE_LIMITS.FORM_SUBMIT);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
   try {
     const body = await req.json();
     const data = schema.parse(body);

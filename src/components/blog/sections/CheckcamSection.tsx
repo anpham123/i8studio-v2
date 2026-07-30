@@ -1,3 +1,5 @@
+import { sanitizeHtml } from "@/lib/sanitize";
+
 export interface SectionData {
   type: "checkcam" | "stage" | "comparison" | "insight";
   num: string;
@@ -43,7 +45,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
             </div>
             <h2
               className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
-              dangerouslySetInnerHTML={{ __html: data.title }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
             />
           </div>
         </div>
@@ -93,7 +95,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                   <p
                     key={i}
                     className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
-                    dangerouslySetInnerHTML={{ __html: p }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
                   />
                 ))}
               </div>

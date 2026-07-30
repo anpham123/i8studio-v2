@@ -40,9 +40,28 @@ export async function DELETE(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { filename } = await req.json();
-  if (!filename || filename.includes(".."))
-    return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
 
-  await unlink(join(process.cwd(), "public", "uploads", filename)).catch(() => {});
+  // Comprehensive filename validation
+  if (
+    !filename ||
+    typeof filename !== "string" ||
+    filename.includes("..") ||
+    filename.includes("/") ||
+    filename.includes("\\") ||
+    filename.includes("\0") ||
+    filename.startsWith(".")
+  ) {
+    return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
+  }
+
+  // Verify resolved path stays within uploads directory
+  const uploadDir = join(process.cwd(), "public", "uploads");
+  const filePath = join(uploadDir, filename);
+  const { resolve } = await import("path");
+  if (!resolve(filePath).startsWith(resolve(uploadDir))) {
+    return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
+  }
+
+  await unlink(filePath).catch(() => {});
   return NextResponse.json({ success: true });
 }

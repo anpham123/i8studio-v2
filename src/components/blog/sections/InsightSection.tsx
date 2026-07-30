@@ -1,3 +1,4 @@
+import { sanitizeHtml } from "@/lib/sanitize";
 import type { SectionData } from "./CheckcamSection";
 
 export default function InsightSection({ data }: { data: SectionData }) {
@@ -11,14 +12,14 @@ export default function InsightSection({ data }: { data: SectionData }) {
         )}
         <h3
           className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.5] text-[var(--ink)] mb-8"
-          dangerouslySetInnerHTML={{ __html: data.title }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
         />
         <div className="blog-content">
           {data.body.map((p, i) => (
             <p
               key={i}
               className="text-[14px] sm:text-[15px] leading-[2] text-[var(--ink-light)] mb-5"
-              dangerouslySetInnerHTML={{ __html: p }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
             />
           ))}
         </div>

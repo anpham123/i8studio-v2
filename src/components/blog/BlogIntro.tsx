@@ -1,3 +1,5 @@
+import { sanitizeHtml } from "@/lib/sanitize";
+
 export default function BlogIntro({
   dropcapText,
   pullquote,
@@ -19,7 +21,7 @@ export default function BlogIntro({
             <span className="font-serif text-[44px] sm:text-[52px] leading-none float-left mr-3 mt-1 text-[var(--accent)]">
               {firstChar}
             </span>
-            <span dangerouslySetInnerHTML={{ __html: restText }} />
+            <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(restText) }} />
           </div>
         )}
 
@@ -28,7 +30,7 @@ export default function BlogIntro({
           <blockquote className="border-l-[3px] border-[var(--accent)] pl-6 sm:pl-8 py-2 my-12">
             <p
               className="font-serif text-[16px] sm:text-[18px] leading-[1.7] text-[var(--ink-light)] font-light italic"
-              dangerouslySetInnerHTML={{ __html: pullquote }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(pullquote) }}
             />
           </blockquote>
         )}

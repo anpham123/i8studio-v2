@@ -1,21 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic"
 
+const ALLOWED_EVENT_TYPES = ["pageview", "click", "scroll", "form_submit", "video_play", "download"];
+
 export async function POST(req: NextRequest) {
+  // Rate limit by IP
+  const ip = getClientIp(req);
+  const { allowed, remaining } = checkRateLimit(`analytics:${ip}`, RATE_LIMITS.ANALYTICS);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests" }, {
+      status: 429,
+      headers: { "Retry-After": "60", "X-RateLimit-Remaining": "0" },
+    });
+  }
+
   try {
     const { type, page, metadata } = await req.json();
+
+    // Validate event type
+    if (!type || typeof type !== "string" || !ALLOWED_EVENT_TYPES.includes(type)) {
+      return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
+    }
+
+    // Validate page length
+    if (page && (typeof page !== "string" || page.length > 500)) {
+      return NextResponse.json({ error: "Invalid page" }, { status: 400 });
+    }
+
     await prisma.analyticsEvent.create({
       data: { type, page: page || "", metadata: JSON.stringify(metadata || {}) },
     });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: { "X-RateLimit-Remaining": String(remaining) },
+    });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
+  // Require authentication to view analytics
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { searchParams } = new URL(req.url);
   const from = searchParams.get("from");
   const to = searchParams.get("to");

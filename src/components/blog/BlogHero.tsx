@@ -1,3 +1,5 @@
+import { sanitizeHtml } from "@/lib/sanitize";
+
 export default function BlogHero({
   category,
   eyebrow,
@@ -63,7 +65,7 @@ export default function BlogHero({
           {/* Title */}
           <h1
             className="font-serif text-[clamp(24px,3.2vw,40px)] font-light leading-[1.35] text-[var(--ink)] mb-5"
-            dangerouslySetInnerHTML={{ __html: title }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(title) }}
           />
 
           {/* Subtitle */}

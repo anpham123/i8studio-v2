@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, articleJsonLd, getSiteUrl } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Props = { params: { locale: string; slug: string } };
 
@@ -95,7 +96,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         <div
           className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-white/70 prose-a:text-blue-400 prose-strong:text-white"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
         />
       </article>
     </div>
