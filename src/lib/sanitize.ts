@@ -1,15 +1,17 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitize from "sanitize-html";
 
 /**
  * Sanitize HTML content to prevent XSS attacks.
  * Allows safe HTML tags for rich text rendering while removing
  * dangerous elements like <script>, event handlers, etc.
+ *
+ * Uses `sanitize-html` which works in pure Node.js (no jsdom/browser needed).
  */
 export function sanitizeHtml(dirty: string): string {
   if (!dirty) return "";
 
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: [
+  return sanitize(dirty, {
+    allowedTags: [
       // Text formatting
       "b", "i", "em", "strong", "u", "s", "mark", "small", "sub", "sup",
       // Block elements
@@ -25,13 +27,13 @@ export function sanitizeHtml(dirty: string): string {
       // Semantic
       "span", "div", "section", "article",
     ],
-    ALLOWED_ATTR: [
-      "href", "target", "rel", "src", "alt", "width", "height",
-      "class", "id", "style",
-    ],
-    // Force links to open safely
-    ADD_ATTR: ["target"],
-    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form", "input"],
-    FORBID_ATTR: ["onerror", "onload", "onclick", "onmouseover"],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+      img: ["src", "alt", "width", "height"],
+      "*": ["class", "id", "style"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+    // Strip all tags not in the whitelist (don't escape them)
+    disallowedTagsMode: "discard",
   });
 }
