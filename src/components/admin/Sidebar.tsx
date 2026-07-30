@@ -4,9 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LayoutDashboard, FileText, Image, Wrench,
+  LayoutDashboard, FileText, Image, Wrench, Layers,
   BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
+  Tag, DollarSign, Building2,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -38,6 +39,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { href: "/admin/posts", label: "Bài đăng", icon: FileText },
       { href: "/admin/blog-posts", label: "Blog Posts", icon: BookOpen },
+      { href: "/admin/blog-categories", label: "Blog Categories", icon: Tag },
       { href: "/admin/works", label: "Works", icon: Image },
       { href: "/admin/flipbooks", label: "Flipbooks", icon: BookOpenCheck },
     ],
@@ -46,9 +48,17 @@ const menuGroups: MenuGroup[] = [
     title: "DỊCH VỤ",
     items: [
       { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
+      { href: "/admin/price-list", label: "Bảng giá", icon: DollarSign },
+      { href: "/admin/collections", label: "Collections", icon: Layers },
       { href: "/admin/composite-examples", label: "Photo Composite", icon: Image },
       { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
       { href: "/admin/qa", label: "Q&A", icon: HelpCircle },
+    ],
+  },
+  {
+    title: "CÔNG TY",
+    items: [
+      { href: "/admin/company", label: "Company Content", icon: Building2 },
     ],
   },
   {
@@ -67,6 +77,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
 ];
+
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */

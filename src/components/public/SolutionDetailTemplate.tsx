@@ -7,6 +7,7 @@ import type { SolutionService } from "@/lib/solution-data";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaceholderImage({ alt, className }: { alt: string; className?: string }) {
   return (
     <div className={`bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 flex items-center justify-center ${className ?? ""}`}>

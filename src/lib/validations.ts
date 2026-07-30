@@ -42,6 +42,70 @@ export const ServiceSchema = z.object({
   priceHint: z.string().max(200).optional().default(""),
   priceHintJa: z.string().max(200).optional().default(""),
   order: z.number().int().optional().default(0),
+  isPublished: z.boolean().optional().default(true),
+  heroImage: z.string().optional().default(""),
+  featuresJson: z.string().optional().default("[]"),
+  heroTaglineJa: z.string().optional().default(""),
+  heroTaglineEn: z.string().optional().default(""),
+  heroDescJa: z.string().optional().default(""),
+  heroDescEn: z.string().optional().default(""),
+  feature1TitleJa: z.string().optional().default(""),
+  feature1TitleEn: z.string().optional().default(""),
+  feature1DescJa: z.string().optional().default(""),
+  feature1DescEn: z.string().optional().default(""),
+  feature1Image: z.string().optional().default(""),
+  feature2TitleJa: z.string().optional().default(""),
+  feature2TitleEn: z.string().optional().default(""),
+  feature2DescJa: z.string().optional().default(""),
+  feature2DescEn: z.string().optional().default(""),
+  feature2Image: z.string().optional().default(""),
+  processJson: z.string().optional().default("[]"),
+  plansJson: z.string().optional().default("[]"),
+});
+
+export const CollectionSchema = z.object({
+  slug: z.string().min(1).max(200),
+  titleJa: z.string().optional().default(""),
+  titleEn: z.string().optional().default(""),
+  descJa: z.string().optional().default(""),
+  descEn: z.string().optional().default(""),
+  coverImage: z.string().optional().default(""),
+  imagesJson: z.string().optional().default("[]"),
+  order: z.number().int().optional().default(0),
+  active: z.boolean().optional().default(true),
+});
+
+export const CollectionItemSchema = z.object({
+  collectionId: z.string().min(1),
+  image: z.string().optional().default(""),
+  captionJa: z.string().optional().default(""),
+  captionEn: z.string().optional().default(""),
+  order: z.number().int().optional().default(0),
+});
+
+export const PriceItemSchema = z.object({
+  serviceSlug: z.string().optional().default(""),
+  icon: z.string().optional().default(""),
+  titleJa: z.string().optional().default(""),
+  titleEn: z.string().optional().default(""),
+  bulletsJson: z.string().optional().default("[]"),
+  priceFrom: z.string().optional().default(""),
+  priceLabelJa: z.string().optional().default(""),
+  priceLabelEn: z.string().optional().default(""),
+  order: z.number().int().optional().default(0),
+});
+
+export const CompanyContentSchema = z.object({
+  section: z.string().min(1),
+  contentJson: z.string().optional().default("{}"),
+});
+
+export const BlogCategorySchema = z.object({
+  slug: z.string().min(1).max(200),
+  nameJa: z.string().optional().default(""),
+  nameEn: z.string().optional().default(""),
+  order: z.number().int().optional().default(0),
+  active: z.boolean().optional().default(true),
 });
 
 export const SlideSchema = z.object({
@@ -154,5 +218,3 @@ export const CompositeExampleSchema = z.object({
   order: z.number().int().optional().default(0),
   isPublished: z.boolean().optional().default(true),
 });
-
-

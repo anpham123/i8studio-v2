@@ -9,7 +9,7 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { Plus } from "lucide-react";
 
-interface Service { id: string; name: string; slug: string; priceHint: string; order: number; icon: string; image: string; }
+interface Service { id: string; name: string; slug: string; priceHint: string; order: number; icon: string; image: string; isPublished: boolean; }
 
 export default function ServicesPage() {
   const [data, setData] = useState<Service[]>([]);
@@ -49,6 +49,12 @@ export default function ServicesPage() {
     { key: "name", label: "Tên dịch vụ", sortable: true },
     { key: "slug", label: "Slug", render: (v) => <code className="text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded">{String(v)}</code> },
     { key: "priceHint", label: "Giá tham khảo" },
+    {
+      key: "isPublished", label: "Trạng thái",
+      render: (v) => v
+        ? <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-medium">Published</span>
+        : <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full font-medium">Draft</span>,
+    },
     { key: "order", label: "Thứ tự", sortable: true },
   ];
 

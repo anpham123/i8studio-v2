@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/admin/Toast";
 import { slugify } from "@/lib/utils";
@@ -106,6 +106,12 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
     } catch { return []; }
   });
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; slug: string; nameJa: string; nameEn: string }[]>([]);
+
+  // Fetch blog categories
+  useEffect(() => {
+    fetch("/api/blog-categories").then((r) => r.json()).then((d) => setCategories(d.data || []));
+  }, []);
 
   const set = (key: keyof BlogPostData, val: unknown) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -208,7 +214,10 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
           </div>
           <div>
             <label className={labelCls}>Category</label>
-            <input value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls} placeholder="制作プロセス / ArchViz" />
+            <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls}>
+              <option value="">— Chọn danh mục —</option>
+              {categories.map((c) => <option key={c.id} value={c.slug}>{c.nameJa || c.nameEn} ({c.slug})</option>)}
+            </select>
           </div>
           <div>
             <label className={labelCls}>Eyebrow</label>

@@ -64,7 +64,87 @@ model Service {
   priceHint     String   @default("")
   priceHintJa   String   @default("")
   order         Int      @default(0)
+  isPublished   Boolean  @default(true)
+  heroImage     String   @default("")
+  featuresJson  String   @default("[]")  // JSON array of {titleJa,titleEn,descJa,descEn,image}
+
+  // Solution detail page fields (legacy — kept for backward compat)
+  heroTaglineJa   String @default("")
+  heroTaglineEn   String @default("")
+  heroDescJa      String @default("")
+  heroDescEn      String @default("")
+  feature1TitleJa String @default("")
+  feature1TitleEn String @default("")
+  feature1DescJa  String @default("")
+  feature1DescEn  String @default("")
+  feature1Image   String @default("")
+  feature2TitleJa String @default("")
+  feature2TitleEn String @default("")
+  feature2DescJa  String @default("")
+  feature2DescEn  String @default("")
+  feature2Image   String @default("")
+  processJson     String @default("[]")   // JSON array of {titleJa,titleEn,descJa,descEn}
+  plansJson       String @default("[]")   // JSON array of {name,features[],price,highlighted?}
+
   createdAt     DateTime @default(now())
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  titleJa     String   @default("")
+  titleEn     String   @default("")
+  descJa      String   @default("")
+  descEn      String   @default("")
+  coverImage  String   @default("")
+  imagesJson  String   @default("[]")  // JSON array of image URLs (legacy)
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  items       CollectionItem[]
+  createdAt   DateTime @default(now())
+}
+
+model CollectionItem {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  image        String     @default("")
+  captionJa    String     @default("")
+  captionEn    String     @default("")
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+}
+
+model PriceItem {
+  id           String   @id @default(cuid())
+  serviceSlug  String   @default("")
+  icon         String   @default("")
+  titleJa      String   @default("")
+  titleEn      String   @default("")
+  bulletsJson  String   @default("[]")  // JSON array of feature strings
+  priceFrom    String   @default("")    // e.g. "¥35,000〜" or "ASK"
+  priceLabelJa String   @default("")
+  priceLabelEn String   @default("")
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model CompanyContent {
+  id          String   @id @default(cuid())
+  section     String   @unique  // "overview" | "milestones" | "workflow"
+  contentJson String   @default("{}")
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model BlogCategory {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameJa    String   @default("")
+  nameEn    String   @default("")
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model Slide {

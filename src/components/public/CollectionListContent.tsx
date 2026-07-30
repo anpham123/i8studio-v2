@@ -7,9 +7,14 @@ import { COLLECTIONS } from "@/lib/collection-data";
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
-export default function CollectionListContent() {
+interface DbCol { slug: string; titleJa: string; titleEn: string; descJa: string; descEn: string; coverImage: string; }
+
+export default function CollectionListContent({ dbCollections }: { dbCollections?: DbCol[] }) {
   const locale = useLocale();
   const isJa = locale === "ja";
+  const collections = (dbCollections && dbCollections.length > 0)
+    ? dbCollections.map((c) => ({ slug: c.slug, titleJa: c.titleJa, titleEn: c.titleEn, descJa: c.descJa, descEn: c.descEn, cover: c.coverImage }))
+    : COLLECTIONS.map((c) => ({ slug: c.slug, titleJa: c.titleJa, titleEn: c.titleEn, descJa: c.descJa, descEn: c.descEn, cover: c.cover }));
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,7 +42,7 @@ export default function CollectionListContent() {
       {/* ── Grid ──────────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {COLLECTIONS.map((col, i) => {
+          {collections.map((col, i) => {
             const title = isJa ? col.titleJa : col.titleEn;
             return (
               <motion.div
@@ -49,7 +54,7 @@ export default function CollectionListContent() {
                 transition={{ delay: (i % 3) * 0.08 }}
               >
                 <Link
-                  href={`/${locale}/about-us/collection/${col.slug}`}
+                  href={`/${locale}/collection/${col.slug}`}
                   className="group block rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 overflow-hidden">

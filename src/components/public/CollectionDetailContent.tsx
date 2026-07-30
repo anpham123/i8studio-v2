@@ -8,19 +8,29 @@ import { COLLECTIONS } from "@/lib/collection-data";
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
-export default function CollectionDetailContent({ data }: { data: CollectionItem }) {
+interface DbCollection {
+  slug: string; titleJa: string; titleEn: string;
+  descJa: string; descEn: string; coverImage: string;
+  images: { image: string; captionJa: string; captionEn: string }[];
+}
+
+export default function CollectionDetailContent({ data, dbCollection }: { data?: CollectionItem; dbCollection?: DbCollection }) {
   const locale = useLocale();
   const isJa = locale === "ja";
-  const title = isJa ? data.titleJa : data.titleEn;
-  const desc = isJa ? data.descJa : data.descEn;
-  const others = COLLECTIONS.filter((c) => c.slug !== data.slug).slice(0, 3);
+
+  const col = dbCollection || (data ? { slug: data.slug, titleJa: data.titleJa, titleEn: data.titleEn, descJa: data.descJa, descEn: data.descEn, coverImage: data.cover, images: data.images.map((img) => ({ image: img, captionJa: "", captionEn: "" })) } : null);
+  if (!col) return null;
+
+  const title = isJa ? col.titleJa : col.titleEn;
+  const desc = isJa ? col.descJa : col.descEn;
+  const others = COLLECTIONS.filter((c) => c.slug !== col.slug).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white">
       {/* ── Hero ──────────────── */}
       <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-28 text-center">
-          <Link href={`/${locale}/about-us/collection`} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6">
+          <Link href={`/${locale}/collection`} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6">
             ← {isJa ? "コレクション一覧" : "All Collections"}
           </Link>
           <motion.h1
@@ -44,7 +54,7 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
           <div className="aspect-[21/9] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={data.cover}
+              src={col.coverImage}
               alt={title}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -64,7 +74,7 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
 
         {/* Detail images */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {data.images.map((img, i) => (
+          {col.images.map((img, i) => (
             <motion.div
               key={i}
               variants={fadeUp}
@@ -72,11 +82,11 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
               whileInView="visible"
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200"
+              className="aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 relative group"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={img}
+                src={img.image}
                 alt={`${title} ${i + 1}`}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 onError={(e) => {
@@ -91,6 +101,11 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
                   }
                 }}
               />
+              {(img.captionJa || img.captionEn) && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {isJa ? img.captionJa : img.captionEn}
+                </div>
+              )}
             </motion.div>
           ))}
         </div>
@@ -108,7 +123,7 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
               return (
                 <Link
                   key={col.slug}
-                  href={`/${locale}/about-us/collection/${col.slug}`}
+                  href={`/${locale}/collection/${col.slug}`}
                   className="group block rounded-xl overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-all"
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 overflow-hidden">
@@ -128,7 +143,7 @@ export default function CollectionDetailContent({ data }: { data: CollectionItem
             })}
           </div>
           <div className="text-center mt-10">
-            <Link href={`/${locale}/about-us/collection`} className="text-sm font-medium text-gray-400 hover:text-[#111] transition-colors">
+            <Link href={`/${locale}/collection`} className="text-sm font-medium text-gray-400 hover:text-[#111] transition-colors">
               ← {isJa ? "コレクション一覧に戻る" : "Back to All Collections"}
             </Link>
           </div>
