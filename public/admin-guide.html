@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i8 STUDIO — Hướng dẫn sử dụng Admin Panel</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+    
+    :root {
+      --blue: #2563eb;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --light: #f8fafc;
+      --border: #e2e8f0;
+      --accent: #3b82f6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      color: #1e293b;
+      line-height: 1.7;
+      background: #fff;
+    }
+
+    @media print {
+      body { font-size: 11pt; }
+      .page-break { page-break-before: always; }
+      .no-print { display: none; }
+      .cover { height: 100vh; }
+    }
+
+    /* ── Cover ── */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      color: white;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .cover h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .cover .subtitle {
+      font-size: 1.25rem;
+      font-weight: 300;
+      color: #94a3b8;
+      margin-bottom: 2rem;
+    }
+    .cover .version {
+      background: rgba(59,130,246,0.2);
+      border: 1px solid rgba(59,130,246,0.3);
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      color: #93c5fd;
+    }
+    .cover .date {
+      margin-top: 3rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .toc h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--blue);
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+    }
+    .toc > ol > li {
+      counter-increment: toc;
+      margin-bottom: 0.5rem;
+    }
+    .toc > ol > li::before {
+      content: counter(toc) ". ";
+      font-weight: 600;
+      color: var(--blue);
+    }
+    .toc a {
+      color: var(--dark);
+      text-decoration: none;
+    }
+    .toc a:hover { color: var(--blue); }
+    .toc .sub { padding-left: 1.5rem; font-size: 0.9rem; color: var(--gray); }
+
+    /* ── Sections ── */
+    h2.section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid var(--blue);
+    }
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin: 2rem 0 0.75rem;
+    }
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray);
+      margin: 1.5rem 0 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.8rem;
+    }
+
+    p { margin-bottom: 0.75rem; }
+
+    /* ── Info boxes ── */
+    .info-box {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .info-box.tip {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      color: #1e40af;
+    }
+    .info-box.warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+    .info-box.new {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      color: #166534;
+    }
+    .info-box strong { display: block; margin-bottom: 0.25rem; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--light);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray);
+    }
+
+    /* ── Steps ── */
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+    }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1.25rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background: var(--blue);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    /* ── Tags ── */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+    }
+    .badge.new { background: #dcfce7; color: #166534; }
+    .badge.updated { background: #dbeafe; color: #1e40af; }
+
+    code {
+      background: #f1f5f9;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    .field-list {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 0.25rem 1rem;
+      margin: 0.5rem 0 1rem;
+      font-size: 0.9rem;
+    }
+    .field-list dt {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    .field-list dd {
+      color: var(--gray);
+    }
+
+    .separator {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- COVER PAGE -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="cover">
+  <h1>i8 STUDIO</h1>
+  <p class="subtitle">Hướng dẫn sử dụng Admin Panel</p>
+  <div class="version">Version 2.0 — Tháng 7/2026</div>
+  <p class="date">
+    Tài liệu nội bộ — Cập nhật lần cuối: 31/07/2026<br>
+    Bao gồm tất cả module cũ và mới
+  </p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="container page-break">
+  <div class="toc">
+    <h2>📋 Mục lục</h2>
+    <ol>
+      <li><a href="#login">Đăng nhập &amp; Tổng quan</a></li>
+      <li><a href="#posts">Bài đăng (Posts / News)</a></li>
+      <li><a href="#blog">Blog Posts</a></li>
+      <li><a href="#blog-cat">Blog Categories</a> <span class="badge new">MỚI</span></li>
+      <li><a href="#works">Works (Portfolio)</a></li>
+      <li><a href="#flipbooks">Flipbooks</a></li>
+      <li><a href="#services">Dịch vụ (Services)</a> <span class="badge updated">CẬP NHẬT</span></li>
+      <li><a href="#price">Bảng giá (Price List)</a> <span class="badge new">MỚI</span></li>
+      <li><a href="#collections">Collections</a> <span class="badge updated">CẬP NHẬT</span></li>
+      <li><a href="#composite">Photo Composite</a></li>
+      <li><a href="#case-studies">Case Studies</a></li>
+      <li><a href="#qa">Q&amp;A</a></li>
+      <li><a href="#company">Company Content</a> <span class="badge new">MỚI</span></li>
+      <li><a href="#contacts">Liên hệ &amp; Subscribers</a></li>
+      <li><a href="#media">Media Library</a></li>
+      <li><a href="#settings">Cài đặt &amp; Thương hiệu</a></li>
+      <li><a href="#analytics">Thống kê truy cập</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 1. LOGIN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="login">1. Đăng nhập &amp; Tổng quan</h2>
+
+  <h3>Đăng nhập</h3>
+  <ul class="steps">
+    <li>Truy cập <code>https://i8studio.vn/admin/login</code></li>
+    <li>Nhập <strong>Email</strong> và <strong>Mật khẩu</strong> được cấp</li>
+    <li>Nhấn <strong>Đăng nhập</strong> — hệ thống chuyển đến Dashboard</li>
+  </ul>
+
+  <div class="info-box tip">
+    <strong>💡 Mẹo</strong>
+    Nếu quên mật khẩu, liên hệ quản trị viên hệ thống để reset.
+  </div>
+
+  <h3>Dashboard (Tổng quan)</h3>
+  <p>Trang tổng quan hiển thị các số liệu nhanh:</p>
+  <table>
+    <tr><th>Mục</th><th>Mô tả</th></tr>
+    <tr><td>Tổng bài viết</td><td>Số lượng bài đăng / blog posts</td></tr>
+    <tr><td>Liên hệ mới</td><td>Số tin nhắn chưa đọc từ form liên hệ</td></tr>
+    <tr><td>Works</td><td>Tổng số dự án portfolio</td></tr>
+    <tr><td>Subscribers</td><td>Số người đăng ký nhận tin</td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 2. POSTS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="posts">2. Bài đăng (Posts / News)</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/posts</code></p>
+  <p>Quản lý tin tức, thông báo hiển thị trên trang <code>/news</code> và <code>/insights</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề (JA/EN)</dt><dd>Tiêu đề hiển thị theo ngôn ngữ</dd>
+    <dt>Slug</dt><dd>Đường dẫn URL, tự tạo từ tiêu đề</dd>
+    <dt>Nội dung (JA/EN)</dt><dd>Nội dung chính bài viết</dd>
+    <dt>Tóm tắt (JA/EN)</dt><dd>Đoạn mô tả ngắn hiển thị ở listing</dd>
+    <dt>Ảnh bìa</dt><dd>Upload ảnh đại diện bài viết</dd>
+    <dt>Category</dt><dd>Phân loại: News, Update, Event...</dd>
+    <dt>Published</dt><dd>Checkbox bật/tắt hiển thị công khai</dd>
+  </dl>
+
+  <h4>Thao tác</h4>
+  <ul class="steps">
+    <li><strong>Thêm mới:</strong> Nhấn nút <em>"+ Thêm mới"</em> góc phải trên</li>
+    <li><strong>Chỉnh sửa:</strong> Click vào icon ✏️ trên dòng bài viết</li>
+    <li><strong>Xóa:</strong> Click icon 🗑️ → Xác nhận trong dialog</li>
+    <li><strong>Tìm kiếm:</strong> Gõ từ khóa vào ô tìm kiếm phía trên bảng</li>
+  </ul>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 3. BLOG -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="blog">3. Blog Posts</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/blog-posts</code></p>
+  <p>Quản lý bài blog chuyên sâu với rich content, hiển thị tại <code>/blogs</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề (JA/EN)</dt><dd>Tiêu đề bài blog</dd>
+    <dt>Slug</dt><dd>Đường dẫn URL bài blog</dd>
+    <dt>Nội dung (JA/EN)</dt><dd>Rich text editor với Markdown</dd>
+    <dt>Ảnh bìa</dt><dd>Upload ảnh hero</dd>
+    <dt>Category</dt><dd>Dropdown chọn danh mục (từ Blog Categories)</dd>
+    <dt>Eyebrow</dt><dd>Text nhỏ hiển thị trên tiêu đề</dd>
+    <dt>Author</dt><dd>Tên tác giả</dd>
+    <dt>Published</dt><dd>Bật/tắt hiển thị công khai</dd>
+  </dl>
+
+  <div class="info-box tip">
+    <strong>💡 Nội dung đa ngôn ngữ</strong>
+    Tất cả trường JA/EN đều bắt buộc. Nếu chỉ điền 1 ngôn ngữ, trang sẽ hiển thị nội dung trống cho ngôn ngữ còn lại.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 4. BLOG CATEGORIES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="blog-cat">4. Blog Categories <span class="badge new">MỚI</span></h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/blog-categories</code></p>
+  <p>Quản lý danh mục phân loại cho Blog Posts. Các danh mục mặc định đã được tạo sẵn.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tên (JA/EN)</dt><dd>Tên danh mục theo ngôn ngữ</dd>
+    <dt>Slug</dt><dd>Tự tạo từ tên, dùng cho URL</dd>
+    <dt>Thứ tự</dt><dd>Số thứ tự sắp xếp (nhỏ = trước)</dd>
+    <dt>Active</dt><dd>Bật/tắt danh mục</dd>
+  </dl>
+
+  <h4>Danh mục mặc định</h4>
+  <table>
+    <tr><th>Slug</th><th>Tên JA</th><th>Tên EN</th></tr>
+    <tr><td><code>case-study</code></td><td>事例紹介</td><td>Case Study</td></tr>
+    <tr><td><code>technique-sharing</code></td><td>テクニック共有</td><td>Technique Sharing</td></tr>
+    <tr><td><code>knowledge</code></td><td>ナレッジ</td><td>Knowledge</td></tr>
+    <tr><td><code>ai-updates</code></td><td>AI最新情報</td><td>AI Updates</td></tr>
+    <tr><td><code>i8-life-gallery</code></td><td>i8ライフギャラリー</td><td>I8 Life Gallery</td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 5. WORKS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="works">5. Works (Portfolio)</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/works</code></p>
+  <p>Quản lý dự án portfolio hiển thị tại trang <code>/works</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề</dt><dd>Tên dự án</dd>
+    <dt>Ảnh/Video</dt><dd>Upload media đại diện (hỗ trợ video)</dd>
+    <dt>Loại dịch vụ</dt><dd>CG Perse, CG Animation, VR360, v.v.</dd>
+    <dt>Tags</dt><dd>Nhãn phân loại: Residential, Commercial, v.v.</dd>
+    <dt>Khách hàng</dt><dd>Tên khách hàng (tùy chọn)</dd>
+    <dt>Thứ tự</dt><dd>Sắp xếp hiển thị</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 6. FLIPBOOKS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="flipbooks">6. Flipbooks</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/flipbooks</code></p>
+  <p>Upload và quản lý portfolio PDF dạng flipbook tương tác.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề</dt><dd>Tên flipbook</dd>
+    <dt>File PDF</dt><dd>Upload file PDF portfolio</dd>
+    <dt>Trạng thái</dt><dd>Hiện / Ẩn trên trang công khai</dd>
+    <dt>Thứ tự</dt><dd>Sắp xếp hiển thị</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 7. SERVICES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="services">7. Dịch vụ (Services) <span class="badge updated">CẬP NHẬT</span></h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/services</code></p>
+  <p>Quản lý 9 dịch vụ solution hiển thị tại <code>/solution</code> và <code>/solution/[slug]</code>.</p>
+
+  <h4>Các trường cơ bản</h4>
+  <dl class="field-list">
+    <dt>Tên (JA/EN)</dt><dd>Tên dịch vụ</dd>
+    <dt>Slug</dt><dd>Đường dẫn URL: cg-perse, vr360, v.v.</dd>
+    <dt>Mô tả (JA/EN)</dt><dd>Mô tả ngắn dịch vụ</dd>
+    <dt>Icon</dt><dd>Icon đại diện (emoji hoặc URL)</dd>
+    <dt>Published ✨</dt><dd>Bật/tắt hiển thị dịch vụ trên trang công khai</dd>
+  </dl>
+
+  <h4>Trường chi tiết (mới)</h4>
+  <dl class="field-list">
+    <dt>Hero Image ✨</dt><dd>Ảnh hero banner trang chi tiết dịch vụ</dd>
+    <dt>Hero Tagline (JA/EN)</dt><dd>Câu tagline hiển thị trên hero</dd>
+    <dt>Hero Description (JA/EN)</dt><dd>Mô tả chi tiết phần hero</dd>
+    <dt>Features (động) ✨</dt><dd>Danh sách tính năng nổi bật, thêm/xóa linh hoạt</dd>
+    <dt>Process Steps</dt><dd>Các bước quy trình làm việc</dd>
+    <dt>Plans</dt><dd>Các gói dịch vụ / báo giá</dd>
+  </dl>
+
+  <div class="info-box new">
+    <strong>✨ Tính năng mới: Dynamic Features</strong>
+    Thay vì chỉ 2 features cố định, giờ bạn có thể thêm bao nhiêu features tùy ý. Mỗi feature gồm: Tiêu đề (JA/EN), Mô tả (JA/EN), và Ảnh minh họa.
+  </div>
+
+  <h4>Danh sách 9 dịch vụ</h4>
+  <table>
+    <tr><th>Slug</th><th>Tên JA</th><th>Tên EN</th></tr>
+    <tr><td><code>cg-perse</code></td><td>CGパース</td><td>CG Perspective</td></tr>
+    <tr><td><code>cg-animation</code></td><td>CG動画</td><td>CG Animation</td></tr>
+    <tr><td><code>photo-composite</code></td><td>写真合成</td><td>Photo Composite</td></tr>
+    <tr><td><code>virtual-staging</code></td><td>バーチャルステージング</td><td>Virtual Staging</td></tr>
+    <tr><td><code>vr360</code></td><td>VR360</td><td>VR 360°</td></tr>
+    <tr><td><code>vr-walkthrough</code></td><td>VRウォークスルー</td><td>VR Walkthrough</td></tr>
+    <tr><td><code>digital-model</code></td><td>デジタル模型</td><td>Digital Model</td></tr>
+    <tr><td><code>ar</code></td><td>AR</td><td>Augmented Reality</td></tr>
+    <tr><td><code>exe-content</code></td><td>EXEコンテンツ</td><td>EXE Content</td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 8. PRICE LIST -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="price">8. Bảng giá (Price List) <span class="badge new">MỚI</span></h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/price-list</code></p>
+  <p>Quản lý các mục bảng giá hiển thị tại trang <code>/price</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tên (JA/EN)</dt><dd>Tên mục giá</dd>
+    <dt>Icon</dt><dd>Emoji icon đại diện (ví dụ: 🖼️, 🎥, 🏠)</dd>
+    <dt>Dịch vụ liên kết</dt><dd>Dropdown chọn dịch vụ tương ứng</dd>
+    <dt>Giá từ</dt><dd>Mức giá tham khảo (ví dụ: ¥35,000〜 hoặc ASK)</dd>
+    <dt>Nhãn giá (JA/EN)</dt><dd>Label hiển thị (参考価格 / Starting from)</dd>
+    <dt>Thứ tự</dt><dd>Sắp xếp hiển thị</dd>
+    <dt>Bullets / Tính năng</dt><dd>Danh sách tính năng, mỗi dòng 1 mục</dd>
+  </dl>
+
+  <div class="info-box tip">
+    <strong>💡 Liên kết dịch vụ</strong>
+    Khi chọn "Dịch vụ liên kết", bảng giá sẽ tự động link đến trang chi tiết dịch vụ tương ứng.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 9. COLLECTIONS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="collections">9. Collections <span class="badge updated">CẬP NHẬT</span></h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/collections</code></p>
+  <p>Quản lý bộ sưu tập ảnh theo loại không gian, hiển thị tại <code>/collection</code>.</p>
+
+  <h4>Thông tin collection</h4>
+  <dl class="field-list">
+    <dt>Tên (JA/EN)</dt><dd>Tên bộ sưu tập</dd>
+    <dt>Slug</dt><dd>Đường dẫn URL</dd>
+    <dt>Mô tả (JA/EN)</dt><dd>Mô tả ngắn</dd>
+    <dt>Ảnh bìa</dt><dd>Cover image hiển thị ở listing</dd>
+    <dt>Active</dt><dd>Bật/tắt hiển thị</dd>
+    <dt>Thứ tự</dt><dd>Sắp xếp</dd>
+  </dl>
+
+  <h4>Quản lý ảnh Gallery (mới) ✨</h4>
+  <p>Mỗi collection giờ có thể quản lý ảnh gallery chi tiết:</p>
+  <ul class="steps">
+    <li>Mở collection → phần <strong>"Ảnh gallery"</strong> bên dưới</li>
+    <li>Nhấn <strong>"Thêm ảnh mới"</strong> → Upload ảnh</li>
+    <li>Mỗi ảnh có <strong>Caption JA</strong> và <strong>Caption EN</strong> (hiện khi hover)</li>
+    <li>Nhấn ❌ trên ảnh để xóa</li>
+  </ul>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 10. PHOTO COMPOSITE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="composite">10. Photo Composite</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/composite-examples</code></p>
+  <p>Quản lý ví dụ Before/After cho dịch vụ Photo Composite.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề</dt><dd>Tên ví dụ</dd>
+    <dt>Ảnh Before</dt><dd>Ảnh gốc trước xử lý</dd>
+    <dt>Ảnh After</dt><dd>Ảnh sau khi composite</dd>
+    <dt>Mô tả</dt><dd>Giải thích kỹ thuật sử dụng</dd>
+    <dt>Category</dt><dd>Loại: Interior, Exterior, Aerial, v.v.</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 11. CASE STUDIES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="case-studies">11. Case Studies</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/case-studies</code></p>
+  <p>Quản lý các dự án case study chi tiết hiển thị tại <code>/case-studies</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Tiêu đề (JA/EN)</dt><dd>Tên dự án</dd>
+    <dt>Slug</dt><dd>Đường dẫn URL</dd>
+    <dt>Mô tả (JA/EN)</dt><dd>Mô tả dự án</dd>
+    <dt>Khách hàng</dt><dd>Tên khách hàng / công ty</dd>
+    <dt>Dịch vụ</dt><dd>Loại dịch vụ sử dụng</dd>
+    <dt>Ảnh bìa</dt><dd>Ảnh đại diện case study</dd>
+    <dt>Gallery</dt><dd>Nhiều ảnh chi tiết dự án</dd>
+    <dt>Kết quả</dt><dd>Kết quả đạt được</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12. Q&A -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="qa">12. Q&amp;A (Hỏi đáp)</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/qa</code></p>
+  <p>Quản lý câu hỏi thường gặp hiển thị tại trang <code>/qa</code>.</p>
+
+  <h4>Các trường thông tin</h4>
+  <dl class="field-list">
+    <dt>Câu hỏi (JA/EN)</dt><dd>Nội dung câu hỏi</dd>
+    <dt>Câu trả lời (JA/EN)</dt><dd>Nội dung trả lời</dd>
+    <dt>Category</dt><dd>Phân nhóm câu hỏi</dd>
+    <dt>Thứ tự</dt><dd>Sắp xếp hiển thị</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 13. COMPANY CONTENT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="company">13. Company Content <span class="badge new">MỚI</span></h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/company</code></p>
+  <p>Quản lý nội dung trang About Us và Workflow. Giao diện chia thành <strong>3 tab</strong>.</p>
+
+  <h3>Tab 1: Overview</h3>
+  <p>Thông tin giới thiệu công ty và số liệu thống kê.</p>
+  <dl class="field-list">
+    <dt>Intro (JA/EN)</dt><dd>Đoạn giới thiệu công ty</dd>
+    <dt>Nhân sự</dt><dd>Số lượng nhân viên</dd>
+    <dt>Năm kinh nghiệm</dt><dd>Số năm hoạt động</dd>
+    <dt>Khách hàng</dt><dd>Tổng số khách hàng</dd>
+    <dt>Dự án</dt><dd>Tổng số dự án đã thực hiện</dd>
+  </dl>
+
+  <h3>Tab 2: Milestones</h3>
+  <p>Các cột mốc quan trọng trong lịch sử công ty.</p>
+  <dl class="field-list">
+    <dt>Năm</dt><dd>Năm xảy ra sự kiện (ví dụ: 2019)</dd>
+    <dt>Tiêu đề (JA/EN)</dt><dd>Tên cột mốc</dd>
+    <dt>Mô tả (JA/EN)</dt><dd>Chi tiết sự kiện</dd>
+  </dl>
+  <p>Nhấn <strong>"+ Thêm"</strong> để thêm milestone mới. Nhấn ❌ để xóa.</p>
+
+  <h3>Tab 3: Workflow</h3>
+  <p>Các bước quy trình làm việc hiển thị tại trang <code>/about-us/workflow</code>.</p>
+  <dl class="field-list">
+    <dt>Số bước</dt><dd>Thứ tự bước (1, 2, 3...)</dd>
+    <dt>Tiêu đề (JA/EN)</dt><dd>Tên bước</dd>
+    <dt>Mô tả (JA/EN)</dt><dd>Chi tiết bước thực hiện</dd>
+    <dt>Ảnh</dt><dd>Upload ảnh minh họa cho bước</dd>
+    <dt>Tags</dt><dd>Nhãn phân loại (phân cách bằng dấu phẩy)</dd>
+  </dl>
+
+  <div class="info-box warning">
+    <strong>⚠️ Lưu ý quan trọng</strong>
+    Nhấn nút <strong>"Lưu"</strong> sau khi chỉnh sửa mỗi tab. Chuyển tab mà chưa lưu sẽ mất dữ liệu đã thay đổi.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 14. CONTACTS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="contacts">14. Liên hệ &amp; Subscribers</h2>
+  
+  <h3>Liên hệ (Contacts)</h3>
+  <p><strong>Đường dẫn:</strong> <code>/admin/contacts</code></p>
+  <p>Xem và quản lý tin nhắn từ form liên hệ trên website.</p>
+  <table>
+    <tr><th>Tab</th><th>Mô tả</th></tr>
+    <tr><td>Tất cả</td><td>Toàn bộ tin nhắn</td></tr>
+    <tr><td>Chưa đọc</td><td>Tin nhắn mới chưa xử lý</td></tr>
+    <tr><td>Đã đọc</td><td>Tin nhắn đã xem / xử lý</td></tr>
+  </table>
+  <p>Click vào tin nhắn để xem chi tiết. Trạng thái tự chuyển sang "Đã đọc".</p>
+
+  <h3>Subscribers</h3>
+  <p><strong>Đường dẫn:</strong> <code>/admin/subscribers</code></p>
+  <p>Danh sách email đăng ký nhận tin từ footer website. Có thể xuất danh sách hoặc xóa.</p>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 15. MEDIA -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="media">15. Media Library</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/media</code></p>
+  <p>Quản lý tập trung tất cả file ảnh/video đã upload.</p>
+
+  <h4>Thao tác</h4>
+  <ul class="steps">
+    <li><strong>Upload:</strong> Kéo thả hoặc nhấn nút upload</li>
+    <li><strong>Copy URL:</strong> Click vào ảnh → sao chép đường dẫn</li>
+    <li><strong>Xóa:</strong> Chọn ảnh → nhấn xóa</li>
+  </ul>
+
+  <div class="info-box tip">
+    <strong>💡 Định dạng hỗ trợ</strong>
+    JPG, PNG, WebP, GIF, MP4, MOV. Dung lượng tối đa: 10MB cho ảnh, 50MB cho video.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 16. SETTINGS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title page-break" id="settings">16. Cài đặt &amp; Thương hiệu</h2>
+
+  <h3>Cài đặt chung</h3>
+  <p><strong>Đường dẫn:</strong> <code>/admin/settings</code></p>
+  <dl class="field-list">
+    <dt>Tên website</dt><dd>Hiển thị trên header và SEO</dd>
+    <dt>Mô tả</dt><dd>Meta description mặc định</dd>
+    <dt>Email liên hệ</dt><dd>Email nhận thông báo từ form</dd>
+    <dt>Số điện thoại</dt><dd>Hiển thị ở footer và trang liên hệ</dd>
+    <dt>Địa chỉ</dt><dd>Địa chỉ công ty</dd>
+    <dt>Social links</dt><dd>Facebook, Instagram, YouTube, v.v.</dd>
+  </dl>
+
+  <h3>Thương hiệu (Branding)</h3>
+  <p><strong>Đường dẫn:</strong> <code>/admin/settings/branding</code></p>
+  <dl class="field-list">
+    <dt>Logo</dt><dd>Upload logo chính</dd>
+    <dt>Favicon</dt><dd>Upload icon tab trình duyệt</dd>
+    <dt>Màu chủ đạo</dt><dd>Tùy chỉnh màu thương hiệu</dd>
+    <dt>OG Image</dt><dd>Ảnh mặc định khi chia sẻ trên mạng xã hội</dd>
+  </dl>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 17. ANALYTICS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="analytics">17. Thống kê truy cập</h2>
+  <p><strong>Đường dẫn:</strong> <code>/admin/analytics</code></p>
+  <p>Xem thống kê lượt truy cập website theo thời gian thực.</p>
+  <table>
+    <tr><th>Chỉ số</th><th>Mô tả</th></tr>
+    <tr><td>Page Views</td><td>Tổng lượt xem trang</td></tr>
+    <tr><td>Unique Visitors</td><td>Số người truy cập riêng biệt</td></tr>
+    <tr><td>Top Pages</td><td>Trang được xem nhiều nhất</td></tr>
+    <tr><td>Referrers</td><td>Nguồn truy cập (Google, direct, v.v.)</td></tr>
+  </table>
+
+  <hr class="separator">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- APPENDIX -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <h2 class="section-title" id="appendix">Phụ lục: Tham khảo nhanh</h2>
+
+  <h3>Phím tắt thao tác chung</h3>
+  <table>
+    <tr><th>Thao tác</th><th>Cách thực hiện</th></tr>
+    <tr><td>Thêm mới</td><td>Nút <strong>"+ Thêm mới"</strong> góc phải trên</td></tr>
+    <tr><td>Chỉnh sửa</td><td>Click icon ✏️ hoặc click vào dòng dữ liệu</td></tr>
+    <tr><td>Xóa</td><td>Click icon 🗑️ → Xác nhận</td></tr>
+    <tr><td>Tìm kiếm</td><td>Gõ từ khóa vào ô search phía trên bảng</td></tr>
+    <tr><td>Upload ảnh</td><td>Kéo thả hoặc click vào vùng upload</td></tr>
+    <tr><td>Lưu</td><td>Nút <strong>"Lưu"</strong> góc phải trên</td></tr>
+  </table>
+
+  <h3>Cấu trúc URL trang công khai</h3>
+  <table>
+    <tr><th>Module</th><th>URL công khai</th></tr>
+    <tr><td>Trang chủ</td><td><code>/ja</code> hoặc <code>/en</code></td></tr>
+    <tr><td>Dịch vụ</td><td><code>/[locale]/solution</code></td></tr>
+    <tr><td>Chi tiết dịch vụ</td><td><code>/[locale]/solution/[slug]</code></td></tr>
+    <tr><td>Bảng giá</td><td><code>/[locale]/price</code></td></tr>
+    <tr><td>Works</td><td><code>/[locale]/works</code></td></tr>
+    <tr><td>Collection</td><td><code>/[locale]/collection</code></td></tr>
+    <tr><td>Case Studies</td><td><code>/[locale]/case-studies</code></td></tr>
+    <tr><td>Blog</td><td><code>/[locale]/blogs</code></td></tr>
+    <tr><td>News</td><td><code>/[locale]/news</code></td></tr>
+    <tr><td>Q&A</td><td><code>/[locale]/qa</code></td></tr>
+    <tr><td>About Us</td><td><code>/[locale]/about-us</code></td></tr>
+    <tr><td>Workflow</td><td><code>/[locale]/about-us/workflow</code></td></tr>
+    <tr><td>Liên hệ</td><td><code>/[locale]/contact</code></td></tr>
+  </table>
+
+  <div class="info-box tip">
+    <strong>💡 Đa ngôn ngữ</strong>
+    <code>[locale]</code> = <code>ja</code> (tiếng Nhật) hoặc <code>en</code> (tiếng Anh). Website tự động chuyển đổi nội dung theo ngôn ngữ người dùng chọn.
+  </div>
+
+</div>
+
+<footer>
+  <p><strong>i8 STUDIO</strong> — Admin Panel Guide v2.0</p>
+  <p>© 2026 i8 Studio. Tài liệu nội bộ — Không chia sẻ bên ngoài.</p>
+  <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+    Để in PDF: Mở file này trong trình duyệt → Ctrl+P → Save as PDF
+  </p>
+</footer>
+
+</body>
+</html>

@@ -19,9 +19,75 @@ const SERVICE_ICONS: Record<string, string> = {
   "exe-content": "💻",
 };
 
-export default function PricePageContent() {
+interface DbPriceItem {
+  id: string;
+  nameJa: string;
+  nameEn: string;
+  icon: string;
+  serviceSlug: string;
+  price: string;
+  priceLabelJa: string;
+  priceLabelEn: string;
+  bulletsJson: string;
+  order: number;
+}
+
+interface PriceCard {
+  slug: string;
+  icon: string;
+  titleJa: string;
+  titleEn: string;
+  features: string[];
+  featuresJa: string[];
+  price: string;
+  priceLabelJa: string;
+  priceLabelEn: string;
+}
+
+function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
+  return items.map((item) => {
+    let bullets: string[] = [];
+    try { bullets = JSON.parse(item.bulletsJson); } catch { /* ignore */ }
+    return {
+      slug: item.serviceSlug,
+      icon: item.icon || "📦",
+      titleJa: item.nameJa,
+      titleEn: item.nameEn,
+      features: bullets,
+      featuresJa: bullets,
+      price: item.price || "ASK",
+      priceLabelJa: item.priceLabelJa || "参考価格",
+      priceLabelEn: item.priceLabelEn || "Starting from",
+    };
+  });
+}
+
+function buildCardsFromSolutions(): PriceCard[] {
+  return SOLUTIONS.map((svc) => ({
+    slug: svc.slug,
+    icon: SERVICE_ICONS[svc.slug] ?? "📦",
+    titleJa: svc.titleJa,
+    titleEn: svc.titleEn,
+    features: svc.plans[1]?.features.slice(0, 3) ?? svc.plans[0]?.features.slice(0, 3) ?? [],
+    featuresJa: svc.plans[1]?.features.slice(0, 3) ?? svc.plans[0]?.features.slice(0, 3) ?? [],
+    price: svc.plans[0]?.price ?? "ASK",
+    priceLabelJa: "参考価格",
+    priceLabelEn: "Starting from",
+  }));
+}
+
+interface Props {
+  dbItems?: DbPriceItem[];
+}
+
+export default function PricePageContent({ dbItems }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
+
+  // If DB has items, use them. Otherwise fall back to hardcoded SOLUTIONS.
+  const cards = dbItems && dbItems.length > 0
+    ? buildCardsFromDb(dbItems)
+    : buildCardsFromSolutions();
 
   return (
     <div className="min-h-screen bg-white">
@@ -60,13 +126,13 @@ export default function PricePageContent() {
       {/* ── Service Grid ──────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SOLUTIONS.map((svc, i) => {
-            const title = isJa ? svc.titleJa : svc.titleEn;
-            const basePrice = svc.plans[0]?.price ?? "ASK";
-            const features = svc.plans[1]?.features.slice(0, 3) ?? svc.plans[0]?.features.slice(0, 3) ?? [];
+          {cards.map((card, i) => {
+            const title = isJa ? card.titleJa : card.titleEn;
+            const features = isJa ? (card.featuresJa.length > 0 ? card.featuresJa : card.features) : card.features;
+            const priceLabel = isJa ? card.priceLabelJa : card.priceLabelEn;
             return (
               <motion.div
-                key={svc.slug}
+                key={card.slug + "-" + i}
                 variants={fadeUp}
                 initial="hidden"
                 whileInView="visible"
@@ -76,7 +142,7 @@ export default function PricePageContent() {
               >
                 {/* Icon + Title */}
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">{SERVICE_ICONS[svc.slug] ?? "📦"}</span>
+                  <span className="text-2xl">{card.icon}</span>
                   <h3 className="text-lg font-medium text-[#111]">{title}</h3>
                 </div>
 
@@ -92,19 +158,28 @@ export default function PricePageContent() {
 
                 {/* Price */}
                 <div className="mb-6">
-                  <span className="text-xs uppercase tracking-wider text-gray-400">{isJa ? "参考価格" : "Starting from"}</span>
+                  <span className="text-xs uppercase tracking-wider text-gray-400">{priceLabel}</span>
                   <div className="text-2xl font-light text-[#111] mt-1" style={{ fontFamily: "var(--font-display), serif" }}>
-                    {basePrice === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : basePrice}
+                    {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
                   </div>
                 </div>
 
                 {/* CTA */}
-                <Link
-                  href={`/${locale}/solution/${svc.slug}`}
-                  className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
-                >
-                  {isJa ? "詳細を見る" : "View Details"}
-                </Link>
+                {card.slug ? (
+                  <Link
+                    href={`/${locale}/solution/${card.slug}`}
+                    className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
+                  >
+                    {isJa ? "詳細を見る" : "View Details"}
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
+                  >
+                    {isJa ? "お問い合わせ" : "Contact Us"}
+                  </Link>
+                )}
               </motion.div>
             );
           })}
