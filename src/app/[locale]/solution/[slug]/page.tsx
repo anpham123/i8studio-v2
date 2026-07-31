@@ -6,6 +6,8 @@ import { SOLUTIONS, getSolutionBySlug } from "@/lib/solution-data";
 import SolutionDetailTemplate from "@/components/public/SolutionDetailTemplate";
 import type { SolutionService } from "@/lib/solution-data";
 
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return SOLUTIONS.map((s) => ({ slug: s.slug }));
 }
