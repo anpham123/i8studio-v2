@@ -18,12 +18,15 @@ export async function generateMetadata({
 }
 
 export default async function ContactPage() {
-  const settings = await prisma.setting.findMany();
+  const [settings, services] = await Promise.all([
+    prisma.setting.findMany(),
+    prisma.service.findMany({ orderBy: { order: "asc" }, select: { name: true } }),
+  ]);
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
   return (
     <div className="min-h-screen">
-      <ContactSection settings={settingsMap} />
+      <ContactSection settings={settingsMap} serviceNames={services.map((s) => s.name)} />
     </div>
   );
 }

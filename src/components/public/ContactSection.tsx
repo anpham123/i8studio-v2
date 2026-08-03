@@ -7,22 +7,27 @@ import { useTranslations } from "next-intl";
 
 interface ContactSectionProps {
   settings: Record<string, string>;
+  serviceNames?: string[];
 }
 
-export default function ContactSection({ settings }: ContactSectionProps) {
+const DEFAULT_SERVICES = [
+  "3D CG Visualization",
+  "3D Animation",
+  "VR Experience",
+  "BIM Services",
+  "Pachinko & Slot CG",
+  "Anime & Illustration",
+  "Other",
+];
+
+export default function ContactSection({ settings, serviceNames }: ContactSectionProps) {
   const t = useTranslations("contact");
   const [form, setForm] = useState({ fullName: "", email: "", service: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
-  const services = [
-    "3D CG Visualization",
-    "3D Animation",
-    "VR Experience",
-    "BIM Services",
-    "Pachinko & Slot CG",
-    "Anime & Illustration",
-    "Other",
-  ];
+  const services = serviceNames && serviceNames.length > 0
+    ? [...serviceNames, "Other"]
+    : DEFAULT_SERVICES;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

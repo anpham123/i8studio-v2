@@ -6,14 +6,14 @@ import { motion } from "framer-motion";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
-const STATS = [
+const DEFAULT_STATS = [
   { numJa: "80+", numEn: "80+", labelJa: "プロフェッショナルスタッフ", labelEn: "Professional Staff" },
   { numJa: "5+", numEn: "5+", labelJa: "年の経験", labelEn: "Years of Experience" },
   { numJa: "150+", numEn: "150+", labelJa: "グローバルクライアント", labelEn: "Global Clients" },
   { numJa: "2,000+", numEn: "2,000+", labelJa: "完了プロジェクト", labelEn: "Completed Projects" },
 ];
 
-const MILESTONES = [
+const DEFAULT_MILESTONES = [
   {
     year: "2019",
     titleJa: "i8 STUDIO 設立",
@@ -44,9 +44,36 @@ const MILESTONES = [
   },
 ];
 
+function buildStats(settings: Record<string, string>) {
+  return DEFAULT_STATS.map((def, i) => {
+    const idx = i + 1;
+    return {
+      numEn: settings[`overviewStat${idx}NumEn`] || def.numEn,
+      numJa: settings[`overviewStat${idx}NumJa`] || settings[`overviewStat${idx}NumEn`] || def.numJa,
+      labelEn: settings[`overviewStat${idx}LabelEn`] || def.labelEn,
+      labelJa: settings[`overviewStat${idx}LabelJa`] || def.labelJa,
+    };
+  });
+}
+
+function buildMilestones(settings: Record<string, string>) {
+  return DEFAULT_MILESTONES.map((def, i) => {
+    const idx = i + 1;
+    return {
+      year: settings[`aboutMilestone${idx}Year`] || def.year,
+      titleEn: settings[`aboutMilestone${idx}TitleEn`] || settings[`aboutMilestone${idx}Text`] || def.titleEn,
+      titleJa: settings[`aboutMilestone${idx}TitleJa`] || settings[`aboutMilestone${idx}TextJa`] || def.titleJa,
+      descEn: settings[`aboutMilestone${idx}DescEn`] || def.descEn,
+      descJa: settings[`aboutMilestone${idx}DescJa`] || def.descJa,
+    };
+  });
+}
+
 export default function CompanyOverviewContent({ settings }: { settings: Record<string, string> }) {
   const locale = useLocale();
   const isJa = locale === "ja";
+  const STATS = buildStats(settings);
+  const MILESTONES = buildMilestones(settings);
 
   return (
     <div className="min-h-screen bg-white">
@@ -66,12 +93,14 @@ export default function CompanyOverviewContent({ settings }: { settings: Record<
             className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight mb-6"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
-            {isJa ? "建築の夢を、鮮明な現実へと視覚化する" : "Visualizing Architectural Dreams into Vivid Reality"}
+            {isJa
+              ? (settings.aboutHeroTitleJa || "建築の夢を、鮮明な現実へと視覚化する")
+              : (settings.aboutHeroTitleEn || "Visualizing Architectural Dreams into Vivid Reality")}
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-white/50 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             {isJa
-              ? "2019年にベトナム・ダナンで設立。日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。"
-              : "Founded in 2019 in Da Nang, Vietnam. A high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators."}
+              ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
+              : (settings.aboutHeroDescEn || "Founded in 2019 in Da Nang, Vietnam. A high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators.")}
           </motion.p>
         </div>
       </section>
