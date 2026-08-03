@@ -11,6 +11,27 @@ import { Save, Trash2, Loader2, Plus, X, ChevronDown, ChevronUp } from "lucide-r
 interface Feature { titleJa: string; titleEn: string; descJa: string; descEn: string; image: string; }
 interface ProcessStep { titleJa: string; titleEn: string; descJa: string; descEn: string; }
 interface PricePlan { name: string; features: string[]; price: string; highlighted?: boolean; }
+interface FieldProps { k: string; label: string; placeholder?: string; wide?: boolean; form: Record<string, string | boolean>; set: (k: string, v: string | boolean) => void; }
+function Field({ k, label, placeholder, wide, form, set }: FieldProps) {
+  return (
+    <div className={wide ? "col-span-2" : ""}>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <input value={String(form[k] || "")} onChange={(e) => set(k, e.target.value)} placeholder={placeholder}
+        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" />
+    </div>
+  );
+}
+
+interface TextAreaProps { k: string; label: string; form: Record<string, string | boolean>; set: (k: string, v: string | boolean) => void; }
+function TextArea({ k, label, form, set }: TextAreaProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <textarea value={String(form[k] || "")} onChange={(e) => set(k, e.target.value)} rows={3}
+        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none" />
+    </div>
+  );
+}
 
 export default function EditServicePage() {
   const { id } = useParams<{ id: string }>();
@@ -57,22 +78,6 @@ export default function EditServicePage() {
     if (data.data) toast("Đã lưu", "success"); else toast("Lỗi", "error");
   };
 
-  const Field = ({ k, label, placeholder, wide }: { k: string; label: string; placeholder?: string; wide?: boolean }) => (
-    <div className={wide ? "col-span-2" : ""}>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <input value={String(form[k] || "")} onChange={(e) => set(k, e.target.value)} placeholder={placeholder}
-        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" />
-    </div>
-  );
-
-  const TextArea = ({ k, label }: { k: string; label: string }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-      <textarea value={String(form[k] || "")} onChange={(e) => set(k, e.target.value)} rows={3}
-        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none" />
-    </div>
-  );
-
   if (loading) return <AdminShell title="Dịch vụ"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
 
   return (
@@ -90,23 +95,23 @@ export default function EditServicePage() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Thông tin cơ bản</h3>
           <div className="grid grid-cols-2 gap-4">
-            <Field k="name" label="Tên (EN)" />
-            <Field k="nameJa" label="Tên (JA)" />
+            <Field form={form} set={set} k="name" label="Tên (EN)" />
+            <Field form={form} set={set} k="nameJa" label="Tên (JA)" />
           </div>
-          <Field k="slug" label="Slug" />
+          <Field form={form} set={set} k="slug" label="Slug" />
           <div className="grid grid-cols-2 gap-4">
-            <Field k="icon" label="Icon" placeholder="lucide icon name" />
+            <Field form={form} set={set} k="icon" label="Icon" placeholder="lucide icon name" />
             <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Thứ tự</label><input type="number" value={String(form.order || "0")} onChange={(e) => set("order", e.target.value)} className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none" /></div>
           </div>
           <div className="flex items-center gap-2 pt-2">
             <input type="checkbox" checked={!!form.isPublished} onChange={(e) => set("isPublished", e.target.checked)} id="isPublished" className="rounded" />
             <label htmlFor="isPublished" className="text-sm text-gray-700">Published (hiển thị trên trang công khai)</label>
           </div>
-          <TextArea k="description" label="Mô tả (EN)" />
-          <TextArea k="descriptionJa" label="Mô tả (JA)" />
+          <TextArea form={form} set={set} k="description" label="Mô tả (EN)" />
+          <TextArea form={form} set={set} k="descriptionJa" label="Mô tả (JA)" />
           <div className="grid grid-cols-2 gap-4">
-            <Field k="priceHint" label="Giá (EN)" placeholder="From ¥50,000" />
-            <Field k="priceHintJa" label="Giá (JA)" placeholder="¥50,000〜" />
+            <Field form={form} set={set} k="priceHint" label="Giá (EN)" placeholder="From ¥50,000" />
+            <Field form={form} set={set} k="priceHintJa" label="Giá (JA)" placeholder="¥50,000〜" />
           </div>
         </div>
 
@@ -129,11 +134,11 @@ export default function EditServicePage() {
               <div className="space-y-4">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Hero Section</p>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field k="heroTaglineJa" label="Tagline (JA)" placeholder="精緻さが生む芸術" />
-                  <Field k="heroTaglineEn" label="Tagline (EN)" placeholder="Art Born from Precision" />
+                  <Field form={form} set={set} k="heroTaglineJa" label="Tagline (JA)" placeholder="精緻さが生む芸術" />
+                  <Field form={form} set={set} k="heroTaglineEn" label="Tagline (EN)" placeholder="Art Born from Precision" />
                 </div>
-                <TextArea k="heroDescJa" label="Hero mô tả (JA)" />
-                <TextArea k="heroDescEn" label="Hero mô tả (EN)" />
+                <TextArea form={form} set={set} k="heroDescJa" label="Hero mô tả (JA)" />
+                <TextArea form={form} set={set} k="heroDescEn" label="Hero mô tả (EN)" />
               </div>
 
               {/* Dynamic Features (new) */}
@@ -163,22 +168,22 @@ export default function EditServicePage() {
               <div className="space-y-4 border-t border-gray-100 pt-6">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature 1 (legacy)</p>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field k="feature1TitleJa" label="Tiêu đề (JA)" />
-                  <Field k="feature1TitleEn" label="Tiêu đề (EN)" />
+                  <Field form={form} set={set} k="feature1TitleJa" label="Tiêu đề (JA)" />
+                  <Field form={form} set={set} k="feature1TitleEn" label="Tiêu đề (EN)" />
                 </div>
-                <TextArea k="feature1DescJa" label="Mô tả (JA)" />
-                <TextArea k="feature1DescEn" label="Mô tả (EN)" />
+                <TextArea form={form} set={set} k="feature1DescJa" label="Mô tả (JA)" />
+                <TextArea form={form} set={set} k="feature1DescEn" label="Mô tả (EN)" />
                 <ImageUpload label="Ảnh Feature 1" value={String(form.feature1Image || "")} onChange={(url) => set("feature1Image", url)} />
               </div>
 
               <div className="space-y-4 border-t border-gray-100 pt-6">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature 2</p>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field k="feature2TitleJa" label="Tiêu đề (JA)" />
-                  <Field k="feature2TitleEn" label="Tiêu đề (EN)" />
+                  <Field form={form} set={set} k="feature2TitleJa" label="Tiêu đề (JA)" />
+                  <Field form={form} set={set} k="feature2TitleEn" label="Tiêu đề (EN)" />
                 </div>
-                <TextArea k="feature2DescJa" label="Mô tả (JA)" />
-                <TextArea k="feature2DescEn" label="Mô tả (EN)" />
+                <TextArea form={form} set={set} k="feature2DescJa" label="Mô tả (JA)" />
+                <TextArea form={form} set={set} k="feature2DescEn" label="Mô tả (EN)" />
                 <ImageUpload label="Ảnh Feature 2" value={String(form.feature2Image || "")} onChange={(url) => set("feature2Image", url)} />
               </div>
 
