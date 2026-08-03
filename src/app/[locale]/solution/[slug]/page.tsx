@@ -8,10 +8,15 @@ import SolutionDetailTemplate from "@/components/public/SolutionDetailTemplate";
 export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
-  const services = await prisma.service.findMany({
-    select: { slug: true },
-  });
-  return services.map((s) => ({ slug: s.slug }));
+  try {
+    const services = await prisma.service.findMany({
+      select: { slug: true },
+    });
+    return services.map((s) => ({ slug: s.slug }));
+  } catch {
+    // DB may not be available during Docker build
+    return [];
+  }
 }
 
 export async function generateMetadata({
