@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
-import { SOLUTIONS } from "@/lib/solution-data";
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
@@ -62,32 +61,46 @@ function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
   });
 }
 
-function buildCardsFromSolutions(): PriceCard[] {
-  return SOLUTIONS.map((svc) => ({
-    slug: svc.slug,
-    icon: SERVICE_ICONS[svc.slug] ?? "📦",
-    titleJa: svc.titleJa,
-    titleEn: svc.titleEn,
-    features: svc.plans[1]?.features.slice(0, 3) ?? svc.plans[0]?.features.slice(0, 3) ?? [],
-    featuresJa: svc.plans[1]?.features.slice(0, 3) ?? svc.plans[0]?.features.slice(0, 3) ?? [],
-    price: svc.plans[0]?.price ?? "ASK",
-    priceLabelJa: "参考価格",
-    priceLabelEn: "Starting from",
-  }));
+interface DbServiceItem {
+  slug: string;
+  name: string;
+  nameJa: string;
+  priceHint: string;
+  icon: string;
+  plansJson: string;
+}
+
+function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
+  return services.map((svc) => {
+    let plans: { name: string; features: string[]; price: string }[] = [];
+    try { plans = JSON.parse(svc.plansJson || "[]"); } catch { /* ignore */ }
+    return {
+      slug: svc.slug,
+      icon: svc.icon || SERVICE_ICONS[svc.slug] || "📦",
+      titleJa: svc.nameJa || svc.name,
+      titleEn: svc.name,
+      features: plans[1]?.features.slice(0, 3) ?? plans[0]?.features.slice(0, 3) ?? [],
+      featuresJa: plans[1]?.features.slice(0, 3) ?? plans[0]?.features.slice(0, 3) ?? [],
+      price: plans[0]?.price ?? svc.priceHint ?? "ASK",
+      priceLabelJa: "参考価格",
+      priceLabelEn: "Starting from",
+    };
+  });
 }
 
 interface Props {
   dbItems?: DbPriceItem[];
+  dbServices?: DbServiceItem[];
 }
 
-export default function PricePageContent({ dbItems }: Props) {
+export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
 
-  // If DB has items, use them. Otherwise fall back to hardcoded SOLUTIONS.
+  // If DB has price items, use them. Otherwise fall back to services from DB.
   const cards = dbItems && dbItems.length > 0
     ? buildCardsFromDb(dbItems)
-    : buildCardsFromSolutions();
+    : buildCardsFromServices(dbServices);
 
   return (
     <div className="min-h-screen bg-white">

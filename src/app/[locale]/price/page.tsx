@@ -18,9 +18,13 @@ export async function generateMetadata({
 }
 
 export default async function PricePage() {
-  const dbItems = await prisma.priceItem.findMany({
-    orderBy: { order: "asc" },
-  });
+  const [dbItems, dbServices] = await Promise.all([
+    prisma.priceItem.findMany({ orderBy: { order: "asc" } }),
+    prisma.service.findMany({
+      orderBy: { order: "asc" },
+      select: { slug: true, name: true, nameJa: true, priceHint: true, icon: true, plansJson: true },
+    }),
+  ]);
 
   const items = dbItems.map((item) => ({
     id: item.id,
@@ -35,5 +39,5 @@ export default async function PricePage() {
     order: item.order,
   }));
 
-  return <PricePageContent dbItems={items} />;
+  return <PricePageContent dbItems={items} dbServices={dbServices} />;
 }

@@ -24,33 +24,25 @@ interface NavItem {
   megaMenu?: boolean;   // if true → dark panel mega-menu style
 }
 
+interface ServiceItem {
+  slug: string;
+  name: string;
+  nameJa: string;
+  image: string;
+}
+
 interface HeaderProps {
   logoImage?: string;
   logoHeight?: number;
   headerHeight?: number;
+  services?: ServiceItem[];
 }
-
-/* ------------------------------------------------------------------ */
-/*  Service thumbnails (placeholder — replace with real images)        */
-/* ------------------------------------------------------------------ */
-
-const SERVICE_THUMBNAILS: Record<string, string> = {
-  "cg-perspective":    "/uploads/service-cg-perspective.jpg",
-  "cg-video":          "/uploads/service-cg-video.jpg",
-  "photo-composite":   "/uploads/service-photo-composite.jpg",
-  "virtual-staging":   "/uploads/service-virtual-staging.jpg",
-  "vr360":             "/uploads/service-vr360.jpg",
-  "vr-walkthrough":    "/uploads/service-vr-walkthrough.jpg",
-  "digital-model":     "/uploads/service-digital-model.jpg",
-  "ar":                "/uploads/service-ar.jpg",
-  "exe-content":       "/uploads/service-exe-content.jpg",
-};
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }: HeaderProps) {
+export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, services = [] }: HeaderProps) {
   const [, setScrolled]                         = useState(false);
   const [mobileOpen, setMobileOpen]             = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu]   = useState<string | null>(null);
@@ -125,17 +117,11 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48 }
       label: t("solution"),
       href: `/${locale}/solution`,
       megaMenu: true,
-      children: [
-        { label: t("workSub.cgPerspective"),  href: `/${locale}/solution/cg-perspective`,  thumbnail: SERVICE_THUMBNAILS["cg-perspective"] },
-        { label: t("workSub.cgVideo"),        href: `/${locale}/solution/cg-video`,        thumbnail: SERVICE_THUMBNAILS["cg-video"] },
-        { label: t("workSub.photoComposite"), href: `/${locale}/solution/photo-composite`, thumbnail: SERVICE_THUMBNAILS["photo-composite"] },
-        { label: t("workSub.virtualStaging"), href: `/${locale}/solution/virtual-staging`, thumbnail: SERVICE_THUMBNAILS["virtual-staging"] },
-        { label: t("workSub.vr360"),          href: `/${locale}/solution/vr360`,           thumbnail: SERVICE_THUMBNAILS["vr360"] },
-        { label: t("workSub.vrWalkthrough"),  href: `/${locale}/solution/vr-walkthrough`,  thumbnail: SERVICE_THUMBNAILS["vr-walkthrough"] },
-        { label: t("workSub.digitalModel"),   href: `/${locale}/solution/digital-model`,   thumbnail: SERVICE_THUMBNAILS["digital-model"] },
-        { label: t("workSub.ar"),             href: `/${locale}/solution/ar`,              thumbnail: SERVICE_THUMBNAILS["ar"] },
-        { label: t("workSub.exeContent"),     href: `/${locale}/solution/exe-content`,     thumbnail: SERVICE_THUMBNAILS["exe-content"] },
-      ],
+      children: services.map((svc) => ({
+        label: locale === "ja" && svc.nameJa ? svc.nameJa : svc.name,
+        href: `/${locale}/solution/${svc.slug}`,
+        thumbnail: svc.image || undefined,
+      })),
     },
     { label: t("price"), href: `/${locale}/price` },
     {
