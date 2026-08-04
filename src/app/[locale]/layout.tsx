@@ -48,8 +48,8 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://i8studio.vn";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await prisma.setting.findMany();
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
-  const logoImageName = settingsMap.logoImage ? settingsMap.logoImage.split("/").pop() : "1";
-  const faviconKey = settingsMap.faviconImage ? settingsMap.faviconImage.split("/").pop() : logoImageName;
+  const faviconSource = settingsMap.faviconImage || settingsMap.logoImage || "default";
+  const faviconKey = Buffer.from(faviconSource).toString("base64url").slice(0, 12);
 
   return {
     title: {

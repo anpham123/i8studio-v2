@@ -55,7 +55,7 @@ export async function GET() {
     return new Response(new Uint8Array(iconBuffer), {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        "Cache-Control": "public, max-age=60, s-maxage=60, must-revalidate",
       },
     });
   } catch (error) {
