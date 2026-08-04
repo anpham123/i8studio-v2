@@ -68,9 +68,9 @@ export default function Footer({ settings }: FooterProps) {
           {/* Col 1: Logo + tagline + social */}
           <div>
             <Link href={`/${locale}`} className="inline-block mb-3">
-              {settings.logoImage ? (
+              {(settings.footerLogoImage || settings.logoImage) ? (
                 <img
-                  src={settings.logoImage}
+                  src={settings.footerLogoImage || settings.logoImage}
                   alt="i8 studio logo"
                   style={{ height: parseInt(settings.logoFooterHeight) || Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
                 />

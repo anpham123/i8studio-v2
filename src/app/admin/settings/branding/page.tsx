@@ -9,6 +9,7 @@ import { Loader2, Type, CheckCircle2, RotateCcw, Save, MousePointer, Globe2 } fr
 interface BrandingSettings {
   logoImage: string;
   logoHeight: string;
+  footerLogoImage: string;
   logoFooterHeight: string;
   faviconImage: string;
   aboutImageTeam: string;
@@ -41,6 +42,7 @@ export default function BrandingSettingsPage() {
   const [values, setValues] = useState<BrandingSettings>({
     logoImage: "",
     logoHeight: String(DEFAULT_HEIGHT),
+    footerLogoImage: "",
     logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
     faviconImage: "",
     aboutImageTeam: "",
@@ -62,6 +64,7 @@ export default function BrandingSettingsPage() {
     setValues({
       logoImage: m.logoImage || "",
       logoHeight: m.logoHeight || String(DEFAULT_HEIGHT),
+      footerLogoImage: m.footerLogoImage || "",
       logoFooterHeight: m.logoFooterHeight || String(DEFAULT_FOOTER_HEIGHT),
       faviconImage: m.faviconImage || "",
       aboutImageTeam: m.aboutImageTeam || "",
@@ -80,6 +83,13 @@ export default function BrandingSettingsPage() {
     setValues((v) => ({ ...v, logoImage: url }));
     const ok = await saveToAPI({ logoImage: url });
     if (ok) toast(url ? "Logo đã lưu" : "Đã xoá logo", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleFooterLogoChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, footerLogoImage: url }));
+    const ok = await saveToAPI({ footerLogoImage: url });
+    if (ok) toast(url ? "Logo chân trang đã lưu" : "Đã xoá logo chân trang (sẽ dùng logo Header)", "success");
     else toast("Không thể lưu — vui lòng thử lại", "error");
   }, [toast]);
 
@@ -155,6 +165,7 @@ export default function BrandingSettingsPage() {
     const defaults: BrandingSettings = {
       logoImage: "",
       logoHeight: String(DEFAULT_HEIGHT),
+      footerLogoImage: "",
       logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
       faviconImage: "",
       aboutImageTeam: "",
@@ -277,22 +288,29 @@ export default function BrandingSettingsPage() {
           </div>
 
           {/* Footer Height control */}
+          {/* Footer logo upload */}
+          <div className="mt-8 border-t border-gray-100 pt-8">
+            <h4 className="text-sm font-medium text-gray-700 mb-1">Logo chân trang (Footer)</h4>
+            <p className="text-xs text-gray-400 mb-3">Upload logo riêng cho Footer. Để trống sẽ dùng logo Header.</p>
+            <ImageUpload value={values.footerLogoImage} onChange={handleFooterLogoChange} label="" />
+          </div>
+
           <div className="mt-8 border-t border-gray-100 pt-8">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Kích thước logo chân trang (Footer) (px)</h4>
 
             {/* Live preview against footer background */}
-            {values.logoImage && (
+            {(values.footerLogoImage || values.logoImage) && (
               <div className="mb-4 rounded-xl overflow-hidden border border-gray-200 bg-[#fafafa]">
                 <div className="px-6 flex items-center border-b border-gray-100" style={{ height: Math.max(parsedFooterHeight + 24, 76) }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={values.logoImage}
+                    src={values.footerLogoImage || values.logoImage}
                     alt="Logo footer preview"
                     style={{ height: parsedFooterHeight, width: "auto", maxWidth: 240, display: "block", objectFit: "contain" }}
                   />
                 </div>
                 <p className="text-center text-xs text-gray-400 py-1.5 bg-gray-50">
-                  Xem thử — logo {parsedFooterHeight}px trong Footer
+                  Xem thử — logo {parsedFooterHeight}px trong Footer {values.footerLogoImage ? "(logo riêng)" : "(dùng logo Header)"}
                 </p>
               </div>
             )}
@@ -529,6 +547,7 @@ export default function BrandingSettingsPage() {
           <div className="mt-3 space-y-1 font-mono">
             <div><span className="text-gray-400">logoImage:</span> {values.logoImage || "(trống)"}</div>
             <div><span className="text-gray-400">logoHeight:</span> {values.logoHeight}</div>
+            <div><span className="text-gray-400">footerLogoImage:</span> {values.footerLogoImage || "(trống — dùng logoImage)"}</div>
             <div><span className="text-gray-400">logoFooterHeight:</span> {values.logoFooterHeight}</div>
             <div><span className="text-gray-400">aboutImageTeam:</span> {values.aboutImageTeam || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageOffice:</span> {values.aboutImageOffice || "(trống)"}</div>
