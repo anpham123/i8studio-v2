@@ -83,7 +83,8 @@ export default function Footer({ settings }: FooterProps) {
             </p>
             <div className="flex gap-2">
               {SOCIAL.map(({ key, Icon, label }) => {
-                const url = settings[key];
+                const raw = settings[key];
+                const url = raw && !raw.startsWith("http") ? `https://${raw}` : raw;
                 return (
                   <a
                     key={key}
