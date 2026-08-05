@@ -10,14 +10,6 @@ type Props = {
   searchParams: { category?: string };
 };
 
-const CATEGORIES = [
-  { key: "case-study", labelJa: "ケーススタディ", labelEn: "Case Study" },
-  { key: "technique", labelJa: "技術共有", labelEn: "Technique Sharing" },
-  { key: "knowledge", labelJa: "建築知識", labelEn: "Knowledge" },
-  { key: "ai", labelJa: "AI特集", labelEn: "AI Column" },
-  { key: "life-gallery", labelJa: "I8 ライフギャラリー", labelEn: "I8 Life Gallery" },
-];
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildMetadata({
     title: "Blog — Articles & Insights",
@@ -30,6 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogIndexPage({ params, searchParams }: Props) {
   const { locale } = params;
   const activeCategory = searchParams.category;
+
+  // Fetch categories from DB
+  const dbCategories = await prisma.blogCategory.findMany({ orderBy: { order: "asc" } });
 
   const where: Record<string, unknown> = { isPublished: true };
   if (activeCategory) {
@@ -77,17 +72,17 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
           >
             {isJa ? "すべて" : "All"}
           </Link>
-          {CATEGORIES.map((cat) => (
+          {dbCategories.map((cat) => (
             <Link
-              key={cat.key}
-              href={`/${locale}/blogs?category=${cat.key}`}
+              key={cat.slug}
+              href={`/${locale}/blogs?category=${cat.slug}`}
               className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
-                activeCategory === cat.key
+                activeCategory === cat.slug
                   ? "bg-[#111] text-white"
                   : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
               }`}
             >
-              {isJa ? cat.labelJa : cat.labelEn}
+              {isJa ? (cat.nameJa || cat.nameEn) : (cat.nameEn || cat.nameJa)}
             </Link>
           ))}
         </div>
