@@ -34,8 +34,25 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
   }, [value, editor]);
 
   const addImage = useCallback(() => {
-    const url = prompt("Image URL:");
-    if (url && editor) editor.chain().focus().setImage({ src: url }).run();
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file || !editor) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.url) {
+          editor.chain().focus().setImage({ src: data.url }).run();
+        }
+      } catch (err) {
+        console.error("Upload failed:", err);
+      }
+    };
+    input.click();
   }, [editor]);
 
   const addLink = useCallback(() => {
