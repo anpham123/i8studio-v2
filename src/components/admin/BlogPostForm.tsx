@@ -164,8 +164,11 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
   };
 
   const handleSave = async () => {
+    if (!form.title.trim()) { toast("Vui lòng nhập tiêu đề", "error"); return; }
+    if (!form.slug.trim()) { toast("Vui lòng nhập slug", "error"); return; }
+
     setSaving(true);
-    const payload = { ...form, sections: JSON.stringify(sections) };
+    const payload = { ...form, sections: JSON.stringify(sections), readTime: Number(form.readTime) || 5 };
     const url = isEdit ? `/api/blog-posts/${initial!.id}` : "/api/blog-posts";
     const method = isEdit ? "PUT" : "POST";
 
@@ -175,12 +178,19 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed");
       const json = await res.json();
+      if (!res.ok) {
+        const errMsg = Array.isArray(json.error)
+          ? json.error.map((e: { path?: string[]; message?: string }) => `${(e.path || []).join(".")}: ${e.message}`).join(", ")
+          : json.error || "Lỗi không xác định";
+        toast(`Lỗi: ${errMsg}`, "error");
+        setSaving(false);
+        return;
+      }
       toast(isEdit ? "Đã cập nhật" : "Đã tạo", "success");
       if (!isEdit) router.push(`/admin/blog-posts/${json.data.id}`);
     } catch {
-      toast("Lỗi khi lưu", "error");
+      toast("Lỗi kết nối server", "error");
     }
     setSaving(false);
   };
