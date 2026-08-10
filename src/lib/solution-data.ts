@@ -39,6 +39,30 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     if (Array.isArray(parsed)) features = parsed;
   } catch { /* empty */ }
 
+  // Fall back to legacy feature1/feature2 fields if no dynamic features
+  if (features.length === 0) {
+    const f1Title = (db.feature1TitleJa as string) || (db.feature1TitleEn as string);
+    const f2Title = (db.feature2TitleJa as string) || (db.feature2TitleEn as string);
+    if (f1Title) {
+      features.push({
+        titleJa: (db.feature1TitleJa as string) || "",
+        titleEn: (db.feature1TitleEn as string) || "",
+        descJa: (db.feature1DescJa as string) || "",
+        descEn: (db.feature1DescEn as string) || "",
+        image: (db.feature1Image as string) || "",
+      });
+    }
+    if (f2Title) {
+      features.push({
+        titleJa: (db.feature2TitleJa as string) || "",
+        titleEn: (db.feature2TitleEn as string) || "",
+        descJa: (db.feature2DescJa as string) || "",
+        descEn: (db.feature2DescEn as string) || "",
+        image: (db.feature2Image as string) || "",
+      });
+    }
+  }
+
   let process: SolutionService["process"] = [];
   try {
     const parsed = JSON.parse((db.processJson as string) || "[]");
