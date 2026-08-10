@@ -109,7 +109,7 @@ export default function AboutSection({ locale, showLearnMore = true, settings }:
               <div className="col-span-2 aspect-video rounded-xl bg-gray-100 border border-gray-200 overflow-hidden relative group">
                 {settings?.aboutImageTeam ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={settings.aboutImageTeam} alt="Our Team" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  <img src={settings.aboutImageTeam} alt="Our Team" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center text-gray-300">
@@ -129,7 +129,7 @@ export default function AboutSection({ locale, showLearnMore = true, settings }:
               <div className="aspect-square rounded-xl bg-gray-100 border border-gray-200 overflow-hidden relative group">
                 {settings?.aboutImageOffice ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={settings.aboutImageOffice} alt="Da Nang Office" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  <img src={settings.aboutImageOffice} alt="Da Nang Office" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-gray-300 text-xs text-center">
@@ -146,7 +146,7 @@ export default function AboutSection({ locale, showLearnMore = true, settings }:
               <div className="aspect-square rounded-xl bg-gray-100 border border-gray-200 overflow-hidden relative group">
                 {settings?.aboutImageQuality ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={settings.aboutImageQuality} alt="Quality First" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                  <img src={settings.aboutImageQuality} alt="Quality First" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-gray-300 text-xs text-center">

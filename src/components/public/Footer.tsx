@@ -72,8 +72,6 @@ export default function Footer({ settings }: FooterProps) {
                 <img
                   src={settings.footerLogoImage || settings.logoImage}
                   alt={settings.siteName || "i8 STUDIO"}
-                  className="h-12 w-auto object-contain"
-                  onError={(e) => { e.currentTarget.style.display = "none"; }}
                   style={{ height: parseInt(settings.logoFooterHeight) || Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
                 />
               ) : (

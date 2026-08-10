@@ -63,7 +63,6 @@ export default function NewsSection({ posts, locale }: NewsSectionProps) {
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         loading="lazy"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

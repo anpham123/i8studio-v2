@@ -52,7 +52,7 @@ export default function CaseStudyPreview({ caseStudies, locale }: CaseStudyPrevi
                 >
                   {cs.afterImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={cs.afterImage} alt={title} className="w-full h-48 object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                    <img src={cs.afterImage} alt={title} className="w-full h-48 object-cover" />
                   ) : (
                     <div className="w-full h-48 bg-gray-50 flex items-center justify-center">
                       <TrendingUp size={40} className="text-gray-200" />
