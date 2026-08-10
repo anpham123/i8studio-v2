@@ -28,7 +28,15 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
     <div className="min-h-screen bg-white">
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative bg-[#111] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
+        {data.heroImage ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={data.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/60" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
+        )}
         <div className="relative max-w-5xl mx-auto px-6 py-28 md:py-36 text-center">
           <motion.p
             initial={{ opacity: 0 }}
