@@ -54,7 +54,10 @@ export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHi
       <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
       {value ? (
         <div className="relative inline-block">
-          <img src={value} alt="" className={`rounded-lg border border-gray-200 ${aspectHint === "16:9" ? "w-full max-w-md aspect-video object-cover" : "max-h-64 object-contain"}`} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={value} alt="" className={`rounded-lg border border-gray-200 ${aspectHint === "16:9" ? "w-full max-w-md aspect-video object-cover" : "max-h-64 object-contain"}`}
+            onError={() => onChange("")}
+          />
           <button
             type="button" onClick={() => onChange("")}
             className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"

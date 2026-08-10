@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Box, Film, Glasses, Building2, Gamepad2, Sparkles } from "lucide-react";
+import { ArrowRight, Box, Film, Glasses, Building2, Gamepad2, Sparkles, Image, Video, Layers, Sofa, Globe, PersonStanding, Smartphone, Monitor, Camera, Cuboid } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useTranslations } from "next-intl";
 
@@ -10,6 +10,16 @@ const iconMap: Record<string, React.ElementType> = {
   Building2,
   Gamepad2,
   Sparkles,
+  Image,
+  Video,
+  Layers,
+  Sofa,
+  Globe,
+  PersonStanding,
+  Smartphone,
+  Monitor,
+  Camera,
+  Cuboid,
 };
 
 interface Service {
@@ -69,12 +79,16 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
                         src={service.image}
                         alt={name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget.parentElement?.querySelector("[data-icon-fallback]") as HTMLElement;
+                          if (fallback) fallback.style.display = "flex";
+                        }}
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Icon size={40} className="text-gray-200" />
-                      </div>
-                    )}
+                    ) : null}
+                    <div data-icon-fallback className={`w-full h-full items-center justify-center ${service.image ? "hidden" : "flex"}`}>
+                      <Icon size={40} className="text-gray-200" />
+                    </div>
                     {/* Category tag */}
                     <div className="absolute top-3 left-3">
                       <span className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full">

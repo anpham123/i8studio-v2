@@ -16,6 +16,9 @@ const SERVICE_ICONS: Record<string, string> = {
   "digital-model": "🏗️",
   "ar": "📱",
   "exe-content": "💻",
+  "bim-services": "🏢",
+  "pachinko-slot-cg": "🎰",
+  "anime-illustration": "✨",
 };
 
 interface DbPriceItem {
@@ -76,7 +79,7 @@ function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
     try { plans = JSON.parse(svc.plansJson || "[]"); } catch { /* ignore */ }
     return {
       slug: svc.slug,
-      icon: svc.icon || SERVICE_ICONS[svc.slug] || "📦",
+      icon: SERVICE_ICONS[svc.slug] || svc.icon || "📦",
       titleJa: svc.nameJa || svc.name,
       titleEn: svc.name,
       features: plans[1]?.features.slice(0, 3) ?? plans[0]?.features.slice(0, 3) ?? [],
