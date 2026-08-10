@@ -164,29 +164,6 @@ export default function EditServicePage() {
                 ))}
               </div>
 
-              {/* Legacy Features (read-only hint) */}
-              <div className="space-y-4 border-t border-gray-100 pt-6">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature 1 (legacy)</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field form={form} set={set} k="feature1TitleJa" label="Tiêu đề (JA)" />
-                  <Field form={form} set={set} k="feature1TitleEn" label="Tiêu đề (EN)" />
-                </div>
-                <TextArea form={form} set={set} k="feature1DescJa" label="Mô tả (JA)" />
-                <TextArea form={form} set={set} k="feature1DescEn" label="Mô tả (EN)" />
-                <ImageUpload label="Ảnh Feature 1" value={String(form.feature1Image || "")} onChange={(url) => set("feature1Image", url)} />
-              </div>
-
-              <div className="space-y-4 border-t border-gray-100 pt-6">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Feature 2</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field form={form} set={set} k="feature2TitleJa" label="Tiêu đề (JA)" />
-                  <Field form={form} set={set} k="feature2TitleEn" label="Tiêu đề (EN)" />
-                </div>
-                <TextArea form={form} set={set} k="feature2DescJa" label="Mô tả (JA)" />
-                <TextArea form={form} set={set} k="feature2DescEn" label="Mô tả (EN)" />
-                <ImageUpload label="Ảnh Feature 2" value={String(form.feature2Image || "")} onChange={(url) => set("feature2Image", url)} />
-              </div>
-
               {/* Process Steps */}
               <div className="space-y-4 border-t border-gray-100 pt-6">
                 <div className="flex items-center justify-between">
