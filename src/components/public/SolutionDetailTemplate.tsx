@@ -31,7 +31,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         {data.heroImage ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={data.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
             <div className="absolute inset-0 bg-black/60" />
           </>
         ) : (

@@ -89,6 +89,7 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
                           alt={title}
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           loading="lazy"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
                         />
                       ) : (
                         <div className="absolute inset-0 bg-gray-100" />

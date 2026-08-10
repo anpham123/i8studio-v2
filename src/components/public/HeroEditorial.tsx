@@ -172,6 +172,7 @@ function GridTile({
           alt={image.alt}
           className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-105"
           loading={index < 6 ? "eager" : "lazy"}
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
       ) : (
         <div

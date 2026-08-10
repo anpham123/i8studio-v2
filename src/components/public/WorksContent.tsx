@@ -351,6 +351,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         src={work.image}
                         alt={work.title}
                         className="w-full h-auto object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                       />
                     ) : (
                       <div
