@@ -75,6 +75,35 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         </div>
       </section>
 
+      {/* ── Service-level Media Embed (VR360 / Video / 3D) ── */}
+      {data.mediaEmbedUrl && (
+        <section className="bg-[#fafaf8]">
+          <div className="max-w-5xl mx-auto px-6 py-16 md:py-24">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">INTERACTIVE EXPERIENCE</p>
+              <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+                {isJa ? "インタラクティブデモ" : "Interactive Demo"}
+              </h2>
+            </motion.div>
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="aspect-video rounded-2xl overflow-hidden shadow-xl border border-gray-200"
+            >
+              <iframe
+                src={getEmbedUrl(data.mediaEmbedUrl) || undefined}
+                className="w-full h-full border-0"
+                allowFullScreen
+                allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                title={title}
+              />
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* ── Feature Blocks (alternating) ────────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 space-y-20 md:space-y-28">
         {data.features.map((feat, i) => {
