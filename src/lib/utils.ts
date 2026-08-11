@@ -7,11 +7,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function slugify(text: string): string {
-  return text
+  const slug = text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+    .replace(/[!@#$%^&*()+=\[\]{};:'",.<>?/\\|`~]/g, "") // remove punctuation
     .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+|-+$/g, "")
+    .substring(0, 120);
+  return slug || ("post-" + Date.now());
 }
 
 export function formatDate(date: Date | string, pattern = "MMM d, yyyy"): string {
