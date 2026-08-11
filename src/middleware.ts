@@ -78,6 +78,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url), 301);
   }
 
+  // 301 redirect: /blogs?category=X → /blogs/route-name
+  const blogCategoryRedirects: Record<string, string> = {
+    "case-study": "case-study",
+    "technique": "tips",
+    "knowledge": "knowledge",
+    "ai": "ai-feature",
+    "life-gallery": "life-gallery",
+  };
+  const blogCatMatch = pathname.match(/^\/(en|ja)\/blogs$/);
+  if (blogCatMatch) {
+    const category = request.nextUrl.searchParams.get("category");
+    if (category && blogCategoryRedirects[category]) {
+      const [, locale] = blogCatMatch;
+      return NextResponse.redirect(
+        new URL(`/${locale}/blogs/${blogCategoryRedirects[category]}`, request.url),
+        301
+      );
+    }
+  }
+
   // Apply i18n middleware for public routes
   if (!pathname.startsWith("/admin") && !pathname.startsWith("/api")) {
     return intlMiddleware(request);

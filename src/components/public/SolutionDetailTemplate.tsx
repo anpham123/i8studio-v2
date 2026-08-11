@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import type { SolutionService } from "@/lib/solution-data";
+import { getEmbedUrl } from "@/components/admin/MediaEmbedPreview";
+import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
@@ -79,6 +81,8 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           const ftTitle = isJa ? feat.titleJa : feat.titleEn;
           const ftDesc = isJa ? feat.descJa : feat.descEn;
           const reverse = i % 2 === 1;
+          const embedUrl = feat.mediaEmbedUrl ? getEmbedUrl(feat.mediaEmbedUrl) : null;
+          const isBeforeAfter = feat.displayMode === "beforeAfter" && feat.imageBefore && feat.imageAfter;
           return (
             <motion.div
               key={i}
@@ -88,26 +92,48 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               viewport={{ once: true, amount: 0.3 }}
               className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} gap-10 md:gap-16 items-center`}
             >
-              {/* Image */}
-              <div className="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={feat.image}
-                  alt={ftTitle}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    target.style.display = "none";
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center");
-                      const span = document.createElement("span");
-                      span.className = "text-gray-400 text-sm font-medium text-center px-4";
-                      span.textContent = ftTitle;
-                      parent.appendChild(span);
-                    }
-                  }}
-                />
+              {/* Visual */}
+              <div className="w-full md:w-1/2 rounded-2xl overflow-hidden">
+                {embedUrl ? (
+                  <div className="aspect-video rounded-2xl overflow-hidden">
+                    <iframe
+                      src={embedUrl}
+                      className="w-full h-full border-0"
+                      allowFullScreen
+                      allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                      title={ftTitle}
+                    />
+                  </div>
+                ) : isBeforeAfter ? (
+                  <BeforeAfterSlider
+                    beforeImage={feat.imageBefore}
+                    afterImage={feat.imageAfter}
+                    beforeLabel="Before"
+                    afterLabel="After"
+                    autoAspect={true}
+                  />
+                ) : (
+                  <div className="aspect-[4/3]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={feat.image}
+                      alt={ftTitle}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = "none";
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center");
+                          const span = document.createElement("span");
+                          span.className = "text-gray-400 text-sm font-medium text-center px-4";
+                          span.textContent = ftTitle;
+                          parent.appendChild(span);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               {/* Text */}
               <div className="w-full md:w-1/2">
@@ -131,8 +157,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {data.process.map((step, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {data.process
+              .filter((step) => step.titleJa || step.titleEn || step.descJa || step.descEn)
+              .map((step, i) => (
               <motion.div
                 key={i}
                 variants={fadeUp}
@@ -146,10 +174,6 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-sm font-semibold mb-5">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                {/* Connector line (not on last) */}
-                {i < data.process.length - 1 && (
-                  <div className="hidden lg:block absolute top-6 left-12 w-[calc(100%-3rem)] h-px bg-gray-200" />
-                )}
                 <h3 className="text-base font-medium text-[#111] mb-2">
                   {isJa ? step.titleJa : step.titleEn}
                 </h3>

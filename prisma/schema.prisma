@@ -66,7 +66,8 @@ model Service {
   order         Int      @default(0)
   isPublished   Boolean  @default(true)
   heroImage     String   @default("")
-  featuresJson  String   @default("[]")  // JSON array of {titleJa,titleEn,descJa,descEn,image}
+  featuresJson  String   @default("[]")  // JSON array of {titleJa,titleEn,descJa,descEn,image,mediaEmbedUrl?,displayMode?,imageBefore?,imageAfter?}
+  mediaEmbedUrl String   @default("")    // Service-level embed URL (video/VR360/3D)
 
   // Solution detail page fields (legacy — kept for backward compat)
   heroTaglineJa   String @default("")
@@ -125,6 +126,7 @@ model PriceItem {
   priceFrom    String   @default("")    // e.g. "¥35,000〜" or "ASK"
   priceLabelJa String   @default("")
   priceLabelEn String   @default("")
+  cardImage    String   @default("")    // Hero image for price card
   order        Int      @default(0)
   createdAt    DateTime @default(now())
 }
@@ -317,4 +319,17 @@ model CompositeExample {
   updatedAt   DateTime @updatedAt
 }
 
-
+model Portfolio {
+  id            String   @id @default(cuid())
+  title         String
+  titleJa       String   @default("")
+  description   String   @default("")
+  descriptionJa String   @default("")
+  coverImage    String   @default("")
+  galleryJson   String   @default("[]")
+  category      String   @default("")
+  order         Int      @default(0)
+  isPublished   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

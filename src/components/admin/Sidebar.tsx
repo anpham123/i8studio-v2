@@ -50,6 +50,7 @@ const menuGroups: MenuGroup[] = [
       { href: "/admin/services", label: "Dịch vụ", icon: Wrench },
       { href: "/admin/price-list", label: "Bảng giá", icon: DollarSign },
       { href: "/admin/collections", label: "Collections", icon: Layers },
+      { href: "/admin/portfolio", label: "Portfolio", icon: Folder },
       { href: "/admin/composite-examples", label: "Photo Composite", icon: Image },
       { href: "/admin/case-studies", label: "Case Studies", icon: BookOpen },
       { href: "/admin/qa", label: "Q&A", icon: HelpCircle },

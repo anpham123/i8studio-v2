@@ -6,6 +6,7 @@ import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
 import { slugify } from "@/lib/utils";
+import { DEFAULT_PROCESS_STEPS } from "@/lib/process-template";
 import { Save } from "lucide-react";
 
 export default function NewServicePage() {
@@ -19,10 +20,18 @@ export default function NewServicePage() {
     if (!form.name) return toast("Tên không được để trống", "error");
     if (!form.slug) form.slug = slugify(form.name);
     setSaving(true);
-    const res = await fetch("/api/services", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, order: parseInt(form.order) || 0 }) });
+    const res = await fetch("/api/services", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        order: parseInt(form.order) || 0,
+        processJson: JSON.stringify(DEFAULT_PROCESS_STEPS),
+      }),
+    });
     const data = await res.json();
     setSaving(false);
-    if (data.data) { toast("Đã tạo", "success"); router.push(`/admin/services/${data.data.id}`); }
+    if (data.data) { toast("Đã tạo (6 bước quy trình đã được khởi tạo)", "success"); router.push(`/admin/services/${data.data.id}`); }
     else toast("Lỗi", "error");
   };
 

@@ -61,6 +61,7 @@ export const ServiceSchema = z.object({
   feature2Image: z.string().optional().default(""),
   processJson: z.string().optional().default("[]"),
   plansJson: z.string().optional().default("[]"),
+  mediaEmbedUrl: z.string().optional().default(""),
 });
 
 export const CollectionSchema = z.object({
@@ -92,6 +93,7 @@ export const PriceItemSchema = z.object({
   priceFrom: z.string().optional().default(""),
   priceLabelJa: z.string().optional().default(""),
   priceLabelEn: z.string().optional().default(""),
+  cardImage: z.string().optional().default(""),
   order: z.number().int().optional().default(0),
 });
 
@@ -215,6 +217,18 @@ export const CompositeExampleSchema = z.object({
   beforeImage: z.string().min(1),
   afterImage: z.string().min(1),
   isFeatured: z.boolean().optional().default(false),
+  order: z.number().int().optional().default(0),
+  isPublished: z.boolean().optional().default(true),
+});
+
+export const PortfolioSchema = z.object({
+  title: z.string().min(1).max(300),
+  titleJa: z.string().max(300).optional().default(""),
+  description: z.string().optional().default(""),
+  descriptionJa: z.string().optional().default(""),
+  coverImage: z.string().optional().default(""),
+  galleryJson: z.string().optional().default("[]"),
+  category: z.string().max(200).optional().default(""),
   order: z.number().int().optional().default(0),
   isPublished: z.boolean().optional().default(true),
 });

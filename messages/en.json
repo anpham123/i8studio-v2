@@ -41,6 +41,17 @@
       "lifeGallery": "I8 Life Gallery"
     }
   },
+  "portfolio": {
+    "comingSoon": "Our portfolio is currently being prepared. It will be available soon — stay tuned!"
+  },
+  "blogCategory": {
+    "caseStudy": { "title": "Case Study", "desc": "Real project examples showcasing our problem-solving process and results." },
+    "technique": { "title": "Technique Sharing", "desc": "Practical 3DCG production techniques and know-how." },
+    "knowledge": { "title": "Knowledge", "desc": "Industry knowledge and latest trends in architectural visualization." },
+    "ai": { "title": "AI Column", "desc": "AI-powered production workflows and cutting-edge case studies." },
+    "lifeGallery": { "title": "I8 Life Gallery", "desc": "A glimpse into the daily life and culture of the i8 STUDIO team." },
+    "emptyState": "Content is being prepared. Please check back later."
+  },
   "hero": {
     "cta1": "Get Free Quote",
     "cta2": "View Our Works",

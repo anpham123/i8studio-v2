@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { useToast } from "@/components/admin/Toast";
 import { Save, Trash2, Loader2 } from "lucide-react";
 
@@ -77,6 +78,9 @@ export default function EditPriceItemPage() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
           <label className="block text-sm font-medium text-gray-700">Tính năng / Bullets</label>
           <textarea value={bullets.join("\n")} onChange={(e) => setBullets(e.target.value.split("\n"))} rows={5} placeholder="Mỗi dòng là 1 tính năng" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none" />
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <ImageUpload label="Ảnh card (hiển thị trên trang giá)" value={form.cardImage || ""} onChange={(url) => set("cardImage", url)} />
         </div>
       </div>
       <ConfirmDialog open={showDel} message={`Xóa "${form.titleJa || form.titleEn}"?`} onConfirm={async () => { await fetch(`/api/price-items/${id}`, { method: "DELETE" }); router.push("/admin/price-list"); }} onCancel={() => setShowDel(false)} />

@@ -36,6 +36,7 @@ export default async function PricePage() {
     priceLabelJa: item.priceLabelJa ?? "参考価格",
     priceLabelEn: item.priceLabelEn ?? "Starting from",
     bulletsJson: item.bulletsJson ?? "[]",
+    cardImage: item.cardImage ?? "",
     order: item.order,
   }));
 

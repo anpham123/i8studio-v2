@@ -41,6 +41,17 @@
       "lifeGallery": "I8 Life Gallery"
     }
   },
+  "portfolio": {
+    "comingSoon": "コンテンツは現在準備中です。近日中に公開予定ですので、お楽しみにお待ちください。"
+  },
+  "blogCategory": {
+    "caseStudy": { "title": "ケーススタディ", "desc": "実際のプロジェクト事例を通じて、課題解決のプロセスと成果をご紹介します。" },
+    "technique": { "title": "テクニック共有", "desc": "3DCG制作の実践的なテクニックやノウハウを共有します。" },
+    "knowledge": { "title": "ナレッジ", "desc": "建築ビジュアライゼーション業界の知識と最新トレンドをお届けします。" },
+    "ai": { "title": "AI特集", "desc": "AI技術を活用した制作ワークフローと最新事例をご紹介します。" },
+    "lifeGallery": { "title": "I8 Life Gallery", "desc": "i8 STUDIOのチームメンバーの日常やカルチャーをお伝えします。" },
+    "emptyState": "コンテンツは現在準備中です。また後日お越しください。"
+  },
   "hero": {
     "cta1": "無料見積もりを取得",
     "cta2": "実績を見る",

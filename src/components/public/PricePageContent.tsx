@@ -31,6 +31,7 @@ interface DbPriceItem {
   priceLabelJa: string;
   priceLabelEn: string;
   bulletsJson: string;
+  cardImage?: string;
   order: number;
 }
 
@@ -44,6 +45,7 @@ interface PriceCard {
   price: string;
   priceLabelJa: string;
   priceLabelEn: string;
+  cardImage?: string;
 }
 
 function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
@@ -60,6 +62,7 @@ function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
       price: item.price || "ASK",
       priceLabelJa: item.priceLabelJa || "参考価格",
       priceLabelEn: item.priceLabelEn || "Starting from",
+      cardImage: item.cardImage || "",
     };
   });
 }
@@ -154,48 +157,72 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                 whileInView="visible"
                 viewport={{ once: true }}
                 transition={{ delay: (i % 3) * 0.08 }}
-                className="group border border-gray-100 rounded-2xl p-7 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                className="group border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300"
               >
-                {/* Icon + Title */}
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">{card.icon}</span>
-                  <h3 className="text-lg font-medium text-[#111]">{title}</h3>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-2 mb-6">
-                  {features.map((f, fi) => (
-                    <li key={fi} className="flex items-start gap-2 text-sm text-gray-500">
-                      <span className="text-[#b8935a] mt-0.5 shrink-0">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Price */}
-                <div className="mb-6">
-                  <span className="text-xs uppercase tracking-wider text-gray-400">{priceLabel}</span>
-                  <div className="text-2xl font-light text-[#111] mt-1" style={{ fontFamily: "var(--font-display), serif" }}>
-                    {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
+                {/* Card Image */}
+                {card.cardImage && (
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={card.cardImage} alt={title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">{card.icon}</span>
+                        <h3 className="text-white text-lg font-medium">{title}</h3>
+                      </div>
+                      <div className="text-white/80 text-sm">
+                        <span className="text-white/50 text-xs uppercase tracking-wider">{priceLabel} </span>
+                        {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                {/* CTA */}
-                {card.slug ? (
-                  <Link
-                    href={`/${locale}/solution/${card.slug}`}
-                    className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
-                  >
-                    {isJa ? "詳細を見る" : "View Details"}
-                  </Link>
-                ) : (
-                  <Link
-                    href={`/${locale}/contact`}
-                    className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
-                  >
-                    {isJa ? "お問い合わせ" : "Contact Us"}
-                  </Link>
                 )}
+                <div className="p-7">
+                  {/* Icon + Title (shown when no image) */}
+                  {!card.cardImage && (
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-2xl">{card.icon}</span>
+                      <h3 className="text-lg font-medium text-[#111]">{title}</h3>
+                    </div>
+                  )}
+
+                  {/* Features */}
+                  <ul className="space-y-2 mb-6">
+                    {features.slice(0, 4).map((f, fi) => (
+                      <li key={fi} className="flex items-start gap-2 text-sm text-gray-500">
+                        <span className="text-[#b8935a] mt-0.5 shrink-0">✓</span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Price (shown when no image) */}
+                  {!card.cardImage && (
+                    <div className="mb-6">
+                      <span className="text-xs uppercase tracking-wider text-gray-400">{priceLabel}</span>
+                      <div className="text-2xl font-light text-[#111] mt-1" style={{ fontFamily: "var(--font-display), serif" }}>
+                        {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  {card.slug ? (
+                    <Link
+                      href={`/${locale}/solution/${card.slug}`}
+                      className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
+                    >
+                      {isJa ? "詳細を見る" : "View Details"}
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/${locale}/contact`}
+                      className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
+                    >
+                      {isJa ? "お問い合わせ" : "Contact Us"}
+                    </Link>
+                  )}
+                </div>
               </motion.div>
             );
           })}

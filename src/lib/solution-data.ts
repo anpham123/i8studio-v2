@@ -11,12 +11,17 @@ export interface SolutionService {
   heroTaglineEn: string;
   heroDescJa: string;
   heroDescEn: string;
+  mediaEmbedUrl: string;
   features: {
     titleJa: string;
     titleEn: string;
     descJa: string;
     descEn: string;
     image: string;
+    mediaEmbedUrl?: string;
+    displayMode?: "single" | "beforeAfter";
+    imageBefore?: string;
+    imageAfter?: string;
   }[];
   process: {
     titleJa: string;
@@ -85,6 +90,7 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     heroTaglineEn: (db.heroTaglineEn as string) || "",
     heroDescJa: (db.heroDescJa as string) || "",
     heroDescEn: (db.heroDescEn as string) || "",
+    mediaEmbedUrl: (db.mediaEmbedUrl as string) || "",
     features,
     process,
     plans,

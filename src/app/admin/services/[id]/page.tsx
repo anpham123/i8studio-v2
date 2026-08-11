@@ -5,10 +5,18 @@ import { useParams, useRouter } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import MediaEmbedPreview from "@/components/admin/MediaEmbedPreview";
 import { useToast } from "@/components/admin/Toast";
-import { Save, Trash2, Loader2, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Save, Trash2, Loader2, Plus, X, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { DEFAULT_PROCESS_STEPS } from "@/lib/process-template";
 
-interface Feature { titleJa: string; titleEn: string; descJa: string; descEn: string; image: string; }
+interface Feature {
+  titleJa: string; titleEn: string; descJa: string; descEn: string; image: string;
+  mediaEmbedUrl?: string;
+  displayMode?: "single" | "beforeAfter";
+  imageBefore?: string;
+  imageAfter?: string;
+}
 interface ProcessStep { titleJa: string; titleEn: string; descJa: string; descEn: string; }
 interface PricePlan { name: string; features: string[]; price: string; highlighted?: boolean; }
 interface FieldProps { k: string; label: string; placeholder?: string; wide?: boolean; form: Record<string, string | boolean>; set: (k: string, v: string | boolean) => void; }
@@ -43,6 +51,7 @@ export default function EditServicePage() {
   const [saving, setSaving] = useState(false);
   const [showDel, setShowDel] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [processWarnings, setProcessWarnings] = useState<string[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
@@ -60,6 +69,15 @@ export default function EditServicePage() {
   }, [id]);
 
   const save = async () => {
+    // Validate process steps — warn if any have empty fields
+    const warnings: string[] = [];
+    process.forEach((step, i) => {
+      const hasEmpty = !step.titleJa && !step.titleEn && !step.descJa && !step.descEn;
+      const partialEmpty = (!step.titleJa || !step.titleEn || !step.descJa || !step.descEn) && !hasEmpty;
+      if (partialEmpty) warnings.push(`Bước ${i + 1}: có field trống`);
+    });
+    setProcessWarnings(warnings);
+
     setSaving(true);
     const res = await fetch(`/api/services/${id}`, {
       method: "PUT",
@@ -75,7 +93,22 @@ export default function EditServicePage() {
     });
     const data = await res.json();
     setSaving(false);
-    if (data.data) toast("Đã lưu", "success"); else toast("Lỗi", "error");
+    if (data.data) {
+      if (warnings.length > 0) {
+        toast(`Đã lưu (${warnings.length} cảnh báo quy trình)`, "success");
+      } else {
+        toast("Đã lưu", "success");
+      }
+    } else toast("Lỗi", "error");
+  };
+
+  const fillMissingSteps = () => {
+    const filled = [...process];
+    for (let i = filled.length; i < 6; i++) {
+      filled.push({ ...DEFAULT_PROCESS_STEPS[i] });
+    }
+    setProcess(filled);
+    toast(`Đã bổ sung ${6 - process.length} bước thiếu`, "success");
   };
 
   if (loading) return <AdminShell title="Dịch vụ"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
@@ -121,6 +154,14 @@ export default function EditServicePage() {
           <ImageUpload label="Ảnh hero (trang chi tiết)" value={String(form.heroImage || "")} onChange={(url) => set("heroImage", url)} />
         </div>
 
+        {/* ── Media Embed URL (Issue 1) ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">🎬 Media Embed (Video / VR360 / 3D)</h3>
+          <p className="text-xs text-gray-400">URL nhúng nội dung tương tác cho trang dịch vụ. Hỗ trợ: YouTube, Vimeo, VR360, Kuula, Matterport, hoặc URL trực tiếp.</p>
+          <Field form={form} set={set} k="mediaEmbedUrl" label="Media Embed URL" placeholder="https://vr.i8studio.vn/360/..." />
+          <MediaEmbedPreview url={String(form.mediaEmbedUrl || "")} />
+        </div>
+
         {/* ── Solution Detail (collapsible) ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <button onClick={() => setShowDetail(!showDetail)} className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition-colors">
@@ -141,15 +182,15 @@ export default function EditServicePage() {
                 <TextArea form={form} set={set} k="heroDescEn" label="Hero mô tả (EN)" />
               </div>
 
-              {/* Dynamic Features (new) */}
+              {/* Dynamic Features (Issue 1 + 2) */}
               <div className="space-y-4 border-t border-gray-100 pt-6">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Features ({features.length})</p>
-                  <button onClick={() => setFeatures((f) => [...f, { titleJa: "", titleEn: "", descJa: "", descEn: "", image: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm feature</button>
+                  <button onClick={() => setFeatures((f) => [...f, { titleJa: "", titleEn: "", descJa: "", descEn: "", image: "", mediaEmbedUrl: "", displayMode: "single", imageBefore: "", imageAfter: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm feature</button>
                 </div>
                 {features.map((feat, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
-                    <button onClick={() => setFeatures((f) => f.filter((_, j) => j !== i))} className="absolute top-2 right-2 text-red-400 hover:text-red-600"><X size={14} /></button>
+                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative overflow-hidden">
+                    <button onClick={() => setFeatures((f) => f.filter((_, j) => j !== i))} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 flex items-center justify-center transition-colors z-10"><X size={12} /></button>
                     <p className="text-xs font-medium text-gray-400">Feature {i + 1}</p>
                     <div className="grid grid-cols-2 gap-3">
                       <input value={feat.titleJa} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], titleJa: e.target.value }; setFeatures(n); }} placeholder="Tiêu đề (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
@@ -159,20 +200,67 @@ export default function EditServicePage() {
                       <textarea value={feat.descJa} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], descJa: e.target.value }; setFeatures(n); }} placeholder="Mô tả (JA)" rows={2} className="border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
                       <textarea value={feat.descEn} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], descEn: e.target.value }; setFeatures(n); }} placeholder="Mô tả (EN)" rows={2} className="border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
                     </div>
-                    <ImageUpload label="Ảnh feature" value={feat.image} onChange={(url) => { const n = [...features]; n[i] = { ...n[i], image: url }; setFeatures(n); }} />
+
+                    {/* Display Mode Toggle (Issue 2) */}
+                    <div className="flex items-center gap-3">
+                      <label className="text-xs font-medium text-gray-500">Kiểu hiển thị:</label>
+                      <select
+                        value={feat.displayMode || "single"}
+                        onChange={(e) => { const n = [...features]; n[i] = { ...n[i], displayMode: e.target.value as "single" | "beforeAfter" }; setFeatures(n); }}
+                        className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs"
+                      >
+                        <option value="single">Ảnh đơn</option>
+                        <option value="beforeAfter">Before/After Slider</option>
+                      </select>
+                    </div>
+
+                    {feat.displayMode === "beforeAfter" ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <ImageUpload label="Ảnh Before" value={feat.imageBefore || ""} onChange={(url) => { const n = [...features]; n[i] = { ...n[i], imageBefore: url }; setFeatures(n); }} />
+                        <ImageUpload label="Ảnh After" value={feat.imageAfter || ""} onChange={(url) => { const n = [...features]; n[i] = { ...n[i], imageAfter: url }; setFeatures(n); }} />
+                      </div>
+                    ) : (
+                      <ImageUpload label="Ảnh feature" value={feat.image} onChange={(url) => { const n = [...features]; n[i] = { ...n[i], image: url }; setFeatures(n); }} />
+                    )}
+
+                    {/* Media Embed URL per feature (Issue 1) */}
+                    <div className="space-y-2 border-t border-gray-200 pt-3">
+                      <label className="text-xs font-medium text-gray-500">Media Embed URL (tuỳ chọn)</label>
+                      <input value={feat.mediaEmbedUrl || ""} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: e.target.value }; setFeatures(n); }} placeholder="https://youtube.com/... hoặc https://vr.i8studio.vn/..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                      {feat.mediaEmbedUrl && <MediaEmbedPreview url={feat.mediaEmbedUrl} className="mt-2" />}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Process Steps */}
+              {/* Process Steps (Issue 3) */}
               <div className="space-y-4 border-t border-gray-100 pt-6">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quy trình ({process.length} bước)</p>
-                  <button onClick={() => setProcess((p) => [...p, { titleJa: "", titleEn: "", descJa: "", descEn: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm bước</button>
+                  <div className="flex items-center gap-2">
+                    {process.length < 6 && (
+                      <button onClick={fillMissingSteps} className="flex items-center gap-1 text-green-600 text-xs font-medium hover:text-green-700">
+                        <Plus size={14} /> Bổ sung đủ 6 bước
+                      </button>
+                    )}
+                    <button onClick={() => setProcess((p) => [...p, { titleJa: "", titleEn: "", descJa: "", descEn: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm bước</button>
+                  </div>
                 </div>
+
+                {processWarnings.length > 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-yellow-700 text-xs font-medium">
+                      <AlertTriangle size={14} /> Cảnh báo quy trình
+                    </div>
+                    {processWarnings.map((w, i) => (
+                      <p key={i} className="text-xs text-yellow-600 ml-5">• {w}</p>
+                    ))}
+                  </div>
+                )}
+
                 {process.map((step, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
-                    <button onClick={() => setProcess((p) => p.filter((_, j) => j !== i))} className="absolute top-2 right-2 text-red-400 hover:text-red-600"><X size={14} /></button>
+                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative overflow-hidden">
+                    <button onClick={() => setProcess((p) => p.filter((_, j) => j !== i))} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 flex items-center justify-center transition-colors z-10"><X size={12} /></button>
                     <p className="text-xs font-medium text-gray-400">Bước {i + 1}</p>
                     <div className="grid grid-cols-2 gap-3">
                       <input value={step.titleJa} onChange={(e) => { const n = [...process]; n[i] = { ...n[i], titleJa: e.target.value }; setProcess(n); }} placeholder="Tiêu đề (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
@@ -193,8 +281,8 @@ export default function EditServicePage() {
                   <button onClick={() => setPlans((p) => [...p, { name: "", features: [], price: "", highlighted: false }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm gói</button>
                 </div>
                 {plans.map((plan, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
-                    <button onClick={() => setPlans((p) => p.filter((_, j) => j !== i))} className="absolute top-2 right-2 text-red-400 hover:text-red-600"><X size={14} /></button>
+                  <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative overflow-hidden">
+                    <button onClick={() => setPlans((p) => p.filter((_, j) => j !== i))} className="absolute top-3 right-3 w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 hover:text-red-700 flex items-center justify-center transition-colors z-10"><X size={12} /></button>
                     <div className="grid grid-cols-3 gap-3">
                       <input value={plan.name} onChange={(e) => { const n = [...plans]; n[i] = { ...n[i], name: e.target.value }; setPlans(n); }} placeholder="Tên gói" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                       <input value={plan.price} onChange={(e) => { const n = [...plans]; n[i] = { ...n[i], price: e.target.value }; setPlans(n); }} placeholder="¥50,000〜 / ASK" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />

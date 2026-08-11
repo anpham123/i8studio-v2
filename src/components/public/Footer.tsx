@@ -54,7 +54,7 @@ export default function Footer({ settings }: FooterProps) {
   const navLinks = [
     { label: navT("work"),     href: `/${locale}/works` },
     { label: navT("solution"), href: `/${locale}/solution` },
-    { label: navT("insights"), href: `/${locale}/insights` },
+    { label: navT("price"),    href: `/${locale}/price` },
     { label: navT("aboutUs"),  href: `/${locale}/about-us` },
     { label: navT("contact"),  href: `/${locale}/contact` },
     { label: navT("blogs"),    href: `/${locale}/blogs` },

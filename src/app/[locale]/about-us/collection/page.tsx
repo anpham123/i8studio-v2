@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
+import { prisma } from "@/lib/prisma";
 import CollectionListContent from "@/components/public/CollectionListContent";
 
 export async function generateMetadata({
@@ -15,6 +16,19 @@ export async function generateMetadata({
   });
 }
 
-export default function CollectionPage() {
-  return <CollectionListContent />;
+export default async function CollectionPage() {
+  const dbCollections = await prisma.collection.findMany({
+    where: { active: true },
+    orderBy: { order: "asc" },
+    select: {
+      slug: true,
+      titleJa: true,
+      titleEn: true,
+      descJa: true,
+      descEn: true,
+      coverImage: true,
+    },
+  });
+
+  return <CollectionListContent dbCollections={dbCollections} />;
 }
