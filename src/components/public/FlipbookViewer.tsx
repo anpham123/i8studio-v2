@@ -7,6 +7,7 @@ import React, {
   useCallback,
   forwardRef,
 } from "react";
+import { createPortal } from "react-dom";
 import HTMLFlipBook from "react-pageflip";
 import { ChevronLeft, ChevronRight, X, BookOpen, Loader2 } from "lucide-react";
 
@@ -273,7 +274,7 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
   // react-pageflip renders the book at exactly 2×pageWidth (or 1× in portrait)
   const bookTotalW = dim.portrait ? dim.width : dim.width * 2;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex flex-col"
       style={{ background: "rgba(8,8,16,0.97)" }}
@@ -449,6 +450,7 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
           <ChevronRight size={15} />
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
