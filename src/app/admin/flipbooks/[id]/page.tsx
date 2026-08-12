@@ -49,10 +49,10 @@ export default function EditFlipbookPage() {
     if (data.data) toast("Đã lưu", "success"); else toast("Lỗi", "error");
   };
 
-  if (loading) return <AdminShell title="Flipbook"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
+  if (loading) return <AdminShell title="Portfolio"><div className="flex justify-center py-24"><Loader2 className="animate-spin text-blue-500" size={32} /></div></AdminShell>;
 
   return (
-    <AdminShell title="Chỉnh sửa Flipbook" actions={<div className="flex gap-2"><button onClick={() => setShowDel(true)} className="border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm hover:bg-red-50"><Trash2 size={15} /></button><button onClick={save} disabled={saving} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"><Save size={15} /> Lưu</button></div>}>
+    <AdminShell title="Chỉnh sửa Portfolio" actions={<div className="flex gap-2"><button onClick={() => setShowDel(true)} className="border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm hover:bg-red-50"><Trash2 size={15} /></button><button onClick={save} disabled={saving} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"><Save size={15} /> Lưu</button></div>}>
       <div className="max-w-2xl space-y-5">
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">

@@ -45,9 +45,9 @@ export default function FlipbooksPage() {
   ];
 
   return (
-    <AdminShell title={`Flipbooks (${data.length})`} actions={<Link href="/admin/flipbooks/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
-      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/flipbooks/${r.id}`)} onDelete={setDel} searchPlaceholder="Tìm flipbook..." />
-      <ConfirmDialog open={!!del} message={`Xóa flipbook "${del?.title}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
+    <AdminShell title={`Portfolio (${data.length})`} actions={<Link href="/admin/flipbooks/new" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"><Plus size={16} /> Thêm mới</Link>}>
+      <DataTable columns={cols} data={data} loading={loading} onEdit={(r) => router.push(`/admin/flipbooks/${r.id}`)} onDelete={setDel} searchPlaceholder="Tìm portfolio..." />
+      <ConfirmDialog open={!!del} message={`Xóa portfolio "${del?.title}"?`} onConfirm={handleDelete} onCancel={() => setDel(null)} loading={deleting} />
     </AdminShell>
   );
 }
