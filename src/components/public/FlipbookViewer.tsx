@@ -27,22 +27,26 @@ interface PdfDoc {
 // ─── Dimension helper ────────────────────────────────────────────────────────
 // PDF pages are 16:9 landscape. Display single page at a time (portrait mode
 // in react-pageflip = 1 page), maximising width within the viewport.
-function calcDim() {
+function calcDim(pdfRatio?: number) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const availH = vh - 56 - 64 - 40; // header (56) + footer (64) + padding (40)
-  const hPad   = vw < 768 ? 24 : 80;  // side padding
+  const headerH = 56;
+  const footerH = 64;
+  const padV = 24;
+  const availH = vh - headerH - footerH - padV;
+  const hPad   = vw < 768 ? 16 : 60;
   const availW = vw - hPad * 2;
 
-  // 16:9 ratio — fit by width first, then clamp by height
-  let w = Math.min(availW, 1280);
-  let h = Math.round(w * (9 / 16));
+  // Use actual PDF aspect ratio if known, else default 16:9
+  const ratio = pdfRatio || (9 / 16);
+
+  let w = Math.min(availW, 1600);
+  let h = Math.round(w * ratio);
   if (h > availH) {
     h = availH;
-    w = Math.round(h * (16 / 9));
+    w = Math.round(h / ratio);
   }
 
-  // Always single-page display (usePortrait = true)
   return { width: w, height: h, portrait: true };
 }
 
@@ -102,9 +106,11 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
     pageFlip(): { flipNext(): void; flipPrev(): void };
   } | null>(null);
 
+  const pdfRatioRef = useRef<number | undefined>(undefined);
+
   // ── Resize ────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const onResize = () => setDim(calcDim());
+    const onResize = () => setDim(calcDim(pdfRatioRef.current));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -199,7 +205,18 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
         setTotalPages(n);
         setPageImages(new Array(n).fill(null));
 
-        const snapWidth = calcDim().width; // stable width for this session
+        // Detect actual PDF page aspect ratio from page 1
+        const firstPage = await pdfDoc.getPage(1);
+        const nativeVP = firstPage.getViewport({ scale: 1 });
+        const pdfAspect = nativeVP.height / nativeVP.width; // h/w ratio
+        pdfRatioRef.current = pdfAspect;
+        firstPage.cleanup();
+
+        // Recalculate dimensions with real ratio
+        const newDim = calcDim(pdfAspect);
+        setDim(newDim);
+
+        const snapWidth = newDim.width; // stable width for this session
 
         // ── Phase 1: render first 4 pages sequentially → show book ASAP
         const firstBatch = Math.min(4, n);
@@ -367,9 +384,9 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
               height={dim.height}
               size="fixed"
               minWidth={280}
-              maxWidth={1280}
+              maxWidth={1600}
               minHeight={158}
-              maxHeight={720}
+              maxHeight={1200}
               showCover={true}
               drawShadow={true}
               flippingTime={500}
