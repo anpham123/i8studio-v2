@@ -275,7 +275,7 @@ export default function FlipbookViewer({ pdfUrl, title, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col"
+      className="fixed inset-0 z-[9999] flex flex-col"
       style={{ background: "rgba(8,8,16,0.97)" }}
       onClick={onClose}
     >
