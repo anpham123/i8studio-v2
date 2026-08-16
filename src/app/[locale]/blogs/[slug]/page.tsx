@@ -15,15 +15,27 @@ import { sanitizeHtml } from "@/lib/sanitize";
 type Props = { params: { locale: string; slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // First try to find post matching current locale
-  let post = await prisma.blogPost.findFirst({
-    where: { slug: params.slug, isPublished: true, locale: params.locale },
-  });
-  // Fallback: find any published post with this slug
-  if (!post) {
+  // Try multiple Unicode normalization forms to handle NFC/NFKD mismatch
+  const slugVariants = [
+    decodeURIComponent(params.slug),
+    decodeURIComponent(params.slug).normalize("NFC"),
+    decodeURIComponent(params.slug).normalize("NFKD"),
+  ];
+  let post = null;
+  for (const s of slugVariants) {
     post = await prisma.blogPost.findFirst({
-      where: { slug: params.slug, isPublished: true },
+      where: { slug: s, isPublished: true, locale: params.locale },
     });
+    if (post) break;
+  }
+  // Fallback: find any published post with this slug (cross-locale)
+  if (!post) {
+    for (const s of slugVariants) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: s, isPublished: true },
+      });
+      if (post) break;
+    }
   }
   if (!post) return {};
 
@@ -38,19 +50,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
-  const { locale, slug } = params;
+  const { locale, slug: rawSlug } = params;
 
-  // First try to find post matching current locale
-  let post = await prisma.blogPost.findFirst({
-    where: { slug, isPublished: true, locale },
-  });
+  // Try multiple Unicode normalization forms to handle NFC/NFKD mismatch
+  const slugVariants = [
+    decodeURIComponent(rawSlug),
+    decodeURIComponent(rawSlug).normalize("NFC"),
+    decodeURIComponent(rawSlug).normalize("NFKD"),
+  ];
+  let post = null;
+  for (const s of slugVariants) {
+    post = await prisma.blogPost.findFirst({
+      where: { slug: s, isPublished: true, locale },
+    });
+    if (post) break;
+  }
   // Fallback: find any published post with this slug (cross-locale)
   if (!post) {
-    post = await prisma.blogPost.findFirst({
-      where: { slug, isPublished: true },
-    });
+    for (const s of slugVariants) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: s, isPublished: true },
+      });
+      if (post) break;
+    }
   }
   if (!post) notFound();
+  const slug = post.slug;
 
   // Parse sections JSON
   let sections: SectionData[] = [];
