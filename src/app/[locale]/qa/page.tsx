@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+// ISR: regenerate every 60 seconds
+export const revalidate = 60;
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, faqPageJsonLd } from "@/lib/seo";
 import QASection from "@/components/public/QASection";

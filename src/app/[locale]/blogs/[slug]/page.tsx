@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+// ISR: regenerate every 60 seconds
+export const revalidate = 60;
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, articleJsonLd, getSiteUrl } from "@/lib/seo";

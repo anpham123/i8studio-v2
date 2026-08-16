@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+// ISR: regenerate every 60 seconds
+export const revalidate = 60;
 import { buildMetadata } from "@/lib/seo";
 import BlogCategoryPage from "@/components/public/BlogCategoryPage";
 

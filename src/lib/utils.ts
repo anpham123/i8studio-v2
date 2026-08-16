@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export function slugify(text: string): string {
   const slug = text
     .toLowerCase()
-    .normalize("NFKD")
+    .normalize("NFC")
     .replace(/[\u0300-\u036f]/g, "") // remove diacritics
     .replace(/[!@#$%^&*()+=\[\]{};:'",.<>?/\\|`~]/g, "") // remove punctuation
     .replace(/[\s_-]+/g, "-")
