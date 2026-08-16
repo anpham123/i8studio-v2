@@ -33,7 +33,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
           {/* Text column */}
           <div>
-            <div className="font-display text-[40px] sm:text-[52px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
+            <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
               {data.num}
             </div>
 
@@ -59,7 +59,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
               {data.body.map((p, i) => (
                 <p
                   key={i}
-                  className="text-[var(--ink-light)] leading-[2] mb-5 text-[14px] sm:text-[15px]"
+                  className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
                 />
               ))}

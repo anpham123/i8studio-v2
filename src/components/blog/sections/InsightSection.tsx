@@ -6,19 +6,19 @@ export default function InsightSection({ data }: { data: SectionData }) {
     <section className="bg-[var(--surface-warm)] py-[70px] sm:py-[100px]">
       <div className="max-w-[780px] mx-auto px-6 sm:px-10">
         {data.num && (
-          <div className="font-display text-[40px] sm:text-[52px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
+          <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
             {data.num}
           </div>
         )}
         <h3
-          className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.5] text-[var(--ink)] mb-8"
+          className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-8"
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
         />
         <div className="blog-content">
           {data.body.map((p, i) => (
             <p
               key={i}
-              className="text-[14px] sm:text-[15px] leading-[2] text-[var(--ink-light)] mb-5"
+              className="text-[14px] sm:text-[15px] leading-[1.9] text-[var(--ink-light)] mb-4"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
             />
           ))}

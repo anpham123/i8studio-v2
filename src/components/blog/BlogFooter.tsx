@@ -6,7 +6,7 @@ export default function BlogFooter({ locale = "ja" }: { locale?: string }) {
 
   return (
     <footer className="bg-[var(--surface)] border-t border-[var(--line)] py-12 text-center">
-      <p className="font-serif text-[18px] sm:text-[20px] text-[var(--ink-light)] font-light italic mb-2">
+      <p className="font-serif text-[18px] sm:text-[20px] text-[var(--ink-light)] font-medium italic mb-2">
         {tagline}
       </p>
       <p className="text-[12px] text-[var(--ink-muted)] tracking-wider">
