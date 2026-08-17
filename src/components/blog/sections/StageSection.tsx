@@ -33,27 +33,29 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
           {/* Text column */}
           <div>
-            <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
-              {data.num}
+            <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-8">
+              <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight">
+                {data.num}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  {data.eyebrow && (
+                    <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em]">
+                      {data.eyebrow}
+                    </span>
+                  )}
+                  {data.eyebrowBadge && (
+                    <span className="bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] px-2 py-1 rounded">
+                      {data.eyebrowBadge}
+                    </span>
+                  )}
+                </div>
+                <h2
+                  className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
+                />
+              </div>
             </div>
-
-            <div className="flex items-center gap-3 mb-6">
-              {data.eyebrow && (
-                <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em]">
-                  {data.eyebrow}
-                </span>
-              )}
-              {data.eyebrowBadge && (
-                <span className="bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] px-2 py-1 rounded">
-                  {data.eyebrowBadge}
-                </span>
-              )}
-            </div>
-
-            <h2
-              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-6"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
-            />
 
             <div className="blog-content">
               {data.body.map((p, i) => (

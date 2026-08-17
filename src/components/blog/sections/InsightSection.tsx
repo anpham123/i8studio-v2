@@ -5,15 +5,19 @@ export default function InsightSection({ data }: { data: SectionData }) {
   return (
     <section className="bg-[var(--surface-warm)] py-[70px] sm:py-[100px]">
       <div className="max-w-[780px] mx-auto px-6 sm:px-10">
-        {data.num && (
-          <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight mb-4">
-            {data.num}
+        <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-8">
+          {data.num && (
+            <div className="font-display text-[48px] sm:text-[64px] leading-none text-[var(--accent)]/40 font-bold tracking-tight">
+              {data.num}
+            </div>
+          )}
+          <div className="flex-1">
+            <h3
+              className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
+            />
           </div>
-        )}
-        <h3
-          className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-8"
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
-        />
+        </div>
         <div className="blog-content">
           {data.body.map((p, i) => (
             <p
