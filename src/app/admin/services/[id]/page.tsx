@@ -171,8 +171,8 @@ export default function EditServicePage() {
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  if (file.size > 200 * 1024 * 1024) { toast.error("File quá lớn (tối đa 200MB)"); return; }
-                  toast.info(`Đang upload ${file.name}...`);
+                  if (file.size > 200 * 1024 * 1024) { toast("File quá lớn (tối đa 200MB)", "error"); return; }
+                  toast(`Đang upload ${file.name}...`, "info");
                   const fd = new FormData();
                   fd.append("file", file);
                   try {
@@ -180,11 +180,11 @@ export default function EditServicePage() {
                     const data = await res.json();
                     if (data.url) {
                       set("mediaEmbedUrl", data.url);
-                      toast.success("Upload video thành công!");
+                      toast("Upload video thành công!", "success");
                     } else {
-                      toast.error(data.error || "Upload thất bại");
+                      toast(data.error || "Upload thất bại", "error");
                     }
-                  } catch { toast.error("Upload thất bại"); }
+                  } catch { toast("Upload thất bại", "error"); }
                   e.target.value = "";
                 }}
               />
@@ -283,8 +283,8 @@ export default function EditServicePage() {
                             onChange={async (e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              if (file.size > 200 * 1024 * 1024) { toast.error("File quá lớn"); return; }
-                              toast.info(`Uploading ${file.name}...`);
+                              if (file.size > 200 * 1024 * 1024) { toast("File quá lớn", "error"); return; }
+                              toast(`Uploading ${file.name}...`, "info");
                               const fd = new FormData();
                               fd.append("file", file);
                               try {
@@ -292,9 +292,9 @@ export default function EditServicePage() {
                                 const d = await res.json();
                                 if (d.url) {
                                   const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: d.url }; setFeatures(n);
-                                  toast.success("Upload OK!");
-                                } else { toast.error(d.error || "Lỗi"); }
-                              } catch { toast.error("Lỗi upload"); }
+                                  toast("Upload OK!", "success");
+                                } else { toast(d.error || "Lỗi", "error"); }
+                              } catch { toast("Lỗi upload", "error"); }
                               e.target.value = "";
                             }}
                           />
