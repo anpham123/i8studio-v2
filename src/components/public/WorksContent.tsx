@@ -345,21 +345,23 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                   }}
                   className="break-inside-avoid w-full group cursor-pointer inline-block"
                 >
-                  <div className="relative overflow-hidden w-full bg-gray-50 rounded-[3px] transition-transform duration-500 ease-out">
+                  <div
+                    className="relative overflow-hidden w-full bg-gray-100 rounded-[3px] transition-transform duration-500 ease-out"
+                    style={{ aspectRatio: work.span === "wide" ? "16/10" : "3/4" }}
+                  >
                     {work.image ? (
                       <img
                         src={work.image}
                         alt={work.title}
-                        className="w-full h-auto object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                        loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover transition-all duration-[1.2s] ease-out group-hover:scale-105 opacity-0"
+                        onLoad={(e) => { e.currentTarget.classList.remove("opacity-0"); e.currentTarget.classList.add("opacity-100"); }}
                         onError={(e) => { e.currentTarget.style.display = "none"; }}
                       />
                     ) : (
                       <div
-                        className="w-full transition-transform duration-[1.2s] ease-out group-hover:scale-105"
-                        style={{
-                          backgroundColor: work.bg,
-                          aspectRatio: work.span === "wide" ? "16/10" : "3/4"
-                        }}
+                        className="absolute inset-0 w-full h-full transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                        style={{ backgroundColor: work.bg }}
                       />
                     )}
                   </div>
