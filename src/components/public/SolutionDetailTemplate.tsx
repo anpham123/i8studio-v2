@@ -116,12 +116,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         </section>
       )}
 
-      {/* ── Feature Blocks (alternating) ────────────────── */}
+      {/* ── Feature Blocks (full-width media, text below) ── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 space-y-20 md:space-y-28">
         {data.features.map((feat, i) => {
           const ftTitle = isJa ? feat.titleJa : feat.titleEn;
           const ftDesc = isJa ? feat.descJa : feat.descEn;
-          const reverse = i % 2 === 1;
           const embedUrl = feat.mediaEmbedUrl ? getEmbedUrl(feat.mediaEmbedUrl) : null;
           const isBeforeAfter = feat.displayMode === "beforeAfter" && feat.imageBefore && feat.imageAfter;
           return (
@@ -130,11 +129,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               variants={fadeUp}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} gap-10 md:gap-16 items-center`}
+              viewport={{ once: true, amount: 0.2 }}
+              className="flex flex-col gap-6"
             >
-              {/* Visual */}
-              <div className="w-full md:w-1/2 rounded-2xl overflow-hidden">
+              {/* Visual — full width */}
+              <div className="w-full rounded-2xl overflow-hidden">
                 {embedUrl ? (
                   /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl || "") ? (
                     <div className="aspect-video rounded-2xl overflow-hidden">
@@ -168,18 +167,18 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     autoAspect={true}
                   />
                 ) : (
-                  <div className="aspect-[4/3]">
+                  <div className="aspect-video">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={feat.image}
                       alt={ftTitle}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-2xl"
                       onError={(e) => {
                         const target = e.currentTarget;
                         target.style.display = "none";
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center");
+                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center", "rounded-2xl");
                           const span = document.createElement("span");
                           span.className = "text-gray-400 text-sm font-medium text-center px-4";
                           span.textContent = ftTitle;
@@ -190,9 +189,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   </div>
                 )}
               </div>
-              {/* Text */}
-              <div className="w-full md:w-1/2">
-                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+              {/* Text — below media */}
+              <div className="max-w-3xl">
+                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-3 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {ftTitle}
                 </h2>
                 <p className="text-gray-500 text-base leading-relaxed">{ftDesc}</p>
