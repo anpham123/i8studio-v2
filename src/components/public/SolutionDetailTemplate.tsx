@@ -159,29 +159,28 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     </div>
                   )
                 ) : isBeforeAfter ? (
-                  <div className="aspect-video rounded-2xl overflow-hidden">
+                  <div className="w-full rounded-2xl overflow-hidden">
                     <BeforeAfterSlider
                       beforeImage={feat.imageBefore}
                       afterImage={feat.imageAfter}
                       beforeLabel="Before"
                       afterLabel="After"
-                      autoAspect={false}
-                      fillContainer={true}
+                      autoAspect={true}
                     />
                   </div>
                 ) : (
-                  <div className="aspect-video">
+                  <div className="w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={feat.image}
                       alt={ftTitle}
-                      className="w-full h-full object-cover rounded-2xl"
+                      className="w-full h-auto rounded-2xl"
                       onError={(e) => {
                         const target = e.currentTarget;
                         target.style.display = "none";
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center", "rounded-2xl");
+                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center", "rounded-2xl", "aspect-video");
                           const span = document.createElement("span");
                           span.className = "text-gray-400 text-sm font-medium text-center px-4";
                           span.textContent = ftTitle;
