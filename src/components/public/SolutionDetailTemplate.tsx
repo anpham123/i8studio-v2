@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
@@ -8,6 +9,43 @@ import { getEmbedUrl } from "@/components/admin/MediaEmbedPreview";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
+
+/** Click-to-load iframe — avoids loading heavy 3D/VR content until user requests it */
+function LazyIframe({ src, title, thumbnail }: { src: string; title: string; thumbnail?: string }) {
+  const [loaded, setLoaded] = useState(false);
+
+  if (loaded) {
+    return (
+      <iframe
+        src={src}
+        className="w-full h-full border-0"
+        allowFullScreen
+        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+        title={title}
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setLoaded(true)}
+      className="w-full h-full bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex flex-col items-center justify-center gap-4 cursor-pointer group transition-all hover:from-gray-700 hover:to-gray-800"
+    >
+      {thumbnail && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumbnail} alt={title} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+      )}
+      <div className="relative z-10 flex flex-col items-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
+          <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+        <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">Click to load interactive view</span>
+      </div>
+    </button>
+  );
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaceholderImage({ alt, className }: { alt: string; className?: string }) {
@@ -103,11 +141,8 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   className="w-full h-full object-cover bg-black"
                 />
               ) : (
-                <iframe
-                  src={getEmbedUrl(data.mediaEmbedUrl) || undefined}
-                  className="w-full h-full border-0"
-                  allowFullScreen
-                  allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                <LazyIframe
+                  src={getEmbedUrl(data.mediaEmbedUrl) || ""}
                   title={title}
                 />
               )}
@@ -149,12 +184,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     </div>
                   ) : (
                     <div className="aspect-video rounded-2xl overflow-hidden">
-                      <iframe
+                      <LazyIframe
                         src={embedUrl}
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
                         title={ftTitle}
+                        thumbnail={feat.image}
                       />
                     </div>
                   )
