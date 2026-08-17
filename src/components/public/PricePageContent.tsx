@@ -6,21 +6,6 @@ import { motion } from "framer-motion";
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
-const SERVICE_ICONS: Record<string, string> = {
-  "cg-perspective": "🖼️",
-  "cg-video": "🎬",
-  "photo-composite": "📷",
-  "virtual-staging": "🛋️",
-  "vr360": "🌐",
-  "vr-walkthrough": "🚶",
-  "digital-model": "🏗️",
-  "ar": "📱",
-  "exe-content": "💻",
-  "bim-services": "🏢",
-  "pachinko-slot-cg": "🎰",
-  "anime-illustration": "✨",
-};
-
 interface DbPriceItem {
   id: string;
   nameJa: string;
@@ -76,6 +61,21 @@ interface DbServiceItem {
   plansJson: string;
 }
 
+const SERVICE_ICONS: Record<string, string> = {
+  "cg-perspective": "🖼️",
+  "cg-video": "🎬",
+  "photo-composite": "📷",
+  "virtual-staging": "🛋️",
+  "vr360": "🌐",
+  "vr-walkthrough": "🚶",
+  "digital-model": "🏗️",
+  "ar": "📱",
+  "exe-content": "💻",
+  "bim-services": "🏢",
+  "pachinko-slot-cg": "🎰",
+  "anime-illustration": "✨",
+};
+
 function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
   return services.map((svc) => {
     let plans: { name: string; features: string[]; price: string }[] = [];
@@ -85,8 +85,8 @@ function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
       icon: SERVICE_ICONS[svc.slug] || svc.icon || "📦",
       titleJa: svc.nameJa || svc.name,
       titleEn: svc.name,
-      features: plans[1]?.features.slice(0, 3) ?? plans[0]?.features.slice(0, 3) ?? [],
-      featuresJa: plans[1]?.features.slice(0, 3) ?? plans[0]?.features.slice(0, 3) ?? [],
+      features: plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
+      featuresJa: plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
       price: plans[0]?.price ?? svc.priceHint ?? "ASK",
       priceLabelJa: "参考価格",
       priceLabelEn: "Starting from",
@@ -103,20 +103,19 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
 
-  // If DB has price items, use them. Otherwise fall back to services from DB.
   const cards = dbItems && dbItems.length > 0
     ? buildCardsFromDb(dbItems)
     : buildCardsFromServices(dbServices);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#fafaf8]">
       {/* ── Hero ─────────────────────────────────────── */}
-      <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
+      <section className="border-b border-[var(--line)]">
+        <div className="max-w-[1100px] mx-auto px-6 sm:px-10 pt-16 sm:pt-24 pb-12 sm:pb-16">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5"
+            className="text-[11px] uppercase tracking-[0.3em] text-[var(--accent)] mb-4"
           >
             PRICE LIST
           </motion.p>
@@ -124,8 +123,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl font-light text-[#111] mb-6"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            className="font-serif text-[clamp(28px,4vw,48px)] font-medium text-[var(--ink)] leading-[1.3] mb-3"
           >
             {isJa ? "料金体系" : "Pricing"}
           </motion.h1>
@@ -133,22 +131,24 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed"
+            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[600px]"
           >
             {isJa
-              ? "プロジェクトの規模・複雑さに応じた柔軟な料金体系。まずはお気軽にご相談ください。"
-              : "Flexible pricing based on project scale and complexity. Feel free to contact us for a consultation."}
+              ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
+              : "Standard pricing for each architectural visualization service. We propose the best plan based on project scale, detail, and timeline."}
           </motion.p>
         </div>
       </section>
 
       {/* ── Service Grid ──────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="max-w-[1100px] mx-auto px-6 sm:px-10 py-14 sm:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
             const title = isJa ? card.titleJa : card.titleEn;
             const features = isJa ? (card.featuresJa.length > 0 ? card.featuresJa : card.features) : card.features;
             const priceLabel = isJa ? card.priceLabelJa : card.priceLabelEn;
+            const isAsk = card.price === "ASK" || !card.price;
+
             return (
               <motion.div
                 key={card.slug + "-" + i}
@@ -156,72 +156,87 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                transition={{ delay: (i % 3) * 0.08 }}
-                className="group border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                transition={{ delay: (i % 2) * 0.1 }}
+                className="group bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-lg transition-all duration-300"
               >
                 {/* Card Image */}
-                {card.cardImage && (
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={card.cardImage} alt={title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg">{card.icon}</span>
-                        <h3 className="text-white text-lg font-medium">{title}</h3>
-                      </div>
-                      <div className="text-white/80 text-sm">
-                        <span className="text-white/50 text-xs uppercase tracking-wider">{priceLabel} </span>
-                        {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
-                      </div>
+                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#1e1b14] to-[#2a2318]">
+                  {card.cardImage && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={card.cardImage}
+                      alt={title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                    />
+                  )}
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+                  {/* Service name badge */}
+                  <div className="absolute top-4 left-4">
+                    <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-sm">
+                      <h3 className="font-serif text-[15px] sm:text-[17px] font-medium text-[var(--ink)] leading-tight">
+                        {card.titleEn}
+                      </h3>
+                      {isJa && card.titleJa !== card.titleEn && (
+                        <p className="text-[11px] text-[var(--ink-muted)] mt-0.5">{card.titleJa}</p>
+                      )}
                     </div>
                   </div>
-                )}
-                <div className="p-7">
-                  {/* Icon + Title (shown when no image) */}
-                  {!card.cardImage && (
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl">{card.icon}</span>
-                      <h3 className="text-lg font-medium text-[#111]">{title}</h3>
-                    </div>
-                  )}
+                </div>
 
+                {/* Content */}
+                <div className="p-6 sm:p-7">
                   {/* Features */}
-                  <ul className="space-y-2 mb-6">
-                    {features.slice(0, 4).map((f, fi) => (
-                      <li key={fi} className="flex items-start gap-2 text-sm text-gray-500">
-                        <span className="text-[#b8935a] mt-0.5 shrink-0">✓</span>
+                  <ul className="space-y-2.5 mb-6">
+                    {features.slice(0, 5).map((f, fi) => (
+                      <li key={fi} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-[var(--ink-light)] leading-[1.6]">
+                        <span className="text-[var(--accent)] mt-[1px] shrink-0 text-[13px]">◎</span>
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  {/* Price (shown when no image) */}
-                  {!card.cardImage && (
-                    <div className="mb-6">
-                      <span className="text-xs uppercase tracking-wider text-gray-400">{priceLabel}</span>
-                      <div className="text-2xl font-light text-[#111] mt-1" style={{ fontFamily: "var(--font-display), serif" }}>
-                        {card.price === "ASK" ? (isJa ? "お問い合わせ" : "Contact Us") : card.price}
-                      </div>
+                  {/* Price + CTA row */}
+                  <div className="flex items-end justify-between pt-5 border-t border-[var(--line)]">
+                    <div>
+                      {isAsk ? (
+                        <>
+                          <span className="font-display text-[28px] sm:text-[32px] font-bold text-[var(--ink)] tracking-tight leading-none">
+                            ASK
+                          </span>
+                          <p className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider mt-1">
+                            {isJa ? "お見積り" : "On request"}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-display text-[28px] sm:text-[32px] font-bold text-[var(--ink)] tracking-tight leading-none">
+                            {card.price}
+                          </span>
+                          <p className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider mt-1">
+                            {priceLabel}
+                          </p>
+                        </>
+                      )}
                     </div>
-                  )}
 
-                  {/* CTA */}
-                  {card.slug ? (
-                    <Link
-                      href={`/${locale}/solution/${card.slug}`}
-                      className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
-                    >
-                      {isJa ? "詳細を見る" : "View Details"}
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/${locale}/contact`}
-                      className="block text-center text-sm font-semibold py-2.5 rounded-full border border-[#111] text-[#111] hover:bg-[#111] hover:text-white transition-colors"
-                    >
-                      {isJa ? "お問い合わせ" : "Contact Us"}
-                    </Link>
-                  )}
+                    {card.slug ? (
+                      <Link
+                        href={`/${locale}/solution/${card.slug}`}
+                        className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                      >
+                        {isJa ? "詳細を見る" : "Details"} →
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/${locale}/contact`}
+                        className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                      >
+                        {isJa ? "お問い合わせ" : "Contact"} →
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );
@@ -229,23 +244,62 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
         </div>
       </section>
 
-      {/* ── Footer CTA ────────────────────────────────── */}
-      <section className="bg-[#111]">
-        <div className="max-w-4xl mx-auto px-6 py-20 md:py-28 text-center">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <h2 className="text-2xl md:text-3xl font-light text-white mb-6" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
-              {isJa ? "個別のプロジェクトに合わせた自由なカスタマイズ。" : "Flexible customization for your unique project."}
-            </h2>
-            <p className="text-white/50 mb-10 max-w-lg mx-auto">
-              {isJa ? "料金はプロジェクトの規模・仕様に応じて変動します。まずはお気軽にお見積もりをご依頼ください。" : "Pricing varies based on project scale and specifications. Please request a free estimate."}
-            </p>
-            <Link
-              href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-10 py-4 bg-white text-[#111] text-sm font-semibold rounded-full hover:bg-white/90 transition-colors"
-            >
-              {isJa ? "お見積もりを依頼する" : "Request a Quote"} →
-            </Link>
-          </motion.div>
+      {/* ── Custom Project CTA ────────────────────────── */}
+      <section className="border-t border-[var(--line)]">
+        <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden rounded-sm my-14 sm:my-20 bg-[#111]">
+            {/* Text */}
+            <div className="p-10 sm:p-14 flex flex-col justify-center">
+              <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+                <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] mb-5">
+                  ✦ CUSTOM PROJECT
+                </p>
+                <h2 className="font-serif text-[22px] sm:text-[30px] font-medium text-white leading-[1.4] mb-6">
+                  {isJa
+                    ? "個別のプロジェクトに合わせた自由なカスタマイズ。"
+                    : "Flexible customization for your unique project."}
+                </h2>
+                <p className="text-white/50 text-[14px] leading-[1.9] mb-8">
+                  {isJa
+                    ? "料金はプロジェクトの規模・仕様に応じて変動します。私たちはクライアントのビジョンを最優先し、独自のニーズに応える最適なアプローチを検討いたします。まずはご相談ください。"
+                    : "Pricing varies based on project scale and specifications. We prioritize your vision and find the optimal approach. Contact us for a consultation."}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--accent)] text-black text-[13px] font-semibold rounded-sm hover:bg-[#c9a36a] transition-colors"
+                  >
+                    {isJa ? "お見積もりを依頼する" : "Request a Quote"}
+                  </Link>
+                  <Link
+                    href={`/${locale}/contact`}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/20 text-white text-[13px] font-medium rounded-sm hover:border-white/40 transition-colors"
+                  >
+                    {isJa ? "お問い合わせ" : "Contact Us"}
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Image */}
+            <div className="relative aspect-[4/3] lg:aspect-auto overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b14] to-[#3a3228]" />
+              <div
+                className="absolute inset-0 opacity-20"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(184,147,90,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(184,147,90,0.08) 1px, transparent 1px)",
+                  backgroundSize: "40px 40px",
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center px-8">
+                  <p className="font-display text-[48px] sm:text-[64px] text-[var(--accent)]/30 font-bold leading-none mb-4">i8</p>
+                  <p className="text-white/30 text-[12px] uppercase tracking-[0.3em]">STUDIO</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
