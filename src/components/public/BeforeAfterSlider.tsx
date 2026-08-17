@@ -299,31 +299,8 @@ export default function BeforeAfterSlider({
     containerClass += " w-full h-full";
   } else if (autoAspect) {
     containerStyle.aspectRatio = detectedRatio || "16/10";
-    
-    let isHeightConstrained = preferHeightOverWidth;
-    if (detectedRatio && !preferHeightOverWidth) {
-      const [wStr, hStr] = detectedRatio.split("/");
-      const imgW = parseFloat(wStr);
-      const imgH = parseFloat(hStr);
-      if (imgW && imgH) {
-        const imgRatio = imgW / imgH;
-        if (imgRatio < viewportRatio) {
-          isHeightConstrained = true;
-        }
-      }
-    }
-
-    if (isHeightConstrained) {
-      containerStyle.height = "100%";
-      containerStyle.width = "auto";
-      containerClass += " h-full";
-    } else {
-      containerStyle.width = "100%";
-      containerStyle.height = "auto";
-    }
-    if (maxHeight) {
-      containerStyle.maxHeight = `${maxHeight}px`;
-    }
+    containerStyle.width = "100%";
+    containerStyle.height = "auto";
   } else if (aspectRatio) {
     containerStyle.aspectRatio = aspectRatio;
     containerClass += " w-full";
