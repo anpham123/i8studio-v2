@@ -299,8 +299,7 @@ export default function BeforeAfterSlider({
     containerClass += " w-full h-full";
   } else if (autoAspect) {
     containerStyle.aspectRatio = detectedRatio || "16/10";
-    containerStyle.width = "100%";
-    containerStyle.height = "auto";
+    containerStyle.maxWidth = "100%";
     containerStyle.maxHeight = "80vh";
     containerStyle.margin = "0 auto";
   } else if (aspectRatio) {
