@@ -201,7 +201,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="flex max-w-[1920px] mx-auto px-6 md:px-[60px] pt-24 md:pt-[120px] pb-24 gap-12">
+      <div className="flex max-w-[1920px] mx-auto px-6 md:px-[60px] pt-4 md:pt-6 pb-24 gap-12">
         
         {/* ========== DESKTOP SIDEBAR ========== */}
         <aside className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin">
