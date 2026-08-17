@@ -56,24 +56,26 @@ function buildStats(settings: Record<string, string>) {
   });
 }
 
-function buildMilestones(settings: Record<string, string>) {
-  return DEFAULT_MILESTONES.map((def, i) => {
-    const idx = i + 1;
-    return {
-      year: settings[`aboutMilestone${idx}Year`] || def.year,
-      titleEn: settings[`aboutMilestone${idx}TitleEn`] || settings[`aboutMilestone${idx}Text`] || def.titleEn,
-      titleJa: settings[`aboutMilestone${idx}TitleJa`] || settings[`aboutMilestone${idx}TextJa`] || def.titleJa,
-      descEn: settings[`aboutMilestone${idx}DescEn`] || def.descEn,
-      descJa: settings[`aboutMilestone${idx}DescJa`] || def.descJa,
-    };
-  });
+interface MilestoneItem {
+  year: string;
+  titleJa: string;
+  titleEn: string;
+  descJa: string;
+  descEn: string;
 }
 
-export default function CompanyOverviewContent({ settings }: { settings: Record<string, string> }) {
+interface Props {
+  settings: Record<string, string>;
+  milestones?: MilestoneItem[];
+  overview?: Record<string, string>;
+}
+
+export default function CompanyOverviewContent({ settings, milestones, overview }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
   const STATS = buildStats(settings);
-  const MILESTONES = buildMilestones(settings);
+  // Use DB milestones if available, otherwise fallback to hardcoded defaults
+  const MILESTONES = milestones && milestones.length > 0 ? milestones : DEFAULT_MILESTONES;
 
   return (
     <div className="min-h-screen bg-white">
