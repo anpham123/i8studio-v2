@@ -176,16 +176,22 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
 
                 {/* All content overlaid */}
                 <div className="relative z-10 flex flex-col justify-between min-h-[380px] sm:min-h-[420px] p-6 sm:p-7">
-                  {/* Top: Service name badge */}
+                  {/* Top: Service name */}
                   <div>
-                    <div className="inline-block bg-white/95 backdrop-blur-sm px-4 py-2 rounded-sm">
-                      <h3 className="font-serif text-[15px] sm:text-[17px] font-medium text-[var(--ink)] leading-tight">
-                        {card.titleEn}
-                      </h3>
-                      {isJa && card.titleJa !== card.titleEn && (
-                        <p className="text-[11px] text-[var(--ink-muted)] mt-0.5">{card.titleJa}</p>
-                      )}
-                    </div>
+                    <h3
+                      className="font-serif text-[20px] sm:text-[24px] font-medium text-white leading-tight"
+                      style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}
+                    >
+                      {card.titleEn}
+                    </h3>
+                    {isJa && card.titleJa !== card.titleEn && (
+                      <p
+                        className="text-[12px] text-white/70 mt-1"
+                        style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
+                      >
+                        {card.titleJa}
+                      </p>
+                    )}
                   </div>
 
                   {/* Bottom: Features + Price + CTA */}
