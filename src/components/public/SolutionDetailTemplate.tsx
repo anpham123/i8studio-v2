@@ -159,13 +159,16 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     </div>
                   )
                 ) : isBeforeAfter ? (
-                  <BeforeAfterSlider
-                    beforeImage={feat.imageBefore}
-                    afterImage={feat.imageAfter}
-                    beforeLabel="Before"
-                    afterLabel="After"
-                    autoAspect={true}
-                  />
+                  <div className="aspect-video rounded-2xl overflow-hidden">
+                    <BeforeAfterSlider
+                      beforeImage={feat.imageBefore}
+                      afterImage={feat.imageAfter}
+                      beforeLabel="Before"
+                      afterLabel="After"
+                      autoAspect={false}
+                      fillContainer={true}
+                    />
+                  </div>
                 ) : (
                   <div className="aspect-video">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
