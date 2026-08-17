@@ -157,7 +157,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                 whileInView="visible"
                 viewport={{ once: true }}
                 transition={{ delay: (i % 2) * 0.1 }}
-                className="group relative rounded-sm overflow-hidden hover:shadow-xl transition-all duration-300"
+                className="group relative rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
               >
                 {/* Full background image */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b14] to-[#2a2318]">
