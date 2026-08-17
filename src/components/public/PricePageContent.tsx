@@ -111,7 +111,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
     <div className="min-h-screen bg-[#fafaf8]">
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="border-b border-[var(--line)]">
-        <div className="max-w-[1100px] mx-auto px-6 sm:px-10 pt-4 sm:pt-6 pb-4 sm:pb-6">
+        <div className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-4 sm:pt-6 pb-4 sm:pb-6">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
