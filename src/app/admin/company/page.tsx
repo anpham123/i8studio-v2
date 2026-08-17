@@ -123,14 +123,30 @@ export default function CompanyContentPage() {
               {milestones.map((ms, i) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
                   <button onClick={() => setMilestones((m) => m.filter((_, j) => j !== i))} className="absolute top-2 right-2 text-red-400 hover:text-red-600"><X size={14} /></button>
+                  <p className="text-xs font-semibold text-blue-600 mb-1">Mốc {i + 1}</p>
                   <div className="grid grid-cols-3 gap-3">
-                    <input value={ms.year} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], year: e.target.value }; setMilestones(n); }} placeholder="Năm (2019)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                    <input value={ms.titleJa} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], titleJa: e.target.value }; setMilestones(n); }} placeholder="Tiêu đề (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                    <input value={ms.titleEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], titleEn: e.target.value }; setMilestones(n); }} placeholder="Tiêu đề (EN)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">📅 Năm</label>
+                      <input value={ms.year} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], year: e.target.value }; setMilestones(n); }} placeholder="VD: 2019年" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇯🇵 Tiêu đề (JP)</label>
+                      <input value={ms.titleJa} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], titleJa: e.target.value }; setMilestones(n); }} placeholder="基礎を築いた時期" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Tiêu đề (EN)</label>
+                      <input value={ms.titleEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], titleEn: e.target.value }; setMilestones(n); }} placeholder="The Foundation Period" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <input value={ms.descJa} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descJa: e.target.value }; setMilestones(n); }} placeholder="Mô tả (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                    <input value={ms.descEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descEn: e.target.value }; setMilestones(n); }} placeholder="Mô tả (EN)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇯🇵 Mô tả (JP)</label>
+                      <textarea value={ms.descJa} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descJa: e.target.value }; setMilestones(n); }} placeholder="Nội dung mô tả tiếng Nhật..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Mô tả (EN)</label>
+                      <textarea value={ms.descEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descEn: e.target.value }; setMilestones(n); }} placeholder="Description in English..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -149,18 +165,39 @@ export default function CompanyContentPage() {
               {workflow.map((step, i) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
                   <button onClick={() => setWorkflow((w) => w.filter((_, j) => j !== i))} className="absolute top-2 right-2 text-red-400 hover:text-red-600"><X size={14} /></button>
-                  <p className="text-xs font-medium text-gray-400">Bước {step.stepNumber}</p>
+                  <p className="text-xs font-semibold text-blue-600 mb-1">Bước {step.stepNumber}</p>
                   <div className="grid grid-cols-3 gap-3">
-                    <input type="number" value={step.stepNumber} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], stepNumber: parseInt(e.target.value) || 0 }; setWorkflow(n); }} placeholder="Số" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                    <input value={step.titleJa} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], titleJa: e.target.value }; setWorkflow(n); }} placeholder="Tiêu đề (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                    <input value={step.titleEn} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], titleEn: e.target.value }; setWorkflow(n); }} placeholder="Tiêu đề (EN)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🔢 Số thứ tự</label>
+                      <input type="number" value={step.stepNumber} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], stepNumber: parseInt(e.target.value) || 0 }; setWorkflow(n); }} placeholder="1" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇯🇵 Tiêu đề (JP)</label>
+                      <input value={step.titleJa} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], titleJa: e.target.value }; setWorkflow(n); }} placeholder="ヒアリング・資料共有" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Tiêu đề (EN)</label>
+                      <input value={step.titleEn} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], titleEn: e.target.value }; setWorkflow(n); }} placeholder="Consultation & Briefing" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <textarea value={step.descJa} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], descJa: e.target.value }; setWorkflow(n); }} placeholder="Mô tả (JA)" rows={2} className="border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
-                    <textarea value={step.descEn} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], descEn: e.target.value }; setWorkflow(n); }} placeholder="Mô tả (EN)" rows={2} className="border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇯🇵 Mô tả (JP)</label>
+                      <textarea value={step.descJa} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], descJa: e.target.value }; setWorkflow(n); }} placeholder="Nội dung mô tả tiếng Nhật..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Mô tả (EN)</label>
+                      <textarea value={step.descEn} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], descEn: e.target.value }; setWorkflow(n); }} placeholder="Description in English..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
+                    </div>
                   </div>
-                  <ImageUpload label="Ảnh bước" value={step.image} onChange={(url) => { const n = [...workflow]; n[i] = { ...n[i], image: url }; setWorkflow(n); }} />
-                  <input value={step.tags} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], tags: e.target.value }; setWorkflow(n); }} placeholder="Tags (phân cách bằng dấu phẩy)" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 mb-1">🖼️ Ảnh minh hoạ</label>
+                    <ImageUpload label="Ảnh bước" value={step.image} onChange={(url) => { const n = [...workflow]; n[i] = { ...n[i], image: url }; setWorkflow(n); }} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 mb-1">🏷️ Tags (phân cách bằng dấu phẩy)</label>
+                    <input value={step.tags} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], tags: e.target.value }; setWorkflow(n); }} placeholder="VD: 3ds Max, SketchUp, BIM" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                  </div>
                 </div>
               ))}
             </div>
