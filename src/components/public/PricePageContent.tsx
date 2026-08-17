@@ -254,64 +254,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
         </div>
       </section>
 
-      {/* ── Custom Project CTA ────────────────────────── */}
-      <section className="border-t border-[var(--line)]">
-        <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden rounded-sm my-14 sm:my-20 bg-[#111]">
-            {/* Text */}
-            <div className="p-10 sm:p-14 flex flex-col justify-center">
-              <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-                <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] mb-5">
-                  ✦ CUSTOM PROJECT
-                </p>
-                <h2 className="font-serif text-[22px] sm:text-[30px] font-medium text-white leading-[1.4] mb-6">
-                  {isJa
-                    ? "個別のプロジェクトに合わせた自由なカスタマイズ。"
-                    : "Flexible customization for your unique project."}
-                </h2>
-                <p className="text-white/50 text-[14px] leading-[1.9] mb-8">
-                  {isJa
-                    ? "料金はプロジェクトの規模・仕様に応じて変動します。私たちはクライアントのビジョンを最優先し、独自のニーズに応える最適なアプローチを検討いたします。まずはご相談ください。"
-                    : "Pricing varies based on project scale and specifications. We prioritize your vision and find the optimal approach. Contact us for a consultation."}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href={`/${locale}/contact`}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--accent)] text-black text-[13px] font-semibold rounded-sm hover:bg-[#c9a36a] transition-colors"
-                  >
-                    {isJa ? "お見積もりを依頼する" : "Request a Quote"}
-                  </Link>
-                  <Link
-                    href={`/${locale}/contact`}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/20 text-white text-[13px] font-medium rounded-sm hover:border-white/40 transition-colors"
-                  >
-                    {isJa ? "お問い合わせ" : "Contact Us"}
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
 
-            {/* Image */}
-            <div className="relative aspect-[4/3] lg:aspect-auto overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b14] to-[#3a3228]" />
-              <div
-                className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(184,147,90,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(184,147,90,0.08) 1px, transparent 1px)",
-                  backgroundSize: "40px 40px",
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center px-8">
-                  <p className="font-display text-[48px] sm:text-[64px] text-[var(--accent)]/30 font-bold leading-none mb-4">i8</p>
-                  <p className="text-white/30 text-[12px] uppercase tracking-[0.3em]">STUDIO</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
