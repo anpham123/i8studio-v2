@@ -111,7 +111,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
     <div className="min-h-screen bg-[#fafaf8]">
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="border-b border-[var(--line)]">
-        <div className="max-w-[1100px] mx-auto px-6 sm:px-10 pt-4 sm:pt-6 pb-12 sm:pb-16">
+        <div className="max-w-[1100px] mx-auto px-6 sm:px-10 pt-4 sm:pt-6 pb-4 sm:pb-6">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -141,7 +141,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
       </section>
 
       {/* ── Service Grid ──────────────────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 sm:px-10 py-14 sm:py-20">
+      <section className="max-w-[1100px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-14 sm:pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
             const title = isJa ? card.titleJa : card.titleEn;
