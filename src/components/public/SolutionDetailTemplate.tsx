@@ -92,13 +92,25 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               viewport={{ once: true }}
               className="aspect-video rounded-2xl overflow-hidden shadow-xl border border-gray-200"
             >
-              <iframe
-                src={getEmbedUrl(data.mediaEmbedUrl) || undefined}
-                className="w-full h-full border-0"
-                allowFullScreen
-                allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
-                title={title}
-              />
+              {/\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl) ? (
+                <video
+                  src={data.mediaEmbedUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                  className="w-full h-full object-cover bg-black"
+                />
+              ) : (
+                <iframe
+                  src={getEmbedUrl(data.mediaEmbedUrl) || undefined}
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                  title={title}
+                />
+              )}
             </motion.div>
           </div>
         </section>
@@ -124,15 +136,29 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               {/* Visual */}
               <div className="w-full md:w-1/2 rounded-2xl overflow-hidden">
                 {embedUrl ? (
-                  <div className="aspect-video rounded-2xl overflow-hidden">
-                    <iframe
-                      src={embedUrl}
-                      className="w-full h-full border-0"
-                      allowFullScreen
-                      allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
-                      title={ftTitle}
-                    />
-                  </div>
+                  /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl || "") ? (
+                    <div className="aspect-video rounded-2xl overflow-hidden">
+                      <video
+                        src={feat.mediaEmbedUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        controls
+                        className="w-full h-full object-cover bg-black"
+                      />
+                    </div>
+                  ) : (
+                    <div className="aspect-video rounded-2xl overflow-hidden">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                        title={ftTitle}
+                      />
+                    </div>
+                  )
                 ) : isBeforeAfter ? (
                   <BeforeAfterSlider
                     beforeImage={feat.imageBefore}

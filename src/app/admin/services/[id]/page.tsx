@@ -157,9 +157,56 @@ export default function EditServicePage() {
         {/* ── Media Embed URL (Issue 1) ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
           <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">🎬 Media Embed (Video / VR360 / 3D)</h3>
-          <p className="text-xs text-gray-400">URL nhúng nội dung tương tác cho trang dịch vụ. Hỗ trợ: YouTube, Vimeo, VR360, Kuula, Matterport, hoặc URL trực tiếp.</p>
-          <Field form={form} set={set} k="mediaEmbedUrl" label="Media Embed URL" placeholder="https://vr.i8studio.vn/360/..." />
-          <MediaEmbedPreview url={String(form.mediaEmbedUrl || "")} />
+          <p className="text-xs text-gray-400">Upload video trực tiếp lên VPS (MP4, WebM, MOV — tối đa 200MB) hoặc nhập URL (VR360, Kuula, Matterport). Video upload sẽ tự động phát khi mở trang.</p>
+          
+          {/* Upload video button */}
+          <div className="flex items-center gap-3">
+            <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Video
+              <input
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 200 * 1024 * 1024) { toast.error("File quá lớn (tối đa 200MB)"); return; }
+                  toast.info(`Đang upload ${file.name}...`);
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  try {
+                    const res = await fetch("/api/upload-video", { method: "POST", body: fd });
+                    const data = await res.json();
+                    if (data.url) {
+                      set("mediaEmbedUrl", data.url);
+                      toast.success("Upload video thành công!");
+                    } else {
+                      toast.error(data.error || "Upload thất bại");
+                    }
+                  } catch { toast.error("Upload thất bại"); }
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            <span className="text-xs text-gray-400">hoặc</span>
+          </div>
+
+          <Field form={form} set={set} k="mediaEmbedUrl" label="Media URL" placeholder="/uploads/videos/xxx.mp4 hoặc https://vr.i8studio.vn/360/..." />
+          
+          {/* Preview */}
+          {String(form.mediaEmbedUrl || "").length > 0 && (
+            /\.(mp4|webm|mov)(\?|$)/i.test(String(form.mediaEmbedUrl || "")) ? (
+              <video
+                src={String(form.mediaEmbedUrl)}
+                controls
+                muted
+                className="w-full rounded-lg border border-gray-200 max-h-[300px] object-contain bg-black"
+              />
+            ) : (
+              <MediaEmbedPreview url={String(form.mediaEmbedUrl || "")} />
+            )
+          )}
         </div>
 
         {/* ── Solution Detail (collapsible) ── */}
@@ -225,9 +272,42 @@ export default function EditServicePage() {
 
                     {/* Media Embed URL per feature (Issue 1) */}
                     <div className="space-y-2 border-t border-gray-200 pt-3">
-                      <label className="text-xs font-medium text-gray-500">Media Embed URL (tuỳ chọn)</label>
-                      <input value={feat.mediaEmbedUrl || ""} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: e.target.value }; setFeatures(n); }} placeholder="https://youtube.com/... hoặc https://vr.i8studio.vn/..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                      {feat.mediaEmbedUrl && <MediaEmbedPreview url={feat.mediaEmbedUrl} className="mt-2" />}
+                      <label className="text-xs font-medium text-gray-500">Media (Video upload hoặc URL)</label>
+                      <div className="flex items-center gap-2">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-xs font-medium rounded cursor-pointer hover:bg-gray-700 transition-colors shrink-0">
+                          📹 Upload
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 200 * 1024 * 1024) { toast.error("File quá lớn"); return; }
+                              toast.info(`Uploading ${file.name}...`);
+                              const fd = new FormData();
+                              fd.append("file", file);
+                              try {
+                                const res = await fetch("/api/upload-video", { method: "POST", body: fd });
+                                const d = await res.json();
+                                if (d.url) {
+                                  const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: d.url }; setFeatures(n);
+                                  toast.success("Upload OK!");
+                                } else { toast.error(d.error || "Lỗi"); }
+                              } catch { toast.error("Lỗi upload"); }
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                        <input value={feat.mediaEmbedUrl || ""} onChange={(e) => { const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: e.target.value }; setFeatures(n); }} placeholder="/uploads/videos/xxx.mp4 hoặc URL..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      {feat.mediaEmbedUrl && (
+                        /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl) ? (
+                          <video src={feat.mediaEmbedUrl} controls muted className="w-full rounded border border-gray-200 max-h-[200px] object-contain bg-black mt-2" />
+                        ) : (
+                          <MediaEmbedPreview url={feat.mediaEmbedUrl} className="mt-2" />
+                        )
+                      )}
                     </div>
                   </div>
                 ))}
