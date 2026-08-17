@@ -52,6 +52,7 @@ export default function EditServicePage() {
   const [showDel, setShowDel] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [processWarnings, setProcessWarnings] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
@@ -161,36 +162,62 @@ export default function EditServicePage() {
           
           {/* Upload video button */}
           <div className="flex items-center gap-3">
-            <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-gray-800 transition-colors">
+            <label className={`inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-lg transition-colors ${uploadProgress !== null ? 'bg-gray-500 cursor-wait' : 'bg-gray-900 cursor-pointer hover:bg-gray-800'}`}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload Video
+              {uploadProgress !== null ? `Uploading... ${uploadProgress}%` : 'Upload Video'}
               <input
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 className="hidden"
-                onChange={async (e) => {
+                disabled={uploadProgress !== null}
+                onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
                   if (file.size > 200 * 1024 * 1024) { toast("File quá lớn (tối đa 200MB)", "error"); return; }
-                  toast(`Đang upload ${file.name}...`, "info");
+                  setUploadProgress(0);
                   const fd = new FormData();
                   fd.append("file", file);
-                  try {
-                    const res = await fetch("/api/upload-video", { method: "POST", body: fd });
-                    const data = await res.json();
-                    if (data.url) {
-                      set("mediaEmbedUrl", data.url);
-                      toast("Upload video thành công!", "success");
-                    } else {
-                      toast(data.error || "Upload thất bại", "error");
-                    }
-                  } catch { toast("Upload thất bại", "error"); }
+                  const xhr = new XMLHttpRequest();
+                  xhr.upload.onprogress = (ev) => {
+                    if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+                  };
+                  xhr.onload = () => {
+                    setUploadProgress(null);
+                    try {
+                      const data = JSON.parse(xhr.responseText);
+                      if (data.url) {
+                        set("mediaEmbedUrl", data.url);
+                        toast("Upload video thành công!", "success");
+                      } else {
+                        toast(data.error || "Upload thất bại", "error");
+                      }
+                    } catch { toast("Upload thất bại", "error"); }
+                  };
+                  xhr.onerror = () => { setUploadProgress(null); toast("Upload thất bại", "error"); };
+                  xhr.open("POST", "/api/upload-video");
+                  xhr.send(fd);
                   e.target.value = "";
                 }}
               />
             </label>
             <span className="text-xs text-gray-400">hoặc</span>
           </div>
+
+          {/* Progress bar */}
+          {uploadProgress !== null && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>Đang upload lên VPS...</span>
+                <span className="font-mono font-semibold">{uploadProgress}%</span>
+              </div>
+              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <Field form={form} set={set} k="mediaEmbedUrl" label="Media URL" placeholder="/uploads/videos/xxx.mp4 hoặc https://vr.i8studio.vn/360/..." />
           
@@ -274,27 +301,37 @@ export default function EditServicePage() {
                     <div className="space-y-2 border-t border-gray-200 pt-3">
                       <label className="text-xs font-medium text-gray-500">Media (Video upload hoặc URL)</label>
                       <div className="flex items-center gap-2">
-                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white text-xs font-medium rounded cursor-pointer hover:bg-gray-700 transition-colors shrink-0">
-                          📹 Upload
+                        <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded transition-colors shrink-0 ${uploadProgress !== null ? 'bg-gray-500 cursor-wait' : 'bg-gray-800 cursor-pointer hover:bg-gray-700'}`}>
+                          📹 {uploadProgress !== null ? `${uploadProgress}%` : 'Upload'}
                           <input
                             type="file"
                             accept="video/mp4,video/webm,video/quicktime"
                             className="hidden"
-                            onChange={async (e) => {
+                            disabled={uploadProgress !== null}
+                            onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
                               if (file.size > 200 * 1024 * 1024) { toast("File quá lớn", "error"); return; }
-                              toast(`Uploading ${file.name}...`, "info");
+                              setUploadProgress(0);
                               const fd = new FormData();
                               fd.append("file", file);
-                              try {
-                                const res = await fetch("/api/upload-video", { method: "POST", body: fd });
-                                const d = await res.json();
-                                if (d.url) {
-                                  const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: d.url }; setFeatures(n);
-                                  toast("Upload OK!", "success");
-                                } else { toast(d.error || "Lỗi", "error"); }
-                              } catch { toast("Lỗi upload", "error"); }
+                              const xhr = new XMLHttpRequest();
+                              xhr.upload.onprogress = (ev) => {
+                                if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+                              };
+                              xhr.onload = () => {
+                                setUploadProgress(null);
+                                try {
+                                  const d = JSON.parse(xhr.responseText);
+                                  if (d.url) {
+                                    const n = [...features]; n[i] = { ...n[i], mediaEmbedUrl: d.url }; setFeatures(n);
+                                    toast("Upload OK!", "success");
+                                  } else { toast(d.error || "Lỗi", "error"); }
+                                } catch { toast("Lỗi upload", "error"); }
+                              };
+                              xhr.onerror = () => { setUploadProgress(null); toast("Lỗi upload", "error"); };
+                              xhr.open("POST", "/api/upload-video");
+                              xhr.send(fd);
                               e.target.value = "";
                             }}
                           />
