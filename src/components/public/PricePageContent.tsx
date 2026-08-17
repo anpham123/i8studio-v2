@@ -157,24 +157,28 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                 whileInView="visible"
                 viewport={{ once: true }}
                 transition={{ delay: (i % 2) * 0.1 }}
-                className="group bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-lg transition-all duration-300"
+                className="group relative rounded-sm overflow-hidden hover:shadow-xl transition-all duration-300"
               >
-                {/* Card Image */}
-                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#1e1b14] to-[#2a2318]">
+                {/* Full background image */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b14] to-[#2a2318]">
                   {card.cardImage && (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={card.cardImage}
                       alt={title}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     />
                   )}
-                  {/* Dark overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                </div>
 
-                  {/* Service name badge */}
-                  <div className="absolute top-4 left-4">
-                    <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-sm">
+                {/* Dark gradient overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/75" />
+
+                {/* All content overlaid */}
+                <div className="relative z-10 flex flex-col justify-between min-h-[380px] sm:min-h-[420px] p-6 sm:p-7">
+                  {/* Top: Service name badge */}
+                  <div>
+                    <div className="inline-block bg-white/95 backdrop-blur-sm px-4 py-2 rounded-sm">
                       <h3 className="font-serif text-[15px] sm:text-[17px] font-medium text-[var(--ink)] leading-tight">
                         {card.titleEn}
                       </h3>
@@ -183,59 +187,59 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-6 sm:p-7">
-                  {/* Features */}
-                  <ul className="space-y-2.5 mb-6">
-                    {features.slice(0, 5).map((f, fi) => (
-                      <li key={fi} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-[var(--ink-light)] leading-[1.6]">
-                        <span className="text-[var(--accent)] mt-[1px] shrink-0 text-[13px]">◎</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Bottom: Features + Price + CTA */}
+                  <div>
+                    {/* Features */}
+                    <ul className="space-y-2 mb-6">
+                      {features.slice(0, 5).map((f, fi) => (
+                        <li key={fi} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-white/85 leading-[1.6]">
+                          <span className="text-[var(--accent)] mt-[1px] shrink-0 text-[13px]">◎</span>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
 
-                  {/* Price + CTA row */}
-                  <div className="flex items-end justify-between pt-5 border-t border-[var(--line)]">
-                    <div>
-                      {isAsk ? (
-                        <>
-                          <span className="font-display text-[28px] sm:text-[32px] font-bold text-[var(--ink)] tracking-tight leading-none">
-                            ASK
-                          </span>
-                          <p className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider mt-1">
-                            {isJa ? "お見積り" : "On request"}
-                          </p>
-                        </>
+                    {/* Price + CTA row */}
+                    <div className="flex items-end justify-between pt-4 border-t border-white/15">
+                      <div>
+                        {isAsk ? (
+                          <>
+                            <span className="font-display text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
+                              ASK
+                            </span>
+                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
+                              {isJa ? "お見積り" : "On request"}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-display text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
+                              {card.price}
+                            </span>
+                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
+                              {priceLabel}
+                            </p>
+                          </>
+                        )}
+                      </div>
+
+                      {card.slug ? (
+                        <Link
+                          href={`/${locale}/solution/${card.slug}`}
+                          className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                        >
+                          {isJa ? "詳細を見る" : "Details"} →
+                        </Link>
                       ) : (
-                        <>
-                          <span className="font-display text-[28px] sm:text-[32px] font-bold text-[var(--ink)] tracking-tight leading-none">
-                            {card.price}
-                          </span>
-                          <p className="text-[11px] text-[var(--ink-muted)] uppercase tracking-wider mt-1">
-                            {priceLabel}
-                          </p>
-                        </>
+                        <Link
+                          href={`/${locale}/contact`}
+                          className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                        >
+                          {isJa ? "お問い合わせ" : "Contact"} →
+                        </Link>
                       )}
                     </div>
-
-                    {card.slug ? (
-                      <Link
-                        href={`/${locale}/solution/${card.slug}`}
-                        className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
-                      >
-                        {isJa ? "詳細を見る" : "Details"} →
-                      </Link>
-                    ) : (
-                      <Link
-                        href={`/${locale}/contact`}
-                        className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
-                      >
-                        {isJa ? "お問い合わせ" : "Contact"} →
-                      </Link>
-                    )}
                   </div>
                 </div>
               </motion.div>
