@@ -298,19 +298,11 @@ export default function BeforeAfterSlider({
   if (fillContainer) {
     containerClass += " w-full h-full";
   } else if (autoAspect) {
-    // Cap: if portrait (ratio < 1), use 4/3 minimum so it stays landscape-friendly
-    let finalRatio = detectedRatio || "16/10";
-    if (detectedRatio) {
-      const [wStr, hStr] = detectedRatio.split("/");
-      const w = parseFloat(wStr);
-      const h = parseFloat(hStr);
-      if (w && h && w / h < 1) {
-        finalRatio = "4/3"; // cap portrait images to 4:3
-      }
-    }
-    containerStyle.aspectRatio = finalRatio;
+    containerStyle.aspectRatio = detectedRatio || "16/10";
     containerStyle.width = "100%";
     containerStyle.height = "auto";
+    containerStyle.maxHeight = "80vh";
+    containerStyle.margin = "0 auto";
   } else if (aspectRatio) {
     containerStyle.aspectRatio = aspectRatio;
     containerClass += " w-full";
