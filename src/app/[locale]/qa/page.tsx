@@ -39,7 +39,7 @@ export default async function QAPage({ params }: { params: { locale: string } })
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
         />
       )}
-      <QASection items={qaItems} locale={locale} />
+      <QASection items={qaItems} locale={locale} preview={false} />
     </div>
   );
 }
