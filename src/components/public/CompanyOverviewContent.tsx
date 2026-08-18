@@ -16,6 +16,8 @@ const DEFAULT_STATS = [
 const DEFAULT_MILESTONES = [
   {
     year: "2019",
+    yearJa: "2019年",
+    yearEn: "2019",
     titleJa: "i8 STUDIO 設立",
     titleEn: "i8 STUDIO Founded",
     descJa: "ベトナム・ダナンにて設立。日本市場向けの高品質3DCG制作を開始。",
@@ -23,6 +25,8 @@ const DEFAULT_MILESTONES = [
   },
   {
     year: "2020-2021",
+    yearJa: "2020〜2021年",
+    yearEn: "2020-2021",
     titleJa: "日本市場拡大",
     titleEn: "Japan Market Expansion",
     descJa: "日本の大手建築・不動産企業との取引を拡大。チームを30名に拡充。",
@@ -30,6 +34,8 @@ const DEFAULT_MILESTONES = [
   },
   {
     year: "2022-2023",
+    yearJa: "2022〜2023年",
+    yearEn: "2022-2023",
     titleJa: "技術革新",
     titleEn: "Technological Innovation",
     descJa: "VR/AR技術を導入。リアルタイムレンダリングとバーチャルステージングサービスを開始。",
@@ -37,6 +43,8 @@ const DEFAULT_MILESTONES = [
   },
   {
     year: "2024〜",
+    yearJa: "2024年〜",
+    yearEn: "2024-Present",
     titleJa: "グローバルパートナーシップ",
     titleEn: "Global Partnership",
     descJa: "80名体制に拡大。AI技術の活用でさらなる品質向上と効率化を実現。グローバル展開を加速。",
@@ -57,7 +65,9 @@ function buildStats(settings: Record<string, string>) {
 }
 
 interface MilestoneItem {
-  year: string;
+  year?: string;
+  yearJa?: string;
+  yearEn?: string;
   titleJa: string;
   titleEn: string;
   descJa: string;
@@ -184,7 +194,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                   {/* Content */}
                   <div className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pr-8 md:text-right" : "md:pl-8"}`}>
                     <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-[#b8935a] font-semibold">{ms.year}</span>
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-[#b8935a] font-semibold">{isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}</span>
                       <h3 className="text-lg font-medium text-[#111] mt-2 mb-2">
                         {isJa ? ms.titleJa : ms.titleEn}
                       </h3>
