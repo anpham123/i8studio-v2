@@ -28,22 +28,53 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero ──────────────────────────────────────────── */}
-      <section className="relative bg-[#111] overflow-hidden">
-        {data.heroImage ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-            <div className="absolute inset-0 bg-black/60" />
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
-        )}
-        <div className="relative max-w-5xl mx-auto px-6 py-28 md:py-36 text-center">
+      {/* ── Hero (full-viewport) ──────────────────────────── */}
+      <section className="relative h-screen min-h-[600px] max-h-[1200px] overflow-hidden flex items-center justify-center">
+        {/* Background: video or image */}
+        {(() => {
+          // Determine hero media: heroImage can be video or image
+          const heroSrc = data.heroImage || "";
+          const isHeroVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
+          // If no heroImage but mediaEmbedUrl is a direct video, use that
+          const mediaUrl = data.mediaEmbedUrl || "";
+          const isMediaVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl);
+          const useVideo = isHeroVideo ? heroSrc : (!heroSrc && isMediaVideo ? mediaUrl : null);
+          const useImage = !useVideo ? heroSrc : null;
+
+          return (
+            <>
+              {useVideo ? (
+                <video
+                  src={useVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : useImage ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={useImage}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
+              )}
+              {/* Dark gradient overlay for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70" />
+            </>
+          );
+        })()}
+
+        {/* Content overlay */}
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-6"
+            className="text-[11px] uppercase tracking-[0.3em] text-white/50 mb-6"
           >
             {title}
           </motion.p>
@@ -51,7 +82,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-tight mb-6"
+            className="text-4xl md:text-5xl lg:text-7xl font-light text-white leading-tight mb-6"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {heroTagline}
@@ -64,15 +95,31 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           >
             {heroDesc}
           </motion.p>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
               href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-sm font-semibold rounded-full hover:bg-white/90 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-sm font-semibold rounded-full hover:bg-white/90 transition-colors shadow-lg"
             >
               {isJa ? "無料相談する" : "Free Consultation"}
             </Link>
           </motion.div>
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        >
+          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-1.5 h-1.5 rounded-full bg-white/60"
+            />
+          </div>
+        </motion.div>
       </section>
 
       {/* ── Service-level Media Embed (VR360 / Video / 3D) ── */}
