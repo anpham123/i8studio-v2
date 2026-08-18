@@ -70,6 +70,7 @@ interface Props {
   overview?: Record<string, string>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function CompanyOverviewContent({ settings, milestones, overview: _overview }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";

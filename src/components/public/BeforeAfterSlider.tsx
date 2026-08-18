@@ -34,7 +34,9 @@ export default function BeforeAfterSlider({
   aspectRatio, // Keep optional for backward compatibility
   fillContainer = false,
   autoAspect = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maxHeight: _maxHeight = 600,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   preferHeightOverWidth: _preferHeightOverWidth = false,
 }: Props) {
   const finalBeforeImage = beforeImage || before || "";
@@ -47,19 +49,7 @@ export default function BeforeAfterSlider({
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const [detectedRatio, setDetectedRatio] = useState<string | null>(null);
-  const [_viewportRatio, setViewportRatio] = useState(1.6);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const updateRatio = () => {
-      const allowedW = window.innerWidth * 0.9;
-      const allowedH = window.innerHeight * 0.85;
-      setViewportRatio(allowedW / allowedH);
-    };
-    updateRatio();
-    window.addEventListener("resize", updateRatio);
-    return () => window.removeEventListener("resize", updateRatio);
-  }, []);
+  // viewportRatio removed — was unused
 
   // Aspect ratio check & warning + auto-detect ratio
   useEffect(() => {
