@@ -121,8 +121,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         {data.features.map((feat, i) => {
           const ftTitle = isJa ? feat.titleJa : feat.titleEn;
           const ftDesc = isJa ? feat.descJa : feat.descEn;
-          const embedUrl = feat.mediaEmbedUrl ? getEmbedUrl(feat.mediaEmbedUrl) : null;
+          const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl || "");
+          const embedUrl = feat.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(feat.mediaEmbedUrl) : null;
           const isBeforeAfter = feat.displayMode === "beforeAfter" && feat.imageBefore && feat.imageAfter;
+          const hasMedia = isDirectVideo || embedUrl || isBeforeAfter || feat.image;
           return (
             <motion.div
               key={i}
@@ -133,32 +135,30 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               className="flex flex-col gap-6"
             >
               {/* Visual — full width */}
-              {(embedUrl || isBeforeAfter || feat.image) && (
+              {hasMedia && (
               <div className="w-full rounded-2xl overflow-hidden">
-                {embedUrl ? (
-                  /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl || "") ? (
-                    <div className="aspect-video rounded-2xl overflow-hidden">
-                      <video
-                        src={feat.mediaEmbedUrl}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        controls
-                        className="w-full h-full object-cover bg-black"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-video rounded-2xl overflow-hidden">
-                      <iframe
-                        src={embedUrl}
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
-                        title={ftTitle}
-                      />
-                    </div>
-                  )
+                {isDirectVideo ? (
+                  <div className="aspect-video rounded-2xl overflow-hidden">
+                    <video
+                      src={feat.mediaEmbedUrl}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      controls
+                      className="w-full h-full object-cover bg-black"
+                    />
+                  </div>
+                ) : embedUrl ? (
+                  <div className="aspect-video rounded-2xl overflow-hidden">
+                    <iframe
+                      src={embedUrl}
+                      className="w-full h-full border-0"
+                      allowFullScreen
+                      allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                      title={ftTitle}
+                    />
+                  </div>
                 ) : isBeforeAfter ? (
                   <div className="w-full rounded-2xl overflow-hidden">
                     <BeforeAfterSlider
