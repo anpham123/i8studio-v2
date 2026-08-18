@@ -264,41 +264,40 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                       className="fixed left-0 right-0 top-full mt-0 z-50"
                       style={{ top: headerHeight }}
                     >
-                      <div className="bg-[#111] border-t border-white/10">
-                        <div className="max-w-6xl mx-auto px-8 py-10">
+                      <div className="bg-white border-t border-gray-200 shadow-xl">
+                        <div className="max-w-7xl mx-auto px-8 py-10">
                           {/* Header */}
                           <div className="flex items-center gap-3 mb-8">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/40">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
                               SERVICE
                             </span>
-                            <span className="flex-1 h-px bg-white/10" />
+                            <span className="flex-1 h-px bg-gray-200" />
                           </div>
 
-                          {/* 3x3 Grid */}
-                          <div className="grid grid-cols-3 gap-4">
+                          {/* 4-col Grid */}
+                          <div className="grid grid-cols-4 gap-4">
                             {link.children.map((child) => (
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                className="group flex items-center gap-4 p-3 rounded-lg transition-all duration-200 hover:bg-white/8"
+                                className="group flex items-center gap-4 p-4 rounded-xl transition-all duration-200 hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
                               >
                                 {/* Thumbnail */}
-                                <div className="w-[72px] h-[50px] rounded-md overflow-hidden bg-white/5 shrink-0 border border-white/10">
+                                <div className="w-[80px] h-[56px] rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                   {child.thumbnail ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                       src={child.thumbnail}
                                       alt={child.label}
-                                      className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-200"
+                                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-200"
                                       onError={(e) => {
-                                        // Fallback: show label initial on error
                                         const target = e.currentTarget;
                                         target.style.display = "none";
                                         const parent = target.parentElement;
                                         if (parent) {
                                           parent.classList.add("flex", "items-center", "justify-center");
                                           const span = document.createElement("span");
-                                          span.className = "text-white/30 text-[11px] font-medium";
+                                          span.className = "text-gray-400 text-[11px] font-medium";
                                           span.textContent = child.label.slice(0, 2);
                                           parent.appendChild(span);
                                         }
@@ -306,7 +305,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                      <span className="text-white/30 text-[11px] font-medium">
+                                      <span className="text-gray-400 text-[11px] font-medium">
                                         {child.label.slice(0, 2)}
                                       </span>
                                     </div>
@@ -314,7 +313,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                 </div>
 
                                 {/* Label */}
-                                <span className="text-[13px] font-medium text-white/60 group-hover:text-white transition-colors duration-200 leading-tight">
+                                <span className="text-[13px] font-medium text-gray-600 group-hover:text-[#111] transition-colors duration-200 leading-tight">
                                   {child.label}
                                 </span>
                               </Link>
@@ -322,10 +321,10 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           </div>
 
                           {/* View All link */}
-                          <div className="mt-8 pt-6 border-t border-white/10 text-right">
+                          <div className="mt-8 pt-6 border-t border-gray-200 text-right">
                             <Link
                               href={link.href}
-                              className="inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.15em] text-white/40 hover:text-white transition-colors"
+                              className="inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.15em] text-gray-400 hover:text-[#111] transition-colors"
                             >
                               View All Services →
                             </Link>
