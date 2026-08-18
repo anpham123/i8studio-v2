@@ -44,6 +44,7 @@ export const ServiceSchema = z.object({
   order: z.number().int().optional().default(0),
   isPublished: z.boolean().optional().default(true),
   heroImage: z.string().optional().default(""),
+  heroVideo: z.string().optional().default(""),
   featuresJson: z.string().optional().default("[]"),
   heroTaglineJa: z.string().optional().default(""),
   heroTaglineEn: z.string().optional().default(""),

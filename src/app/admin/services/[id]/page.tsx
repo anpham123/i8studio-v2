@@ -153,6 +153,81 @@ export default function EditServicePage() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
           <ImageUpload label="Ảnh dịch vụ (thumbnail)" value={String(form.image || "")} onChange={(url) => set("image", url)} />
           <ImageUpload label="Ảnh hero (trang chi tiết)" value={String(form.heroImage || "")} onChange={(url) => set("heroImage", url)} />
+          
+          {/* Hero Video */}
+          <div className="space-y-3 border-t border-gray-100 pt-4">
+            <h4 className="text-sm font-semibold text-gray-700">🎬 Hero Video (tự động phát khi mở trang)</h4>
+            <p className="text-xs text-gray-400">Upload video MP4/WebM để hiển thị làm background hero. Video sẽ autoplay, muted, loop.</p>
+            <div className="flex items-center gap-3">
+              <label className={`inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-lg transition-colors ${uploadProgress !== null ? 'bg-gray-500 cursor-wait' : 'bg-gray-900 cursor-pointer hover:bg-gray-800'}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                {uploadProgress !== null ? `Uploading... ${uploadProgress}%` : 'Upload Hero Video'}
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  className="hidden"
+                  disabled={uploadProgress !== null}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 200 * 1024 * 1024) { toast("File quá lớn (tối đa 200MB)", "error"); return; }
+                    setUploadProgress(0);
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const xhr = new XMLHttpRequest();
+                    xhr.upload.onprogress = (ev) => {
+                      if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+                    };
+                    xhr.onload = () => {
+                      setUploadProgress(null);
+                      try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.url) {
+                          set("heroVideo", data.url);
+                          toast("Upload hero video thành công!", "success");
+                        } else {
+                          toast(data.error || "Upload thất bại", "error");
+                        }
+                      } catch { toast("Upload thất bại", "error"); }
+                    };
+                    xhr.onerror = () => { setUploadProgress(null); toast("Upload thất bại", "error"); };
+                    xhr.open("POST", "/api/upload-video");
+                    xhr.send(fd);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <span className="text-xs text-gray-400">hoặc nhập URL</span>
+            </div>
+            {uploadProgress !== null && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Đang upload...</span>
+                  <span className="font-mono font-semibold">{uploadProgress}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              </div>
+            )}
+            <Field form={form} set={set} k="heroVideo" label="Hero Video URL" placeholder="/uploads/videos/hero.mp4" />
+            {String(form.heroVideo || "").length > 0 && (
+              <div className="relative">
+                <video
+                  src={String(form.heroVideo)}
+                  controls
+                  muted
+                  className="w-full rounded-lg border border-gray-200 max-h-[200px] object-contain bg-black"
+                />
+                <button
+                  onClick={() => set("heroVideo", "")}
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Media Embed URL (Issue 1) ── */}

@@ -66,6 +66,7 @@ model Service {
   order         Int      @default(0)
   isPublished   Boolean  @default(true)
   heroImage     String   @default("")
+  heroVideo     String   @default("")    // Hero background video (mp4/webm) — autoplay on page load
   featuresJson  String   @default("[]")  // JSON array of {titleJa,titleEn,descJa,descEn,image,mediaEmbedUrl?,displayMode?,imageBefore?,imageAfter?}
   mediaEmbedUrl String   @default("")    // Service-level embed URL (video/VR360/3D)
 

@@ -7,6 +7,7 @@ export interface SolutionService {
   titleJa: string;
   titleEn: string;
   heroImage: string;
+  heroVideo: string;
   heroTaglineJa: string;
   heroTaglineEn: string;
   heroDescJa: string;
@@ -86,6 +87,7 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     titleJa: (db.nameJa as string) || "",
     titleEn: (db.name as string) || "",
     heroImage: (db.heroImage as string) || "",
+    heroVideo: (db.heroVideo as string) || "",
     heroTaglineJa: (db.heroTaglineJa as string) || "",
     heroTaglineEn: (db.heroTaglineEn as string) || "",
     heroDescJa: (db.heroDescJa as string) || "",

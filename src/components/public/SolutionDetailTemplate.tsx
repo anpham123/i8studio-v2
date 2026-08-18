@@ -32,13 +32,16 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="relative h-screen min-h-[600px] max-h-[1200px] overflow-hidden flex items-center justify-center">
         {/* Background: video or image */}
         {(() => {
-          // Determine hero media: heroImage can be video or image
+          // Priority: heroVideo > heroImage (if video) > mediaEmbedUrl (if video) > heroImage (as image)
+          const heroVideoUrl = data.heroVideo || "";
           const heroSrc = data.heroImage || "";
-          const isHeroVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
-          // If no heroImage but mediaEmbedUrl is a direct video, use that
+          const isHeroImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
           const mediaUrl = data.mediaEmbedUrl || "";
           const isMediaVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl);
-          const useVideo = isHeroVideo ? heroSrc : (!heroSrc && isMediaVideo ? mediaUrl : null);
+          
+          const useVideo = heroVideoUrl
+            || (isHeroImageVideo ? heroSrc : null)
+            || (!heroSrc && isMediaVideo ? mediaUrl : null);
           const useImage = !useVideo ? heroSrc : null;
 
           return (
