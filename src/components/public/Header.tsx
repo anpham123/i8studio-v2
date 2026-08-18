@@ -275,15 +275,15 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           </div>
 
                           {/* 4-col Grid */}
-                          <div className="grid grid-cols-4 gap-4">
+                          <div className="grid grid-cols-4 gap-5">
                             {link.children.map((child) => (
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                className="group flex items-center gap-4 p-4 rounded-xl transition-all duration-200 hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
+                                className="group flex items-center gap-5 p-4 rounded-xl transition-all duration-200 hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
                               >
                                 {/* Thumbnail */}
-                                <div className="w-[80px] h-[56px] rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                   {child.thumbnail ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
@@ -313,7 +313,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                 </div>
 
                                 {/* Label */}
-                                <span className="text-[13px] font-medium text-gray-600 group-hover:text-[#111] transition-colors duration-200 leading-tight">
+                                <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111] transition-colors duration-200 leading-tight">
                                   {child.label}
                                 </span>
                               </Link>
