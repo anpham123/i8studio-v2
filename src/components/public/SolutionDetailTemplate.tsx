@@ -133,6 +133,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               className="flex flex-col gap-6"
             >
               {/* Visual — full width */}
+              {(embedUrl || isBeforeAfter || feat.image) && (
               <div className="w-full rounded-2xl overflow-hidden">
                 {embedUrl ? (
                   /\.(mp4|webm|mov)(\?|$)/i.test(feat.mediaEmbedUrl || "") ? (
@@ -168,7 +169,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                       autoAspect={true}
                     />
                   </div>
-                ) : (
+                ) : feat.image ? (
                   <div className="w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -180,17 +181,14 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                         target.style.display = "none";
                         const parent = target.parentElement;
                         if (parent) {
-                          parent.classList.add("bg-gradient-to-br", "from-gray-200", "via-gray-100", "to-gray-200", "flex", "items-center", "justify-center", "rounded-2xl", "aspect-video");
-                          const span = document.createElement("span");
-                          span.className = "text-gray-400 text-sm font-medium text-center px-4";
-                          span.textContent = ftTitle;
-                          parent.appendChild(span);
+                          parent.style.display = "none";
                         }
                       }}
                     />
                   </div>
-                )}
+                ) : null}
               </div>
+              )}
               {/* Text — below media */}
               <div className="max-w-3xl">
                 <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-3 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
