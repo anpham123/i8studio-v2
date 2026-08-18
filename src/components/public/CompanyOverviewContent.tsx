@@ -70,7 +70,7 @@ interface Props {
   overview?: Record<string, string>;
 }
 
-export default function CompanyOverviewContent({ settings, milestones, overview }: Props) {
+export default function CompanyOverviewContent({ settings, milestones, overview: _overview }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
   const STATS = buildStats(settings);

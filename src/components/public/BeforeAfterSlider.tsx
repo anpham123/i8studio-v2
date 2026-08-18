@@ -34,8 +34,8 @@ export default function BeforeAfterSlider({
   aspectRatio, // Keep optional for backward compatibility
   fillContainer = false,
   autoAspect = false,
-  maxHeight = 600,
-  preferHeightOverWidth = false,
+  maxHeight: _maxHeight = 600,
+  preferHeightOverWidth: _preferHeightOverWidth = false,
 }: Props) {
   const finalBeforeImage = beforeImage || before || "";
   const finalAfterImage = afterImage || after || "";
@@ -47,7 +47,7 @@ export default function BeforeAfterSlider({
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const [detectedRatio, setDetectedRatio] = useState<string | null>(null);
-  const [viewportRatio, setViewportRatio] = useState(1.6);
+  const [_viewportRatio, setViewportRatio] = useState(1.6);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
