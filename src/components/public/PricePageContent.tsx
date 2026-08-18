@@ -142,7 +142,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
 
       {/* ── Service Grid ──────────────────────────────── */}
       <section className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-14 sm:pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
             const title = isJa ? card.titleJa : card.titleEn;
             const features = isJa ? (card.featuresJa.length > 0 ? card.featuresJa : card.features) : card.features;
