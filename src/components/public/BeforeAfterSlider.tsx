@@ -362,14 +362,20 @@ export default function BeforeAfterSlider({
         )}
       </div>
 
-      {/* Labels */}
+      {/* Labels — fade out when slider covers them */}
       {beforeLabel && (
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wider text-[#111] pointer-events-none z-10">
+        <div
+          className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wider text-[#111] pointer-events-none z-10 transition-opacity duration-200"
+          style={{ opacity: position > 85 ? 0 : position > 75 ? (85 - position) / 10 : 1 }}
+        >
           {beforeLabel}
         </div>
       )}
       {afterLabel && (
-        <div className="absolute top-4 right-4 bg-[#111]/85 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wider text-white pointer-events-none z-10">
+        <div
+          className="absolute top-4 right-4 bg-[#111]/85 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium tracking-wider text-white pointer-events-none z-10 transition-opacity duration-200"
+          style={{ opacity: position < 15 ? 0 : position < 25 ? (position - 15) / 10 : 1 }}
+        >
           {afterLabel}
         </div>
       )}
