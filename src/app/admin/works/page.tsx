@@ -183,21 +183,23 @@ export default function WorksPage() {
       render: (v, row) => (
         <input
           type="number"
-          value={row.order}
-          onChange={(e) => {
-            const val = parseInt(e.target.value) || 0;
-            setData((prev) => prev.map((w) => w.id === row.id ? { ...w, order: val } : w));
-          }}
+          key={`${row.id}-${row.order}`}
+          defaultValue={row.order}
           onBlur={async (e) => {
             const val = parseInt(e.target.value) || 0;
+            if (val === row.order) return; // no change
             const res = await fetch(`/api/works/${row.id}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ order: val }),
             });
             const json = await res.json();
-            if (json.data) toast("Đã cập nhật thứ tự", "success");
-            else toast("Lỗi khi cập nhật", "error");
+            if (json.data) {
+              setData((prev) => prev.map((w) => w.id === row.id ? { ...w, order: val } : w));
+              toast("Đã cập nhật thứ tự", "success");
+            } else {
+              toast("Lỗi khi cập nhật", "error");
+            }
           }}
           className="w-16 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400 bg-white"
         />
