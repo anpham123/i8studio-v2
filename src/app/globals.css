@@ -200,19 +200,6 @@ main {
   color: #111;
 }
 
-/* ── Smooth image fade-in ───────────────────────────────── */
-img[loading="lazy"] {
-  opacity: 0;
-  transition: opacity 0.4s ease-out;
-}
-img[loading="lazy"].loaded,
-img[loading="lazy"][complete] {
-  opacity: 1;
-}
-/* Eager images should always be visible */
-img:not([loading="lazy"]) {
-  opacity: 1;
-}
 
 /* ── Focus ring (accessibility) ─────────────────────────── */
 :focus-visible {
