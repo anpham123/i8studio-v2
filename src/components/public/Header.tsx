@@ -47,6 +47,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   const [mobileOpen, setMobileOpen]             = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu]   = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded]     = useState<string | null>(null);
+  const [scrollHidden, setScrollHidden]         = useState(false);
   const t        = useTranslations("nav");
   const locale   = useLocale();
   const pathname = usePathname();
@@ -109,6 +110,31 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
     setMobileOpen(false);
     setMobileExpanded(null);
   }, [pathname]);
+
+  /* ---- hide/show header on scroll direction ---- */
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        // Always show when near top or when dropdown/mobile menu is open
+        if (currentY < 100 || openDesktopMenu || mobileOpen) {
+          setScrollHidden(false);
+        } else if (currentY > lastY + 5) {
+          setScrollHidden(true);  // scrolling down
+        } else if (currentY < lastY - 5) {
+          setScrollHidden(false); // scrolling up
+        }
+        lastY = currentY;
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [openDesktopMenu, mobileOpen]);
 
   /* ---- nav data ---- */
   const navLinks: NavItem[] = [
@@ -191,16 +217,18 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
     <motion.header
       ref={navRef}
       className="fixed top-0 left-0 right-0 z-[100]"
-      animate={
-        transparent
+      animate={{
+        ...(transparent
           ? { backgroundColor: "rgba(255,255,255,0)", backdropFilter: "blur(0px)", boxShadow: "none" }
-          : { backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)", boxShadow: "0 1px 24px rgba(0,0,0,0.07)" }
-      }
-      transition={
-        transparent
+          : { backgroundColor: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)", boxShadow: "0 1px 24px rgba(0,0,0,0.07)" }),
+        y: scrollHidden ? -headerHeight : 0,
+      }}
+      transition={{
+        ...(transparent
           ? { duration: 0 }
-          : { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
-      }
+          : { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }),
+        y: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] },
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between" style={{ height: headerHeight }}>

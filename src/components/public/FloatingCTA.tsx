@@ -34,7 +34,7 @@ export default function FloatingCTA() {
       >
         <Link
           href={`/${locale}/contact`}
-          className="bg-black/75 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md flex items-center gap-2 px-6 py-3 rounded-full shadow-lg shadow-black/10 transition-all duration-300 font-medium"
+          className="bg-black/75 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md flex items-center gap-2 px-6 py-3 rounded-full shadow-lg shadow-black/10 transition-all duration-300 font-medium hover:scale-105 active:scale-95"
         >
           <MessageSquare size={16} />
           {t("getQuote")}

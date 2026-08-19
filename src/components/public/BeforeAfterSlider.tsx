@@ -328,7 +328,7 @@ export default function BeforeAfterSlider({
       />
 
       {/* BEFORE image (top layer, clipped by position) */}
-      <div className="absolute inset-0" style={clipStyle}>
+      <div className="absolute inset-0" style={{ ...clipStyle, willChange: 'clip-path' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={finalBeforeImage}
@@ -344,9 +344,8 @@ export default function BeforeAfterSlider({
         style={lineStyle}
       />
 
-      {/* Draggable handle */}
       <div
-        className="absolute w-11 h-11 rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.25)] flex items-center justify-center pointer-events-none border border-white/80 z-20"
+        className={`absolute w-11 h-11 rounded-full bg-white flex items-center justify-center pointer-events-none border border-white/80 z-20 transition-shadow duration-300 ${!hasInteracted ? 'handle-glow' : 'shadow-[0_2px_12px_rgba(0,0,0,0.25)]'}`}
         style={handleStyle}
       >
         {isHorizontal ? (

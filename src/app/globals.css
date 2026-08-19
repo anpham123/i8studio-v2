@@ -189,3 +189,49 @@ main {
     cursor: auto !important;
   }
 }
+
+/* ── Brand selection color ──────────────────────────────── */
+::selection {
+  background: rgba(184, 147, 90, 0.25);
+  color: #111;
+}
+::-moz-selection {
+  background: rgba(184, 147, 90, 0.25);
+  color: #111;
+}
+
+/* ── Smooth image fade-in ───────────────────────────────── */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+img[loading="lazy"].loaded,
+img[loading="lazy"][complete] {
+  opacity: 1;
+}
+/* Eager images should always be visible */
+img:not([loading="lazy"]) {
+  opacity: 1;
+}
+
+/* ── Focus ring (accessibility) ─────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent, #b8935a);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Content visibility for below-fold sections ─────────── */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+/* ── BeforeAfter handle glow ────────────────────────────── */
+@keyframes handle-pulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+  50%      { box-shadow: 0 2px 20px rgba(184,147,90,0.5), 0 0 0 6px rgba(184,147,90,0.15); }
+}
+.handle-glow {
+  animation: handle-pulse 2s ease-in-out infinite;
+}
