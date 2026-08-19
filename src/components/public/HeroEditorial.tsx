@@ -46,7 +46,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
+    { flex: 1, aspect: "21/9" },
   ],
   [
     { flex: 1, aspect: "16/9" },
@@ -77,7 +77,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
+    { flex: 1, aspect: "21/9" },
   ],
   [
     { flex: 1, aspect: "16/9" },
@@ -108,7 +108,7 @@ const MASONRY_ROWS = [
     { flex: 1, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "21/9", maxHeight: "70vh" },
+    { flex: 1, aspect: "21/9" },
   ],
   [
     { flex: 1, aspect: "16/9" },
