@@ -48,6 +48,7 @@ model Work {
   videoUrl         String   @default("")           // YouTube embed URL
   vrUrl            String   @default("")           // VR360 iframe URL (e.g. https://vr.i8studio.vn/360/...)
   order            Int      @default(0)
+  homeOrder        Int      @default(0)           // Thứ tự riêng trên trang chủ
   featured         Boolean  @default(false)
   createdAt        DateTime @default(now())
 }

@@ -30,7 +30,7 @@ const buildingCategoryMap: Record<string, string> = {
   commercial: "Commercial", office: "Office", public: "Public Facility", urban: "Urban Development",
 };
 
-interface Work { id: string; title: string; category: string; type?: string; buildingCategory?: string; order: number; featured: boolean; image: string; }
+interface Work { id: string; title: string; category: string; type?: string; buildingCategory?: string; order: number; homeOrder: number; featured: boolean; image: string; }
 
 /* ------------------------------------------------------------------ */
 /*  Sliding pill tab bar                                                */
@@ -197,6 +197,33 @@ export default function WorksPage() {
             if (json.data) {
               setData((prev) => prev.map((w) => w.id === row.id ? { ...w, order: val } : w));
               toast("Đã cập nhật thứ tự", "success");
+            } else {
+              toast("Lỗi khi cập nhật", "error");
+            }
+          }}
+          className="w-16 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400 bg-white"
+        />
+      ),
+    },
+    {
+      key: "homeOrder", label: "TT Trang chủ", sortable: true,
+      render: (v, row) => (
+        <input
+          type="number"
+          key={`home-${row.id}-${row.homeOrder}`}
+          defaultValue={row.homeOrder}
+          onBlur={async (e) => {
+            const val = parseInt(e.target.value) || 0;
+            if (val === row.homeOrder) return;
+            const res = await fetch(`/api/works/${row.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ homeOrder: val }),
+            });
+            const json = await res.json();
+            if (json.data) {
+              setData((prev) => prev.map((w) => w.id === row.id ? { ...w, homeOrder: val } : w));
+              toast("Đã cập nhật TT trang chủ", "success");
             } else {
               toast("Lỗi khi cập nhật", "error");
             }
