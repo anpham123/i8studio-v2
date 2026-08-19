@@ -21,7 +21,7 @@ export async function generateMetadata({
 }
 
 export default async function WorksPage() {
-  const works = await prisma.work.findMany({ orderBy: { order: "asc" } });
+  const works = await prisma.work.findMany({ orderBy: [{ order: "asc" }, { createdAt: "desc" }] });
   const settings = await prisma.setting.findMany();
 
   const settingsMap = settings.reduce((acc, curr) => {

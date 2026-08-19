@@ -35,7 +35,7 @@ export default async function HomePage() {
   // Fetch works for hero masonry grid (ordered by admin-set order)
   const works = await prisma.work.findMany({
     where: { image: { not: "" } },
-    orderBy: { order: "asc" },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     take: limit,
     select: { id: true, title: true, image: true },
   });
