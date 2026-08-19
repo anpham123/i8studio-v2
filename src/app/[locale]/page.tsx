@@ -32,9 +32,9 @@ export default async function HomePage() {
   });
   const limit = limitSetting ? (parseInt(limitSetting.value) || 11) : 11;
 
-  // Fetch works for hero masonry grid (ordered by admin-set order)
+  // Fetch featured works for hero masonry grid
   const works = await prisma.work.findMany({
-    where: { image: { not: "" } },
+    where: { image: { not: "" }, featured: true },
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     take: limit,
     select: { id: true, title: true, image: true },
