@@ -200,19 +200,23 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   });
 
   const textY = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const gridY = useTransform(scrollYProgress, [0, 1], [0, -30]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+
+  // Hero image = first image, masonry uses the rest
+  const heroImage = images[0];
+  const masonryImages = images.slice(1);
 
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
 
-  // Determine active rows dynamically by summing cumulative items until we reach limit
+  // Determine active rows dynamically (limit - 1 because hero uses 1 image)
+  const masonryLimit = Math.max(0, limit - 1);
   let cumulativeItems = 0;
   let rowCount = 0;
   for (let i = 0; i < MASONRY_ROWS.length; i++) {
     cumulativeItems += MASONRY_ROWS[i].length;
     rowCount = i + 1;
-    if (cumulativeItems >= limit) {
+    if (cumulativeItems >= masonryLimit) {
       break;
     }
   }
@@ -220,44 +224,77 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
 
   return (
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
-      {/* ========== TEXT ========== */}
-      <motion.div
-        className="max-w-[800px] mx-auto text-center pt-[20px] pb-[16px] px-6"
-        style={{ y: textY, opacity: textOpacity }}
-      >
-        <motion.h1
-          className="font-serif text-[28px] sm:text-[32px] md:text-[36px] font-normal text-[#111] tracking-[0.05em] leading-[1.2] mb-1"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-        >
-          {t("hero.title")}
-        </motion.h1>
+      {/* ========== FULL-VIEWPORT HERO ========== */}
+      <div className="relative w-full" style={{ height: 'calc(100vh - var(--header-h, 76px))' }}>
+        {/* Hero image */}
+        {heroImage?.url ? (
+          <motion.img
+            src={heroImage.url}
+            alt={heroImage.alt}
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#c8c2b8]" />
+        )}
 
-        <motion.p
-          className="font-serif text-[14px] sm:text-[15px] md:text-[16px] font-light text-[#555] tracking-[0.08em] mb-2"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-        >
-          {t("hero.subtitle")}
-        </motion.p>
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
-        <motion.p
-          className="text-[11px] sm:text-[12px] text-[#888] leading-[1.6] max-w-[560px] mx-auto whitespace-pre-line"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+        {/* Text overlay */}
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-end pb-16 sm:pb-20 px-6 text-center z-10"
+          style={{ y: textY, opacity: textOpacity }}
         >
-          {t("hero.description")}
-        </motion.p>
-      </motion.div>
+          <motion.h1
+            className="font-serif text-[32px] sm:text-[40px] md:text-[48px] font-normal text-white tracking-[0.05em] leading-[1.15] mb-3 drop-shadow-lg"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            {t("hero.title")}
+          </motion.h1>
+
+          <motion.p
+            className="font-serif text-[14px] sm:text-[16px] md:text-[18px] font-light text-white/85 tracking-[0.08em] mb-3 drop-shadow-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            {t("hero.subtitle")}
+          </motion.p>
+
+          <motion.p
+            className="text-[11px] sm:text-[12px] text-white/65 leading-[1.6] max-w-[560px] whitespace-pre-line drop-shadow-sm"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            {t("hero.description")}
+          </motion.p>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+        >
+          <motion.div
+            className="w-5 h-8 rounded-full border-2 border-white/40 flex items-start justify-center p-1"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+          >
+            <div className="w-1 h-2 rounded-full bg-white/60" />
+          </motion.div>
+        </motion.div>
+      </div>
 
       {/* ========== MASONRY GRID ========== */}
-      <motion.div
-        className="w-full px-0 pb-4"
-        style={{ y: gridY }}
-      >
+      <div className="w-full px-0 py-2">
         <div className="flex flex-col gap-2">
           {activeRows.map((row, rowIdx) => {
             const rowItems = row.map((item) => {
@@ -275,7 +312,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
                     style={{ flex: item.flex, minWidth: 0 }}
                   >
                     <GridTile
-                      image={images[item.tileIdx]}
+                      image={masonryImages[item.tileIdx]}
                       index={item.tileIdx}
                       fallbackColor={PLACEHOLDER_COLORS[item.tileIdx % PLACEHOLDER_COLORS.length]}
                       aspect={item.aspect}
@@ -287,7 +324,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             );
           })}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
+
