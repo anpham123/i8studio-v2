@@ -225,7 +225,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   return (
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
       {/* ========== FULL-VIEWPORT HERO ========== */}
-      <div className="relative w-full" style={{ height: 'calc(100vh - var(--header-h, 76px))' }}>
+      <div className="relative w-full px-3 pt-3" style={{ height: 'calc(100vh - var(--header-h, 76px))' }}>
+        <div className="relative w-full h-full rounded-[6px] overflow-hidden">
         {/* Hero image */}
         {heroImage?.url ? (
           <motion.img
@@ -291,10 +292,11 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             <div className="w-1 h-2 rounded-full bg-white/60" />
           </motion.div>
         </motion.div>
+        </div>
       </div>
 
       {/* ========== MASONRY GRID ========== */}
-      <div className="w-full px-0 py-2">
+      <div className="w-full px-3 py-2">
         <div className="flex flex-col gap-2">
           {activeRows.map((row, rowIdx) => {
             const rowItems = row.map((item) => {
