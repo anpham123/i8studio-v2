@@ -7,7 +7,7 @@ import {
   LayoutDashboard, FileText, Image, Wrench, Layers,
   BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
-  Tag, DollarSign, Building2,
+  Tag, DollarSign, Building2, Home,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -40,6 +40,7 @@ const menuGroups: MenuGroup[] = [
       { href: "/admin/posts", label: "Bài đăng", icon: FileText },
       { href: "/admin/blog-posts", label: "Blog Posts", icon: BookOpen },
       { href: "/admin/blog-categories", label: "Blog Categories", icon: Tag },
+      { href: "/admin/homepage", label: "Trang chủ", icon: Home },
       { href: "/admin/works", label: "Works", icon: Image },
       { href: "/admin/flipbooks", label: "Portfolio", icon: BookOpenCheck },
     ],

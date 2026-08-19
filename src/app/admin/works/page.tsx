@@ -205,61 +205,6 @@ export default function WorksPage() {
         />
       ),
     },
-    {
-      key: "homeOrder", label: "TT Trang chủ", sortable: true,
-      render: (v, row) => (
-        <input
-          type="number"
-          key={`home-${row.id}-${row.homeOrder}`}
-          defaultValue={row.homeOrder}
-          onBlur={async (e) => {
-            const val = parseInt(e.target.value) || 0;
-            if (val === row.homeOrder) return;
-            const res = await fetch(`/api/works/${row.id}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ homeOrder: val }),
-            });
-            const json = await res.json();
-            if (json.data) {
-              setData((prev) => prev.map((w) => w.id === row.id ? { ...w, homeOrder: val } : w));
-              toast("Đã cập nhật TT trang chủ", "success");
-            } else {
-              toast("Lỗi khi cập nhật", "error");
-            }
-          }}
-          className="w-16 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-400 bg-white"
-        />
-      ),
-    },
-    {
-      key: "featured", label: "Nổi bật", sortable: true,
-      render: (v, row) => (
-        <div className="flex items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={Boolean(row.featured)}
-            onChange={async (e) => {
-              const checked = e.target.checked;
-              setData((prev) => prev.map((w) => w.id === row.id ? { ...w, featured: checked } : w));
-              const res = await fetch(`/api/works/${row.id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ featured: checked }),
-              });
-              const json = await res.json();
-              if (json.data) toast("Đã cập nhật nổi bật", "success");
-              else {
-                toast("Lỗi khi cập nhật", "error");
-                setData((prev) => prev.map((w) => w.id === row.id ? { ...w, featured: !checked } : w));
-              }
-            }}
-            className="rounded border-gray-300 h-4 w-4 text-blue-600 focus:ring-blue-500 cursor-pointer"
-          />
-          {row.featured && <span className="text-[10px] text-amber-500 font-semibold">★</span>}
-        </div>
-      ),
-    },
   ];
 
   return (
