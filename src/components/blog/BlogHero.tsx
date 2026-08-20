@@ -52,11 +52,11 @@ export default function BlogHero({
       </div>
 
       {/* Title section BELOW image */}
-      <div className="bg-[var(--surface)] py-16 sm:py-20">
-        <div className="max-w-[900px] mx-auto px-6 sm:px-10">
+      <div className="bg-[var(--surface)] pt-10 sm:pt-14 pb-2 sm:pb-4">
+        <div className="max-w-[760px] mx-auto px-6 sm:px-10">
           {/* Category */}
           {category && (
-            <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-6">
+            <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-4">
               <span className="opacity-60 text-[var(--ink-muted)]">{categoryLabel}</span>
               <span className="ml-3">{category}</span>
             </div>
