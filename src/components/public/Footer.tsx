@@ -77,10 +77,10 @@ export default function Footer({ settings }: FooterProps) {
                 <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
               )}
             </Link>
-            <p className="text-gray-500 text-sm leading-relaxed mb-5">
+            <p className="text-gray-600 text-[15px] sm:text-[16px] leading-relaxed mb-6">
               {t("tagline")}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               {SOCIAL.map(({ key, Icon, label }) => {
                 const raw = settings[key];
                 const url = raw && !raw.startsWith("http") ? `https://${raw}` : raw;
@@ -91,9 +91,9 @@ export default function Footer({ settings }: FooterProps) {
                     target={url ? "_blank" : undefined}
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                       url
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900"
+                        ? "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900"
                         : "bg-gray-50 text-gray-200 cursor-default"
                     }`}
                   >
@@ -106,15 +106,15 @@ export default function Footer({ settings }: FooterProps) {
 
           {/* Col 2: Navigation */}
           <div>
-            <h4 className="text-gray-900 font-semibold text-sm mb-4 uppercase tracking-widest text-xs">
+            <h4 className="text-gray-900 font-bold text-sm sm:text-[15px] mb-5 uppercase tracking-wider">
               {t("navigation")}
             </h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-3">
               {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-gray-500 hover:text-gray-900 text-sm transition-colors"
+                    className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium"
                   >
                     {link.label}
                   </Link>
@@ -125,10 +125,10 @@ export default function Footer({ settings }: FooterProps) {
 
           {/* Col 3: Contact */}
           <div>
-            <h4 className="text-gray-900 font-semibold text-sm mb-4 uppercase tracking-widest text-xs">
+            <h4 className="text-gray-900 font-bold text-sm sm:text-[15px] mb-5 uppercase tracking-wider">
               {t("contact")}
             </h4>
-            <ul className="space-y-2.5 text-sm text-gray-500">
+            <ul className="space-y-3 text-[15px] sm:text-[16px] text-gray-600">
               {settings.email && (
                 <li>
                   <a href={`mailto:${settings.email}`} className="hover:text-gray-900 transition-colors">
@@ -153,10 +153,10 @@ export default function Footer({ settings }: FooterProps) {
 
       {/* Bottom bar */}
       <div className="border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-gray-400 text-xs">{t("rights")}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-500 text-[13px] sm:text-[14px]">{t("rights")}</p>
           <div className="flex items-center gap-4">
-            <p className="text-gray-300 text-xs">{t("trust")}</p>
+            <p className="text-gray-400 text-[13px] sm:text-[14px]">{t("trust")}</p>
             <ScrollToTopButton />
           </div>
         </div>
