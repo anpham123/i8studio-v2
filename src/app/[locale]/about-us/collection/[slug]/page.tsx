@@ -5,45 +5,47 @@ import { prisma } from "@/lib/prisma";
 import { COLLECTIONS, getCollectionBySlug } from "@/lib/collection-data";
 import CollectionDetailContent from "@/components/public/CollectionDetailContent";
 
-export const revalidate = 60;
-export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  try {
-    const dbCols = await prisma.collection.findMany({
-      where: { active: true },
-      select: { slug: true },
-    });
-    const slugs = new Set([
-      ...COLLECTIONS.map((c) => c.slug),
-      ...dbCols.map((c) => c.slug),
-    ]);
-    return Array.from(slugs).map((slug) => ({ slug }));
-  } catch {
-    return COLLECTIONS.map((c) => ({ slug: c.slug }));
-  }
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string; slug: string };
 }): Promise<Metadata> {
-  const decodedSlug = decodeURIComponent(params.slug);
-  const dbCol = await prisma.collection.findUnique({
-    where: { slug: decodedSlug },
-    select: { titleJa: true, titleEn: true, descJa: true, descEn: true },
-  });
-  const data = dbCol || getCollectionBySlug(decodedSlug);
-  if (!data) return {};
-  const title = params.locale === "ja" ? data.titleJa : data.titleEn;
-  const desc = params.locale === "ja" ? data.descJa : data.descEn;
-  return buildMetadata({
-    title: `${title || "Collection"} — Collection`,
-    description: desc || "Collection gallery",
-    path: `/about-us/collection/${encodeURIComponent(decodedSlug)}`,
-    locale: params.locale,
-  });
+  try {
+    const rawSlug = params.slug || "";
+    let decodedSlug = rawSlug;
+    try {
+      decodedSlug = decodeURIComponent(rawSlug);
+    } catch {
+      decodedSlug = rawSlug;
+    }
+
+    let dbCol: any = null;
+    try {
+      dbCol = await prisma.collection.findFirst({
+        where: {
+          OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+        },
+        select: { titleJa: true, titleEn: true, descJa: true, descEn: true },
+      });
+    } catch {
+      dbCol = null;
+    }
+
+    const data = dbCol || getCollectionBySlug(decodedSlug) || getCollectionBySlug(rawSlug);
+    if (!data) return {};
+    const title = params.locale === "ja" ? data.titleJa : data.titleEn;
+    const desc = params.locale === "ja" ? data.descJa : data.descEn;
+    return buildMetadata({
+      title: `${title || "Collection"} — Collection`,
+      description: desc || "Collection gallery",
+      path: `/about-us/collection/${encodeURIComponent(decodedSlug)}`,
+      locale: params.locale,
+    });
+  } catch {
+    return {};
+  }
 }
 
 export default async function CollectionDetailPage({
@@ -51,36 +53,62 @@ export default async function CollectionDetailPage({
 }: {
   params: { locale: string; slug: string };
 }) {
-  const decodedSlug = decodeURIComponent(params.slug);
+  const rawSlug = params.slug || "";
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch {
+    decodedSlug = rawSlug;
+  }
 
-  // Fetch from DB
-  const dbCol = await prisma.collection.findUnique({
-    where: { slug: decodedSlug },
-    include: {
-      items: { orderBy: { order: "asc" } },
-    },
-  });
+  // Fetch from DB safely
+  let dbCol: any = null;
+  try {
+    dbCol = await prisma.collection.findFirst({
+      where: {
+        OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+      },
+      include: {
+        items: { orderBy: { order: "asc" } },
+      },
+    });
+  } catch {
+    try {
+      dbCol = await prisma.collection.findFirst({
+        where: {
+          OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+        },
+      });
+    } catch {
+      dbCol = null;
+    }
+  }
 
-  // Also fetch other active collections for the bottom section
-  const allDbCols = await prisma.collection.findMany({
-    where: { active: true, slug: { not: decodedSlug } },
-    orderBy: { order: "asc" },
-    take: 3,
-    select: {
-      slug: true,
-      titleJa: true,
-      titleEn: true,
-      coverImage: true,
-    },
-  });
+  // Fetch other collections safely
+  let allDbCols: any[] = [];
+  try {
+    allDbCols = await prisma.collection.findMany({
+      where: { active: true, slug: { notIn: [decodedSlug, rawSlug] } },
+      orderBy: { order: "asc" },
+      take: 3,
+      select: {
+        slug: true,
+        titleJa: true,
+        titleEn: true,
+        coverImage: true,
+      },
+    });
+  } catch {
+    allDbCols = [];
+  }
 
   if (dbCol) {
     let images: { image: string; captionJa: string; captionEn: string }[] = [];
     if (dbCol.items && dbCol.items.length > 0) {
-      images = dbCol.items.map((item) => ({
+      images = dbCol.items.map((item: any) => ({
         image: item.image,
-        captionJa: item.captionJa,
-        captionEn: item.captionEn,
+        captionJa: item.captionJa || "",
+        captionEn: item.captionEn || "",
       }));
     } else {
       try {
@@ -112,9 +140,8 @@ export default async function CollectionDetailPage({
   }
 
   // Fallback to hardcoded data
-  const data = getCollectionBySlug(decodedSlug);
+  const data = getCollectionBySlug(decodedSlug) || getCollectionBySlug(rawSlug);
   if (!data) notFound();
 
   return <CollectionDetailContent data={data} />;
 }
-
