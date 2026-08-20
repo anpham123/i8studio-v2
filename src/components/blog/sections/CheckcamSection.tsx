@@ -23,7 +23,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
   const checkLabel = locale === "ja" ? "確認できること" : "What can be confirmed";
   const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
   return (
-    <section className="bg-[#faf8f3] py-[70px] sm:py-[100px]">
+    <section className="bg-[#faf8f3] py-[45px] sm:py-[60px]">
       <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-12 sm:mb-16">

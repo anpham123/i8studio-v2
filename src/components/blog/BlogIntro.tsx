@@ -33,11 +33,11 @@ export default function BlogIntro({
   const { firstChar, restHtml } = parseDropcap(dropcapText || "");
 
   return (
-    <section className="bg-[var(--surface)] pt-2 pb-8 sm:pb-12">
+    <section className="bg-[var(--surface)] pt-2 pb-3 sm:pb-5">
       <div className="max-w-[760px] mx-auto px-6 sm:px-10">
         {/* Lead paragraph with large styled dropcap */}
         {dropcapText && (
-          <div className="text-[14px] sm:text-[15px] leading-[2] text-[#111] mb-6 clearfix">
+          <div className="text-[14px] sm:text-[15px] leading-[2] text-[#111] mb-5 clearfix">
             {firstChar && (
               <span className="font-serif text-[48px] sm:text-[56px] leading-[0.8] float-left mr-3.5 mt-1 font-normal text-[#b8935a] select-none">
                 {firstChar}
@@ -52,7 +52,7 @@ export default function BlogIntro({
 
         {/* Pullquote */}
         {pullquote && (
-          <blockquote className="border-l-[3px] border-[var(--accent)] pl-6 sm:pl-8 py-2 my-6 sm:my-8 bg-[var(--surface-warm)]/40 rounded-r-sm">
+          <blockquote className="border-l-[3px] border-[var(--accent)] pl-6 sm:pl-8 py-2.5 mt-6 sm:mt-8 mb-2 sm:mb-3 bg-[var(--surface-warm)]/40 rounded-r-sm">
             <p
               className="font-serif text-[15px] sm:text-[17px] leading-[1.8] text-[#111] font-medium italic"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(pullquote) }}
