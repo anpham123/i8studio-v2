@@ -74,9 +74,9 @@ export default function HomepagePage() {
       setAllWorks((prev) =>
         prev.map((w) => w.id === work.id ? { ...w, featured: true, homeOrder: maxOrder } : w)
       );
-      toast(`\u0110\u00e3 th\u00eam "${work.title}" v\u00e0o trang ch\u1ee7`, "success");
+      toast(`Đã thêm "${work.title}" vào trang chủ`, "success");
     } else {
-      toast("L\u1ed7i khi th\u00eam", "error");
+      toast("Lỗi khi thêm", "error");
     }
   };
 
@@ -91,9 +91,9 @@ export default function HomepagePage() {
       setAllWorks((prev) =>
         prev.map((w) => w.id === work.id ? { ...w, featured: false, homeOrder: 0 } : w)
       );
-      toast(`\u0110\u00e3 b\u1ecf "${work.title}" kh\u1ecfi trang ch\u1ee7`, "success");
+      toast(`Đã bỏ "${work.title}" khỏi trang chủ`, "success");
     } else {
-      toast("L\u1ed7i khi b\u1ecf", "error");
+      toast("Lỗi khi bỏ", "error");
     }
   };
 
@@ -127,7 +127,7 @@ export default function HomepagePage() {
         return w;
       })
     );
-    toast("\u0110\u00e3 di chuy\u1ec3n l\u00ean", "success");
+    toast("Đã di chuyển lên", "success");
   };
 
   const moveDown = async (index: number) => {
@@ -160,7 +160,7 @@ export default function HomepagePage() {
         return w;
       })
     );
-    toast("\u0110\u00e3 di chuy\u1ec3n xu\u1ed1ng", "success");
+    toast("Đã di chuyển xuống", "success");
   };
 
   /* ─── Swap: replace a homepage item with another work ─── */
@@ -187,7 +187,7 @@ export default function HomepagePage() {
       })
     );
     setSwapTarget(null);
-    toast(`\u0110\u00e3 thay "${oldWork.title}" b\u1eb1ng "${newWork.title}"`, "success");
+    toast(`Đã thay "${oldWork.title}" bằng "${newWork.title}"`, "success");
   };
 
   /* ─── Drag & Drop ─── */
@@ -236,7 +236,7 @@ export default function HomepagePage() {
         })
       )
     );
-    toast("\u0110\u00e3 s\u1eafp x\u1ebfp l\u1ea1i th\u1ee9 t\u1ef1", "success");
+    toast("Đã sắp xếp lại thứ tự", "success");
   };
 
   /* ─── Revalidate cache ─── */
@@ -250,12 +250,12 @@ export default function HomepagePage() {
       });
       const json = await res.json();
       if (json.revalidated) {
-        toast("\u0110\u00e3 c\u1eadp nh\u1eadt cache website th\u00e0nh c\u00f4ng!", "success");
+        toast("Đã cập nhật cache website thành công!", "success");
       } else {
-        toast("L\u1ed7i khi c\u1eadp nh\u1eadt cache", "error");
+        toast("Lỗi khi cập nhật cache", "error");
       }
     } catch {
-      toast("L\u1ed7i khi c\u1eadp nh\u1eadt cache", "error");
+      toast("Lỗi khi cập nhật cache", "error");
     }
     setRevalidating(false);
   };
@@ -264,7 +264,7 @@ export default function HomepagePage() {
 
   return (
     <AdminShell
-      title={`Trang ch\u1ee7 \u2014 \u1ea2nh hi\u1ec3n th\u1ecb (${homepageWorks.length})`}
+      title={`Trang chủ — Ảnh hiển thị (${homepageWorks.length})`}
       actions={
         <div className="flex items-center gap-2">
           {/* Revalidate button */}
@@ -272,10 +272,10 @@ export default function HomepagePage() {
             onClick={revalidateCache}
             disabled={revalidating}
             className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
-            title="C\u1eadp nh\u1eadt website ngay (x\u00f3a cache)"
+            title="Cập nhật website ngay (xóa cache)"
           >
             <RefreshCw size={16} className={revalidating ? "animate-spin" : ""} />
-            {revalidating ? "\u0110ang c\u1eadp nh\u1eadt..." : "C\u1eadp nh\u1eadt website"}
+            {revalidating ? "Đang cập nhật..." : "Cập nhật website"}
           </button>
 
           {/* Preview button */}
@@ -295,7 +295,7 @@ export default function HomepagePage() {
             onClick={() => setShowPicker(true)}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
-            <Plus size={16} /> Th\u00eam \u1ea3nh
+            <Plus size={16} /> Thêm ảnh
           </button>
         </div>
       }
@@ -303,13 +303,13 @@ export default function HomepagePage() {
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          <strong>H\u01b0\u1edbng d\u1eabn:</strong> Qu\u1ea3n l\u00fd \u1ea3nh hi\u1ec3n th\u1ecb tr\u00ean trang ch\u1ee7. \u1ea2nh \u0111\u1ea7u ti\u00ean (v\u1ecb tr\u00ed 1) s\u1ebd l\u00e0 \u1ea3nh hero full m\u00e0n h\u00ecnh.
+          <strong>Hướng dẫn:</strong> Quản lý ảnh hiển thị trên trang chủ. Ảnh đầu tiên (vị trí 1) sẽ là ảnh hero full màn hình.
           <br />
-          {"\uD83D\uDDB1\uFE0F"} <strong>K\u00e9o th\u1ea3</strong> \u0111\u1ec3 s\u1eafp x\u1ebfp nhanh &nbsp;|&nbsp;
-          {"\u25B2 \u25BC"} di chuy\u1ec3n th\u1ee9 t\u1ef1 &nbsp;|&nbsp;
-          {"\uD83D\uDD04"} thay th\u1ebf \u1ea3nh &nbsp;|&nbsp;
-          {"\u2715"} b\u1ecf kh\u1ecfi trang ch\u1ee7 &nbsp;|&nbsp;
-          B\u1ea5m <strong>&quot;C\u1eadp nh\u1eadt website&quot;</strong> \u0111\u1ec3 \u00e1p d\u1ee5ng thay \u0111\u1ed5i ngay.
+          🖱️ <strong>Kéo thả</strong> để sắp xếp nhanh &nbsp;|&nbsp;
+          ▲ ▼ di chuyển thứ tự &nbsp;|&nbsp;
+          🔄 thay thế ảnh &nbsp;|&nbsp;
+          ✕ bỏ khỏi trang chủ &nbsp;|&nbsp;
+          Bấm <strong>&quot;Cập nhật website&quot;</strong> để áp dụng thay đổi ngay.
         </p>
       </div>
 
@@ -318,7 +318,7 @@ export default function HomepagePage() {
         <div className="mb-6 rounded-xl overflow-hidden border border-violet-200 shadow-lg">
           <div className="bg-violet-50 px-4 py-2 flex items-center gap-2 border-b border-violet-200">
             <Eye size={14} className="text-violet-600" />
-            <span className="text-sm font-medium text-violet-700">Preview Hero — \u1ea2nh full m\u00e0n h\u00ecnh tr\u00ean trang ch\u1ee7</span>
+            <span className="text-sm font-medium text-violet-700">Preview Hero — Ảnh full màn hình trên trang chủ</span>
           </div>
           <div className="relative aspect-[21/9] bg-gray-900">
             <img
@@ -328,7 +328,7 @@ export default function HomepagePage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
             <div className="absolute bottom-6 left-6 text-white">
-              <p className="text-xs text-white/60 mb-1">HERO IMAGE — V\u1ecb tr\u00ed #1</p>
+              <p className="text-xs text-white/60 mb-1">HERO IMAGE — Vị trí #1</p>
               <h3 className="text-xl font-semibold drop-shadow-lg">{heroWork.title}</h3>
               <span className="text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full mt-2 inline-block">
                 {typeMap[heroWork.type || "still"] || heroWork.type}
@@ -346,8 +346,8 @@ export default function HomepagePage() {
       ) : homepageWorks.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
           <Star size={48} className="mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-medium">Ch\u01b0a c\u00f3 \u1ea3nh n\u00e0o tr\u00ean trang ch\u1ee7</p>
-          <p className="text-sm mt-1">B\u1ea5m &ldquo;Th\u00eam \u1ea3nh&rdquo; \u0111\u1ec3 ch\u1ecdn works hi\u1ec3n th\u1ecb</p>
+          <p className="text-lg font-medium">Chưa có ảnh nào trên trang chủ</p>
+          <p className="text-sm mt-1">Bấm &ldquo;Thêm ảnh&rdquo; để chọn works hiển thị</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -396,7 +396,7 @@ export default function HomepagePage() {
                 </span>
                 {idx === 0 && (
                   <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2 font-medium">
-                    {"\u2605"} Hero
+                    ★ Hero
                   </span>
                 )}
               </div>
@@ -407,7 +407,7 @@ export default function HomepagePage() {
                 <button
                   onClick={() => setSwapTarget({ work, index: idx })}
                   className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                  title="Thay th\u1ebf \u1ea3nh kh\u00e1c"
+                  title="Thay thế ảnh khác"
                 >
                   <ArrowLeftRight size={16} />
                 </button>
@@ -418,7 +418,7 @@ export default function HomepagePage() {
                     onClick={() => moveUp(idx)}
                     disabled={idx === 0}
                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                    title="Di chuy\u1ec3n l\u00ean"
+                    title="Di chuyển lên"
                   >
                     <ChevronUp size={16} />
                   </button>
@@ -426,7 +426,7 @@ export default function HomepagePage() {
                     onClick={() => moveDown(idx)}
                     disabled={idx === homepageWorks.length - 1}
                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                    title="Di chuy\u1ec3n xu\u1ed1ng"
+                    title="Di chuyển xuống"
                   >
                     <ChevronDown size={16} />
                   </button>
@@ -436,7 +436,7 @@ export default function HomepagePage() {
                 <button
                   onClick={() => removeFromHomepage(work)}
                   className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                  title="B\u1ecf kh\u1ecfi trang ch\u1ee7"
+                  title="Bỏ khỏi trang chủ"
                 >
                   <X size={18} />
                 </button>
@@ -454,7 +454,7 @@ export default function HomepagePage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 py-4 border-b flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Ch\u1ecdn \u1ea3nh th\u00eam v\u00e0o trang ch\u1ee7</h3>
+              <h3 className="text-lg font-semibold">Chọn ảnh thêm vào trang chủ</h3>
               <button onClick={() => setShowPicker(false)} className="p-1 hover:bg-gray-100 rounded-lg">
                 <X size={20} />
               </button>
@@ -463,7 +463,7 @@ export default function HomepagePage() {
             <div className="px-6 py-3 border-b">
               <input
                 type="text"
-                placeholder="T\u00ecm ki\u1ebfm work..."
+                placeholder="Tìm kiếm work..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
@@ -472,7 +472,7 @@ export default function HomepagePage() {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-1">
               {availableWorks.length === 0 ? (
-                <p className="text-center py-8 text-gray-400">Kh\u00f4ng t\u00ecm th\u1ea5y work n\u00e0o</p>
+                <p className="text-center py-8 text-gray-400">Không tìm thấy work nào</p>
               ) : (
                 availableWorks.map((work) => (
                   <div
@@ -509,7 +509,7 @@ export default function HomepagePage() {
           >
             <div className="px-6 py-4 border-b">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">Thay th\u1ebf \u1ea3nh</h3>
+                <h3 className="text-lg font-semibold">Thay thế ảnh</h3>
                 <button onClick={() => setSwapTarget(null)} className="p-1 hover:bg-gray-100 rounded-lg">
                   <X size={20} />
                 </button>
@@ -522,7 +522,7 @@ export default function HomepagePage() {
                   className="w-20 h-14 object-cover rounded-lg shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-amber-600 font-medium mb-0.5">{`\u0110ang thay th\u1ebf (v\u1ecb tr\u00ed #${swapTarget.index + 1})`}</p>
+                  <p className="text-xs text-amber-600 font-medium mb-0.5">{`Đang thay thế (vị trí #${swapTarget.index + 1})`}</p>
                   <p className="text-sm font-medium text-gray-900 truncate">{swapTarget.work.title}</p>
                 </div>
                 <ArrowLeftRight size={20} className="text-amber-500 shrink-0" />
@@ -532,7 +532,7 @@ export default function HomepagePage() {
             <div className="px-6 py-3 border-b">
               <input
                 type="text"
-                placeholder="T\u00ecm ki\u1ebfm work \u0111\u1ec3 thay th\u1ebf..."
+                placeholder="Tìm kiếm work để thay thế..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
@@ -541,7 +541,7 @@ export default function HomepagePage() {
 
             <div className="flex-1 overflow-y-auto p-4 space-y-1">
               {availableWorks.length === 0 ? (
-                <p className="text-center py-8 text-gray-400">Kh\u00f4ng t\u00ecm th\u1ea5y work n\u00e0o</p>
+                <p className="text-center py-8 text-gray-400">Không tìm thấy work nào</p>
               ) : (
                 availableWorks.map((work) => (
                   <div
