@@ -163,7 +163,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                 <img
                   src={img}
                   alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ))}
