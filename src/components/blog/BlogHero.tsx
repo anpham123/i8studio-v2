@@ -26,8 +26,8 @@ export default function BlogHero({
         </div>
       )}
 
-      {/* Hero image — 70vh */}
-      <div className="relative h-[70vh] overflow-hidden">
+      {/* Hero image — full-viewport like About Us */}
+      <div className="relative w-full h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] overflow-hidden">
         {heroImage ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
