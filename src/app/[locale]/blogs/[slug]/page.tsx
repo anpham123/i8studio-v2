@@ -15,8 +15,6 @@ import InsightSection from "@/components/blog/sections/InsightSection";
 import type { SectionData } from "@/components/blog/sections/CheckcamSection";
 import { sanitizeHtml } from "@/lib/sanitize";
 
-import TableSection from "@/components/blog/sections/TableSection";
-
 type Props = { params: { locale: string; slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -132,8 +130,6 @@ export default async function BlogDetailPage({ params }: Props) {
             return <StageSection key={idx} data={section} locale={locale} />;
           case "insight":
             return <InsightSection key={idx} data={section} />;
-          case "table":
-            return <TableSection key={idx} data={section} locale={locale} />;
           default:
             return null;
         }

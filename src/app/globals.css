@@ -40,6 +40,7 @@ body {
   isolation: isolate;
   overflow: hidden;
 }
+
 .section-noise::before {
   content: '';
   position: absolute;
@@ -53,32 +54,54 @@ body {
 }
 
 /* ── Scrollbar ──────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f5f5f5; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
 }
 
 /* ── Keyframes ──────────────────────────────────────────── */
 @keyframes scroll-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
+
 @keyframes shimmer {
-  0%   { transform: translateX(-100%) skewX(-12deg); }
-  100% { transform: translateX(200%) skewX(-12deg); }
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-12deg);
+  }
 }
 
 /* ── Animation utilities ────────────────────────────────── */
-.animate-scroll-left { animation: scroll-left 30s linear infinite; }
+.animate-scroll-left {
+  animation: scroll-left 30s linear infinite;
+}
 
 /* ── Component classes ──────────────────────────────────── */
 @layer utilities {
-  .text-balance { text-wrap: balance; }
+  .text-balance {
+    text-wrap: balance;
+  }
 
   /* Shimmer sweep — apply to relative overflow-hidden elements */
   .shimmer-top::after {
@@ -88,12 +111,10 @@ body {
     left: -60%;
     width: 40%;
     height: 100%;
-    background: linear-gradient(
-      105deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.14) 50%,
-      transparent 60%
-    );
+    background: linear-gradient(105deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.14) 50%,
+        transparent 60%);
     animation: shimmer 2.8s ease-in-out infinite;
   }
 }
@@ -101,14 +122,12 @@ body {
 /* ── Section dividers ───────────────────────────────────── */
 .section-divider {
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.1) 50%,
-    rgba(0,0,0,0.06) 75%,
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(0, 0, 0, 0.06) 25%,
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(0, 0, 0, 0.06) 75%,
+      transparent);
 }
 
 /* ── Smooth page transitions ────────────────────────────── */
@@ -118,10 +137,20 @@ main {
 
 /* ── Shared component utilities ─────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+  }
 }
-.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
 
 @layer utilities {
   .card-glass {
@@ -136,6 +165,7 @@ main {
     @apply bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg px-6 py-3 hover:from-blue-400 hover:to-purple-500 transition-all duration-300;
     box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
   }
+
   .btn-gradient:hover {
     box-shadow: 0 6px 32px rgba(99, 102, 241, 0.6);
   }
@@ -147,15 +177,19 @@ main {
   padding: 2px 4px;
   border-radius: 2px;
 }
+
 .blog-content strong {
   font-weight: 500;
 }
+
 .blog-content em {
   font-style: italic;
 }
+
 .blog-content p {
   font-weight: 400;
 }
+
 /* Gold accent text from Tiptap color */
 .blog-content span[style*="color: rgb(184, 147, 90)"],
 .blog-content span[style*="color:#b8935a"],
@@ -163,67 +197,19 @@ main {
   font-weight: 500;
 }
 
-/* Comparison Table styles (Image 1 style) */
-.blog-content table,
-.comparison-table,
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #cbd5e1;
-  background-color: #ffffff;
-  margin: 1.5rem 0;
-  font-size: 0.875rem;
-  line-height: 1.7;
-}
-
-.blog-content table thead tr,
-.comparison-table thead tr,
-.prose table thead tr {
-  background-color: #f0f4f8;
-  border-bottom: 1px solid #cbd5e1;
-}
-
-.blog-content table th,
-.comparison-table th,
-.prose table th {
-  padding: 0.875rem 1rem;
-  font-weight: 700;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
-  text-align: left;
-}
-
-.blog-content table th:first-child,
-.comparison-table th:first-child,
-.prose table th:first-child {
-  text-align: center;
-  width: 15%;
-  min-width: 80px;
-}
-
-.blog-content table td,
-.comparison-table td,
-.prose table td {
-  padding: 0.875rem 1rem;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  vertical-align: middle;
-}
-
-.blog-content table td:first-child,
-.comparison-table td:first-child,
-.prose table td:first-child {
-  text-align: center;
-  font-weight: 600;
-  color: #1e293b;
-  background-color: #f8fafc;
-}
-
 /* VR360 auto-pan animation */
 @keyframes pan360 {
-  0% { object-position: 0% 50%; }
-  50% { object-position: 100% 50%; }
-  100% { object-position: 0% 50%; }
+  0% {
+    object-position: 0% 50%;
+  }
+
+  50% {
+    object-position: 100% 50%;
+  }
+
+  100% {
+    object-position: 0% 50%;
+  }
 }
 
 .animate-pan-360 {
@@ -233,10 +219,12 @@ main {
 
 /* Custom Cursor branding */
 @media (hover: hover) and (pointer: fine) {
+
   .custom-cursor-active,
   .custom-cursor-active * {
     cursor: none !important;
   }
+
   .custom-cursor-active iframe,
   .custom-cursor-active input,
   .custom-cursor-active textarea,
@@ -251,6 +239,7 @@ main {
   background: rgba(184, 147, 90, 0.25);
   color: #111;
 }
+
 ::-moz-selection {
   background: rgba(184, 147, 90, 0.25);
   color: #111;
@@ -272,9 +261,17 @@ main {
 
 /* ── BeforeAfter handle glow ────────────────────────────── */
 @keyframes handle-pulse {
-  0%, 100% { box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
-  50%      { box-shadow: 0 2px 20px rgba(184,147,90,0.5), 0 0 0 6px rgba(184,147,90,0.15); }
+
+  0%,
+  100% {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 2px 20px rgba(184, 147, 90, 0.5), 0 0 0 6px rgba(184, 147, 90, 0.15);
+  }
 }
+
 .handle-glow {
   animation: handle-pulse 2s ease-in-out infinite;
 }
