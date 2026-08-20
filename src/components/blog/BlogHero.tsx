@@ -64,13 +64,13 @@ export default function BlogHero({
 
           {/* Title */}
           <h1
-            className="font-serif text-[clamp(24px,3.2vw,40px)] font-medium leading-[1.35] text-[var(--ink)] mb-5"
+            className="font-serif text-[clamp(28px,4vw,48px)] font-semibold leading-[1.28] tracking-tight text-[#111] mb-4"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(title) }}
           />
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="text-[#111] text-[14px] sm:text-[15px] leading-[1.9] max-w-[700px]">
+            <p className="text-[#333] text-[15px] sm:text-[16px] font-medium leading-[1.8] max-w-[700px] mb-2">
               {subtitle}
             </p>
           )}
