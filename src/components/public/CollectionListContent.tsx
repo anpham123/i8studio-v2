@@ -5,13 +5,19 @@ import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { COLLECTIONS } from "@/lib/collection-data";
 
+import { usePathname } from "next/navigation";
+
 const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 
 interface DbCol { slug: string; titleJa: string; titleEn: string; descJa: string; descEn: string; coverImage: string; }
 
 export default function CollectionListContent({ dbCollections }: { dbCollections?: DbCol[] }) {
   const locale = useLocale();
+  const pathname = usePathname();
   const isJa = locale === "ja";
+  const isAboutUs = pathname?.includes("/about-us");
+  const basePath = isAboutUs ? `/${locale}/about-us/collection` : `/${locale}/collection`;
+
   const collections = (dbCollections && dbCollections.length > 0)
     ? dbCollections.map((c) => ({ slug: c.slug, titleJa: c.titleJa, titleEn: c.titleEn, descJa: c.descJa, descEn: c.descEn, cover: c.coverImage }))
     : COLLECTIONS.map((c) => ({ slug: c.slug, titleJa: c.titleJa, titleEn: c.titleEn, descJa: c.descJa, descEn: c.descEn, cover: c.cover }));
@@ -54,7 +60,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                 transition={{ delay: (i % 3) * 0.08 }}
               >
                 <Link
-                  href={`/${locale}/collection/${col.slug}`}
+                  href={`${basePath}/${encodeURIComponent(col.slug)}`}
                   className="group block rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 overflow-hidden">

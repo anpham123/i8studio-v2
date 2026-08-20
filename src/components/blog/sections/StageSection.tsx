@@ -4,32 +4,38 @@ import type { SectionData } from "./CheckcamSection";
 export default function StageSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {
   const improvedLabel = locale === "ja" ? "改善された点" : "Improvements made";
   const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
+  const hasImage = Boolean(data.image);
+
   return (
     <section className="bg-[var(--surface)] py-[70px] sm:py-[100px]">
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
         <div
-          className={`grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center ${
-            data.reverse ? "lg:[&>*:first-child]:order-2" : ""
-          }`}
+          className={
+            hasImage
+              ? `grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center ${
+                  data.reverse ? "lg:[&>*:first-child]:order-2" : ""
+                }`
+              : ""
+          }
         >
-          {/* Image column */}
-          <div className="relative">
-            <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm overflow-hidden">
-              {data.image && (
-                /* eslint-disable-next-line @next/next/no-img-element */
+          {/* Image column (only when image exists) */}
+          {hasImage && (
+            <div className="relative">
+              <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.image}
                   alt={data.title.replace(/<[^>]*>/g, "")}
                   className="w-full h-full object-cover"
                 />
+              </div>
+              {data.caption && (
+                <p className="text-[12px] text-[var(--ink-muted)] italic mt-3 leading-relaxed">
+                  {data.caption}
+                </p>
               )}
             </div>
-            {data.caption && (
-              <p className="text-[12px] text-[var(--ink-muted)] italic mt-3 leading-relaxed">
-                {data.caption}
-              </p>
-            )}
-          </div>
+          )}
 
           {/* Text column */}
           <div>
@@ -45,8 +51,8 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                     </span>
                   )}
                   {data.eyebrowBadge && (
-                    <span className="bg-[var(--accent)]/10 text-[var(--accent)] text-[10px] px-2 py-1 rounded">
-                      {data.eyebrowBadge}
+                    <span className="bg-[var(--accent)] text-black text-[10px] px-2 py-1 rounded">
+                      {data.eyebrowBadge.trim()}
                     </span>
                   )}
                 </div>
@@ -61,7 +67,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
               {data.body.map((p, i) => (
                 <p
                   key={i}
-                  className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
+                  className="text-[#111] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
                 />
               ))}
@@ -110,7 +116,15 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 mt-12">
+          <div
+            className={`grid gap-4 mt-12 ${
+              data.additionalImages.length === 3
+                ? "grid-cols-1 md:grid-cols-3"
+                : data.additionalImages.length === 2
+                ? "grid-cols-1 sm:grid-cols-2"
+                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
+            }`}
+          >
             {data.additionalImages.map((img, i) => (
               <div key={i} className="aspect-[4/3] rounded-sm overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

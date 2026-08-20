@@ -303,47 +303,37 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           </div>
 
                           {/* 4-col Grid */}
-                          <div className="grid grid-cols-4 gap-5">
+                          <div className="grid grid-cols-4 gap-4">
                             {link.children.map((child) => (
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                className="group flex items-center gap-5 p-4 rounded-xl transition-all duration-200 hover:bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm"
+                                className="group relative block aspect-[16/10] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200/80 bg-gray-900"
                               >
-                                {/* Thumbnail */}
-                                <div className="w-[100px] h-[70px] rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-                                  {child.thumbnail ? (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
-                                      src={child.thumbnail}
-                                      alt={child.label}
-                                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-                                      onError={(e) => {
-                                        const target = e.currentTarget;
-                                        target.style.display = "none";
-                                        const parent = target.parentElement;
-                                        if (parent) {
-                                          parent.classList.add("flex", "items-center", "justify-center");
-                                          const span = document.createElement("span");
-                                          span.className = "text-gray-400 text-[11px] font-medium";
-                                          span.textContent = child.label.slice(0, 2);
-                                          parent.appendChild(span);
-                                        }
-                                      }}
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                      <span className="text-gray-400 text-[11px] font-medium">
-                                        {child.label.slice(0, 2)}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
+                                {child.thumbnail ? (
+                                  /* eslint-disable-next-line @next/next/no-img-element */
+                                  <img
+                                    src={child.thumbnail}
+                                    alt={child.label}
+                                    className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                                    onError={(e) => {
+                                      const target = e.currentTarget;
+                                      target.style.display = "none";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] via-[#1a1c22] to-[#111]" />
+                                )}
 
-                                {/* Label */}
-                                <span className="text-sm font-semibold text-gray-700 group-hover:text-[#111] transition-colors duration-200 leading-tight">
-                                  {child.label}
-                                </span>
+                                {/* Dark overlay for text legibility */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/20 group-hover:from-black/60 group-hover:via-black/25 group-hover:to-transparent transition-colors duration-300" />
+
+                                {/* Label overlaid on image */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4 text-center z-10">
+                                  <span className="text-white font-medium text-[13px] tracking-wide drop-shadow-md group-hover:scale-105 transition-transform duration-300 leading-snug">
+                                    {child.label}
+                                  </span>
+                                </div>
                               </Link>
                             ))}
                           </div>
@@ -473,26 +463,30 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                             <div className={`pb-1 ${link.megaMenu ? "pl-3" : "pl-5"}`}>
                               {link.megaMenu ? (
                                 /* Mega-menu items on mobile: compact grid with thumbnails */
-                                <div className="grid grid-cols-2 gap-2 py-2">
+                                <div className="grid grid-cols-2 gap-2.5 py-2">
                                   {link.children.map((child) => (
                                     <Link
                                       key={child.href}
                                       href={child.href}
                                       onClick={() => setMobileOpen(false)}
-                                      className="flex items-center gap-3 px-2 py-2 rounded-lg text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                                      className="group relative block aspect-[16/10] rounded-lg overflow-hidden shadow-sm bg-gray-900 border border-gray-200"
                                     >
-                                      {child.thumbnail && (
-                                        <div className="w-10 h-7 rounded overflow-hidden bg-gray-100 shrink-0">
-                                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                                          <img
-                                            src={child.thumbnail}
-                                            alt=""
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => { e.currentTarget.style.display = "none"; }}
-                                          />
-                                        </div>
+                                      {child.thumbnail ? (
+                                        /* eslint-disable-next-line @next/next/no-img-element */
+                                        <img
+                                          src={child.thumbnail}
+                                          alt=""
+                                          className="absolute inset-0 w-full h-full object-cover opacity-85"
+                                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                        />
+                                      ) : (
+                                        <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] to-[#111]" />
                                       )}
-                                      {child.label}
+                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-2 text-center">
+                                        <span className="text-white font-medium text-[12px] leading-tight drop-shadow">
+                                          {child.label}
+                                        </span>
+                                      </div>
                                     </Link>
                                   ))}
                                 </div>

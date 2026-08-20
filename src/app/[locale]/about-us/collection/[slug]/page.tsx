@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
-
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { COLLECTIONS, getCollectionBySlug } from "@/lib/collection-data";
 import CollectionDetailContent from "@/components/public/CollectionDetailContent";
 
-export function generateStaticParams() {
-  return COLLECTIONS.map((c) => ({ slug: c.slug }));
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  try {
+    const dbCols = await prisma.collection.findMany({
+      where: { active: true },
+      select: { slug: true },
+    });
+    const slugs = new Set([
+      ...COLLECTIONS.map((c) => c.slug),
+      ...dbCols.map((c) => c.slug),
+    ]);
+    return Array.from(slugs).map((slug) => ({ slug }));
+  } catch {
+    return COLLECTIONS.map((c) => ({ slug: c.slug }));
+  }
 }
 
 export async function generateMetadata({
@@ -17,19 +29,19 @@ export async function generateMetadata({
 }: {
   params: { locale: string; slug: string };
 }): Promise<Metadata> {
-  // Try DB first, then fallback to hardcoded
+  const decodedSlug = decodeURIComponent(params.slug);
   const dbCol = await prisma.collection.findUnique({
-    where: { slug: params.slug },
+    where: { slug: decodedSlug },
     select: { titleJa: true, titleEn: true, descJa: true, descEn: true },
   });
-  const data = dbCol || getCollectionBySlug(params.slug);
+  const data = dbCol || getCollectionBySlug(decodedSlug);
   if (!data) return {};
   const title = params.locale === "ja" ? data.titleJa : data.titleEn;
   const desc = params.locale === "ja" ? data.descJa : data.descEn;
   return buildMetadata({
-    title: `${title} — Collection`,
-    description: desc,
-    path: `/about-us/collection/${params.slug}`,
+    title: `${title || "Collection"} — Collection`,
+    description: desc || "Collection gallery",
+    path: `/about-us/collection/${encodeURIComponent(decodedSlug)}`,
     locale: params.locale,
   });
 }
@@ -39,15 +51,50 @@ export default async function CollectionDetailPage({
 }: {
   params: { locale: string; slug: string };
 }) {
-  // Try DB first
+  const decodedSlug = decodeURIComponent(params.slug);
+
+  // Fetch from DB
   const dbCol = await prisma.collection.findUnique({
-    where: { slug: params.slug },
+    where: { slug: decodedSlug },
     include: {
       items: { orderBy: { order: "asc" } },
     },
   });
 
+  // Also fetch other active collections for the bottom section
+  const allDbCols = await prisma.collection.findMany({
+    where: { active: true, slug: { not: decodedSlug } },
+    orderBy: { order: "asc" },
+    take: 3,
+    select: {
+      slug: true,
+      titleJa: true,
+      titleEn: true,
+      coverImage: true,
+    },
+  });
+
   if (dbCol) {
+    let images: { image: string; captionJa: string; captionEn: string }[] = [];
+    if (dbCol.items && dbCol.items.length > 0) {
+      images = dbCol.items.map((item) => ({
+        image: item.image,
+        captionJa: item.captionJa,
+        captionEn: item.captionEn,
+      }));
+    } else {
+      try {
+        const legacyImages: string[] = JSON.parse(dbCol.imagesJson || "[]");
+        images = legacyImages.map((img) => ({
+          image: img,
+          captionJa: "",
+          captionEn: "",
+        }));
+      } catch {
+        images = [];
+      }
+    }
+
     return (
       <CollectionDetailContent
         dbCollection={{
@@ -57,19 +104,17 @@ export default async function CollectionDetailPage({
           descJa: dbCol.descJa,
           descEn: dbCol.descEn,
           coverImage: dbCol.coverImage,
-          images: dbCol.items.map((item) => ({
-            image: item.image,
-            captionJa: item.captionJa,
-            captionEn: item.captionEn,
-          })),
+          images,
         }}
+        otherCollections={allDbCols}
       />
     );
   }
 
   // Fallback to hardcoded data
-  const data = getCollectionBySlug(params.slug);
+  const data = getCollectionBySlug(decodedSlug);
   if (!data) notFound();
 
   return <CollectionDetailContent data={data} />;
 }
+

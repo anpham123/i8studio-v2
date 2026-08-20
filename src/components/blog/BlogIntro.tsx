@@ -17,7 +17,7 @@ export default function BlogIntro({
       <div className="max-w-[760px] mx-auto px-6 sm:px-10">
         {/* Lead paragraph with dropcap */}
         {dropcapText && (
-          <div className="text-[14px] sm:text-[15px] leading-[1.9] text-[var(--ink-light)] mb-10">
+          <div className="text-[14px] sm:text-[15px] leading-[1.9] text-[#111] mb-10">
             <span className="font-serif text-[44px] sm:text-[52px] leading-none float-left mr-3 mt-1 text-[var(--accent)]">
               {firstChar}
             </span>
@@ -29,7 +29,7 @@ export default function BlogIntro({
         {pullquote && (
           <blockquote className="border-l-[3px] border-[var(--accent)] pl-6 sm:pl-8 py-2 my-12">
             <p
-              className="font-serif text-[16px] sm:text-[18px] leading-[1.7] text-[var(--ink-light)] font-medium italic"
+              className="font-serif text-[16px] sm:text-[18px] leading-[1.7] text-[#111] font-medium italic"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(pullquote) }}
             />
           </blockquote>
@@ -38,3 +38,4 @@ export default function BlogIntro({
     </section>
   );
 }
+

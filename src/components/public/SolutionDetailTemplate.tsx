@@ -240,7 +240,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               </div>
               )}
               {/* Text — below media */}
-              <div className="max-w-3xl">
+              <div className="w-full">
                 <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-3 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {ftTitle}
                 </h2>

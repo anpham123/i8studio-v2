@@ -90,12 +90,13 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero ───────────────────────── */}
-      <section className="relative bg-[#111] overflow-hidden">
+      {/* ── Hero (full-viewport) ──────────────────────────── */}
+      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#111] overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
         {/* Placeholder hero bg — replace with real image */}
         <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-        <div className="relative max-w-5xl mx-auto px-6 py-28 md:py-40 text-center">
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-6">
             ABOUT US
           </motion.p>
@@ -116,6 +117,22 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
               : (settings.aboutHeroDescEn || "Founded in 2019 in Da Nang, Vietnam. A high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators.")}
           </motion.p>
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        >
+          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-1.5 h-1.5 rounded-full bg-white/60"
+            />
+          </div>
+        </motion.div>
       </section>
 
       {/* ── Stats ──────────────────────── */}
@@ -165,7 +182,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
 
       {/* ── Timeline ───────────────────── */}
       <section className="bg-[#fafaf8] section-noise">
-        <div className="max-w-4xl mx-auto px-6 py-20 md:py-28">
+        <div className="max-w-5xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
             <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">OUR JOURNEY</p>
             <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
@@ -177,7 +194,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
             {/* Vertical line */}
             <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gray-200 -translate-x-1/2" />
 
-            <div className="space-y-12">
+            <div className="space-y-16">
               {MILESTONES.map((ms, i) => (
                 <motion.div
                   key={i}
@@ -186,22 +203,30 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                   whileInView="visible"
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className={`relative flex flex-col md:flex-row items-start gap-6 ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
+                  className={`relative flex flex-col md:flex-row items-stretch gap-6 md:gap-0 ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
                 >
                   {/* Dot */}
-                  <div className="absolute left-6 md:left-1/2 w-3 h-3 rounded-full bg-[#111] border-2 border-white -translate-x-1/2 mt-2 z-10" />
+                  <div className="absolute left-6 md:left-1/2 w-3.5 h-3.5 rounded-full bg-[#111] border-2 border-white -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 shadow-sm" />
 
-                  {/* Content */}
-                  <div className={`ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pr-8 md:text-right" : "md:pl-8"}`}>
-                    <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                  {/* Content (Text Card) */}
+                  <div className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pr-4" : "md:pl-4"} flex flex-col`}>
+                    <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col justify-center">
                       <span className="text-[11px] uppercase tracking-[0.2em] text-[#b8935a] font-semibold">{isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}</span>
-                      <h3 className="text-lg font-medium text-[#111] mt-2 mb-2">
+                      <h3 className="text-lg md:text-xl font-medium text-[#111] mt-2 mb-3">
                         {isJa ? ms.titleJa : ms.titleEn}
                       </h3>
                       <p className="text-sm text-gray-500 leading-relaxed">
                         {isJa ? ms.descJa : ms.descEn}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Spacer for center dot alignment */}
+                  <div className="hidden md:block w-16 shrink-0" />
+
+                  {/* Opposite Side (Pure UI Placeholder Frame) */}
+                  <div className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pl-4" : "md:pr-4"} flex flex-col`}>
+                    <div className="w-full h-full min-h-[160px] rounded-2xl bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3] border border-gray-200/80 shadow-sm" />
                   </div>
                 </motion.div>
               ))}
@@ -222,7 +247,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
           <div className="aspect-[21/9] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/uploads/about-team.jpg"
+              src={settings.aboutImageTeam || settings.aboutHeroImage || "/uploads/about-team.jpg"}
               alt="i8 STUDIO Team"
               className="w-full h-full object-cover"
               onError={(e) => {

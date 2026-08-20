@@ -144,7 +144,7 @@ export default function Footer({ settings }: FooterProps) {
                 </li>
               )}
               {settings.address && <li>{settings.address}</li>}
-              <li className="text-gray-400">{settings.workingHours || t("workingHours")}</li>
+              <li>{settings.workingHours || t("workingHours")}</li>
             </ul>
           </div>
 

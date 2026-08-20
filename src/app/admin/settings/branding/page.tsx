@@ -265,11 +265,10 @@ export default function BrandingSettingsPage() {
                   key={px}
                   type="button"
                   onClick={() => setValues((v) => ({ ...v, logoHeight: String(px) }))}
-                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                    parsedHeight === px
-                      ? "border-blue-400 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
-                  }`}
+                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${parsedHeight === px
+                    ? "border-blue-400 bg-blue-50 text-blue-700"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
                 >
                   {px}px
                 </button>
@@ -343,11 +342,10 @@ export default function BrandingSettingsPage() {
                   key={px}
                   type="button"
                   onClick={() => setValues((v) => ({ ...v, logoFooterHeight: String(px) }))}
-                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                    parsedFooterHeight === px
-                      ? "border-blue-400 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
-                  }`}
+                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${parsedFooterHeight === px
+                    ? "border-blue-400 bg-blue-50 text-blue-700"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
                 >
                   {px}px
                 </button>
@@ -473,11 +471,10 @@ export default function BrandingSettingsPage() {
                   key={px}
                   type="button"
                   onClick={() => setValues((v) => ({ ...v, cursorSize: String(px) }))}
-                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${
-                    (parseInt(values.cursorSize, 10) || DEFAULT_CURSOR_SIZE) === px
-                      ? "border-blue-400 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-500 hover:border-gray-300"
-                  }`}
+                  className={`py-1.5 rounded-lg border text-xs font-medium transition-all ${(parseInt(values.cursorSize, 10) || DEFAULT_CURSOR_SIZE) === px
+                    ? "border-blue-400 bg-blue-50 text-blue-700"
+                    : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
                 >
                   {px}px
                 </button>

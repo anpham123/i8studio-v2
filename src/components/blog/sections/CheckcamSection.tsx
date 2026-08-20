@@ -94,7 +94,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                 {data.body.map((p, i) => (
                   <p
                     key={i}
-                    className="text-[var(--ink-light)] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
+                    className="text-[#111] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
                   />
                 ))}
@@ -143,7 +143,15 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
 
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 mt-12">
+          <div
+            className={`grid gap-4 mt-12 ${
+              data.additionalImages.length === 3
+                ? "grid-cols-1 md:grid-cols-3"
+                : data.additionalImages.length === 2
+                ? "grid-cols-1 sm:grid-cols-2"
+                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
+            }`}
+          >
             {data.additionalImages.map((img, i) => (
               <div key={i} className="aspect-[4/3] rounded-sm overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
