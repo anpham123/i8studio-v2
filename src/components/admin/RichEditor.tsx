@@ -226,17 +226,53 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
           <ToolBtn onClick={addLink} active={editor.isActive("link")} title="Add link">
             <Link size={15} />
           </ToolBtn>
-          <ToolBtn onClick={() => setIsTableModalOpen(true)} active={false} title="Chèn Bảng So Sánh (Comparison Table)">
+          <ToolBtn onClick={() => setIsTableModalOpen(true)} active={editor.isActive("table")} title="Chèn Bảng So Sánh (Comparison Table)">
             <TableIcon size={15} />
           </ToolBtn>
           <div className="w-px bg-gray-200 mx-1 ml-auto" />
-          <ToolBtn onClick={() => editor.chain().focus().undo().run()} active={false} title="Undo">
+          <ToolBtn onClick={() => editor.chain().focus().undo().run()} active={false} title="Undo (Hoàn tác / Hủy thao tác vừa làm)">
             <Undo size={15} />
           </ToolBtn>
           <ToolBtn onClick={() => editor.chain().focus().redo().run()} active={false} title="Redo">
             <Redo size={15} />
           </ToolBtn>
         </div>
+
+        {/* Table Active Context Action Strip */}
+        {editor.isActive("table") && (
+          <div className="flex items-center justify-between px-3 py-1.5 bg-blue-50/90 border-b border-blue-100 text-xs animate-in fade-in duration-150">
+            <div className="flex items-center gap-2 text-blue-800 font-medium">
+              <TableIcon size={14} className="text-blue-600" />
+              <span>Đang chọn bảng:</span>
+              <button
+                type="button"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+                className="px-2 py-0.5 bg-white border border-blue-200 rounded hover:bg-blue-100 text-blue-700 transition-colors shadow-2xs font-normal"
+              >
+                + Thêm dòng
+              </button>
+              <button
+                type="button"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                className="px-2 py-0.5 bg-white border border-blue-200 rounded hover:bg-blue-100 text-blue-700 transition-colors shadow-2xs font-normal"
+              >
+                + Thêm cột
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                editor.chain().focus().deleteTable().run();
+                toast("Đã xóa bảng khỏi bài viết", "info");
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded transition-colors shadow-2xs"
+              title="Xóa toàn bộ bảng này"
+            >
+              <Trash2 size={13} /> Xóa / Hủy bảng này
+            </button>
+          </div>
+        )}
+
         <EditorContent editor={editor} />
       </div>
 
