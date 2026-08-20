@@ -5,45 +5,47 @@ import { prisma } from "@/lib/prisma";
 import { COLLECTIONS, getCollectionBySlug } from "@/lib/collection-data";
 import CollectionDetailContent from "@/components/public/CollectionDetailContent";
 
-export const revalidate = 60;
-export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  try {
-    const dbCols = await prisma.collection.findMany({
-      where: { active: true },
-      select: { slug: true },
-    });
-    const slugs = new Set([
-      ...COLLECTIONS.map((c) => c.slug),
-      ...dbCols.map((c) => c.slug),
-    ]);
-    return Array.from(slugs).map((slug) => ({ slug }));
-  } catch {
-    return COLLECTIONS.map((c) => ({ slug: c.slug }));
-  }
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string; slug: string };
 }): Promise<Metadata> {
-  const decodedSlug = decodeURIComponent(params.slug);
-  const col = await prisma.collection.findUnique({
-    where: { slug: decodedSlug },
-    select: { titleJa: true, titleEn: true, descJa: true, descEn: true },
-  });
-  const data = col || getCollectionBySlug(decodedSlug);
-  if (!data) return {};
-  const title = params.locale === "ja" ? data.titleJa : data.titleEn;
-  const desc = params.locale === "ja" ? data.descJa : data.descEn;
-  return buildMetadata({
-    title: `${title || "Collection"} — Gallery`,
-    description: desc || "Collection gallery",
-    path: `/collection/${encodeURIComponent(decodedSlug)}`,
-    locale: params.locale,
-  });
+  try {
+    const rawSlug = params.slug || "";
+    let decodedSlug = rawSlug;
+    try {
+      decodedSlug = decodeURIComponent(rawSlug);
+    } catch {
+      decodedSlug = rawSlug;
+    }
+
+    let dbCol: any = null;
+    try {
+      dbCol = await prisma.collection.findFirst({
+        where: {
+          OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+        },
+        select: { titleJa: true, titleEn: true, descJa: true, descEn: true },
+      });
+    } catch {
+      dbCol = null;
+    }
+
+    const data = dbCol || getCollectionBySlug(decodedSlug) || getCollectionBySlug(rawSlug);
+    if (!data) return {};
+    const title = params.locale === "ja" ? data.titleJa : data.titleEn;
+    const desc = params.locale === "ja" ? data.descJa : data.descEn;
+    return buildMetadata({
+      title: `${title || "Collection"} — Gallery`,
+      description: desc || "Collection gallery",
+      path: `/collection/${encodeURIComponent(decodedSlug)}`,
+      locale: params.locale,
+    });
+  } catch {
+    return {};
+  }
 }
 
 export default async function CollectionDetailPage({
@@ -51,51 +53,89 @@ export default async function CollectionDetailPage({
 }: {
   params: { locale: string; slug: string };
 }) {
-  const decodedSlug = decodeURIComponent(params.slug);
-  const col = await prisma.collection.findUnique({
-    where: { slug: decodedSlug },
-    include: { items: { orderBy: { order: "asc" } } },
-  });
+  const rawSlug = params.slug || "";
+  let decodedSlug = rawSlug;
+  try {
+    decodedSlug = decodeURIComponent(rawSlug);
+  } catch {
+    decodedSlug = rawSlug;
+  }
 
-  const allDbCols = await prisma.collection.findMany({
-    where: { active: true, slug: { not: decodedSlug } },
-    orderBy: { order: "asc" },
-    take: 3,
-    select: {
-      slug: true,
-      titleJa: true,
-      titleEn: true,
-      coverImage: true,
-    },
-  });
+  let dbCol: any = null;
+  try {
+    dbCol = await prisma.collection.findFirst({
+      where: {
+        OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+      },
+      include: {
+        items: { orderBy: { order: "asc" } },
+      },
+    });
+  } catch {
+    try {
+      dbCol = await prisma.collection.findFirst({
+        where: {
+          OR: [{ slug: decodedSlug }, { slug: rawSlug }],
+        },
+      });
+    } catch {
+      dbCol = null;
+    }
+  }
 
-  if (col) {
+  let allDbCols: any[] = [];
+  try {
+    allDbCols = await prisma.collection.findMany({
+      where: { active: true, slug: { notIn: [decodedSlug, rawSlug] } },
+      orderBy: { order: "asc" },
+      take: 3,
+      select: {
+        slug: true,
+        titleJa: true,
+        titleEn: true,
+        coverImage: true,
+      },
+    });
+  } catch {
+    allDbCols = [];
+  }
+
+  if (dbCol) {
     let images: { image: string; captionJa: string; captionEn: string }[] = [];
-    if (col.items && col.items.length > 0) {
-      images = col.items.map((i) => ({ image: i.image, captionJa: i.captionJa, captionEn: i.captionEn }));
+    if (dbCol.items && dbCol.items.length > 0) {
+      images = dbCol.items.map((i: any) => ({
+        image: i.image,
+        captionJa: i.captionJa || "",
+        captionEn: i.captionEn || "",
+      }));
     } else {
       try {
-        const legacyImages: string[] = JSON.parse(col.imagesJson || "[]");
-        images = legacyImages.map((img) => ({ image: img, captionJa: "", captionEn: "" }));
-      } catch { /* ignore */ }
+        const legacyImages: string[] = JSON.parse(dbCol.imagesJson || "[]");
+        images = legacyImages.map((img) => ({
+          image: img,
+          captionJa: "",
+          captionEn: "",
+        }));
+      } catch {
+        images = [];
+      }
     }
 
     const data = {
-      slug: col.slug,
-      titleJa: col.titleJa,
-      titleEn: col.titleEn,
-      descJa: col.descJa,
-      descEn: col.descEn,
-      coverImage: col.coverImage,
+      slug: dbCol.slug,
+      titleJa: dbCol.titleJa,
+      titleEn: dbCol.titleEn,
+      descJa: dbCol.descJa,
+      descEn: dbCol.descEn,
+      coverImage: dbCol.coverImage,
       images,
     };
 
     return <CollectionDetailContent dbCollection={data} otherCollections={allDbCols} />;
   }
 
-  const fallbackData = getCollectionBySlug(decodedSlug);
+  const fallbackData = getCollectionBySlug(decodedSlug) || getCollectionBySlug(rawSlug);
   if (!fallbackData) notFound();
 
   return <CollectionDetailContent data={fallbackData} />;
 }
-
