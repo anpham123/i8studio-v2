@@ -65,7 +65,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
             <div className="blog-content">
               {data.body.map((p, i) => (
-                <p
+                <div
                   key={i}
                   className="text-[#111] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
