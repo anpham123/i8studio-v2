@@ -19,6 +19,7 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
   const editor = useEditor({
     extensions: [StarterKit, Image.configure({ inline: false, allowBase64: true })],
     content: value,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
