@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
 // ISR: regenerate every 60 seconds
-export const revalidate = 60;
+export const revalidate = 30;
 
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";

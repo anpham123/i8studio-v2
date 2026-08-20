@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { revalidatePath } from "next/cache";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { WorkSchema } from "@/lib/validations";
@@ -18,6 +19,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const data = WorkSchema.partial().parse(await req.json());
     const item = await prisma.work.update({ where: { id: params.id }, data });
+    // Purge ISR cache so homepage reflects changes immediately
+    revalidatePath("/", "layout");
     return NextResponse.json({ data: item });
   } catch (e) {
     if (e instanceof z.ZodError) return NextResponse.json({ error: e.issues }, { status: 400 });
@@ -28,5 +31,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await prisma.work.delete({ where: { id: params.id } });
+  // Purge ISR cache
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true });
 }
