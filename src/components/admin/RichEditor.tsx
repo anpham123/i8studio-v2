@@ -128,10 +128,19 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
 
     tableHtml += `</tbody></table><p></p>`;
 
-    // Always insert table at the bottom below existing content
-    editor.chain().focus("end").insertContent(tableHtml).run();
+    // Luôn luôn ghép Bảng vào phía sau (dưới cùng) của toàn bộ nội dung chữ hiện có
+    const currentHtml = editor.getHTML();
+    if (currentHtml && currentHtml !== "<p></p>") {
+      const finalHtml = currentHtml + tableHtml;
+      editor.commands.setContent(finalHtml);
+      onChange(finalHtml);
+    } else {
+      editor.commands.setContent(tableHtml);
+      onChange(tableHtml);
+    }
+
     setIsTableModalOpen(false);
-    toast("Đã chèn bảng so sánh vào bài viết thành công!", "success");
+    toast("Đã chèn bảng so sánh vào dưới bài viết thành công!", "success");
   };
 
   const loadSampleTable = () => {
