@@ -33,6 +33,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET || "i8studio-super-secret-key-2026-auth-session",
   pages: {
     signIn: "/admin/login",
   },

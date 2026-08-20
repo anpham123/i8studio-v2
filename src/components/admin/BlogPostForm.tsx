@@ -9,7 +9,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import RichEditor from "@/components/admin/RichEditor";
 
 interface Section {
-  type: "checkcam" | "stage" | "insight" | "comparison";
+  type: "checkcam" | "stage" | "insight" | "comparison" | "table";
   num: string;
   eyebrow: string;
   eyebrowBadge: string;
@@ -21,6 +21,8 @@ interface Section {
   additionalImages: string[];
   tags: { label: string; ok: string[]; ng: string[] };
   grid: { label: string; image: string }[];
+  tableHeaders?: string[];
+  tableRows?: string[][];
 }
 
 const emptySection = (): Section => ({
@@ -36,6 +38,12 @@ const emptySection = (): Section => ({
   additionalImages: [],
   tags: { label: "", ok: [], ng: [] },
   grid: [],
+  tableHeaders: ["技術", "基本的な特徴", "建築・不動産での例"],
+  tableRows: [
+    ["AR", "現実空間にデジタル情報を重ねて表示する", "現地での建物表示、家具配置、施工・設備情報の確認"],
+    ["VR", "視界を仮想空間に置き換え、没入して体験する", "完成前の空間体験、バーチャル内覧、設計レビュー"],
+    ["MR", "現実空間を認識し、デジタル情報を空間に固定・操作する体験を重視する", "実寸確認、複数人での設計検討、作業支援"],
+  ],
 });
 
 interface BlogPostData {
@@ -163,6 +171,70 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
     }));
   };
 
+  // Table management
+  const updateTableHeader = (si: number, ci: number, val: string) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      const headers = [...(sec.tableHeaders || [])];
+      headers[ci] = val;
+      return { ...sec, tableHeaders: headers };
+    }));
+  };
+  const addTableColumn = (si: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      const headers = [...(sec.tableHeaders || []), `Cột ${(sec.tableHeaders || []).length + 1}`];
+      const rows = (sec.tableRows || []).map((r) => [...r, ""]);
+      return { ...sec, tableHeaders: headers, tableRows: rows };
+    }));
+  };
+  const removeTableColumn = (si: number, ci: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si || (sec.tableHeaders || []).length <= 1) return sec;
+      const headers = (sec.tableHeaders || []).filter((_, k) => k !== ci);
+      const rows = (sec.tableRows || []).map((r) => r.filter((_, k) => k !== ci));
+      return { ...sec, tableHeaders: headers, tableRows: rows };
+    }));
+  };
+  const updateTableCell = (si: number, ri: number, ci: number, val: string) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      const rows = [...(sec.tableRows || [])];
+      const row = [...(rows[ri] || [])];
+      row[ci] = val;
+      rows[ri] = row;
+      return { ...sec, tableRows: rows };
+    }));
+  };
+  const addTableRow = (si: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      const colCount = (sec.tableHeaders || []).length || 3;
+      const newRow = new Array(colCount).fill("");
+      return { ...sec, tableRows: [...(sec.tableRows || []), newRow] };
+    }));
+  };
+  const removeTableRow = (si: number, ri: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si || (sec.tableRows || []).length <= 1) return sec;
+      return { ...sec, tableRows: (sec.tableRows || []).filter((_, k) => k !== ri) };
+    }));
+  };
+  const loadSampleComparisonTable = (si: number) => {
+    setSections((s) => s.map((sec, j) => {
+      if (j !== si) return sec;
+      return {
+        ...sec,
+        tableHeaders: ["技術", "基本的な特徴", "建築・不動産での例"],
+        tableRows: [
+          ["AR", "現実空間にデジタル情報を重ねて表示する", "現地での建物表示、家具配置、施工・設備情報の確認"],
+          ["VR", "視界を仮想空間に置き換え、没入して体験する", "完成前の空間体験、バーチャル内覧、設計レビュー"],
+          ["MR", "現実空間を認識し、デジタル情報を空間に固定・操作する体験を重視する", "実寸確認、複数人での設計検討、作業支援"],
+        ],
+      };
+    }));
+  };
+
   const handleSave = async () => {
     if (!form.title.trim()) { toast("Vui lòng nhập tiêu đề", "error"); return; }
     if (!form.slug.trim()) { toast("Vui lòng nhập slug", "error"); return; }
@@ -282,6 +354,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                     <option value="checkcam">Checkcam</option>
                     <option value="insight">Insight</option>
                     <option value="comparison">Comparison</option>
+                    <option value="table">Table (Bảng so sánh)</option>
                   </select>
                   <span className="text-xs text-gray-400">Section {si + 1}</span>
                 </div>
@@ -375,6 +448,104 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                 <div className="mt-3">
                   <label className={labelCls}>Caption</label>
                   <input value={sec.caption} onChange={(e) => updateSection(si, "caption", e.target.value)} className={inputCls} />
+                </div>
+              )}
+
+              {/* Table section editor */}
+              {sec.type === "table" && (
+                <div className="mt-4 p-4 border border-blue-100 rounded-lg bg-blue-50/40 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">📊 Cấu hình Bảng So Sánh</h4>
+                      <p className="text-xs text-blue-600 mt-0.5">Tùy chỉnh tiêu đề các cột và các dòng dữ liệu so sánh trực quan</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => loadSampleComparisonTable(si)}
+                      className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-2.5 py-1 rounded transition-colors"
+                    >
+                      + Nạp mẫu so sánh (AR / VR / MR)
+                    </button>
+                  </div>
+
+                  {/* Headers */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className={labelCls}>Tiêu đề các cột (Headers)</label>
+                      <button
+                        type="button"
+                        onClick={() => addTableColumn(si)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                      >
+                        <Plus size={12} /> Thêm cột
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {(sec.tableHeaders || ["Cột 1", "Cột 2", "Cột 3"]).map((h, ci) => (
+                        <div key={ci} className="flex items-center gap-1">
+                          <input
+                            value={h}
+                            onChange={(e) => updateTableHeader(si, ci, e.target.value)}
+                            placeholder={`Cột ${ci + 1}`}
+                            className={`${inputCls} font-semibold bg-white`}
+                          />
+                          {(sec.tableHeaders || []).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTableColumn(si, ci)}
+                              className="text-red-400 hover:text-red-600 p-1"
+                              title="Xóa cột này"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rows */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className={labelCls}>Dữ liệu các dòng (Rows)</label>
+                      <button
+                        type="button"
+                        onClick={() => addTableRow(si)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                      >
+                        <Plus size={12} /> Thêm dòng
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {(sec.tableRows || [["", "", ""]]).map((row, ri) => (
+                        <div key={ri} className="flex items-start gap-2 p-2 bg-white rounded-lg border border-gray-200">
+                          <span className="text-xs font-bold text-gray-400 mt-2.5 min-w-[20px] text-center">#{ri + 1}</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
+                            {(sec.tableHeaders || ["", "", ""]).map((_, ci) => (
+                              <textarea
+                                key={ci}
+                                value={row[ci] || ""}
+                                onChange={(e) => updateTableCell(si, ri, ci, e.target.value)}
+                                placeholder={`Dòng ${ri + 1} - ${sec.tableHeaders?.[ci] || `Cột ${ci + 1}`}`}
+                                rows={2}
+                                className={`${inputCls} text-xs leading-relaxed`}
+                              />
+                            ))}
+                          </div>
+                          {(sec.tableRows || []).length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTableRow(si, ri)}
+                              className="text-red-400 hover:text-red-600 p-1 mt-1.5"
+                              title="Xóa dòng này"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

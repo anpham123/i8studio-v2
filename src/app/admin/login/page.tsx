@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
       setError("Email hoặc mật khẩu không đúng");
       setLoading(false);
     } else {
-      router.push("/admin");
+      window.location.href = "/admin";
     }
   };
 

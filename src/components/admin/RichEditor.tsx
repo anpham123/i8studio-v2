@@ -6,7 +6,7 @@ import Image from "@tiptap/extension-image";
 import { useEffect, useCallback } from "react";
 import {
   Bold, Italic, List, ListOrdered, Heading2, Heading3,
-  Quote, Undo, Redo, Image as ImageIcon, Link, Minus,
+  Quote, Undo, Redo, Image as ImageIcon, Link, Minus, Table as TableIcon,
 } from "lucide-react";
 
 interface RichEditorProps {
@@ -61,6 +61,42 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
     if (url && editor) editor.chain().focus().setLink({ href: url }).run();
   }, [editor]);
 
+  const addTable = useCallback(() => {
+    if (!editor) return;
+    const tableHtml = `
+<div class="overflow-x-auto my-4">
+<table class="comparison-table w-full border-collapse border border-gray-300">
+  <thead>
+    <tr class="bg-[#f0f4f8]">
+      <th class="border border-gray-300 p-3 font-bold text-gray-800">技術</th>
+      <th class="border border-gray-300 p-3 font-bold text-gray-800">基本的な特徴</th>
+      <th class="border border-gray-300 p-3 font-bold text-gray-800">建築・不動産での例</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="border border-gray-300 p-3 font-semibold text-center">AR</td>
+      <td class="border border-gray-300 p-3">現実空間にデジタル情報を重ねて表示する</td>
+      <td class="border border-gray-300 p-3">現地での建物表示、家具配置、施工・設備情報の確認</td>
+    </tr>
+    <tr>
+      <td class="border border-gray-300 p-3 font-semibold text-center">VR</td>
+      <td class="border border-gray-300 p-3">視界を仮想空間に置き換え、没入して体験する</td>
+      <td class="border border-gray-300 p-3">完成前の空間体験、バーチャル内覧、設計レビュー</td>
+    </tr>
+    <tr>
+      <td class="border border-gray-300 p-3 font-semibold text-center">MR</td>
+      <td class="border border-gray-300 p-3">現実空間を認識し、デジタル情報を空間に固定・操作する体験を重視する</td>
+      <td class="border border-gray-300 p-3">実寸確認、複数人での設計検討、作業支援</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p></p>
+`;
+    editor.chain().focus().insertContent(tableHtml).run();
+  }, [editor]);
+
   if (!editor) return null;
 
   const ToolBtn = ({
@@ -112,6 +148,9 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
           </ToolBtn>
           <ToolBtn onClick={addLink} active={editor.isActive("link")} title="Add link">
             <Link size={15} />
+          </ToolBtn>
+          <ToolBtn onClick={addTable} active={false} title="Chèn Bảng So Sánh (Table)">
+            <TableIcon size={15} />
           </ToolBtn>
           <div className="w-px bg-gray-200 mx-1 ml-auto" />
           <ToolBtn onClick={() => editor.chain().focus().undo().run()} active={false} title="Undo">
