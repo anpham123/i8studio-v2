@@ -21,12 +21,12 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
           {/* Image column (only when image exists) */}
           {hasImage && (
             <div className="relative">
-              <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm overflow-hidden">
+              <div className="w-full bg-[var(--surface-warm)]/60 rounded-lg overflow-hidden border border-gray-200/40 p-2 sm:p-3 flex items-center justify-center shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.image}
                   alt={data.title.replace(/<[^>]*>/g, "")}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto max-h-[600px] object-contain rounded"
                 />
               </div>
               {data.caption && (
@@ -138,7 +138,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                 <img
                   src={img}
                   alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ))}
