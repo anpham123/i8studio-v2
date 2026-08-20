@@ -37,6 +37,8 @@ export default function HomepagePage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    // Auto-normalize homeOrder for legacy items (all had homeOrder=0)
+    await fetch("/api/works/normalize-order", { method: "POST" }).catch(() => {});
     const res = await fetch("/api/works?limit=200");
     const json = await res.json();
     setAllWorks(json.data || []);
