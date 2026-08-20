@@ -239,6 +239,19 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
           <ToolBtn onClick={() => setIsTableModalOpen(true)} active={editor.isActive("table")} title="Chèn Bảng So Sánh (Comparison Table)">
             <TableIcon size={15} />
           </ToolBtn>
+          {editor.isActive("table") && (
+            <button
+              type="button"
+              onClick={() => {
+                editor.chain().focus().deleteTable().run();
+                toast("Đã xóa bảng thành công!", "info");
+              }}
+              className="flex items-center gap-1 px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs font-semibold transition-colors ml-1"
+              title="Xóa toàn bộ bảng đang chọn"
+            >
+              <Trash2 size={13} /> Xóa Bảng Này
+            </button>
+          )}
           <div className="w-px bg-gray-200 mx-1 ml-auto" />
           <ToolBtn onClick={() => editor.chain().focus().undo().run()} active={false} title="Undo (Hoàn tác / Hủy thao tác vừa làm)">
             <Undo size={15} />
