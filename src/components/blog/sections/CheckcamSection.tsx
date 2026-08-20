@@ -92,7 +92,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
             <div className={hasTags ? "grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12" : ""}>
               <div className="blog-content">
                 {data.body.map((p, i) => (
-                  <p
+                  <div
                     key={i}
                     className="text-[#111] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}

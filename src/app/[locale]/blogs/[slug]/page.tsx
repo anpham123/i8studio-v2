@@ -152,7 +152,7 @@ export default async function BlogDetailPage({ params }: Props) {
               />
             )}
             {post.insightBody && (
-              <p
+              <div
                 className="text-[14px] sm:text-[15px] leading-[1.9] text-[#111]"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.insightBody) }}
               />

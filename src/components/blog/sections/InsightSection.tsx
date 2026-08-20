@@ -20,7 +20,7 @@ export default function InsightSection({ data }: { data: SectionData }) {
         </div>
         <div className="blog-content">
           {data.body.map((p, i) => (
-            <p
+            <div
               key={i}
               className="text-[14px] sm:text-[15px] leading-[1.9] text-[#111] mb-4"
               dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
