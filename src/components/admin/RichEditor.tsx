@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { useEffect, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Bold, Italic, List, ListOrdered, Heading2, Heading3,
   Quote, Undo, Redo, Image as ImageIcon, Link, Minus,
@@ -17,7 +18,12 @@ interface RichEditorProps {
 }
 
 export default function RichEditor({ value, onChange, label }: RichEditorProps) {
+  const [mounted, setMounted] = useState(false);
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [tableHeaders, setTableHeaders] = useState<string[]>([
     "技術",
     "基本的な特徴",
@@ -218,9 +224,14 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
       </div>
 
       {/* Comparison Table Builder Modal */}
-      {isTableModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+      {mounted && isTableModalOpen && createPortal(
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsTableModalOpen(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 relative z-10 animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
               <div className="flex items-center gap-2">
@@ -403,7 +414,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
