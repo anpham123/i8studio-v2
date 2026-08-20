@@ -53,7 +53,7 @@ export default function BlogHero({
 
       {/* Title section BELOW image */}
       <div className="bg-[var(--surface)] pt-10 sm:pt-14 pb-2 sm:pb-4">
-        <div className="max-w-[760px] mx-auto px-6 sm:px-10">
+        <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
           {/* Category */}
           {category && (
             <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-4">
@@ -62,15 +62,15 @@ export default function BlogHero({
             </div>
           )}
 
-          {/* Title */}
+          {/* Title - Single line on desktop */}
           <h1
-            className="font-serif text-[clamp(28px,4vw,48px)] font-semibold leading-[1.28] tracking-tight text-[#111] mb-4"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(title) }}
+            className="font-serif text-[clamp(22px,3.2vw,40px)] font-semibold leading-[1.3] tracking-tight text-[#111] mb-4 max-w-full [&>br]:hidden md:[&>br]:inline"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(title.replace(/<br\s*\/?>/gi, " ")) }}
           />
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="font-serif text-[18px] sm:text-[24px] text-[#444] font-medium leading-[1.65] max-w-[720px] mb-4 tracking-normal">
+            <p className="font-serif text-[18px] sm:text-[22px] text-[#444] font-medium leading-[1.65] max-w-[900px] mb-4 tracking-normal">
               {subtitle}
             </p>
           )}
