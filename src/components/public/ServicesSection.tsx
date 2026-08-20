@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Box, Film, Glasses, Building2, Gamepad2, Sparkles, Image, Video, Layers, Sofa, Globe, PersonStanding, Smartphone, Monitor, Camera, Cuboid } from "lucide-react";
 import FadeIn from "./FadeIn";
