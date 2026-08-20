@@ -303,7 +303,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           </div>
 
                           {/* 4-col Grid */}
-                          <div className="grid grid-cols-4 gap-6">
+                          <div className="grid grid-cols-4 gap-8">
                             {link.children.map((child) => (
                               <Link
                                 key={child.href}
@@ -336,16 +336,6 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                 </div>
                               </Link>
                             ))}
-                          </div>
-
-                          {/* View All link */}
-                          <div className="mt-8 pt-6 border-t border-gray-200 text-right">
-                            <Link
-                              href={link.href}
-                              className="inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.15em] text-gray-400 hover:text-[#111] transition-colors"
-                            >
-                              View All Services →
-                            </Link>
                           </div>
                         </div>
                       </div>
