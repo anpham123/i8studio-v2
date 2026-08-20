@@ -7,7 +7,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
   const hasImage = Boolean(data.image);
 
   return (
-    <section className="bg-[var(--surface)] py-[70px] sm:py-[100px]">
+    <section className="bg-[var(--surface)] py-[45px] sm:py-[60px]">
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
         <div
           className={
