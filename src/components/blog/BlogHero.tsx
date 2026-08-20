@@ -70,7 +70,7 @@ export default function BlogHero({
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="font-serif text-[18px] sm:text-[21px] text-[#444] font-medium leading-[1.65] max-w-[720px] mb-4 tracking-normal">
+            <p className="font-serif text-[18px] sm:text-[24px] text-[#444] font-medium leading-[1.65] max-w-[720px] mb-4 tracking-normal">
               {subtitle}
             </p>
           )}

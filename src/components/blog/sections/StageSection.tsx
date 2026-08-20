@@ -117,18 +117,29 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
           <div
-            className={`grid gap-4 mt-12 ${
-              data.additionalImages.length === 3
-                ? "grid-cols-1 md:grid-cols-3"
+            className={`mt-10 ${
+              data.additionalImages.length === 1
+                ? "w-full"
                 : data.additionalImages.length === 2
-                ? "grid-cols-1 sm:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
+                ? "grid grid-cols-1 sm:grid-cols-2 gap-6"
+                : data.additionalImages.length === 3
+                ? "grid grid-cols-1 md:grid-cols-3 gap-6"
+                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
             }`}
           >
             {data.additionalImages.map((img, i) => (
-              <div key={i} className="aspect-[4/3] rounded-sm overflow-hidden">
+              <div
+                key={i}
+                className={`rounded-lg overflow-hidden border border-gray-200/40 shadow-sm bg-[var(--surface-warm)] ${
+                  data.additionalImages!.length === 1 ? "w-full aspect-[16/10]" : "aspect-[4/3]"
+                }`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img} alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`} className="w-full h-full object-cover" />
+                <img
+                  src={img}
+                  alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>
