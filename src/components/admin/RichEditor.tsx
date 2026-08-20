@@ -128,7 +128,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
 
     tableHtml += `</tbody></table><p></p>`;
 
-    editor.chain().focus().insertContent(tableHtml).run();
+    // Always insert table at the bottom below existing content
+    editor.chain().focus("end").insertContent(tableHtml).run();
     setIsTableModalOpen(false);
     toast("Đã chèn bảng so sánh vào bài viết thành công!", "success");
   };
