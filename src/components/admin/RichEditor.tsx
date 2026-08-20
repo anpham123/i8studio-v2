@@ -3,8 +3,13 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
 import { useEffect, useCallback, useState } from "react";
 import { createPortal } from "react-dom";
+import { useToast } from "@/components/admin/Toast";
 import {
   Bold, Italic, List, ListOrdered, Heading2, Heading3,
   Quote, Undo, Redo, Image as ImageIcon, Link, Minus,
@@ -18,12 +23,14 @@ interface RichEditorProps {
 }
 
 export default function RichEditor({ value, onChange, label }: RichEditorProps) {
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
   const [tableHeaders, setTableHeaders] = useState<string[]>([
     "技術",
     "基本的な特徴",
@@ -48,7 +55,19 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
   ]);
 
   const editor = useEditor({
-    extensions: [StarterKit, Image.configure({ inline: false, allowBase64: true })],
+    extensions: [
+      StarterKit,
+      Image.configure({ inline: false, allowBase64: true }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: "comparison-table",
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
     content: value,
     immediatelyRender: false,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -96,24 +115,25 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
   const handleInsertTable = () => {
     if (!editor) return;
 
-    let tableHtml = `<div class="overflow-x-auto my-6"><table class="comparison-table"><thead><tr>`;
+    let tableHtml = `<table class="comparison-table"><thead><tr>`;
     tableHeaders.forEach((h, i) => {
-      tableHtml += `<th>${h || `Cột ${i + 1}`}</th>`;
+      tableHtml += `<th><p><strong>${h || `Cột ${i + 1}`}</strong></p></th>`;
     });
     tableHtml += `</tr></thead><tbody>`;
 
     tableRows.forEach((row) => {
       tableHtml += `<tr>`;
       row.forEach((cell, ci) => {
-        tableHtml += `<td>${cell || ""}</td>`;
+        tableHtml += `<td><p>${cell || ""}</p></td>`;
       });
       tableHtml += `</tr>`;
     });
 
-    tableHtml += `</tbody></table></div><p></p>`;
+    tableHtml += `</tbody></table><p></p>`;
 
     editor.chain().focus().insertContent(tableHtml).run();
     setIsTableModalOpen(false);
+    toast("Đã chèn bảng so sánh vào bài viết thành công!", "success");
   };
 
   const loadSampleTable = () => {
