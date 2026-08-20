@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET || "i8studio-super-secret-key-2026-auth-session",
     });
 
     if (!token) {

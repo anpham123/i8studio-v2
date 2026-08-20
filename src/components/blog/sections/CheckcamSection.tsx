@@ -1,7 +1,7 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 
 export interface SectionData {
-  type: "checkcam" | "stage" | "comparison" | "insight";
+  type: "checkcam" | "stage" | "comparison" | "insight" | "table";
   num: string;
   eyebrow?: string;
   eyebrowBadge?: string;
@@ -17,6 +17,8 @@ export interface SectionData {
     ng?: string[];
   };
   grid?: { label: string; image?: string }[];
+  tableHeaders?: string[];
+  tableRows?: string[][];
 }
 
 export default function CheckcamSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {

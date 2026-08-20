@@ -163,6 +163,62 @@ main {
   font-weight: 500;
 }
 
+/* Comparison Table styles (Image 1 style) */
+.blog-content table,
+.comparison-table,
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.blog-content table thead tr,
+.comparison-table thead tr,
+.prose table thead tr {
+  background-color: #f0f4f8;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.blog-content table th,
+.comparison-table th,
+.prose table th {
+  padding: 0.875rem 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  text-align: left;
+}
+
+.blog-content table th:first-child,
+.comparison-table th:first-child,
+.prose table th:first-child {
+  text-align: center;
+  width: 15%;
+  min-width: 80px;
+}
+
+.blog-content table td,
+.comparison-table td,
+.prose table td {
+  padding: 0.875rem 1rem;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  vertical-align: middle;
+}
+
+.blog-content table td:first-child,
+.comparison-table td:first-child,
+.prose table td:first-child {
+  text-align: center;
+  font-weight: 600;
+  color: #1e293b;
+  background-color: #f8fafc;
+}
+
 /* VR360 auto-pan animation */
 @keyframes pan360 {
   0% { object-position: 0% 50%; }
