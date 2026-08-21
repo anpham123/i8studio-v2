@@ -34,36 +34,6 @@ interface PriceCard {
   cardImage?: string;
 }
 
-function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
-  return items.map((item) => {
-    let bulletsJa: string[] = [];
-    let bulletsEn: string[] = [];
-    try { bulletsJa = JSON.parse(item.bulletsJson || "[]"); } catch { /* ignore */ }
-    try { bulletsEn = JSON.parse(item.bulletsEnJson || "[]"); } catch { /* ignore */ }
-    return {
-      slug: item.serviceSlug,
-      icon: item.icon || "📦",
-      titleJa: item.nameJa,
-      titleEn: item.nameEn,
-      features: bulletsEn.length > 0 ? bulletsEn : bulletsJa,
-      featuresJa: bulletsJa,
-      price: item.price || "ASK",
-      priceLabelJa: item.priceLabelJa || "参考価格",
-      priceLabelEn: item.priceLabelEn || "Starting from",
-      cardImage: item.cardImage || "",
-    };
-  });
-}
-
-interface DbServiceItem {
-  slug: string;
-  name: string;
-  nameJa: string;
-  priceHint: string;
-  icon: string;
-  plansJson: string;
-}
-
 const JAPANESE_SERVICE_TITLES: Record<string, string> = {
   "cg-perspective": "CGパース",
   "cg-video": "CG動画",
@@ -74,6 +44,42 @@ const JAPANESE_SERVICE_TITLES: Record<string, string> = {
   "digital-model": "デジタル模型",
   "ar": "AR",
   "exe-content": "EXEコンテンツ",
+};
+
+const ENGLISH_SERVICE_TITLES: Record<string, string> = {
+  "cg-perspective": "CG Perspective",
+  "cg-video": "CG Video",
+  "photo-composite": "Photo Compositing",
+  "virtual-staging": "Virtual Staging",
+  "vr360": "VR360",
+  "vr-walkthrough": "VR Walkthrough",
+  "digital-model": "Digital Model",
+  "ar": "AR",
+  "exe-content": "EXE Content",
+};
+
+const ENGLISH_SERVICE_BULLETS: Record<string, string[]> = {
+  "cg-perspective": ["1 Cut", "4K Rendering", "3 Revisions", "Furniture Styling"],
+  "cg-video": ["60 Seconds", "4K Quality", "Background Music", "Color Grading"],
+  "photo-composite": ["1 Cut", "High-precision Compositing", "3 Revisions"],
+  "virtual-staging": ["1 Room", "Premium Furniture", "2 Revisions"],
+  "vr360": ["6 Scenes", "Custom UI", "Background Music"],
+  "vr-walkthrough": ["Multi-floor", "Custom UI", "Interactive Elements"],
+  "digital-model": ["1 Building", "Section View", "Annotations"],
+  "ar": ["3 Models", "Custom UI", "Animation"],
+  "exe-content": ["Multiple Scenes", "Custom UI", "Data Integration"],
+};
+
+const JAPANESE_SERVICE_BULLETS: Record<string, string[]> = {
+  "cg-perspective": ["1カット", "4Kレンダリング", "3回修正", "家具コーディネート"],
+  "cg-video": ["60秒", "4K", "BGM付き", "カラーグレーディング"],
+  "photo-composite": ["1カット", "高精度合成", "3回修正"],
+  "virtual-staging": ["1部屋", "プレミアム家具", "2回修正"],
+  "vr360": ["6シーン", "カスタムUI", "BGM"],
+  "vr-walkthrough": ["複数フロア", "カスタムUI", "インタラクション"],
+  "digital-model": ["1棟", "断面表示", "アノテーション"],
+  "ar": ["3モデル", "カスタムUI", "アニメーション"],
+  "exe-content": ["複数シーン", "カスタムUI", "データ連携"],
 };
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -91,6 +97,36 @@ const SERVICE_ICONS: Record<string, string> = {
   "anime-illustration": "✨",
 };
 
+function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
+  return items.map((item) => {
+    let bulletsJa: string[] = [];
+    let bulletsEn: string[] = [];
+    try { bulletsJa = JSON.parse(item.bulletsJson || "[]"); } catch { /* ignore */ }
+    try { bulletsEn = JSON.parse(item.bulletsEnJson || "[]"); } catch { /* ignore */ }
+    return {
+      slug: item.serviceSlug,
+      icon: item.icon || "📦",
+      titleJa: item.nameJa,
+      titleEn: item.nameEn,
+      features: bulletsEn.length > 0 ? bulletsEn : (ENGLISH_SERVICE_BULLETS[item.serviceSlug] || bulletsJa),
+      featuresJa: bulletsJa.length > 0 ? bulletsJa : (JAPANESE_SERVICE_BULLETS[item.serviceSlug] || []),
+      price: item.price || "ASK",
+      priceLabelJa: item.priceLabelJa || "参考価格",
+      priceLabelEn: item.priceLabelEn || "Starting from",
+      cardImage: item.cardImage || "",
+    };
+  });
+}
+
+interface DbServiceItem {
+  slug: string;
+  name: string;
+  nameJa: string;
+  priceHint: string;
+  icon: string;
+  plansJson: string;
+}
+
 function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
   return services.map((svc) => {
     let plans: { name: string; features: string[]; price: string }[] = [];
@@ -100,8 +136,8 @@ function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
       icon: SERVICE_ICONS[svc.slug] || svc.icon || "📦",
       titleJa: svc.nameJa || svc.name,
       titleEn: svc.name,
-      features: plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
-      featuresJa: plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
+      features: ENGLISH_SERVICE_BULLETS[svc.slug] ?? plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
+      featuresJa: JAPANESE_SERVICE_BULLETS[svc.slug] ?? plans[1]?.features.slice(0, 5) ?? plans[0]?.features.slice(0, 5) ?? [],
       price: plans[0]?.price ?? svc.priceHint ?? "ASK",
       priceLabelJa: "参考価格",
       priceLabelEn: "Starting from",
@@ -140,7 +176,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             transition={{ delay: 0.1 }}
             className="font-serif text-[clamp(28px,4vw,48px)] font-medium text-[var(--ink)] leading-[1.3] mb-3"
           >
-            料金体系
+            {isJa ? "料金体系" : "Service Pricing"}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -148,7 +184,9 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             transition={{ delay: 0.2 }}
             className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[600px]"
           >
-            建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。
+            {isJa
+              ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
+              : "Standard pricing guidelines for our architectural visualization services. We propose optimal plans based on project scale, level of detail, and schedule."}
           </motion.p>
         </div>
       </section>
@@ -159,10 +197,10 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
           {cards.map((card, i) => {
             const title = isJa
               ? (JAPANESE_SERVICE_TITLES[card.slug] || card.titleJa || card.titleEn)
-              : (card.titleEn || card.titleJa);
+              : (ENGLISH_SERVICE_TITLES[card.slug] || card.titleEn || card.titleJa);
             const features = isJa
-              ? (card.featuresJa && card.featuresJa.length > 0 ? card.featuresJa : card.features)
-              : (card.features && card.features.length > 0 ? card.features : card.featuresJa);
+              ? ((card.featuresJa && card.featuresJa.length > 0) ? card.featuresJa : (JAPANESE_SERVICE_BULLETS[card.slug] || card.features))
+              : ((card.features && card.features.length > 0) ? card.features : (ENGLISH_SERVICE_BULLETS[card.slug] || card.featuresJa));
             const priceLabel = isJa ? (card.priceLabelJa || "参考価格") : (card.priceLabelEn || "Starting from");
             const isAsk = card.price === "ASK" || !card.price;
 
@@ -224,7 +262,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                               ASK
                             </span>
                             <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
-                              お見積り
+                              {isJa ? "お見積り" : "Get a quote"}
                             </p>
                           </>
                         ) : (
@@ -262,8 +300,6 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
           })}
         </div>
       </section>
-
-
     </div>
   );
 }
