@@ -58,7 +58,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
             <img src={data.image} alt={data.title.replace(/<[^>]*>/g, "")} className="w-full h-auto max-h-[600px] object-contain rounded" />
             {data.caption && (
               <p
-                className="w-full text-[14px] sm:text-[15px] md:text-[16px] font-medium text-gray-700 font-sans tracking-wide mt-3 pt-2.5 border-t border-gray-200/70 text-center leading-relaxed"
+                className="w-full text-[17px] sm:text-[19px] md:text-[21px] font-semibold text-gray-800 font-sans tracking-wide mt-3.5 pt-3 border-t border-gray-200/80 text-center leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.caption) }}
               />
             )}
@@ -180,7 +180,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                   </div>
                   {imgCap && (
                     <p
-                      className="text-[13px] sm:text-[14px] md:text-[15px] font-medium text-gray-700 font-sans tracking-wide mt-2.5 text-center leading-relaxed"
+                      className="text-[15px] sm:text-[16px] md:text-[17px] font-medium text-gray-800 font-sans tracking-wide mt-3 text-center leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
                     />
                   )}
