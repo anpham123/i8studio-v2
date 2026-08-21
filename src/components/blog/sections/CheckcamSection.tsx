@@ -53,9 +53,15 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
 
         {/* Main image (if provided and no grid) */}
         {data.image && (!data.grid || data.grid.length === 0) && (
-          <div className="relative aspect-[16/9] mb-12 rounded-sm overflow-hidden">
+          <div className="w-full bg-[var(--surface-warm)]/60 rounded-lg overflow-hidden border border-gray-200/40 p-2 sm:p-3 flex flex-col items-center justify-center mb-12 shadow-xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.image} alt={data.title.replace(/<[^>]*>/g, "")} className="w-full h-full object-cover" />
+            <img src={data.image} alt={data.title.replace(/<[^>]*>/g, "")} className="w-full h-auto max-h-[600px] object-contain rounded" />
+            {data.caption && (
+              <p
+                className="w-full text-[12px] sm:text-[13px] text-gray-600 font-sans tracking-wide mt-2.5 pt-2 border-t border-gray-200/60 text-center leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.caption) }}
+              />
+            )}
           </div>
         )}
 

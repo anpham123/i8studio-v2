@@ -21,19 +21,20 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
           {/* Image column (only when image exists) */}
           {hasImage && (
             <div className="relative">
-              <div className="w-full bg-[var(--surface-warm)]/60 rounded-lg overflow-hidden border border-gray-200/40 p-2 sm:p-3 flex items-center justify-center shadow-xs">
+              <div className="w-full bg-[var(--surface-warm)]/60 rounded-lg overflow-hidden border border-gray-200/40 p-2 sm:p-3 flex flex-col items-center justify-center shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={data.image}
                   alt={data.title.replace(/<[^>]*>/g, "")}
                   className="w-full h-auto max-h-[600px] object-contain rounded"
                 />
+                {data.caption && (
+                  <p
+                    className="w-full text-[12px] sm:text-[13px] text-gray-600 font-sans tracking-wide mt-2.5 pt-2 border-t border-gray-200/60 text-center leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.caption) }}
+                  />
+                )}
               </div>
-              {data.caption && (
-                <p className="text-[12px] text-[var(--ink-muted)] italic mt-3 leading-relaxed">
-                  {data.caption}
-                </p>
-              )}
             </div>
           )}
 
