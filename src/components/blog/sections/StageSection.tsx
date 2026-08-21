@@ -30,7 +30,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                 />
                 {data.caption && (
                   <p
-                    className="w-full text-[12px] sm:text-[13px] text-gray-600 font-sans tracking-wide mt-2.5 pt-2 border-t border-gray-200/60 text-center leading-relaxed"
+                    className="w-full text-[14px] sm:text-[15px] md:text-[16px] font-medium text-gray-700 font-sans tracking-wide mt-3 pt-2.5 border-t border-gray-200/70 text-center leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.caption) }}
                   />
                 )}
@@ -148,7 +148,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                   </div>
                   {imgCap && (
                     <p
-                      className="text-[12px] sm:text-[13px] text-gray-500 font-sans tracking-wide mt-2 text-center"
+                      className="text-[13px] sm:text-[14px] md:text-[15px] font-medium text-gray-700 font-sans tracking-wide mt-2.5 text-center leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
                     />
                   )}
