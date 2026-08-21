@@ -12,7 +12,7 @@ const tabs = [
   { key: "workflow", label: "Workflow" },
 ] as const;
 
-interface Milestone { year?: string; yearJa: string; yearEn: string; titleJa: string; titleEn: string; descJa: string; descEn: string; }
+interface Milestone { year?: string; yearJa: string; yearEn: string; titleJa: string; titleEn: string; descJa: string; descEn: string; image?: string; }
 interface WorkflowStep { stepNumber: number; titleJa: string; titleEn: string; descJa: string; descEn: string; image: string; tags: string; }
 
 export default function CompanyContentPage() {
@@ -118,7 +118,7 @@ export default function CompanyContentPage() {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Milestones ({milestones.length})</h3>
-                <button onClick={() => setMilestones((m) => [...m, { yearJa: "", yearEn: "", titleJa: "", titleEn: "", descJa: "", descEn: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm</button>
+                <button onClick={() => setMilestones((m) => [...m, { yearJa: "", yearEn: "", titleJa: "", titleEn: "", descJa: "", descEn: "", image: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm</button>
               </div>
               {milestones.map((ms, i) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
@@ -151,6 +151,18 @@ export default function CompanyContentPage() {
                       <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Mô tả (EN)</label>
                       <textarea value={ms.descEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descEn: e.target.value }; setMilestones(n); }} placeholder="Description in English..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-500 mb-1">🖼️ Ảnh minh hoạ mốc lịch sử</label>
+                    <ImageUpload
+                      label="Tải ảnh mốc lịch sử"
+                      value={ms.image || ""}
+                      onChange={(url) => {
+                        const n = [...milestones];
+                        n[i] = { ...n[i], image: url };
+                        setMilestones(n);
+                      }}
+                    />
                   </div>
                 </div>
               ))}

@@ -22,6 +22,7 @@ const DEFAULT_MILESTONES = [
     titleEn: "i8 STUDIO Founded",
     descJa: "ベトナム・ダナンにて設立。日本市場向けの高品質3DCG制作を開始。",
     descEn: "Founded in Da Nang, Vietnam. Started high-quality 3DCG production for the Japanese market.",
+    image: "/uploads/1781662116949-House_in_forest__Summer_.webp",
   },
   {
     year: "2020-2021",
@@ -31,6 +32,7 @@ const DEFAULT_MILESTONES = [
     titleEn: "Japan Market Expansion",
     descJa: "日本の大手建築・不動産企業との取引を拡大。チームを30名に拡充。",
     descEn: "Expanded partnerships with major Japanese architecture and real estate firms. Team grew to 30 members.",
+    image: "/uploads/1782289015929-260326_View_01.webp",
   },
   {
     year: "2022-2023",
@@ -40,6 +42,7 @@ const DEFAULT_MILESTONES = [
     titleEn: "Technological Innovation",
     descJa: "VR/AR技術を導入。リアルタイムレンダリングとバーチャルステージングサービスを開始。",
     descEn: "Introduced VR/AR technologies. Launched real-time rendering and virtual staging services.",
+    image: "/uploads/1787120553201-wood_sauna_at_ziedlejas_wellness_resort_ver_3_retouch.webp",
   },
   {
     year: "2024〜",
@@ -49,6 +52,7 @@ const DEFAULT_MILESTONES = [
     titleEn: "Global Partnership",
     descJa: "80名体制に拡大。AI技術の活用でさらなる品質向上と効率化を実現。グローバル展開を加速。",
     descEn: "Expanded to 80 members. Leveraging AI for enhanced quality and efficiency. Accelerating global expansion.",
+    image: "/uploads/1787120363992-I8_Sample_005_Conner_Pool_002.webp",
   },
 ];
 
@@ -72,6 +76,7 @@ interface MilestoneItem {
   titleEn: string;
   descJa: string;
   descEn: string;
+  image?: string;
 }
 
 interface Props {
@@ -266,9 +271,36 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                   {/* Spacer for center dot alignment */}
                   <div className="hidden md:block w-16 shrink-0" />
 
-                  {/* Opposite Side (Pure UI Placeholder Frame) */}
+                  {/* Opposite Side (Image Frame) */}
                   <div className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pl-4" : "md:pr-4"} flex flex-col`}>
-                    <div className="w-full h-full min-h-[160px] rounded-2xl bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3] border border-gray-200/80 shadow-sm" />
+                    <div className="w-full h-full min-h-[200px] md:min-h-[240px] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 border border-gray-100 shadow-sm relative group">
+                      {ms.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={ms.image}
+                          alt={isJa ? ms.titleJa : ms.titleEn}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                          onError={(e) => {
+                            const t = e.currentTarget;
+                            t.style.display = "none";
+                            const p = t.parentElement;
+                            if (p) {
+                              p.classList.add("flex", "items-center", "justify-center");
+                              const s = document.createElement("span");
+                              s.className = "text-gray-400 text-sm font-medium";
+                              s.textContent = isJa ? (ms.yearJa || ms.year || "") : (ms.yearEn || ms.year || "");
+                              p.appendChild(s);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full min-h-[200px] flex items-center justify-center bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3]">
+                          <span className="text-gray-400 text-sm font-medium">
+                            {isJa ? (ms.yearJa || ms.year || "i8 STUDIO") : (ms.yearEn || ms.year || "i8 STUDIO")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}

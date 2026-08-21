@@ -29,7 +29,16 @@ export default async function AboutPage() {
     prisma.companyContent.findUnique({ where: { section: "overview" } }),
   ]);
 
-  let milestones: Array<{ year: string; titleJa: string; titleEn: string; descJa: string; descEn: string }> = [];
+  let milestones: Array<{
+    year?: string;
+    yearJa?: string;
+    yearEn?: string;
+    titleJa: string;
+    titleEn: string;
+    descJa: string;
+    descEn: string;
+    image?: string;
+  }> = [];
   if (milestonesRow?.contentJson) {
     try {
       const parsed = JSON.parse(milestonesRow.contentJson);
