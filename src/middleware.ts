@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const intlMiddleware = createMiddleware({
-  locales: ["en", "ja"],
-  defaultLocale: "en",
+  locales: ["ja", "en"],
+  defaultLocale: "ja",
 });
 
 /**

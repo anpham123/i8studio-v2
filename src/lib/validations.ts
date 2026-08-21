@@ -92,6 +92,7 @@ export const PriceItemSchema = z.object({
   titleJa: z.string().optional().default(""),
   titleEn: z.string().optional().default(""),
   bulletsJson: z.string().optional().default("[]"),
+  bulletsEnJson: z.string().optional().default("[]"),
   priceFrom: z.string().optional().default(""),
   priceLabelJa: z.string().optional().default(""),
   priceLabelEn: z.string().optional().default(""),
