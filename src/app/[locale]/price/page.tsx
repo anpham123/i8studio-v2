@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
+// force-dynamic: locale-dependent page, cannot be ISR cached across locales
+export const dynamic = "force-dynamic";
 import { buildMetadata } from "@/lib/seo";
 import PricePageContent from "@/components/public/PricePageContent";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +20,8 @@ export async function generateMetadata({
   });
 }
 
-export default async function PricePage() {
+export default async function PricePage({ params }: { params: { locale: string } }) {
+  const { locale } = params;
   const [dbItems, dbServices] = await Promise.all([
     prisma.priceItem.findMany({ orderBy: { order: "asc" } }),
     prisma.service.findMany({
@@ -44,5 +45,5 @@ export default async function PricePage() {
     order: item.order,
   }));
 
-  return <PricePageContent dbItems={items} dbServices={dbServices} />;
+  return <PricePageContent locale={locale} dbItems={items} dbServices={dbServices} />;
 }

@@ -203,12 +203,16 @@ function buildCardsFromServices(services: DbServiceItem[]): PriceCard[] {
 }
 
 interface Props {
+  locale?: string;
   dbItems?: DbPriceItem[];
   dbServices?: DbServiceItem[];
 }
 
-export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
-  const locale = useLocale();
+export default function PricePageContent({ locale: localeProp, dbItems, dbServices = [] }: Props) {
+  // Prefer prop passed from server (avoids ISR cache locale mismatch on deploy)
+  // Fall back to useLocale() for cases where component is used without prop
+  const localeFromHook = useLocale();
+  const locale = localeProp || localeFromHook;
   const isJa = locale === "ja";
 
   const cards = dbItems && dbItems.length > 0
