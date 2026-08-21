@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { getTranslations } from "next-intl/server";
+import { BLOG_CATEGORIES, getCategoryAliases, getCategoryBySlugOrRoute } from "@/lib/blog-categories";
 
 interface Props {
   locale: string;
@@ -14,11 +15,17 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
   const t = await getTranslations({ locale, namespace: "blogCategory" });
   const isJa = locale === "ja";
 
-  const categoryTitle = t(`${categoryKey}.title`);
-  const categoryDesc = t(`${categoryKey}.desc`);
+  const catDef = getCategoryBySlugOrRoute(categorySlug);
+  const categoryTitle = isJa ? (catDef?.nameJa || t(`${categoryKey}.title`)) : (catDef?.nameEn || t(`${categoryKey}.title`));
+  const categoryDesc = isJa ? (catDef?.descJa || t(`${categoryKey}.desc`)) : (catDef?.descEn || t(`${categoryKey}.desc`));
+
+  const aliases = getCategoryAliases(categorySlug);
 
   const posts = await prisma.blogPost.findMany({
-    where: { isPublished: true, category: categorySlug },
+    where: {
+      isPublished: true,
+      category: { in: aliases },
+    },
     orderBy: { publishedAt: "desc" },
   });
 
@@ -28,7 +35,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] font-medium mb-4">
-            BLOG
+            i8 STUDIO
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light text-[var(--ink)] leading-[1.2] mb-4">
             {categoryTitle}
@@ -42,28 +49,28 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
       {/* Category navigation */}
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 mb-10">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/${locale}/blogs`} className="px-4 py-2 rounded-full text-[12px] font-medium tracking-wide uppercase bg-white text-gray-500 border border-[var(--line)] hover:text-[#111] transition-colors">
+          <Link
+            href={`/${locale}/blogs`}
+            className="px-4 py-2 rounded-full text-[12px] font-medium tracking-wide uppercase bg-white text-gray-500 border border-[var(--line)] hover:text-[#111] transition-colors"
+          >
             {isJa ? "すべて" : "All"}
           </Link>
-          {[
-            { slug: "case-study", key: "caseStudy", route: "case-study" },
-            { slug: "technique", key: "technique", route: "tips" },
-            { slug: "knowledge", key: "knowledge", route: "knowledge" },
-            { slug: "ai", key: "ai", route: "ai-feature" },
-            { slug: "life-gallery", key: "lifeGallery", route: "life-gallery" },
-          ].map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/${locale}/blogs/${cat.route}`}
-              className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
-                cat.slug === categorySlug
-                  ? "bg-[#111] text-white"
-                  : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
-              }`}
-            >
-              {t(`${cat.key}.title`)}
-            </Link>
-          ))}
+          {BLOG_CATEGORIES.map((cat) => {
+            const isActive = cat.slug === categorySlug || cat.route === categorySlug || cat.key === categoryKey;
+            return (
+              <Link
+                key={cat.slug}
+                href={`/${locale}/blogs/${cat.route}`}
+                className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
+                  isActive
+                    ? "bg-[#111] text-white"
+                    : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
+                }`}
+              >
+                {isJa ? cat.nameJa : cat.nameEn}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -115,7 +122,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
             ))}
           </div>
         ) : (
-          /* Empty state with design */
+          /* Empty state */
           <div className="text-center py-20">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#fafaf8] flex items-center justify-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-gray-300">

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
+import { BLOG_CATEGORIES, getCategoryAliases } from "@/lib/blog-categories";
 
 type Props = {
   params: { locale: string };
@@ -26,12 +27,10 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const { locale } = params;
   const activeCategory = searchParams.category;
 
-  // Fetch categories from DB
-  const dbCategories = await prisma.blogCategory.findMany({ orderBy: { order: "asc" } });
-
   const where: Record<string, unknown> = { isPublished: true };
   if (activeCategory) {
-    where.category = activeCategory;
+    const aliases = getCategoryAliases(activeCategory);
+    where.category = { in: aliases };
   }
 
   const posts = await prisma.blogPost.findMany({
@@ -75,19 +74,22 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
           >
             {isJa ? "すべて" : "All"}
           </Link>
-          {dbCategories.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/${locale}/blogs?category=${cat.slug}`}
-              className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
-                activeCategory === cat.slug
-                  ? "bg-[#111] text-white"
-                  : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
-              }`}
-            >
-              {isJa ? (cat.nameJa || cat.nameEn) : (cat.nameEn || cat.nameJa)}
-            </Link>
-          ))}
+          {BLOG_CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat.slug || activeCategory === cat.route;
+            return (
+              <Link
+                key={cat.slug}
+                href={`/${locale}/blogs/${cat.route}`}
+                className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
+                  isActive
+                    ? "bg-[#111] text-white"
+                    : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
+                }`}
+              >
+                {isJa ? cat.nameJa : cat.nameEn}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
