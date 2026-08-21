@@ -62,32 +62,7 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
         </div>
       </section>
 
-      {/* Category filter */}
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-10 mb-10">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/${locale}/blogs`}
-            className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide uppercase transition-colors ${!activeCategory
-                ? "bg-[#111] text-white"
-                : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
-              }`}
-          >
-            {isJa ? "すべて" : "All"}
-          </Link>
-          {dbCategories.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/${locale}/blogs?category=${cat.slug}`}
-              className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${activeCategory === cat.slug
-                  ? "bg-[#111] text-white"
-                  : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
-                }`}
-            >
-              {isJa ? (cat.nameJa || cat.nameEn) : (cat.nameEn || cat.nameJa)}
-            </Link>
-          ))}
-        </div>
-      </div>
+
 
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 pb-20">
         {/* Featured post */}

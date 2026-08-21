@@ -42,33 +42,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
         </div>
       </section>
 
-      {/* Category navigation pills */}
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-10 mb-10">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/${locale}/blogs`}
-            className="px-4 py-2 rounded-full text-[12px] font-medium tracking-wide uppercase bg-white text-gray-500 border border-[var(--line)] hover:text-[#111] transition-colors"
-          >
-            {isJa ? "すべて" : "All"}
-          </Link>
-          {BLOG_CATEGORIES.map((cat) => {
-            const isActive = cat.slug === categorySlug || cat.route === categorySlug || cat.key === categoryKey;
-            return (
-              <Link
-                key={cat.slug}
-                href={`/${locale}/blogs/${cat.route}`}
-                className={`px-4 py-2 rounded-full text-[12px] font-medium tracking-wide transition-colors ${
-                  isActive
-                    ? "bg-[#111] text-white"
-                    : "bg-white text-gray-500 border border-[var(--line)] hover:text-[#111]"
-                }`}
-              >
-                {isJa ? cat.nameJa : cat.nameEn}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+
 
       {/* Posts Grid */}
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 pb-20">
