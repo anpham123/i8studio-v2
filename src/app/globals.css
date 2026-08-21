@@ -34,6 +34,14 @@ body {
   overflow-x: hidden;
 }
 
+/* Force standard lining figures (cap-height numbers) for all serif and heading typography */
+.font-serif,
+.font-display,
+h1, h2, h3, h4, h5, h6 {
+  font-variant-numeric: lining-nums proportional-nums;
+  font-feature-settings: "lnum" 1, "pnum" 1;
+}
+
 /* Per-section noise texture — subtle grain on light sections */
 .section-noise {
   position: relative;

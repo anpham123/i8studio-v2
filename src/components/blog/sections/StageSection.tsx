@@ -57,7 +57,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                   )}
                 </div>
                 <h2
-                  className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
+                  className="font-serif lining-nums text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)]"
                   dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.title) }}
                 />
               </div>
