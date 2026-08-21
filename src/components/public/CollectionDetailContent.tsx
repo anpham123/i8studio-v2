@@ -120,13 +120,13 @@ export default function CollectionDetailContent({
                 whileInView="visible"
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 relative group"
+                className="rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 relative group"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.image}
                   alt={`${title} ${i + 1}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  className="w-full h-auto block hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                     const p = e.currentTarget.parentElement;

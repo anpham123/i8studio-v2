@@ -16,6 +16,7 @@ interface DbPriceItem {
   priceLabelJa: string;
   priceLabelEn: string;
   bulletsJson: string;
+  bulletsEnJson?: string;
   cardImage?: string;
   order: number;
 }
@@ -35,15 +36,17 @@ interface PriceCard {
 
 function buildCardsFromDb(items: DbPriceItem[]): PriceCard[] {
   return items.map((item) => {
-    let bullets: string[] = [];
-    try { bullets = JSON.parse(item.bulletsJson); } catch { /* ignore */ }
+    let bulletsJa: string[] = [];
+    let bulletsEn: string[] = [];
+    try { bulletsJa = JSON.parse(item.bulletsJson || "[]"); } catch { /* ignore */ }
+    try { bulletsEn = JSON.parse(item.bulletsEnJson || "[]"); } catch { /* ignore */ }
     return {
       slug: item.serviceSlug,
       icon: item.icon || "📦",
       titleJa: item.nameJa,
       titleEn: item.nameEn,
-      features: bullets,
-      featuresJa: bullets,
+      features: bulletsEn.length > 0 ? bulletsEn : bulletsJa,
+      featuresJa: bulletsJa,
       price: item.price || "ASK",
       priceLabelJa: item.priceLabelJa || "参考価格",
       priceLabelEn: item.priceLabelEn || "Starting from",
@@ -125,7 +128,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             transition={{ delay: 0.1 }}
             className="font-serif text-[clamp(28px,4vw,48px)] font-medium text-[var(--ink)] leading-[1.3] mb-3"
           >
-            {isJa ? "料金体系" : "Pricing"}
+            料金体系
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -133,9 +136,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
             transition={{ delay: 0.2 }}
             className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[600px]"
           >
-            {isJa
-              ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
-              : "Standard pricing for each architectural visualization service. We propose the best plan based on project scale, detail, and timeline."}
+            建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。
           </motion.p>
         </div>
       </section>
@@ -144,9 +145,9 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
       <section className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-14 sm:pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
-            const title = isJa ? card.titleJa : card.titleEn;
-            const features = isJa ? (card.featuresJa.length > 0 ? card.featuresJa : card.features) : card.features;
-            const priceLabel = isJa ? card.priceLabelJa : card.priceLabelEn;
+            const title = card.titleJa || card.titleEn;
+            const features = card.featuresJa && card.featuresJa.length > 0 ? card.featuresJa : card.features;
+            const priceLabel = card.priceLabelJa || "参考価格";
             const isAsk = card.price === "ASK" || !card.price;
 
             return (
@@ -179,19 +180,11 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                   {/* Top: Service name */}
                   <div>
                     <h3
-                      className="font-serif text-[20px] sm:text-[24px] font-medium text-white leading-tight"
-                      style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}
+                      className="font-serif text-[26px] sm:text-[30px] font-medium text-white leading-tight tracking-wide"
+                      style={{ textShadow: "0 2px 14px rgba(0,0,0,0.7)" }}
                     >
-                      {card.titleEn}
+                      {title}
                     </h3>
-                    {isJa && card.titleJa !== card.titleEn && (
-                      <p
-                        className="text-[12px] text-white/70 mt-1"
-                        style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
-                      >
-                        {card.titleJa}
-                      </p>
-                    )}
                   </div>
 
                   {/* Bottom: Features + Price + CTA */}
@@ -215,7 +208,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                               ASK
                             </span>
                             <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
-                              {isJa ? "お見積り" : "On request"}
+                              お見積り
                             </p>
                           </>
                         ) : (
@@ -235,14 +228,14 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                           href={`/${locale}/solution/${card.slug}`}
                           className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
                         >
-                          {isJa ? "詳細を見る" : "Details"} →
+                          詳細を見る →
                         </Link>
                       ) : (
                         <Link
                           href={`/${locale}/contact`}
                           className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
                         >
-                          {isJa ? "お問い合わせ" : "Contact"} →
+                          お問い合わせ →
                         </Link>
                       )}
                     </div>

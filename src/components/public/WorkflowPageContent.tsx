@@ -142,7 +142,7 @@ export default function WorkflowPageContent({ steps }: Props) {
 
               {/* Text */}
               <div className="w-full md:w-1/2">
-                <span className="text-5xl md:text-7xl font-extralight text-gray-300 block mb-2" style={{ fontFamily: "var(--font-display), serif" }}>
+                <span className="text-5xl md:text-7xl font-extralight text-[#111] block mb-2" style={{ fontFamily: "var(--font-display), serif" }}>
                   {num}
                 </span>
                 <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4" style={{ fontFamily: "var(--font-noto-serif), serif" }}>

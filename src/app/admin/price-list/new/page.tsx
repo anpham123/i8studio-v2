@@ -8,10 +8,11 @@ import { Save } from "lucide-react";
 
 export default function NewPriceItemPage() {
   const [form, setForm] = useState({
-    serviceSlug: "", icon: "", titleJa: "", titleEn: "", bulletsJson: "[]",
+    serviceSlug: "", icon: "", titleJa: "", titleEn: "", bulletsJson: "[]", bulletsEnJson: "[]",
     priceFrom: "", priceLabelJa: "", priceLabelEn: "", order: "0",
   });
-  const [bullets, setBullets] = useState<string[]>([]);
+  const [bulletsJa, setBulletsJa] = useState<string[]>([]);
+  const [bulletsEn, setBulletsEn] = useState<string[]>([]);
   const [services, setServices] = useState<{ slug: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -28,7 +29,12 @@ export default function NewPriceItemPage() {
     const res = await fetch("/api/price-items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, order: parseInt(form.order) || 0, bulletsJson: JSON.stringify(bullets) }),
+      body: JSON.stringify({
+        ...form,
+        order: parseInt(form.order) || 0,
+        bulletsJson: JSON.stringify(bulletsJa.filter(b => b.trim() !== "")),
+        bulletsEnJson: JSON.stringify(bulletsEn.filter(b => b.trim() !== "")),
+      }),
     });
     const data = await res.json();
     setSaving(false);
@@ -65,7 +71,28 @@ export default function NewPriceItemPage() {
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
           <label className="block text-sm font-medium text-gray-700">Tính năng / Bullets</label>
-          <textarea value={bullets.join("\n")} onChange={(e) => setBullets(e.target.value.split("\n"))} rows={4} placeholder="Mỗi dòng là 1 tính năng" className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">Tính năng (JA)</label>
+              <textarea
+                value={bulletsJa.join("\n")}
+                onChange={(e) => setBulletsJa(e.target.value.split("\n"))}
+                rows={5}
+                placeholder={"1カット\n4Kレンダリング\n3回修正"}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">Tính năng (EN)</label>
+              <textarea
+                value={bulletsEn.join("\n")}
+                onChange={(e) => setBulletsEn(e.target.value.split("\n"))}
+                rows={5}
+                placeholder={"1 Cut\n4K Rendering\n3 Revisions"}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </AdminShell>

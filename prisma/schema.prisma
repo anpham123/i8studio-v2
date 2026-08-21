@@ -124,7 +124,8 @@ model PriceItem {
   icon         String   @default("")
   titleJa      String   @default("")
   titleEn      String   @default("")
-  bulletsJson  String   @default("[]")  // JSON array of feature strings
+  bulletsJson  String   @default("[]")  // JSON array of feature strings (JA)
+  bulletsEnJson String   @default("[]")  // JSON array of feature strings (EN)
   priceFrom    String   @default("")    // e.g. "¥35,000〜" or "ASK"
   priceLabelJa String   @default("")
   priceLabelEn String   @default("")
