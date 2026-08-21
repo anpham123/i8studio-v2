@@ -8,6 +8,8 @@ import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
 
+import { BLOG_CATEGORIES, getCategoryAliases, getCategoryBySlugOrRoute } from "@/lib/blog-categories";
+
 type Props = {
   params: { locale: string };
   searchParams: { category?: string };
@@ -25,13 +27,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogIndexPage({ params, searchParams }: Props) {
   const { locale } = params;
   const activeCategory = searchParams.category;
+  const isJa = locale === "ja";
 
-  // Fetch categories from DB
-  const dbCategories = await prisma.blogCategory.findMany({ orderBy: { order: "asc" } });
+  const catDef = activeCategory ? getCategoryBySlugOrRoute(activeCategory) : undefined;
+  const aliases = activeCategory ? getCategoryAliases(activeCategory) : undefined;
 
   const where: Record<string, unknown> = { isPublished: true };
-  if (activeCategory) {
-    where.category = activeCategory;
+  if (aliases) {
+    where.category = { in: aliases };
   }
 
   const posts = await prisma.blogPost.findMany({
@@ -41,7 +44,16 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
 
   const featured = !activeCategory ? posts.find((p) => p.isFeatured) : undefined;
   const rest = posts.filter((p) => p.id !== featured?.id);
-  const isJa = locale === "ja";
+
+  const heroEyebrow = activeCategory ? "BLOG" : "i8 STUDIO";
+  const heroTitle = activeCategory
+    ? (isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog"))
+    : "Blog";
+  const heroDesc = activeCategory
+    ? (isJa ? catDef?.descJa : catDef?.descEn)
+    : (isJa
+        ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
+        : "Production process, technical insights, and architectural CG trends.");
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
@@ -49,15 +61,13 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] font-medium mb-4">
-            i8 STUDIO
+            {heroEyebrow}
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light text-[var(--ink)] leading-[1.2] mb-4">
-            Blog
+            {heroTitle}
           </h1>
-          <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[500px] mx-auto">
-            {isJa
-              ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
-              : "Production process, technical insights, and architectural CG trends."}
+          <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[600px] mx-auto">
+            {heroDesc}
           </p>
         </div>
       </section>

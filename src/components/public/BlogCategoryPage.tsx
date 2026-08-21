@@ -25,19 +25,17 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
-      {/* Hero header - identical to main Blog page */}
+      {/* Hero header */}
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] font-medium mb-4">
-            i8 STUDIO
+            BLOG
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light text-[var(--ink)] leading-[1.2] mb-4">
-            Blog
+            {isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog")}
           </h1>
-          <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[500px] mx-auto">
-            {isJa
-              ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
-              : "Production process, technical insights, and architectural CG trends."}
+          <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[600px] mx-auto">
+            {isJa ? catDef?.descJa : catDef?.descEn}
           </p>
         </div>
       </section>
