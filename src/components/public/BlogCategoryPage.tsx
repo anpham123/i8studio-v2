@@ -2,23 +2,17 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { getTranslations } from "next-intl/server";
 import { BLOG_CATEGORIES, getCategoryAliases, getCategoryBySlugOrRoute } from "@/lib/blog-categories";
 
 interface Props {
   locale: string;
   categorySlug: string;
-  categoryKey: string; // key in blogCategory i18n namespace
+  categoryKey: string;
 }
 
 export default async function BlogCategoryPage({ locale, categorySlug, categoryKey }: Props) {
-  const t = await getTranslations({ locale, namespace: "blogCategory" });
   const isJa = locale === "ja";
-
   const catDef = getCategoryBySlugOrRoute(categorySlug);
-  const categoryTitle = isJa ? (catDef?.nameJa || t(`${categoryKey}.title`)) : (catDef?.nameEn || t(`${categoryKey}.title`));
-  const categoryDesc = isJa ? (catDef?.descJa || t(`${categoryKey}.desc`)) : (catDef?.descEn || t(`${categoryKey}.desc`));
-
   const aliases = getCategoryAliases(categorySlug);
 
   const posts = await prisma.blogPost.findMany({
@@ -31,22 +25,24 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
-      {/* Hero */}
+      {/* Hero header - identical to main Blog page */}
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] font-medium mb-4">
             i8 STUDIO
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light text-[var(--ink)] leading-[1.2] mb-4">
-            {categoryTitle}
+            Blog
           </h1>
           <p className="text-[var(--ink-muted)] text-[15px] leading-[1.8] max-w-[500px] mx-auto">
-            {categoryDesc}
+            {isJa
+              ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
+              : "Production process, technical insights, and architectural CG trends."}
           </p>
         </div>
       </section>
 
-      {/* Category navigation */}
+      {/* Category navigation pills */}
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 mb-10">
         <div className="flex flex-wrap items-center gap-2">
           <Link
@@ -74,6 +70,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
         </div>
       </div>
 
+      {/* Posts Grid */}
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 pb-20">
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -98,7 +95,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                      {categoryTitle}
+                      {isJa ? (catDef?.nameJa || post.category) : (catDef?.nameEn || post.category)}
                     </span>
                     <span className="text-[var(--ink-muted)] text-[11px]">·</span>
                     <span className="text-[var(--ink-muted)] text-[11px]">
@@ -122,22 +119,10 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
             ))}
           </div>
         ) : (
-          /* Empty state */
           <div className="text-center py-20">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[#fafaf8] flex items-center justify-center">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-gray-300">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-            </div>
-            <p className="font-serif text-[24px] text-[var(--ink-muted)] font-light mb-3">
-              {t("emptyState")}
+            <p className="font-serif text-[24px] text-[var(--ink-muted)] font-light mb-4">
+              {isJa ? "このカテゴリの記事はまだありません" : "No articles in this category yet"}
             </p>
-            <Link href={`/${locale}/blogs`} className="text-[var(--accent)] text-sm font-medium hover:underline">
-              {isJa ? "すべての記事を見る →" : "View all articles →"}
-            </Link>
           </div>
         )}
       </div>
