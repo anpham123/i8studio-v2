@@ -315,15 +315,15 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
       </section>
 
       {/* ── CTA ────────────────────────── */}
-      <section className="bg-[#111]">
+      <section className="bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-6 py-20 text-center">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <h2 className="text-2xl md:text-3xl font-light text-white mb-8" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-8" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "プロジェクトのご相談はこちら" : "Discuss Your Project"}
             </h2>
             <Link
               href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-10 py-4 bg-white text-[#111] text-sm font-semibold rounded-full hover:bg-white/90 transition-colors"
+              className="inline-flex items-center gap-2 px-10 py-4 bg-[#111] text-white text-sm font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
             >
               {isJa ? "お問い合わせ" : "Contact Us"} →
             </Link>
