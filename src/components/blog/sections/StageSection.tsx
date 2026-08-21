@@ -127,21 +127,33 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                 : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
             }`}
           >
-            {data.additionalImages.map((img, i) => (
-              <div
-                key={i}
-                className={`rounded-lg overflow-hidden border border-gray-200/40 shadow-sm bg-[var(--surface-warm)] ${
-                  data.additionalImages!.length === 1 ? "w-full aspect-[16/10]" : "aspect-[4/3]"
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img}
-                  alt={`${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            ))}
+            {data.additionalImages.map((item, i) => {
+              const imgSrc = typeof item === "string" ? item : item.image;
+              const imgCap = typeof item === "string" ? (data.additionalImageCaptions?.[i] || "") : (item.caption || "");
+
+              return (
+                <div key={i} className="flex flex-col">
+                  <div
+                    className={`rounded-lg overflow-hidden border border-gray-200/40 shadow-sm bg-[var(--surface-warm)] ${
+                      data.additionalImages!.length === 1 ? "w-full aspect-[16/10]" : "aspect-[4/3]"
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imgSrc}
+                      alt={imgCap || `${data.title.replace(/<[^>]*>/g, "")} - ${i + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  {imgCap && (
+                    <p
+                      className="text-[12px] sm:text-[13px] text-gray-500 font-sans tracking-wide mt-2 text-center"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

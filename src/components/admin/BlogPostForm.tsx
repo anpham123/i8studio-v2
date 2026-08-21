@@ -8,6 +8,11 @@ import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X } from "lucide-r
 import ImageUpload from "@/components/admin/ImageUpload";
 import RichEditor from "@/components/admin/RichEditor";
 
+interface AdditionalImageItem {
+  image: string;
+  caption?: string;
+}
+
 interface Section {
   type: "checkcam" | "stage" | "insight" | "comparison";
   num: string;
@@ -18,7 +23,8 @@ interface Section {
   image: string;
   reverse: boolean;
   caption: string;
-  additionalImages: string[];
+  additionalImages: (string | AdditionalImageItem)[];
+  additionalImageCaptions?: string[];
   tags: { label: string; ok: string[]; ng: string[] };
   grid: { label: string; image: string }[];
 }
@@ -154,13 +160,47 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
   // Additional images management
   const addAdditionalImage = (si: number, url: string) => {
-    setSections((s) => s.map((sec, j) => j === si ? { ...sec, additionalImages: [...(sec.additionalImages || []), url] } : sec));
+    setSections((s) =>
+      s.map((sec, j) =>
+        j === si
+          ? {
+              ...sec,
+              additionalImages: [
+                ...(sec.additionalImages || []),
+                { image: url, caption: "" },
+              ],
+            }
+          : sec
+      )
+    );
   };
+
+  const updateAdditionalImageCaption = (si: number, imgIdx: number, caption: string) => {
+    setSections((s) =>
+      s.map((sec, j) => {
+        if (j !== si) return sec;
+        const current = [...(sec.additionalImages || [])];
+        const item = current[imgIdx];
+        if (typeof item === "string") {
+          current[imgIdx] = { image: item, caption };
+        } else {
+          current[imgIdx] = { ...item, caption };
+        }
+        return { ...sec, additionalImages: current };
+      })
+    );
+  };
+
   const removeAdditionalImage = (si: number, imgIdx: number) => {
-    setSections((s) => s.map((sec, j) => {
-      if (j !== si) return sec;
-      return { ...sec, additionalImages: (sec.additionalImages || []).filter((_, k) => k !== imgIdx) };
-    }));
+    setSections((s) =>
+      s.map((sec, j) => {
+        if (j !== si) return sec;
+        return {
+          ...sec,
+          additionalImages: (sec.additionalImages || []).filter((_, k) => k !== imgIdx),
+        };
+      })
+    );
   };
 
   const handleSave = async () => {
@@ -340,27 +380,53 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                 <ImageUpload value={sec.image} onChange={(v) => updateSection(si, "image", v)} />
               </div>
 
-              {/* Additional images */}
-              <div className="mt-3">
-                <label className={labelCls}>Ảnh bổ sung (Additional Images)</label>
-                <div className="flex flex-wrap gap-3 mb-2">
-                  {(sec.additionalImages || []).map((img, imgIdx) => (
-                    <div key={imgIdx} className="relative w-24 h-20 rounded border border-gray-200 overflow-hidden group">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img} alt={`Additional ${imgIdx + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => removeAdditionalImage(si, imgIdx)}
-                        className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              {/* Additional images with per-image caption */}
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <label className={labelCls}>📸 Ảnh bổ sung &amp; Caption riêng từng ảnh (Additional Images)</label>
+                
+                {sec.additionalImages && sec.additionalImages.length > 0 && (
+                  <div className="space-y-3 mb-3">
+                    {sec.additionalImages.map((item, imgIdx) => {
+                      const imgSrc = typeof item === "string" ? item : item.image;
+                      const imgCap = typeof item === "string" ? (sec.additionalImageCaptions?.[imgIdx] || "") : (item.caption || "");
+
+                      return (
+                        <div key={imgIdx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                          <div className="relative w-24 h-16 rounded overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={imgSrc} alt="" className="w-full h-full object-cover" />
+                          </div>
+
+                          <div className="flex-1">
+                            <label className="block text-[11px] font-medium text-gray-600 mb-1">
+                              Caption cho ảnh bổ sung {imgIdx + 1}
+                            </label>
+                            <input
+                              value={imgCap}
+                              onChange={(e) => updateAdditionalImageCaption(si, imgIdx, e.target.value)}
+                              placeholder="Nhập chú thích / caption cho ảnh này..."
+                              className="w-full px-3 py-1.5 border border-gray-200 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeAdditionalImage(si, imgIdx)}
+                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa ảnh này"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <ImageUpload
                   value=""
                   onChange={(v) => { if (v) addAdditionalImage(si, v); }}
-                  label="Thêm ảnh bổ sung"
+                  label="+ Thêm ảnh bổ sung mới"
                 />
               </div>
 
@@ -373,8 +439,8 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
               {sec.type === "stage" && (
                 <div className="mt-3">
-                  <label className={labelCls}>Caption</label>
-                  <input value={sec.caption} onChange={(e) => updateSection(si, "caption", e.target.value)} className={inputCls} />
+                  <label className={labelCls}>Caption ảnh chính (Main Image Caption)</label>
+                  <input value={sec.caption} onChange={(e) => updateSection(si, "caption", e.target.value)} className={inputCls} placeholder="Caption chú thích cho ảnh chính ở trên..." />
                 </div>
               )}
             </div>
