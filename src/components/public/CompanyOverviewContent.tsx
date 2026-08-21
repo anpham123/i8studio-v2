@@ -215,9 +215,51 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                       <h3 className="text-lg md:text-xl font-medium text-[#111] mt-2 mb-3">
                         {isJa ? ms.titleJa : ms.titleEn}
                       </h3>
-                      <p className="text-sm text-gray-500 leading-relaxed">
-                        {isJa ? ms.descJa : ms.descEn}
-                      </p>
+                      {(() => {
+                        const rawDesc = (isJa ? ms.descJa : ms.descEn) || "";
+                        // Split by newlines first
+                        let items = rawDesc
+                          .split(/\r?\n/)
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+
+                        // If it's a single block without newlines, split by sentence endings for Japanese (。) or English (. )
+                        if (items.length <= 1 && rawDesc.length > 40) {
+                          if (isJa && rawDesc.includes("。")) {
+                            items = rawDesc
+                              .split(/(?<=。)/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                          } else if (!isJa && rawDesc.includes(". ")) {
+                            items = rawDesc
+                              .split(/(?<=\.\s+)/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                          }
+                        }
+
+                        if (items.length > 1) {
+                          return (
+                            <ul className="space-y-2.5 mt-1">
+                              {items.map((item, idx) => {
+                                const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                                return (
+                                  <li key={idx} className="flex items-start gap-2.5 text-sm text-gray-600 leading-relaxed">
+                                    <span className="text-[#b8935a] font-bold text-sm leading-[1.6] select-none shrink-0">•</span>
+                                    <span>{cleanItem}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          );
+                        }
+
+                        return (
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            {rawDesc}
+                          </p>
+                        );
+                      })()}
                     </div>
                   </div>
 
