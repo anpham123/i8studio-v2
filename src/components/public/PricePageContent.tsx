@@ -82,6 +82,63 @@ const JAPANESE_SERVICE_BULLETS: Record<string, string[]> = {
   "exe-content": ["複数シーン", "カスタムUI", "データ連携"],
 };
 
+function getLocalizedTitle(card: PriceCard, isJa: boolean): string {
+  const rawJa = (card.titleJa || "").trim();
+  const rawEn = (card.titleEn || "").trim();
+  const slug = (card.slug || "").toLowerCase().replace(/_/g, "-");
+
+  if (isJa) {
+    if (JAPANESE_SERVICE_TITLES[slug]) return JAPANESE_SERVICE_TITLES[slug];
+    // Check if rawJa is one of known English titles stored in DB
+    if (rawJa === "VR Walkthrough" || rawEn === "VR Walkthrough" || slug.includes("walkthrough")) {
+      return "VRウォークスルー";
+    }
+    if (rawJa === "CG Perspective" || rawEn === "CG Perspective" || slug.includes("perspective")) {
+      return "CGパース";
+    }
+    if (rawJa === "CG Video" || rawEn === "CG Video" || slug.includes("video")) {
+      return "CG動画";
+    }
+    if (rawJa === "Photo Compositing" || rawEn === "Photo Compositing" || slug.includes("photo") || slug.includes("composite")) {
+      return "写真合成";
+    }
+    if (rawJa === "Virtual Staging" || rawEn === "Virtual Staging" || slug.includes("staging")) {
+      return "バーチャルステージング";
+    }
+    if (rawJa === "Digital Model" || rawEn === "Digital Model" || slug.includes("model")) {
+      return "デジタル模型";
+    }
+    if (rawJa === "EXE Content" || rawEn === "EXE Content" || slug.includes("exe")) {
+      return "EXEコンテンツ";
+    }
+    return rawJa || rawEn;
+  } else {
+    if (ENGLISH_SERVICE_TITLES[slug]) return ENGLISH_SERVICE_TITLES[slug];
+    if (rawJa === "VRウォークスルー" || rawEn === "VRウォークスルー" || slug.includes("walkthrough")) {
+      return "VR Walkthrough";
+    }
+    if (rawJa === "CGパース" || rawEn === "CGパース" || slug.includes("perspective")) {
+      return "CG Perspective";
+    }
+    if (rawJa === "CG動画" || rawEn === "CG動画" || slug.includes("video")) {
+      return "CG Video";
+    }
+    if (rawJa === "写真合成" || rawEn === "写真合成" || slug.includes("photo") || slug.includes("composite")) {
+      return "Photo Compositing";
+    }
+    if (rawJa === "バーチャルステージング" || rawEn === "バーチャルステージング" || slug.includes("staging")) {
+      return "Virtual Staging";
+    }
+    if (rawJa === "デジタル模型" || rawEn === "デジタル模型" || slug.includes("model")) {
+      return "Digital Model";
+    }
+    if (rawJa === "EXEコンテンツ" || rawEn === "EXEコンテンツ" || slug.includes("exe")) {
+      return "EXE Content";
+    }
+    return rawEn || rawJa;
+  }
+}
+
 const SERVICE_ICONS: Record<string, string> = {
   "cg-perspective": "🖼️",
   "cg-video": "🎬",
@@ -195,9 +252,7 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
       <section className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-14 sm:pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
-            const title = isJa
-              ? (JAPANESE_SERVICE_TITLES[card.slug] || card.titleJa || card.titleEn)
-              : (ENGLISH_SERVICE_TITLES[card.slug] || card.titleEn || card.titleJa);
+            const title = getLocalizedTitle(card, isJa);
             const features = isJa
               ? ((card.featuresJa && card.featuresJa.length > 0) ? card.featuresJa : (JAPANESE_SERVICE_BULLETS[card.slug] || card.features))
               : ((card.features && card.features.length > 0) ? card.features : (ENGLISH_SERVICE_BULLETS[card.slug] || card.featuresJa));
