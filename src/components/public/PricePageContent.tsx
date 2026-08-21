@@ -64,6 +64,18 @@ interface DbServiceItem {
   plansJson: string;
 }
 
+const JAPANESE_SERVICE_TITLES: Record<string, string> = {
+  "cg-perspective": "CGパース",
+  "cg-video": "CG動画",
+  "photo-composite": "写真合成",
+  "virtual-staging": "バーチャルステージング",
+  "vr360": "VR360",
+  "vr-walkthrough": "VRウォークスルー",
+  "digital-model": "デジタル模型",
+  "ar": "AR",
+  "exe-content": "EXEコンテンツ",
+};
+
 const SERVICE_ICONS: Record<string, string> = {
   "cg-perspective": "🖼️",
   "cg-video": "🎬",
@@ -145,9 +157,13 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
       <section className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-6 sm:pt-8 pb-14 sm:pb-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {cards.map((card, i) => {
-            const title = card.titleJa || card.titleEn;
-            const features = card.featuresJa && card.featuresJa.length > 0 ? card.featuresJa : card.features;
-            const priceLabel = card.priceLabelJa || "参考価格";
+            const title = isJa
+              ? (JAPANESE_SERVICE_TITLES[card.slug] || card.titleJa || card.titleEn)
+              : (card.titleEn || card.titleJa);
+            const features = isJa
+              ? (card.featuresJa && card.featuresJa.length > 0 ? card.featuresJa : card.features)
+              : (card.features && card.features.length > 0 ? card.features : card.featuresJa);
+            const priceLabel = isJa ? (card.priceLabelJa || "参考価格") : (card.priceLabelEn || "Starting from");
             const isAsk = card.price === "ASK" || !card.price;
 
             return (
@@ -228,14 +244,14 @@ export default function PricePageContent({ dbItems, dbServices = [] }: Props) {
                           href={`/${locale}/solution/${card.slug}`}
                           className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
                         >
-                          詳細を見る →
+                          {isJa ? "詳細を見る →" : "View details →"}
                         </Link>
                       ) : (
                         <Link
                           href={`/${locale}/contact`}
                           className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
                         >
-                          お問い合わせ →
+                          {isJa ? "お問い合わせ →" : "Contact us →"}
                         </Link>
                       )}
                     </div>
