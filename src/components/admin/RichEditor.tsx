@@ -3,15 +3,42 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
+import LinkExtension from "@tiptap/extension-link";
+import { Mark, mergeAttributes } from "@tiptap/core";
 import { Table, TableRow, TableHeader, TableCell } from "@tiptap/extension-table";
 import { useEffect, useCallback, useState } from "react";
 import { createPortal } from "react-dom";
 import { useToast } from "@/components/admin/Toast";
 import {
   Bold, Italic, List, ListOrdered, Heading2, Heading3,
-  Quote, Undo, Redo, Image as ImageIcon, Link, Minus,
-  Table as TableIcon, Plus, Trash2, X, Sparkles,
+  Quote, Undo, Redo, Image as ImageIcon, Link as LinkIcon, Minus,
+  Table as TableIcon, Plus, Trash2, X, Sparkles, Highlighter,
 } from "lucide-react";
+
+// Custom Highlight mark extension for keyword highlighting
+const Highlight = Mark.create({
+  name: "highlight",
+
+  addOptions() {
+    return {
+      HTMLAttributes: {
+        class: "blog-highlight",
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      { tag: "mark" },
+      { tag: "span[data-highlight]" },
+      { tag: "span.blog-highlight" },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["mark", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
+});
 
 interface RichEditorProps {
   value: string;
@@ -54,6 +81,13 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Highlight,
+      LinkExtension.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "blog-link",
+        },
+      }),
       Image.configure({ inline: false, allowBase64: true }),
       Table.configure({
         resizable: true,
@@ -203,11 +237,18 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
       <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400">
         {/* Toolbar */}
         <div className="flex flex-wrap gap-0.5 p-2 border-b border-gray-100 bg-gray-50">
-          <ToolBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold">
+          <ToolBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold (In đậm)">
             <Bold size={15} />
           </ToolBtn>
-          <ToolBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italic">
+          <ToolBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} title="Italic (In nghiêng)">
             <Italic size={15} />
+          </ToolBtn>
+          <ToolBtn
+            onClick={() => editor.chain().focus().toggleMark("highlight").run()}
+            active={editor.isActive("highlight")}
+            title="Highlight từ khóa (Tô sáng dạ quang)"
+          >
+            <Highlighter size={15} className={editor.isActive("highlight") ? "text-amber-700" : "text-amber-600"} />
           </ToolBtn>
           <div className="w-px bg-gray-200 mx-1" />
           <ToolBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2">
@@ -233,8 +274,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
           <ToolBtn onClick={addImage} active={false} title="Insert image">
             <ImageIcon size={15} />
           </ToolBtn>
-          <ToolBtn onClick={addLink} active={editor.isActive("link")} title="Add link">
-            <Link size={15} />
+          <ToolBtn onClick={addLink} active={editor.isActive("link")} title="Chèn liên kết / Internal Link">
+            <LinkIcon size={15} />
           </ToolBtn>
           <ToolBtn onClick={() => setIsTableModalOpen(true)} active={editor.isActive("table")} title="Chèn Bảng So Sánh (Comparison Table)">
             <TableIcon size={15} />

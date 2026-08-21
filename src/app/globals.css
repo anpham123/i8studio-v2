@@ -364,3 +364,31 @@ table.comparison-table {
 .handle-glow {
   animation: handle-pulse 2s ease-in-out infinite;
 }
+
+/* ── Blog Keyword Highlight & Links ─────────────────────── */
+mark,
+.blog-highlight {
+  background: #fef08a !important;
+  color: #111111 !important;
+  padding: 0.12em 0.35em !important;
+  margin: 0 0.1em !important;
+  border-radius: 0.25rem !important;
+  font-weight: 600 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
+}
+
+.blog-content a,
+.blog-link {
+  color: var(--accent, #b8935a) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  font-weight: 500 !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.blog-content a:hover,
+.blog-link:hover {
+  opacity: 0.8 !important;
+  color: #9a7642 !important;
+}
