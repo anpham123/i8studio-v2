@@ -244,7 +244,49 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-3 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {ftTitle}
                 </h2>
-                <p className="text-gray-500 text-base leading-relaxed">{ftDesc}</p>
+                {(() => {
+                  const rawDesc = ftDesc || "";
+                  let items = rawDesc
+                    .split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+
+                  if (items.length <= 1 && rawDesc.length > 60) {
+                    if (isJa && rawDesc.includes("。")) {
+                      items = rawDesc
+                        .split(/(?<=。)/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                    } else if (!isJa && rawDesc.includes(". ")) {
+                      items = rawDesc
+                        .split(/(?<=\.\s+)/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                    }
+                  }
+
+                  if (items.length > 1) {
+                    return (
+                      <ul className="space-y-2.5 mb-2">
+                        {items.map((item, idx) => {
+                          const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                          return (
+                            <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-sm sm:text-base leading-relaxed">
+                              <span className="text-[#b8935a] font-bold text-sm sm:text-base leading-[1.6] select-none shrink-0">•</span>
+                              <span>{cleanItem}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    );
+                  }
+
+                  return (
+                    <p className="text-gray-500 text-base leading-relaxed whitespace-pre-line">
+                      {rawDesc}
+                    </p>
+                  );
+                })()}
               </div>
             </motion.div>
           );
@@ -281,7 +323,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 <h3 className="text-base font-medium text-[#111] mb-2">
                   {isJa ? step.titleJa : step.titleEn}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
+                <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
                   {isJa ? step.descJa : step.descEn}
                 </p>
               </motion.div>
