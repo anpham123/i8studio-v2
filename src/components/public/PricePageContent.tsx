@@ -205,7 +205,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-4xl"
+            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[1400px]"
           >
             {isJa
               ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
