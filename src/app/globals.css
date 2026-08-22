@@ -402,33 +402,47 @@ mark,
 }
 
 /* ── Blog Table Styles ─────────────────────────────────── */
-.blog-content table {
+.blog-content table,
+.prose table,
+.tiptap table,
+.ProseMirror table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.blog-content th {
+.blog-content th,
+.prose table th,
+.tiptap table th,
+.ProseMirror table th {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 1.0625rem !important; /* ~17px (lớn hơn 14px khoảng 2.5-3pt) */
+  line-height: 1.5 !important;
+  text-align: left !important;
+  padding: 0.875rem 1rem !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.blog-content td,
+.prose table td,
+.tiptap table td,
+.ProseMirror table td {
+  padding: 0.75rem 1rem !important;
+  border: 1px solid #e2e8f0 !important;
+  font-size: 0.875rem !important; /* ~14px */
+  line-height: 1.65 !important;
+  color: #334155 !important;
+  vertical-align: top !important;
+}
+
+.blog-content tr:nth-child(even) td,
+.prose table tr:nth-child(even) td,
+.tiptap table tr:nth-child(even) td,
+.ProseMirror table tr:nth-child(even) td {
   background-color: #f8fafc;
-  color: #0f172a;
-  font-weight: 600;
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-}
-
-.blog-content td {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  color: #334155;
-  vertical-align: top;
-}
-
-.blog-content tr:nth-child(even) td {
-  background-color: #fcfcfc;
 }
