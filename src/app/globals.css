@@ -412,7 +412,7 @@ mark,
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   overflow: hidden;
-  font-family: var(--font-outfit), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Meiryo", "Noto Sans JP", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
 }
 
 /* Loại bỏ viền và khoảng cách thừa cho các thẻ con bên trong ô bảng */
@@ -433,11 +433,18 @@ mark,
   outline: none !important;
 }
 
+/* Dòng tiêu đề đầu tiên: Bôi đậm đen nét chuẩn */
 .blog-content th,
+.blog-content th *,
+.blog-content thead td,
+.blog-content thead td *,
 .prose table th,
+.prose table th *,
 .tiptap table th,
-.ProseMirror table th {
-  background-color: #f1f5f9 !important;
+.tiptap table th *,
+.ProseMirror table th,
+.ProseMirror table th * {
+  background-color: #f0f4f8 !important;
   color: #111827 !important;
   font-weight: 700 !important;
   font-size: 1.0625rem !important; /* ~17px (lớn hơn 14px khoảng 2.5-3pt) */
@@ -449,9 +456,15 @@ mark,
 
 /* Tiêu đề cột đầu tiên: Căn giữa */
 .blog-content th:first-child,
+.blog-content th:first-child *,
+.blog-content thead td:first-child,
+.blog-content thead td:first-child *,
 .prose table th:first-child,
+.prose table th:first-child *,
 .tiptap table th:first-child,
-.ProseMirror table th:first-child {
+.tiptap table th:first-child *,
+.ProseMirror table th:first-child,
+.ProseMirror table th:first-child * {
   text-align: center !important;
 }
 
@@ -467,14 +480,21 @@ mark,
   vertical-align: middle !important;
 }
 
-/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm rõ nét */
-.blog-content td:first-child,
+/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm đen đậm y hệt Admin */
+.blog-content tbody td:first-child,
+.blog-content tbody td:first-child *,
+.blog-content tr td:first-child,
+.blog-content tr td:first-child *,
 .prose table td:first-child,
+.prose table td:first-child *,
 .tiptap table td:first-child,
-.ProseMirror table td:first-child {
+.tiptap table td:first-child *,
+.ProseMirror table td:first-child,
+.ProseMirror table td:first-child * {
   text-align: center !important;
   font-weight: 700 !important;
   color: #111827 !important;
+  background-color: #f8fafc;
 }
 
 .blog-content tr:nth-child(even) td,
