@@ -181,8 +181,8 @@ export default function WorkflowPageContent({ steps }: Props) {
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-sm sm:text-base leading-relaxed">
-                              <span className="text-[#b8935a] font-bold text-sm sm:text-base leading-[1.6] select-none shrink-0">•</span>
+                            <li key={idx} className="flex items-start gap-2.5 text-gray-500 text-base leading-relaxed">
+                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
                               <span>{cleanItem}</span>
                             </li>
                           );
