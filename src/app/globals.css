@@ -409,7 +409,7 @@ mark,
   width: 100%;
   border-collapse: collapse;
   margin: 1.5rem 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -428,16 +428,34 @@ mark,
   border: 1px solid #cbd5e1 !important;
 }
 
+/* Tiêu đề cột đầu tiên: Căn giữa */
+.blog-content th:first-child,
+.prose table th:first-child,
+.tiptap table th:first-child,
+.ProseMirror table th:first-child {
+  text-align: center !important;
+}
+
 .blog-content td,
 .prose table td,
 .tiptap table td,
 .ProseMirror table td {
   padding: 0.75rem 1rem !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
   font-size: 0.875rem !important; /* ~14px */
   line-height: 1.65 !important;
   color: #334155 !important;
-  vertical-align: top !important;
+  vertical-align: middle !important;
+}
+
+/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm */
+.blog-content td:first-child,
+.prose table td:first-child,
+.tiptap table td:first-child,
+.ProseMirror table td:first-child {
+  text-align: center !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
 }
 
 .blog-content tr:nth-child(even) td,
