@@ -43,19 +43,19 @@ interface HeaderProps {
 /* ------------------------------------------------------------------ */
 
 export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, services = [] }: HeaderProps) {
-  const [, setScrolled]                         = useState(false);
-  const [mobileOpen, setMobileOpen]             = useState(false);
-  const [openDesktopMenu, setOpenDesktopMenu]   = useState<string | null>(null);
-  const [mobileExpanded, setMobileExpanded]     = useState<string | null>(null);
-  const [scrollHidden, setScrollHidden]         = useState(false);
-  const t        = useTranslations("nav");
-  const locale   = useLocale();
+  const [, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
+  const [scrollHidden, setScrollHidden] = useState(false);
+  const t = useTranslations("nav");
+  const locale = useLocale();
   const pathname = usePathname();
-  const router   = useRouter();
+  const router = useRouter();
 
   const navRef = useRef<HTMLElement>(null);
 
-  const isHome    = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const transparent = false;
 
   /* ---- scroll / intersection logic ---- */
@@ -155,10 +155,10 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
       href: `/${locale}/about-us`,
       children: [
         { label: t("aboutSub.companyOverview"), href: `/${locale}/about-us` },
-        { label: t("aboutSub.portfolio"),       href: `/${locale}/about-us/portfolio` },
-        { label: t("aboutSub.workflow"),        href: `/${locale}/about-us/workflow` },
-        { label: t("aboutSub.collection"),      href: `/${locale}/about-us/collection` },
-        { label: t("aboutSub.qa"),              href: `/${locale}/qa` },
+        { label: t("aboutSub.portfolio"), href: `/${locale}/about-us/portfolio` },
+        { label: t("aboutSub.workflow"), href: `/${locale}/about-us/workflow` },
+        { label: t("aboutSub.collection"), href: `/${locale}/about-us/collection` },
+        { label: t("aboutSub.qa"), href: `/${locale}/qa` },
       ],
     },
     { label: t("contact"), href: `/${locale}/contact` },
@@ -166,18 +166,18 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
       label: t("blogs"),
       href: `/${locale}/blogs`,
       children: [
-        { label: t("blogSub.caseStudy"),        href: `/${locale}/blogs/case-study` },
+        { label: t("blogSub.caseStudy"), href: `/${locale}/blogs/case-study` },
         { label: t("blogSub.techniqueSharing"), href: `/${locale}/blogs/tips` },
-        { label: t("blogSub.knowledge"),        href: `/${locale}/blogs/knowledge` },
-        { label: t("blogSub.ai"),               href: `/${locale}/blogs/ai-feature` },
-        { label: t("blogSub.lifeGallery"),      href: `/${locale}/blogs/life-gallery` },
+        { label: t("blogSub.knowledge"), href: `/${locale}/blogs/knowledge` },
+        { label: t("blogSub.ai"), href: `/${locale}/blogs/ai-feature` },
+        { label: t("blogSub.lifeGallery"), href: `/${locale}/blogs/life-gallery` },
       ],
     },
   ];
 
   const toggleLocale = () => {
     const newLocale = locale === "en" ? "ja" : "en";
-    const newPath   = pathname.replace(`/${locale}`, `/${newLocale}`);
+    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
     router.push(newPath);
   };
 
@@ -187,13 +187,11 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   };
 
   const linkCls = (href: string, hasChildren?: boolean) =>
-    `px-3 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-all duration-300 relative group inline-flex items-center gap-1 ${
-      isActive(href) ? "text-[#111]" : "text-gray-500 hover:text-[#111]"
+    `px-3 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-all duration-300 relative group inline-flex items-center gap-1 ${isActive(href) ? "text-[#111]" : "text-gray-500 hover:text-[#111]"
     }${hasChildren ? " cursor-default" : ""}`;
 
   const underlineCls = (href: string) =>
-    `absolute bottom-0 left-3 right-3 h-[1.5px] bg-[#111] transition-transform duration-200 origin-left ${
-      isActive(href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+    `absolute bottom-0 left-3 right-3 h-[1.5px] bg-[#111] transition-transform duration-200 origin-left ${isActive(href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
     }`;
 
   /* ---- Desktop dropdown hover handlers ---- */
@@ -268,9 +266,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                     {link.label}
                     <ChevronDown
                       size={13}
-                      className={`transition-transform duration-200 ${
-                        openDesktopMenu === link.href ? "rotate-180" : ""
-                      }`}
+                      className={`transition-transform duration-200 ${openDesktopMenu === link.href ? "rotate-180" : ""
+                        }`}
                     />
                     <span className={underlineCls(link.href)} />
                   </button>
@@ -357,11 +354,10 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                         <Link
                           key={child.href}
                           href={child.href}
-                          className={`block px-5 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${
-                            isActive(child.href)
+                          className={`block px-5 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${isActive(child.href)
                               ? "text-[#111] bg-gray-50"
                               : "text-gray-500 hover:text-[#111] hover:bg-gray-50/70"
-                          }`}
+                            }`}
                         >
                           {child.label}
                         </Link>
@@ -386,9 +382,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`lg:hidden p-2 transition-colors ${
-              transparent ? "text-white/80 hover:text-white" : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`lg:hidden p-2 transition-colors ${transparent ? "text-white/80 hover:text-white" : "text-gray-600 hover:text-gray-900"
+              }`}
             aria-label="Menu"
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -425,18 +420,16 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                       <button
                         type="button"
                         onClick={() => toggleMobileSubmenu(link.href)}
-                        className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          isActive(link.href)
+                        className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.href)
                             ? "bg-gray-50 text-gray-900"
                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
+                          }`}
                       >
                         {link.label}
                         <ChevronDown
                           size={15}
-                          className={`transition-transform duration-200 ${
-                            mobileExpanded === link.href ? "rotate-180" : ""
-                          }`}
+                          className={`transition-transform duration-200 ${mobileExpanded === link.href ? "rotate-180" : ""
+                            }`}
                         />
                       </button>
 
@@ -487,11 +480,10 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors ${
-                                      isActive(child.href)
+                                    className={`flex items-center px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors ${isActive(child.href)
                                         ? "text-gray-900 bg-gray-50"
                                         : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                    }`}
+                                      }`}
                                   >
                                     {child.label}
                                   </Link>
@@ -506,11 +498,10 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                     <Link
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(link.href)
+                      className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.href)
                           ? "bg-gray-50 text-gray-900"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
+                        }`}
                     >
                       {link.label}
                     </Link>
