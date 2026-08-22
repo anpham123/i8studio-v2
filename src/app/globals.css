@@ -412,14 +412,19 @@ mark,
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   overflow: hidden;
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Meiryo", "Noto Sans JP", sans-serif !important;
 }
 
 .blog-content th,
+.blog-content th *,
 .prose table th,
+.prose table th *,
 .tiptap table th,
-.ProseMirror table th {
+.tiptap table th *,
+.ProseMirror table th,
+.ProseMirror table th * {
   background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  color: #111827 !important;
   font-weight: 700 !important;
   font-size: 1.0625rem !important; /* ~17px (lớn hơn 14px khoảng 2.5-3pt) */
   line-height: 1.5 !important;
@@ -428,12 +433,18 @@ mark,
   border: 1px solid #cbd5e1 !important;
 }
 
-/* Tiêu đề cột đầu tiên: Căn giữa */
+/* Tiêu đề cột đầu tiên: Căn giữa và bôi đậm */
 .blog-content th:first-child,
+.blog-content th:first-child *,
 .prose table th:first-child,
+.prose table th:first-child *,
 .tiptap table th:first-child,
-.ProseMirror table th:first-child {
+.tiptap table th:first-child *,
+.ProseMirror table th:first-child,
+.ProseMirror table th:first-child * {
   text-align: center !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
 }
 
 .blog-content td,
@@ -448,14 +459,27 @@ mark,
   vertical-align: middle !important;
 }
 
-/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm */
+/* Hàng đầu tiên nếu tạo bằng td: Bôi đậm như tiêu đề */
+.blog-content thead td,
+.blog-content thead td *,
+.blog-content tr:first-child td,
+.blog-content tr:first-child td * {
+  font-weight: 700 !important;
+  color: #111827 !important;
+}
+
+/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm rõ nét */
 .blog-content td:first-child,
+.blog-content td:first-child *,
 .prose table td:first-child,
+.prose table td:first-child *,
 .tiptap table td:first-child,
-.ProseMirror table td:first-child {
+.tiptap table td:first-child *,
+.ProseMirror table td:first-child,
+.ProseMirror table td:first-child * {
   text-align: center !important;
   font-weight: 700 !important;
-  color: #0f172a !important;
+  color: #111827 !important;
 }
 
 .blog-content tr:nth-child(even) td,
