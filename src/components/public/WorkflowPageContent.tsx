@@ -171,7 +171,11 @@ export default function WorkflowPageContent({ steps }: Props) {
                     }
                   }
 
-                  if (items.length > 1) {
+                  if (items.length === 0 && rawDesc.trim()) {
+                    items = [rawDesc.trim()];
+                  }
+
+                  if (items.length > 0) {
                     return (
                       <ul className="space-y-2.5 mb-6">
                         {items.map((item, idx) => {
@@ -187,11 +191,7 @@ export default function WorkflowPageContent({ steps }: Props) {
                     );
                   }
 
-                  return (
-                    <p className="text-gray-500 text-base leading-relaxed mb-6 whitespace-pre-line">
-                      {rawDesc}
-                    </p>
-                  );
+                  return null;
                 })()}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">

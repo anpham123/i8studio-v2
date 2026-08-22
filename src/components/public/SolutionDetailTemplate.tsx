@@ -265,7 +265,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     }
                   }
 
-                  if (items.length > 1) {
+                  if (items.length === 0 && rawDesc.trim()) {
+                    items = [rawDesc.trim()];
+                  }
+
+                  if (items.length > 0) {
                     return (
                       <ul className="space-y-2.5 mb-2">
                         {items.map((item, idx) => {
@@ -281,11 +285,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     );
                   }
 
-                  return (
-                    <p className="text-gray-500 text-base leading-relaxed whitespace-pre-line">
-                      {rawDesc}
-                    </p>
-                  );
+                  return null;
                 })()}
               </div>
             </motion.div>
