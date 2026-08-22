@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Outfit, Cormorant_Garamond, Noto_Serif_JP, Playfair_Display } from "next/font/google";
+import { Outfit, Cormorant_Garamond, Noto_Serif_JP, Playfair_Display, Roboto } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import "../globals.css";
@@ -39,6 +39,12 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-display",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700", "900"],
+  variable: "--font-roboto",
 });
 
 const locales = ["en", "ja"];
@@ -99,7 +105,7 @@ export default async function LocaleLayout({
   return (
     <html lang={params.locale}>
       <body
-        className={`${outfit.variable} ${cormorant.variable} ${notoSerifJP.variable} ${playfair.variable} font-sans antialiased`}
+        className={`${outfit.variable} ${cormorant.variable} ${notoSerifJP.variable} ${playfair.variable} ${roboto.variable} font-sans antialiased`}
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
       >
         <NextIntlClientProvider messages={messages}>

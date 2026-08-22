@@ -56,7 +56,35 @@ const DEFAULT_MILESTONES = [
   },
 ];
 
-function buildStats(settings: Record<string, string>) {
+function buildStats(settings: Record<string, string>, overview?: Record<string, string>) {
+  if (overview && (overview.staffCount || overview.yearsExperience || overview.clientCount || overview.projectCount)) {
+    return [
+      {
+        numJa: `${overview.staffCount || "80"}+`,
+        numEn: `${overview.staffCount || "80"}+`,
+        labelJa: "プロフェッショナルスタッフ",
+        labelEn: "Professional Staff",
+      },
+      {
+        numJa: `${overview.yearsExperience || "5"}+`,
+        numEn: `${overview.yearsExperience || "5"}+`,
+        labelJa: "年の経験",
+        labelEn: "Years of Experience",
+      },
+      {
+        numJa: `${overview.clientCount || "150"}+`,
+        numEn: `${overview.clientCount || "150"}+`,
+        labelJa: "グローバルクライアント",
+        labelEn: "Global Clients",
+      },
+      {
+        numJa: `${overview.projectCount ? (isNaN(Number(overview.projectCount)) ? overview.projectCount : Number(overview.projectCount).toLocaleString()) : "2,000"}+`,
+        numEn: `${overview.projectCount ? (isNaN(Number(overview.projectCount)) ? overview.projectCount : Number(overview.projectCount).toLocaleString()) : "2,000"}+`,
+        labelJa: "完了プロジェクト",
+        labelEn: "Completed Projects",
+      },
+    ];
+  }
   return DEFAULT_STATS.map((def, i) => {
     const idx = i + 1;
     return {
@@ -85,11 +113,10 @@ interface Props {
   overview?: Record<string, string>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function CompanyOverviewContent({ settings, milestones, overview: _overview }: Props) {
+export default function CompanyOverviewContent({ settings, milestones, overview }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
-  const STATS = buildStats(settings);
+  const STATS = buildStats(settings, overview);
   // Use DB milestones if available, otherwise fallback to hardcoded defaults
   const MILESTONES = milestones && milestones.length > 0 ? milestones : DEFAULT_MILESTONES;
 
@@ -154,7 +181,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="text-4xl md:text-5xl font-extralight text-[#111] mb-2" style={{ fontFamily: "var(--font-display), serif" }}>
+                <div className="text-4xl md:text-5xl font-bold text-[#111] mb-2 font-roboto tracking-tight">
                   {isJa ? stat.numJa : stat.numEn}
                 </div>
                 <div className="text-sm text-gray-400 font-medium uppercase tracking-wide">
@@ -171,16 +198,36 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-6">OUR STORY</p>
           <div className="text-gray-600 text-base md:text-lg leading-[1.9] space-y-6">
-            <p>
-              {isJa
-                ? (settings.aboutDescJa || "i8 STUDIOは、2019年にベトナム・ダナンで設立された建築ビジュアライゼーション専門スタジオです。日本の建築・不動産・インテリアデザイン業界のお客様に、高品質な3DCGパース、アニメーション、VR、ARソリューションを提供しています。")
-                : (settings.aboutDescEn || "i8 STUDIO is an architectural visualization studio founded in 2019 in Da Nang, Vietnam. We provide high-quality 3DCG perspectives, animations, VR, and AR solutions to clients in the Japanese architecture, real estate, and interior design industries.")}
-            </p>
-            <p>
-              {isJa
-                ? "私たちは「お客様のアイデアをサポートする」をミッションに、最新のテクノロジーと80名のプロフェッショナルクリエイターの力で、設計段階のビジョンを鮮明なビジュアルへと変換します。"
-                : "Our mission is to 'support your ideas.' With cutting-edge technology and 80 professional creators, we transform design-stage visions into vivid visuals."}
-            </p>
+            {(() => {
+              const customIntro = isJa ? overview?.introJa : overview?.introEn;
+              if (customIntro && customIntro.trim().length > 0) {
+                return customIntro
+                  .split(/\r?\n\r?\n|\r?\n/)
+                  .map((p) => p.trim())
+                  .filter(Boolean)
+                  .map((p, idx) => <p key={idx}>{p}</p>);
+              }
+
+              const settingDesc = isJa ? settings.aboutDescJa : settings.aboutDescEn;
+              if (settingDesc && settingDesc.trim().length > 0) {
+                return <p>{settingDesc}</p>;
+              }
+
+              return (
+                <>
+                  <p>
+                    {isJa
+                      ? "i8 STUDIOは、2019年にベトナム・ダナンで設立された建築ビジュアライゼーション専門スタジオです。日本の建築・不動産・インテリアデザイン業界のお客様に、高品質な3DCGパース、アニメーション、VR、ARソリューションを提供しています。"
+                      : "i8 STUDIO is an architectural visualization studio founded in 2019 in Da Nang, Vietnam. We provide high-quality 3DCG perspectives, animations, VR, and AR solutions to clients in the Japanese architecture, real estate, and interior design industries."}
+                  </p>
+                  <p>
+                    {isJa
+                      ? "私たちは「お客様のアイデアをサポートする」をミッションに、最新のテクノロジーと80名のプロフェッショナルクリエイターの力で、設計段階のビジョンを鮮明なビジュアルへと変換します。"
+                      : "Our mission is to 'support your ideas.' With cutting-edge technology and 80 professional creators, we transform design-stage visions into vivid visuals."}
+                  </p>
+                </>
+              );
+            })()}
           </div>
         </motion.div>
       </section>
@@ -216,7 +263,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview:
                   {/* Content (Text Card) */}
                   <div className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:pr-4" : "md:pl-4"} flex flex-col`}>
                     <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col justify-center">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-[#b8935a] font-semibold">{isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}</span>
+                      <span className="text-[12px] uppercase tracking-[0.15em] text-[#b8935a] font-bold font-roboto">{isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}</span>
                       <h3 className="text-lg md:text-xl font-medium text-[#111] mt-2 mb-3">
                         {isJa ? ms.titleJa : ms.titleEn}
                       </h3>

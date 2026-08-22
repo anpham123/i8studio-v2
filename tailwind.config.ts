@@ -12,6 +12,8 @@ const config: Config = {
         sans: ["var(--font-outfit)", "system-ui", "sans-serif"],
         serif: ["var(--font-cormorant)", "var(--font-noto-serif)", "Georgia", "serif"],
         display: ["var(--font-display)", "Georgia", "serif"],
+        roboto: ["var(--font-roboto)", "sans-serif"],
+        num: ["var(--font-roboto)", "sans-serif"],
       },
       colors: {
         background: "var(--background)",

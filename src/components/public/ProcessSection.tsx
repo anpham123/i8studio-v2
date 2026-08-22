@@ -41,7 +41,7 @@ export default function ProcessSection({ locale }: { locale: string }) {
                     <div className="w-20 h-20 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center mb-5 shadow-sm group-hover:border-blue-300 transition-colors relative">
                       <Icon size={24} className="text-gray-600" />
                       {/* Step number */}
-                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+                      <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center font-roboto">
                         {i + 1}
                       </div>
                     </div>
@@ -69,7 +69,7 @@ export default function ProcessSection({ locale }: { locale: string }) {
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shrink-0 shadow-sm relative">
                       <Icon size={18} className="text-gray-600" />
-                      <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold flex items-center justify-center">
+                      <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold flex items-center justify-center font-roboto">
                         {i + 1}
                       </div>
                     </div>

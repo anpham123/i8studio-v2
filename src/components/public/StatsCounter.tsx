@@ -41,7 +41,7 @@ export default function StatsCounter({ settings }: StatsCounterProps) {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <div className="text-5xl sm:text-6xl font-bold text-gray-900 mb-2 tracking-tight">
+              <div className="text-5xl sm:text-6xl font-bold text-gray-900 mb-2 tracking-tight font-roboto">
                 {isInView ? (
                   <CountUp
                     start={0}

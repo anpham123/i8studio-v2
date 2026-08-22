@@ -316,12 +316,12 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                   <select
                     value={sec.type}
                     onChange={(e) => updateSection(si, "type", e.target.value)}
-                    className="text-sm border border-gray-200 rounded px-2 py-1 bg-white"
+                    className="text-sm border border-gray-200 rounded px-2 py-1 bg-white font-medium text-gray-700"
                   >
-                    <option value="stage">Stage</option>
-                    <option value="checkcam">Checkcam</option>
-                    <option value="insight">Insight</option>
-                    <option value="comparison">Comparison</option>
+                    <option value="stage">Stage (Nội dung + Ảnh)</option>
+                    <option value="checkcam">Checkcam (Nội dung + Điểm kiểm tra)</option>
+                    <option value="insight">Insight (Khối phân tích chuyên sâu)</option>
+                    <option value="comparison">Comparison (So sánh Trước/Sau)</option>
                   </select>
                   <span className="text-xs text-gray-400">Section {si + 1}</span>
                 </div>

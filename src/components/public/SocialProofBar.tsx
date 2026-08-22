@@ -30,7 +30,7 @@ export default function SocialProofBar({ partners }: SocialProofBarProps) {
           <div className="flex items-center justify-center gap-8 sm:gap-14">
             {stats.map((s, i) => (
               <div key={i} className="flex items-center gap-2 text-gray-400">
-                <span className="text-gray-700 font-bold text-lg sm:text-xl tracking-tight">{s.value}</span>
+                <span className="text-gray-700 font-bold text-lg sm:text-xl tracking-tight font-roboto">{s.value}</span>
                 <span className="text-xs font-medium uppercase tracking-wider">{s.label}</span>
                 {i < stats.length - 1 && (
                   <span className="hidden sm:block ml-8 w-px h-5 bg-gray-200" />

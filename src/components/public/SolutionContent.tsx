@@ -426,7 +426,7 @@ export default function SolutionContent({ worksByType = {}, settings = {} }: Sol
         const textContents = (
           <>
             <div className="text-[32px] font-normal tracking-[0.02em] text-[#111] mb-4">
-              <span className="text-[#bbb] mr-2">{sec.num}.</span>
+              <span className="text-[#bbb] mr-2 font-roboto font-bold">{sec.num}.</span>
               {sec.titleEn}
             </div>
             <div className="text-[15px] text-[#444] leading-[2] mb-4 whitespace-pre-line">

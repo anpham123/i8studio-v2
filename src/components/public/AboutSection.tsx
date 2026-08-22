@@ -87,11 +87,11 @@ export default function AboutSection({ locale, showLearnMore = true, settings }:
                 {milestoneList.map((m, i) => (
                   <FadeIn key={i} delay={i * 0.1}>
                     <div className="flex items-start gap-6 pl-10 relative">
-                      <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <div className="absolute left-0 top-1 w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-bold shrink-0 font-roboto">
                         {i + 1}
                       </div>
                       <div>
-                        <div className="text-gray-900 font-bold text-sm">{m.year}</div>
+                        <div className="text-gray-900 font-bold text-sm font-roboto">{m.year}</div>
                         <div className="text-gray-500 text-sm mt-0.5">
                           {m.text}
                         </div>

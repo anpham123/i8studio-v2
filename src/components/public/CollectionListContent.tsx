@@ -135,8 +135,8 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                   >
                     {/* Index Number */}
                     <span
-                      className={`text-xs font-mono tracking-widest mt-2 transition-colors duration-300 ${
-                        isActive ? "text-[#b8935a] font-bold" : "text-gray-300 group-hover:text-gray-400"
+                      className={`text-xs font-roboto font-bold tracking-widest mt-2 transition-colors duration-300 ${
+                        isActive ? "text-[#b8935a]" : "text-gray-300 group-hover:text-gray-400"
                       }`}
                     >
                       {numStr}
@@ -146,7 +146,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <h2
-                          className={`font-serif text-3xl xl:text-4xl 2xl:text-5xl leading-tight transition-all duration-500 ${
+                          className={`font-serif text-xl lg:text-2xl xl:text-3xl whitespace-nowrap leading-tight transition-all duration-500 ${
                             isActive
                               ? "text-[#111] font-normal translate-x-1"
                               : "text-gray-300 font-light group-hover:text-gray-600"
@@ -281,7 +281,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
               className="space-y-4"
             >
               <div className="flex items-baseline gap-3 border-b border-gray-200 pb-3">
-                <span className="text-xs font-mono tracking-widest text-[#b8935a] font-bold">
+                <span className="text-xs font-roboto tracking-widest text-[#b8935a] font-bold">
                   {numStr}
                 </span>
                 <h2

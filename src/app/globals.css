@@ -42,6 +42,14 @@ h1, h2, h3, h4, h5, h6 {
   font-feature-settings: "lnum" 1, "pnum" 1;
 }
 
+/* Dedicated number font with crisp lining & tabular figures */
+.font-roboto,
+.font-num {
+  font-family: var(--font-roboto), sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1;
+}
+
 /* Per-section noise texture — subtle grain on light sections */
 .section-noise {
   position: relative;
@@ -391,4 +399,36 @@ mark,
 .blog-link:hover {
   opacity: 0.8 !important;
   color: #9a7642 !important;
+}
+
+/* ── Blog Table Styles ─────────────────────────────────── */
+.blog-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.blog-content th {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.blog-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  vertical-align: top;
+}
+
+.blog-content tr:nth-child(even) td {
+  background-color: #fcfcfc;
 }

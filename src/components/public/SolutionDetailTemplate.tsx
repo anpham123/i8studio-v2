@@ -77,7 +77,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[11px] uppercase tracking-[0.3em] text-white/50 mb-6"
+            className="text-[22px] sm:text-[28px] uppercase tracking-[0.3em] text-white/70 font-medium mb-6"
           >
             {title}
           </motion.p>
@@ -275,7 +275,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 className="relative"
               >
                 {/* Step number */}
-                <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-sm font-semibold mb-5">
+                <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-sm font-bold mb-5 font-roboto">
                   {String(i + 1).padStart(2, "0")}
                 </div>
                 <h3 className="text-base font-medium text-[#111] mb-2">
@@ -321,9 +321,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   </span>
                 )}
                 <h3 className="text-xl font-medium text-white mb-4">{plan.name}</h3>
-                <div className="text-3xl font-light text-white mb-6" style={{ fontFamily: "var(--font-display), serif" }}>
+                <div className="text-3xl font-bold text-white mb-6 font-roboto tracking-tight">
                   {plan.price === "ASK" ? (
-                    <span className="text-lg">{isJa ? "お問い合わせ" : "Contact Us"}</span>
+                    <span className="text-lg font-normal">{isJa ? "お問い合わせ" : "Contact Us"}</span>
                   ) : (
                     plan.price
                   )}

@@ -36,7 +36,7 @@ export default function WorkflowSection() {
               <div className="flex flex-col items-center text-center" style={{ width: 160 }}>
                 {/* Circle */}
                 <div className="w-[60px] h-[60px] rounded-full border border-[#111] flex items-center justify-center mb-4 relative">
-                  <span className="text-[18px] font-semibold text-[#111]">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-[18px] font-bold text-[#111] font-roboto">{String(i + 1).padStart(2, "0")}</span>
                 </div>
                 {/* Title */}
                 <div className="text-[14px] font-medium text-[#111] mb-1">{step.title}</div>
@@ -63,7 +63,7 @@ export default function WorkflowSection() {
               <div className="flex flex-col items-center text-center">
                 {/* Circle */}
                 <div className="w-[52px] h-[52px] rounded-full border border-[#111] flex items-center justify-center mb-3">
-                  <span className="text-[16px] font-semibold text-[#111]">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-[16px] font-bold text-[#111] font-roboto">{String(i + 1).padStart(2, "0")}</span>
                 </div>
                 {/* Title */}
                 <div className="text-[14px] font-medium text-[#111] mb-1">{step.title}</div>

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { BlogPostSchema } from "@/lib/validations";
 import { z } from "zod";
 
+import { revalidatePath } from "next/cache";
+
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
@@ -27,6 +29,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
       },
     });
+
+    try {
+      revalidatePath(`/ja/blogs/${post.slug}`);
+      revalidatePath(`/en/blogs/${post.slug}`);
+      revalidatePath("/ja/blogs");
+      revalidatePath("/en/blogs");
+    } catch {
+      // ignore
+    }
+
     return NextResponse.json({ data: post });
   } catch (e) {
     if (e instanceof z.ZodError) return NextResponse.json({ error: e.issues }, { status: 400 });
@@ -38,6 +50,14 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  await prisma.blogPost.delete({ where: { id: params.id } });
+  const post = await prisma.blogPost.delete({ where: { id: params.id } });
+  try {
+    revalidatePath(`/ja/blogs/${post.slug}`);
+    revalidatePath(`/en/blogs/${post.slug}`);
+    revalidatePath("/ja/blogs");
+    revalidatePath("/en/blogs");
+  } catch {
+    // ignore
+  }
   return NextResponse.json({ success: true });
 }

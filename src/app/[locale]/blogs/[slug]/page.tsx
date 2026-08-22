@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, articleJsonLd, getSiteUrl } from "@/lib/seo";
@@ -123,15 +122,29 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* Dynamic sections */}
       {sections.map((section, idx) => {
+        const key = `${section.type || "section"}-${idx}`;
         switch (section.type) {
           case "checkcam":
-            return <CheckcamSection key={idx} data={section} locale={locale} />;
+            return <CheckcamSection key={key} data={section} locale={locale} />;
           case "stage":
-            return <StageSection key={idx} data={section} locale={locale} />;
+            return <StageSection key={key} data={section} locale={locale} />;
           case "insight":
-            return <InsightSection key={idx} data={section} />;
+            return <InsightSection key={key} data={section} />;
+          case "comparison": {
+            const firstAdditional =
+              Array.isArray(section.additionalImages) && section.additionalImages.length > 0
+                ? typeof section.additionalImages[0] === "string"
+                  ? section.additionalImages[0]
+                  : section.additionalImages[0].image
+                : "";
+
+            const beforeImg = section.image || firstAdditional;
+            const afterImg = firstAdditional || section.image;
+
+            return <ComparisonSection key={key} data={section} before={beforeImg} after={afterImg} />;
+          }
           default:
-            return null;
+            return <StageSection key={key} data={section} locale={locale} />;
         }
       })}
 
@@ -143,8 +156,8 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* Insight block */}
       {(post.insightHeading || post.insightBody) && (
-        <section className="bg-[var(--surface-warm)] py-[70px] sm:py-[100px]">
-          <div className="max-w-[780px] mx-auto px-6 sm:px-10">
+        <section className="bg-[var(--surface)] py-[45px] sm:py-[60px]">
+          <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
             {post.insightHeading && (
               <h3
                 className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-8"

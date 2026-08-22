@@ -205,7 +205,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[600px]"
+            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-4xl"
           >
             {isJa
               ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
@@ -279,19 +279,19 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
                       <div>
                         {isAsk ? (
                           <>
-                            <span className="font-display text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
+                            <span className="font-roboto text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
                               ASK
                             </span>
-                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
+                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1 font-sans">
                               {isJa ? "お見積り" : "Get a quote"}
                             </p>
                           </>
                         ) : (
                           <>
-                            <span className="font-display text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
+                            <span className="font-roboto text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
                               {card.price}
                             </span>
-                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1">
+                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1 font-sans">
                               {priceLabel}
                             </p>
                           </>

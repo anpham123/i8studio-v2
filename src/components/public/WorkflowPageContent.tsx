@@ -142,13 +142,57 @@ export default function WorkflowPageContent({ steps }: Props) {
 
               {/* Text */}
               <div className="w-full md:w-1/2">
-                <span className="text-5xl md:text-7xl font-extralight text-[#111] block mb-2" style={{ fontFamily: "var(--font-display), serif" }}>
+                <span className="text-5xl md:text-7xl font-bold text-[#111] block mb-2 font-roboto tracking-tight">
                   {num}
                 </span>
                 <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {title}
                 </h2>
-                <p className="text-gray-500 text-base leading-relaxed mb-6">{desc}</p>
+                {(() => {
+                  const rawDesc = desc || "";
+                  // Split by newlines first
+                  let items = rawDesc
+                    .split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+
+                  // If it's a single block without newlines, split by sentence endings for Japanese (。) or English (. ) if long
+                  if (items.length <= 1 && rawDesc.length > 60) {
+                    if (isJa && rawDesc.includes("。")) {
+                      items = rawDesc
+                        .split(/(?<=。)/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                    } else if (!isJa && rawDesc.includes(". ")) {
+                      items = rawDesc
+                        .split(/(?<=\.\s+)/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                    }
+                  }
+
+                  if (items.length > 1) {
+                    return (
+                      <ul className="space-y-2.5 mb-6">
+                        {items.map((item, idx) => {
+                          const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                          return (
+                            <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-sm sm:text-base leading-relaxed">
+                              <span className="text-[#b8935a] font-bold text-sm sm:text-base leading-[1.6] select-none shrink-0">•</span>
+                              <span>{cleanItem}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    );
+                  }
+
+                  return (
+                    <p className="text-gray-500 text-base leading-relaxed mb-6 whitespace-pre-line">
+                      {rawDesc}
+                    </p>
+                  );
+                })()}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
