@@ -90,11 +90,19 @@ export default function BlogHero({
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(title.replace(/<br\s*\/?>/gi, " ")) }}
           />
 
-          {/* Subtitle */}
+          {/* Subtitle - Single line on desktop */}
           {subtitle && (
-            <p className="font-serif text-[18px] sm:text-[22px] text-[#444] font-medium leading-[1.65] max-w-[900px] mb-4 tracking-normal">
-              {subtitle}
-            </p>
+            <p
+              className="font-serif text-[16px] sm:text-[18px] lg:text-[20px] text-[#444] font-medium leading-[1.65] max-w-full mb-4 tracking-normal [&>br]:hidden md:[&>br]:inline"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(
+                  subtitle
+                    .replace(/<br\s*\/?>/gi, " ")
+                    .replace(/\r?\n+/g, " ")
+                    .trim()
+                ),
+              }}
+            />
           )}
         </div>
       </div>
