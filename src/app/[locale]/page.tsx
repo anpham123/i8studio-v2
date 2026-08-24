@@ -33,17 +33,27 @@ export default async function HomePage() {
   const limit = limitSetting ? (parseInt(limitSetting.value) || 11) : 11;
 
   // Fetch homepage media (standalone, not linked to Works)
-  const media = await prisma.homeMedia.findMany({
-    where: { active: true },
-    orderBy: { order: "asc" },
-    take: limit,
-  });
-
-  const heroImages = media.map((m) => ({
-    url: m.image,
-    alt: m.title,
-    videoUrl: m.videoUrl || undefined,
-  }));
+  let heroImages: { url: string; alt: string; videoUrl?: string }[] = [];
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((prisma as any)?.homeMedia?.findMany) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const media = await (prisma as any).homeMedia.findMany({
+        where: { active: true },
+        orderBy: { order: "asc" },
+        take: limit,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      heroImages = media.map((m: any) => ({
+        url: m.image,
+        alt: m.title,
+        videoUrl: m.videoUrl || undefined,
+      }));
+    }
+  } catch (err) {
+    console.error("Error loading home media:", err);
+    heroImages = [];
+  }
 
   return (
     <>
