@@ -459,8 +459,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
                         {tableHeaders.map((h, i) => (
                           <th
                             key={i}
-                            className={`p-3 font-bold text-gray-900 border-r last:border-r-0 border-gray-300 ${
-                              i === 0 ? "w-[18%] text-center" : ""
+                            className={`p-3 font-bold text-gray-900 border-r last:border-r-0 border-gray-300 text-center ${
+                              i === 0 ? "w-[18%]" : ""
                             }`}
                           >
                             {h || `Cột ${i + 1}`}
