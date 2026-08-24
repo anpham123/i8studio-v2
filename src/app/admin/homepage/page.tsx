@@ -126,6 +126,8 @@ export default function HomepagePage() {
       setAddForm({ title: "", type: "image" });
       setAddImage(null); setAddVideo(null); setAddImagePreview("");
       toast("Đã thêm thành công!", "success");
+      // Auto revalidate
+      fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
     } else toast("Lỗi khi thêm", "error");
     setSaving(false);
   };
@@ -150,6 +152,8 @@ export default function HomepagePage() {
       setItems((p) => p.map((i) => i.id === editItem.id ? { ...i, ...json.data } : i));
       setEditItem(null);
       toast("Lưu thành công!", "success");
+      // Auto revalidate
+      fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
     } else toast("Lỗi khi lưu", "error");
     setSaving(false);
   };
@@ -181,6 +185,7 @@ export default function HomepagePage() {
     if (json.data) {
       setItems((p) => p.map((i) => i.id === item.id ? { ...i, active: !item.active } : i));
       toast(item.active ? "Đã ẩn khỏi trang chủ" : "Đã hiện trên trang chủ", "success");
+      fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
     }
   };
 
@@ -191,6 +196,7 @@ export default function HomepagePage() {
       setItems((p) => p.filter((i) => i.id !== item.id));
       setDeleteConfirm(null);
       toast(`Đã xóa "${item.title}"`, "success");
+      fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
     } else toast("Lỗi khi xóa", "error");
   };
 
@@ -285,6 +291,33 @@ export default function HomepagePage() {
           <strong>Hướng dẫn:</strong> Upload ảnh/video hiển thị trên trang chủ. Vị trí 1 = hero full màn hình.
           Kéo thả để sắp xếp. Bật/tắt để ẩn/hiện.
         </p>
+      </div>
+
+      {/* Aspect Ratio Guide */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+        <p className="text-sm font-semibold text-amber-800 mb-2">📐 Tỷ lệ khung hình trang chủ (Masonry Grid)</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-amber-700">
+          <div className="bg-white rounded-lg p-2 border border-amber-100">
+            <div className="font-bold text-amber-900">Vị trí 1-4</div>
+            <div>Tỷ lệ: <span className="font-mono font-bold">3:5</span> (dọc)</div>
+            <div className="text-amber-500">VD: 600×1000px</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 border border-amber-100">
+            <div className="font-bold text-amber-900">Vị trí 5</div>
+            <div>Tỷ lệ: <span className="font-mono font-bold">21:9</span> (siêu rộng)</div>
+            <div className="text-amber-500">VD: 2100×900px</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 border border-amber-100">
+            <div className="font-bold text-amber-900">Vị trí 6+</div>
+            <div>Tỷ lệ: <span className="font-mono font-bold">16:9</span> (ngang)</div>
+            <div className="text-amber-500">VD: 1920×1080px</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 border border-amber-100">
+            <div className="font-bold text-amber-900">💡 Khuyến nghị</div>
+            <div>Ảnh: JPEG/WebP</div>
+            <div className="text-amber-500">Video: MP4 (H.264)</div>
+          </div>
+        </div>
       </div>
 
       {/* Hero Preview */}
