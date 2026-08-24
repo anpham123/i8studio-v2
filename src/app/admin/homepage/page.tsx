@@ -399,8 +399,8 @@ export default function HomepagePage() {
       )}
 
       {/* ─── Add Modal ─── */}
-      {showAddModal && (
-        {createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setShowAddModal(false)}>
+      {showAddModal &&
+        createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setShowAddModal(false)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b flex items-center justify-between">
               <h3 className="text-lg font-semibold">Thêm ảnh/video mới</h3>
@@ -475,12 +475,12 @@ export default function HomepagePage() {
               </button>
             </div>
           </div>
-        </div>, document.body)}
-      )}
+        </div>, document.body)
+      }
 
       {/* ─── Edit Modal ─── */}
-      {editItem && (
-        {createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setEditItem(null)}>
+      {editItem &&
+        createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setEditItem(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
               <h3 className="text-lg font-semibold">Chỉnh sửa</h3>
@@ -562,12 +562,12 @@ export default function HomepagePage() {
               </button>
             </div>
           </div>
-        </div>, document.body)}
-      )}
+        </div>, document.body)
+      }
 
       {/* ─── Delete Confirm ─── */}
-      {deleteConfirm && (
-        {createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
+      {deleteConfirm &&
+        createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center"><Trash2 size={24} className="text-red-500" /></div>
@@ -588,12 +588,12 @@ export default function HomepagePage() {
               </button>
             </div>
           </div>
-        </div>, document.body)}
-      )}
+        </div>, document.body)
+      }
 
       {/* ─── Lightbox ─── */}
-      {lightbox && (
-        {createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-8" onClick={() => setLightbox(null)}>
+      {lightbox &&
+        createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-8" onClick={() => setLightbox(null)}>
           <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 text-white/70 hover:text-white z-10"><X size={28} /></button>
           {lightbox.idx > 0 && (
             <button onClick={(e) => { e.stopPropagation(); setLightbox({ item: allSorted[lightbox.idx - 1], idx: lightbox.idx - 1 }); }}
@@ -613,8 +613,8 @@ export default function HomepagePage() {
             )}
             <p className="text-white text-center mt-3 text-sm">#{lightbox.idx + 1} — {lightbox.item.title || "Chưa đặt tên"}</p>
           </div>
-        </div>, document.body)}
-      )}
+        </div>, document.body)
+      }
     </AdminShell>
   );
 }
