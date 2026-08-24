@@ -45,18 +45,18 @@ interface Work {
 /*  Placeholder data (fallback if DB is empty)                        */
 /* ------------------------------------------------------------------ */
 const WORKS: Work[] = [
-  { id: "1",  title: "Riverside Residence",   type: "still",      category: "residential",  bg: "#c8c2b8", span: "wide" },
-  { id: "2",  title: "Forest Villa Aerial",   type: "still",      category: "resort",       bg: "#b0aca2", span: "wide" },
-  { id: "3",  title: "Urban Tower",           type: "animation",  category: "commercial",   bg: "#a8a498", span: "narrow" },
-  { id: "4",  title: "Autumn Apartment",      type: "still",      category: "apartment",    bg: "#c4bfa6", span: "narrow" },
-  { id: "5",  title: "Luxury Pool Interior",  type: "composite",  category: "resort",       bg: "#bab4aa", span: "wide" },
-  { id: "6",  title: "City Office Complex",   type: "vr360",      category: "office",       bg: "#9e9a92", span: "narrow" },
-  { id: "7",  title: "Public Library",        type: "walkthrough", category: "public",      bg: "#c0bcb2", span: "narrow" },
-  { id: "8",  title: "Seaside Resort",        type: "still",      category: "resort",       bg: "#d4cec4", span: "wide" },
-  { id: "9",  title: "Shopping Mall",         type: "animation",  category: "commercial",   bg: "#b8b2a8", span: "narrow" },
-  { id: "10", title: "Smart City Plan",       type: "digital",    category: "urban",        bg: "#a4a098", span: "narrow" },
-  { id: "11", title: "Mountain Villa",        type: "composite",  category: "residential",  bg: "#ccc6bc", span: "wide" },
-  { id: "12", title: "AR Showroom",           type: "ar",         category: "commercial",   bg: "#b4aea4", span: "narrow" },
+  { id: "1", title: "Riverside Residence", type: "still", category: "residential", bg: "#c8c2b8", span: "wide" },
+  { id: "2", title: "Forest Villa Aerial", type: "still", category: "resort", bg: "#b0aca2", span: "wide" },
+  { id: "3", title: "Urban Tower", type: "animation", category: "commercial", bg: "#a8a498", span: "narrow" },
+  { id: "4", title: "Autumn Apartment", type: "still", category: "apartment", bg: "#c4bfa6", span: "narrow" },
+  { id: "5", title: "Luxury Pool Interior", type: "composite", category: "resort", bg: "#bab4aa", span: "wide" },
+  { id: "6", title: "City Office Complex", type: "vr360", category: "office", bg: "#9e9a92", span: "narrow" },
+  { id: "7", title: "Public Library", type: "walkthrough", category: "public", bg: "#c0bcb2", span: "narrow" },
+  { id: "8", title: "Seaside Resort", type: "still", category: "resort", bg: "#d4cec4", span: "wide" },
+  { id: "9", title: "Shopping Mall", type: "animation", category: "commercial", bg: "#b8b2a8", span: "narrow" },
+  { id: "10", title: "Smart City Plan", type: "digital", category: "urban", bg: "#a4a098", span: "narrow" },
+  { id: "11", title: "Mountain Villa", type: "composite", category: "residential", bg: "#ccc6bc", span: "wide" },
+  { id: "12", title: "AR Showroom", type: "ar", category: "commercial", bg: "#b4aea4", span: "narrow" },
 ];
 
 const TYPE_KEYS: WorkType[] = ["still", "animation", "composite", "vr360", "walkthrough", "ar", "digital"];
@@ -147,25 +147,25 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
       let category: WorkCategory = (w.buildingCategory as WorkCategory) || "residential";
       if (!w.buildingCategory) {
         if (subtitle.includes("residence") || subtitle.includes("house") || subtitle.includes("villa") || subtitle.includes("home") ||
-            titleLower.includes("residence") || titleLower.includes("house") || titleLower.includes("villa") || titleLower.includes("home")) {
+          titleLower.includes("residence") || titleLower.includes("house") || titleLower.includes("villa") || titleLower.includes("home")) {
           category = "residential";
         } else if (subtitle.includes("apartment") || subtitle.includes("condo") || subtitle.includes("mansion") ||
-                   titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("mansion")) {
+          titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("mansion")) {
           category = "apartment";
         } else if (subtitle.includes("resort") || subtitle.includes("hotel") || subtitle.includes("pool") || subtitle.includes("sauna") ||
-                   titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("pool") || titleLower.includes("sauna")) {
+          titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("pool") || titleLower.includes("sauna")) {
           category = "resort";
         } else if (subtitle.includes("commercial") || subtitle.includes("mall") || subtitle.includes("showroom") || subtitle.includes("shop") || subtitle.includes("store") ||
-                   titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("showroom") || titleLower.includes("shop") || titleLower.includes("store")) {
+          titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("showroom") || titleLower.includes("shop") || titleLower.includes("store")) {
           category = "commercial";
         } else if (subtitle.includes("office") || subtitle.includes("workspace") || subtitle.includes("tower") ||
-                   titleLower.includes("office") || titleLower.includes("workspace") || titleLower.includes("tower")) {
+          titleLower.includes("office") || titleLower.includes("workspace") || titleLower.includes("tower")) {
           category = "office";
         } else if (subtitle.includes("library") || subtitle.includes("public") || subtitle.includes("museum") || subtitle.includes("temple") || subtitle.includes("facility") ||
-                   titleLower.includes("library") || titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("temple") || titleLower.includes("facility")) {
+          titleLower.includes("library") || titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("temple") || titleLower.includes("facility")) {
           category = "public";
         } else if (subtitle.includes("urban") || subtitle.includes("city") || subtitle.includes("landscape") || subtitle.includes("street") || subtitle.includes("plan") ||
-                   titleLower.includes("urban") || titleLower.includes("city") || titleLower.includes("landscape") || titleLower.includes("street") || titleLower.includes("plan")) {
+          titleLower.includes("urban") || titleLower.includes("city") || titleLower.includes("landscape") || titleLower.includes("street") || titleLower.includes("plan")) {
           category = "urban";
         } else {
           const categories: WorkCategory[] = ["residential", "resort", "commercial", "public"];
@@ -202,7 +202,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
   return (
     <div className="bg-white min-h-screen">
       <div className="flex max-w-[1920px] mx-auto px-6 md:px-[60px] pt-4 md:pt-6 pb-24 gap-12">
-        
+
         {/* ========== DESKTOP SIDEBAR ========== */}
         <aside className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin">
           <div>
@@ -220,11 +220,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveType("all")}
-                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                  activeType === "all"
+                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
                     ? "text-[#111] font-medium border-[#111]"
                     : "text-[#555] hover:text-[#111] border-transparent"
-                }`}
+                  }`}
               >
                 {showAllLabel}
               </button>
@@ -232,11 +231,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <button
                   key={key}
                   onClick={() => setActiveType(key)}
-                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                    activeType === key
+                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
                       ? "text-[#111] font-medium border-[#111]"
                       : "text-[#555] hover:text-[#111] border-transparent"
-                  }`}
+                    }`}
                 >
                   {t(`types.${key}`)}
                 </button>
@@ -252,11 +250,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveCat("all")}
-                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                  activeCat === "all"
+                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
                     ? "text-[#111] font-medium border-[#111]"
                     : "text-[#555] hover:text-[#111] border-transparent"
-                }`}
+                  }`}
               >
                 {showAllLabel}
               </button>
@@ -264,11 +261,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <button
                   key={key}
                   onClick={() => setActiveCat(key)}
-                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                    activeCat === key
+                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
                       ? "text-[#111] font-medium border-[#111]"
                       : "text-[#555] hover:text-[#111] border-transparent"
-                  }`}
+                    }`}
                 >
                   {t(`categories.${key}`)}
                 </button>
@@ -422,11 +418,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                       setActiveType("all");
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                      activeType === "all"
+                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
                         ? "text-[#111] font-medium border-[#111]"
                         : "text-[#555] hover:text-[#111] border-transparent"
-                    }`}
+                      }`}
                   >
                     {showAllLabel}
                   </button>
@@ -437,11 +432,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         setActiveType(key);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                        activeType === key
+                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
                           ? "text-[#111] font-medium border-[#111]"
                           : "text-[#555] hover:text-[#111] border-transparent"
-                      }`}
+                        }`}
                     >
                       {t(`types.${key}`)}
                     </button>
@@ -460,11 +454,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                       setActiveCat("all");
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                      activeCat === "all"
+                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
                         ? "text-[#111] font-medium border-[#111]"
                         : "text-[#555] hover:text-[#111] border-transparent"
-                    }`}
+                      }`}
                   >
                     {showAllLabel}
                   </button>
@@ -475,11 +468,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         setActiveCat(key);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${
-                        activeCat === key
+                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
                           ? "text-[#111] font-medium border-[#111]"
                           : "text-[#555] hover:text-[#111] border-transparent"
-                      }`}
+                        }`}
                     >
                       {t(`categories.${key}`)}
                     </button>

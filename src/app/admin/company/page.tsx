@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
+import RichEditor from "@/components/admin/RichEditor";
 import { useToast } from "@/components/admin/Toast";
 import { Save, Loader2, Plus, X } from "lucide-react";
 
@@ -97,8 +98,14 @@ export default function CompanyContentPage() {
           <div className="space-y-5">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Giới thiệu</h3>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (JA)</label><textarea value={overview.introJa} onChange={(e) => setOverview((o) => ({ ...o, introJa: e.target.value }))} rows={4} className={inputCls + " resize-none"} /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (EN)</label><textarea value={overview.introEn} onChange={(e) => setOverview((o) => ({ ...o, introEn: e.target.value }))} rows={4} className={inputCls + " resize-none"} /></div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (JA)</label>
+                <RichEditor value={overview.introJa} onChange={(v) => setOverview((o) => ({ ...o, introJa: v }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (EN)</label>
+                <RichEditor value={overview.introEn} onChange={(v) => setOverview((o) => ({ ...o, introEn: v }))} />
+              </div>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Số liệu thống kê</h3>

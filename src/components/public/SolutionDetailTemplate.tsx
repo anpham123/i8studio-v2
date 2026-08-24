@@ -320,12 +320,38 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-sm font-bold mb-5 font-roboto">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <h3 className="text-base font-medium text-[#111] mb-2">
+                <h3 className="text-base font-semibold text-[#111] mb-3">
                   {isJa ? step.titleJa : step.titleEn}
                 </h3>
-                <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
-                  {isJa ? step.descJa : step.descEn}
-                </p>
+                {(() => {
+                  const rawDesc = (isJa ? step.descJa : step.descEn) || "";
+                  let items = rawDesc
+                    .split(/\r?\n/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+
+                  if (items.length === 0 && rawDesc.trim()) {
+                    items = [rawDesc.trim()];
+                  }
+
+                  if (items.length > 0) {
+                    return (
+                      <ul className="space-y-2.5">
+                        {items.map((item, idx) => {
+                          const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                          return (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-500 leading-relaxed [text-wrap:pretty]">
+                              <span className="text-[#b8935a] font-bold text-sm leading-[1.6] select-none shrink-0">•</span>
+                              <span className="flex-1">{cleanItem}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    );
+                  }
+
+                  return null;
+                })()}
               </motion.div>
             ))}
           </div>

@@ -93,7 +93,7 @@ export default function WorkflowPageContent({ steps }: Props) {
       </section>
 
       {/* ── Steps (alternating) ───────── */}
-      <section className="max-w-6xl mx-auto px-6 py-20 md:py-28 space-y-24 md:space-y-32">
+      <section className="max-w-7xl mx-auto px-6 py-20 md:py-28 space-y-24 md:space-y-32">
         {displaySteps.map((step, i) => {
           const reverse = i % 2 === 1;
           const num = String(step.stepNumber).padStart(2, "0");
@@ -110,10 +110,10 @@ export default function WorkflowPageContent({ steps }: Props) {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
-              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} gap-10 md:gap-16 items-center`}
+              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} gap-8 md:gap-12 lg:gap-16 items-center`}
             >
               {/* Image */}
-              <div className="w-full md:w-1/2 aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200">
+              <div className="w-full md:w-[45%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0">
                 {step.image ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -141,11 +141,11 @@ export default function WorkflowPageContent({ steps }: Props) {
               </div>
 
               {/* Text */}
-              <div className="w-full md:w-1/2">
+              <div className="w-full md:w-[55%] flex-1">
                 <span className="text-5xl md:text-7xl font-bold text-[#111] block mb-2 font-roboto tracking-tight">
                   {num}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+                <h2 className="text-2xl md:text-3xl font-semibold md:font-bold text-[#111] mb-4" style={{ fontFamily: isJa ? "var(--font-noto-serif), serif" : "var(--font-cormorant), var(--font-noto-serif), serif" }}>
                   {title}
                 </h2>
                 {(() => {
@@ -181,9 +181,9 @@ export default function WorkflowPageContent({ steps }: Props) {
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2.5 text-gray-500 text-base leading-relaxed">
+                            <li key={idx} className="flex items-start gap-2.5 text-gray-500 text-base leading-relaxed [text-wrap:pretty]">
                               <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
-                              <span>{cleanItem}</span>
+                              <span className="flex-1">{cleanItem}</span>
                             </li>
                           );
                         })}

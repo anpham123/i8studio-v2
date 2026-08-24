@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
@@ -197,20 +198,33 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
       <section className="max-w-4xl mx-auto px-6 py-20 md:py-28">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
           <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-6">OUR STORY</p>
-          <div className="text-gray-600 text-base md:text-lg leading-[1.9] space-y-6">
+          <div className="blog-content text-gray-700 text-base md:text-lg leading-[1.9] space-y-6">
             {(() => {
               const customIntro = isJa ? overview?.introJa : overview?.introEn;
               if (customIntro && customIntro.trim().length > 0) {
+                if (/<[a-z][\s\S]*>/i.test(customIntro)) {
+                  return (
+                    <div
+                      className="space-y-4"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(customIntro) }}
+                    />
+                  );
+                }
                 return customIntro
                   .split(/\r?\n\r?\n|\r?\n/)
                   .map((p) => p.trim())
                   .filter(Boolean)
-                  .map((p, idx) => <p key={idx}>{p}</p>);
+                  .map((p, idx) => (
+                    <p
+                      key={idx}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
+                    />
+                  ));
               }
 
               const settingDesc = isJa ? settings.aboutDescJa : settings.aboutDescEn;
               if (settingDesc && settingDesc.trim().length > 0) {
-                return <p>{settingDesc}</p>;
+                return <p dangerouslySetInnerHTML={{ __html: sanitizeHtml(settingDesc) }} />;
               }
 
               return (
@@ -385,7 +399,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
               }}
             />
           </div>
-          <p className="text-center text-gray-500 text-base mt-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-center text-gray-600 text-lg md:text-[22px] mt-8 max-w-4xl mx-auto leading-[1.85] font-normal">
             {isJa
               ? "3Dアーティスト、アニメーター、VR/ARエンジニア、プロジェクトマネージャーなど、多彩な専門家が在籍。日本語対応の専任ディレクターがスムーズなコミュニケーションをサポートします。"
               : "Our diverse team includes 3D artists, animators, VR/AR engineers, and project managers. Dedicated Japanese-speaking directors ensure smooth communication."}

@@ -26,6 +26,7 @@ export default function AdminHeader({ title, onOpenMobile, actions }: AdminHeade
         <h1 className="text-lg font-semibold text-gray-900 flex-1">{title}</h1>
 
         {actions && <div className="flex items-center gap-2">{actions}</div>}
+        <div id="admin-header-actions" className="flex items-center gap-2 empty:hidden" />
 
         {/* User info */}
         <div className="flex items-center gap-3 pl-3 border-l border-gray-100">

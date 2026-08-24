@@ -149,24 +149,26 @@ export default async function BlogDetailPage({ params }: Props) {
       })}
 
       {/* Comparison */}
-      <ComparisonSection
-        before={post.comparisonBefore || undefined}
-        after={post.comparisonAfter || undefined}
-      />
+      {(post.comparisonBefore || post.comparisonAfter) && (
+        <ComparisonSection
+          before={post.comparisonBefore || undefined}
+          after={post.comparisonAfter || undefined}
+        />
+      )}
 
       {/* Insight block */}
       {(post.insightHeading || post.insightBody) && (
-        <section className="bg-[var(--surface)] py-[45px] sm:py-[60px]">
+        <section className="bg-[#fbf6ec] border-y border-[#ebd9be] py-[55px] sm:py-[75px]">
           <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
             {post.insightHeading && (
               <h3
-                className="font-serif text-[20px] sm:text-[26px] font-medium leading-[1.4] text-[var(--ink)] mb-8"
+                className="font-serif text-[20px] sm:text-[26px] font-bold leading-[1.4] text-[#111] mb-8"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.insightHeading) }}
               />
             )}
             {post.insightBody && (
               <div
-                className="text-[14px] sm:text-[15px] leading-[1.9] text-[#111]"
+                className="blog-content text-[14px] sm:text-[15px] leading-[1.9] text-[#111]"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.insightBody) }}
               />
             )}

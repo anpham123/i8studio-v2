@@ -80,7 +80,18 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: "list-disc",
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: "list-decimal",
+          },
+        },
+      }),
       Highlight,
       LinkExtension.configure({
         openOnClick: false,
@@ -444,7 +455,7 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
                 <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm bg-white">
                   <table className="w-full border-collapse text-left text-sm">
                     <thead>
-                      <tr className="bg-[#f0f4f8] border-b border-gray-300">
+                      <tr className="bg-[#dbe4ee] border-b border-gray-300">
                         {tableHeaders.map((h, i) => (
                           <th
                             key={i}

@@ -19,7 +19,8 @@ interface BlogPost {
   isFeatured: boolean;
   locale: string;
   publishedAt: string;
-  coverImage: string;
+  coverImage?: string;
+  heroImage?: string;
 }
 
 export default function AdminBlogPostsPage() {
@@ -32,7 +33,7 @@ export default function AdminBlogPostsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/blog-posts?limit=100");
+    const res = await fetch(`/api/blog-posts?limit=100&_t=${Date.now()}`);
     const json = await res.json();
     setData(json.data || []);
     setLoading(false);
@@ -53,9 +54,12 @@ export default function AdminBlogPostsPage() {
   const columns: Column<BlogPost>[] = [
     {
       key: "coverImage", label: "Ảnh", width: "w-16",
-      render: (v) => v
-        ? <img src={String(v)} className="w-14 h-11 object-cover rounded" alt="" />
-        : <div className="w-14 h-11 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">N/A</div>,
+      render: (_v, row) => {
+        const img = row.coverImage || row.heroImage;
+        return img
+          ? <img src={img} className="w-14 h-11 object-cover rounded" alt="" />
+          : <div className="w-14 h-11 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">N/A</div>;
+      },
     },
     {
       key: "title", label: "Tiêu đề", sortable: true,
