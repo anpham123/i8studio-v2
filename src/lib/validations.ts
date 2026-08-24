@@ -235,3 +235,12 @@ export const PortfolioSchema = z.object({
   order: z.number().int().optional().default(0),
   isPublished: z.boolean().optional().default(true),
 });
+
+export const HomeMediaSchema = z.object({
+  title: z.string().max(300).optional().default(""),
+  image: z.string().optional().default(""),
+  videoUrl: z.string().optional().default(""),
+  type: z.enum(["image", "video"]).optional().default("image"),
+  order: z.number().int().optional().default(0),
+  active: z.boolean().optional().default(true),
+});

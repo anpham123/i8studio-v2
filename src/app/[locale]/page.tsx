@@ -32,17 +32,17 @@ export default async function HomePage() {
   });
   const limit = limitSetting ? (parseInt(limitSetting.value) || 11) : 11;
 
-  // Fetch featured works for hero masonry grid
-  const works = await prisma.work.findMany({
-    where: { image: { not: "" }, featured: true },
-    orderBy: [{ homeOrder: "asc" }, { createdAt: "desc" }],
+  // Fetch homepage media (standalone, not linked to Works)
+  const media = await prisma.homeMedia.findMany({
+    where: { active: true },
+    orderBy: { order: "asc" },
     take: limit,
-    select: { id: true, title: true, image: true },
   });
 
-  const heroImages = works.map((w) => ({
-    url: w.image,
-    alt: w.title,
+  const heroImages = media.map((m) => ({
+    url: m.image,
+    alt: m.title,
+    videoUrl: m.videoUrl || undefined,
   }));
 
   return (
