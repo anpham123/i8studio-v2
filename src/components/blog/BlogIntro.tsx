@@ -4,6 +4,8 @@ function parseDropcap(htmlOrText: string) {
   if (!htmlOrText) return { firstChar: "", restHtml: "" };
 
   const raw = htmlOrText.trim();
+  const textOnly = raw.replace(/<[^>]+>/g, "").trim();
+  if (!textOnly) return { firstChar: "", restHtml: "" };
 
   // Strip leading tags like <p>, <div>, <span> to find the first real text character
   const tagMatch = raw.match(/^((?:<[^>]+>)*)([^<])([\s\S]*)$/);
@@ -16,8 +18,8 @@ function parseDropcap(htmlOrText: string) {
   }
 
   return {
-    firstChar: raw.charAt(0),
-    restHtml: raw.slice(1),
+    firstChar: textOnly.charAt(0),
+    restHtml: raw,
   };
 }
 
@@ -28,15 +30,16 @@ export default function BlogIntro({
   dropcapText?: string;
   pullquote?: string;
 }) {
-  if (!dropcapText && !pullquote) return null;
-
   const { firstChar, restHtml } = parseDropcap(dropcapText || "");
+  const hasDropcap = Boolean(firstChar);
+
+  if (!hasDropcap && !pullquote) return null;
 
   return (
     <section className="bg-[var(--surface)] pt-2 pb-3 sm:pb-5">
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
         {/* Lead paragraph with large styled dropcap */}
-        {dropcapText && (
+        {hasDropcap && (
           <div className="text-[14px] sm:text-[15px] leading-[2] text-[#111] mb-5 clearfix max-w-[1000px]">
             {firstChar && (
               <span className="font-serif text-[48px] sm:text-[56px] leading-[0.8] float-left mr-3.5 mt-1 font-normal text-[#b8935a] select-none">

@@ -68,7 +68,9 @@ export default async function AboutPortfolioPage({
       {/* Hero */}
       <section className="bg-[#fafaf8] border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">PORTFOLIO</p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
+            {isJa ? "ポートフォリオ" : "PORTFOLIO"}
+          </p>
           <h1 className="text-3xl md:text-5xl font-light text-[#111] mb-6" style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}>
             {isJa ? "ポートフォリオ" : "Portfolio"}
           </h1>

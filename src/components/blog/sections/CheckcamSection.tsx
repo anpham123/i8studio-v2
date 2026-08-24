@@ -1,4 +1,5 @@
 import { sanitizeHtml } from "@/lib/sanitize";
+import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
 
 export interface SectionData {
   type: "checkcam" | "stage" | "comparison" | "insight";
@@ -38,13 +39,13 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
             {(data?.eyebrow || data?.eyebrowBadge) && (
               <div className="flex items-center gap-3 mb-4">
                 {data?.eyebrow && (
-                  <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em]">
-                    {data.eyebrow}
+                  <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] font-medium">
+                    {translateBlogEyebrow(data.eyebrow, locale === "ja")}
                   </span>
                 )}
                 {data?.eyebrowBadge && (
-                  <span className="bg-[var(--accent)] text-black text-[10px] px-2 py-1 rounded">
-                    {data.eyebrowBadge}
+                  <span className="bg-[var(--accent)] text-black text-[10px] px-2 py-1 rounded font-medium">
+                    {translateBlogBadge(data.eyebrowBadge, locale === "ja")}
                   </span>
                 )}
               </div>

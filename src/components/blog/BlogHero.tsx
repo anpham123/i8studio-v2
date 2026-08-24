@@ -1,4 +1,5 @@
 import { sanitizeHtml } from "@/lib/sanitize";
+import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 
 export default function BlogHero({
   category,
@@ -15,14 +16,35 @@ export default function BlogHero({
   heroImage?: string;
   locale?: string;
 }) {
-  const categoryLabel = locale === "ja" ? "カテゴリー" : "Category";
+  const isJa = locale === "ja";
+  const categoryLabel = isJa ? "カテゴリー" : "Category";
+  const catObj = BLOG_CATEGORIES.find(
+    (c) =>
+      c.slug.toLowerCase() === (category || "").toLowerCase() ||
+      c.aliases?.some((a) => a.toLowerCase() === (category || "").toLowerCase()) ||
+      c.nameEn.toLowerCase() === (category || "").toLowerCase()
+  );
+  const localizedCategory = isJa ? (catObj?.nameJa || category) : (catObj?.nameEn || category);
+
+  const getEyebrowText = (eb?: string) => {
+    if (!eb) return "";
+    if (!isJa) return eb;
+    const map: Record<string, string> = {
+      "i8 Life Gallery": "i8 ライフギャラリー",
+      "I8 LIFE GALLERY": "i8 ライフギャラリー",
+      "Process Case Study · 2026": "プロセス・ケーススタディ · 2026",
+      "Architectural Visualization": "建築ビジュアライゼーション",
+      "Architectural Visualization ": "建築ビジュアライゼーション",
+    };
+    return map[eb.trim()] || eb;
+  };
 
   return (
     <section className="relative">
       {/* Eyebrow top-right */}
       {eyebrow && (
         <div className="absolute top-8 right-6 sm:right-10 lg:right-12 z-20 text-white/60 text-[11px] uppercase tracking-[0.24em]">
-          {eyebrow}
+          {getEyebrowText(eyebrow)}
         </div>
       )}
 
@@ -58,7 +80,7 @@ export default function BlogHero({
           {category && (
             <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-4">
               <span className="opacity-60 text-[var(--ink-muted)]">{categoryLabel}</span>
-              <span className="ml-3">{category}</span>
+              <span className="ml-3 font-medium">{localizedCategory}</span>
             </div>
           )}
 

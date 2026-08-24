@@ -131,7 +131,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-6">
-            ABOUT US
+            {isJa ? "私たちについて" : "ABOUT US"}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -197,7 +197,9 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
       {/* ── Company Description ─────── */}
       <section className="max-w-4xl mx-auto px-6 py-20 md:py-28">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-6">OUR STORY</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-6">
+            {isJa ? "私たちのストーリー" : "OUR STORY"}
+          </p>
           <div className="blog-content text-gray-700 text-base md:text-lg leading-[1.9] space-y-6">
             {(() => {
               const customIntro = isJa ? overview?.introJa : overview?.introEn;
@@ -250,7 +252,9 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">OUR JOURNEY</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+              {isJa ? "歩みと沿革" : "OUR JOURNEY"}
+            </p>
             <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "沿革・マイルストーン" : "History & Milestones"}
             </h2>
@@ -373,7 +377,9 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
       {/* ── Team Section ───────────────── */}
       <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
         <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">OUR TEAM</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+            {isJa ? "チーム紹介" : "OUR TEAM"}
+          </p>
           <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
             {isJa ? "情熱を持った80名のクリエイター" : "80 Passionate Creators"}
           </h2>

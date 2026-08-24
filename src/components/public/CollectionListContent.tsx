@@ -92,7 +92,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
       <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
-            COLLECTION
+            {isJa ? "コレクション" : "COLLECTION"}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -241,7 +241,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                     <div className="absolute bottom-0 left-0 right-0 p-6 xl:p-8 flex items-end justify-between z-10 text-white">
                       <div className="max-w-lg">
                         <span className="text-[11px] uppercase tracking-[0.25em] text-[#e8dcc8] font-semibold block mb-2">
-                          SPACE COLLECTION · {String(activeIndex + 1).padStart(2, "0")} / {String(collections.length).padStart(2, "0")}
+                          {isJa ? "空間コレクション" : "SPACE COLLECTION"} · {String(activeIndex + 1).padStart(2, "0")} / {String(collections.length).padStart(2, "0")}
                         </span>
                         <h3
                           className="font-serif text-xl xl:text-2xl text-white mb-1.5 leading-tight"

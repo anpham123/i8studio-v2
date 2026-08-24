@@ -294,7 +294,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           {/* Header */}
                           <div className="flex items-center gap-3 mb-8">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
-                              SERVICE
+                              {locale === "ja" ? "ソリューション" : "SERVICE"}
                             </span>
                             <span className="flex-1 h-px bg-gray-200" />
                           </div>

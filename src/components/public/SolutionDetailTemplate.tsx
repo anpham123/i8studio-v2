@@ -130,7 +130,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         <section className="bg-[#fafaf8]">
           <div className="max-w-5xl mx-auto px-6 py-16 md:py-24">
             <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">INTERACTIVE EXPERIENCE</p>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+                {isJa ? "インタラクティブ体験" : "INTERACTIVE EXPERIENCE"}
+              </p>
               <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                 {isJa ? "インタラクティブデモ" : "Interactive Demo"}
               </h2>
@@ -297,7 +299,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">PROCESS</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+              {isJa ? "制作工程" : "PROCESS"}
+            </p>
             <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "プロフェッショナルな制作工程" : "Professional Production Process"}
             </h2>
@@ -362,7 +366,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#111]">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-3">SERVICE PLANS</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-3">
+              {isJa ? "料金プラン" : "SERVICE PLANS"}
+            </p>
             <h2 className="text-2xl md:text-3xl font-light text-white" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "サービスプラン" : "Service Plans"}
             </h2>
@@ -388,7 +394,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     {isJa ? "おすすめ" : "Recommended"}
                   </span>
                 )}
-                <h3 className="text-xl font-medium text-white mb-4">{plan.name}</h3>
+                <h3 className="text-xl font-medium text-white mb-4">
+                  {isJa
+                    ? (plan.name === "Standard" ? "スタンダード" : plan.name === "High Quality" ? "ハイクオリティ" : plan.name === "Full Custom" ? "フルカスタム" : plan.name)
+                    : plan.name}
+                </h3>
                 <div className="text-3xl font-bold text-white mb-6 font-roboto tracking-tight">
                   {plan.price === "ASK" ? (
                     <span className="text-lg font-normal">{isJa ? "お問い合わせ" : "Contact Us"}</span>

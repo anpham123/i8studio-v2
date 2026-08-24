@@ -73,7 +73,7 @@ export default function WorkflowPageContent({ steps }: Props) {
       <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
-            WORKFLOW
+            {isJa ? "ワークフロー" : "WORKFLOW"}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}

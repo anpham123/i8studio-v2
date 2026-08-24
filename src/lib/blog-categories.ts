@@ -54,7 +54,7 @@ export const BLOG_CATEGORIES: BlogCategoryDef[] = [
     slug: "life-gallery",
     route: "life-gallery",
     key: "lifeGallery",
-    nameJa: "I8 Life Gallery",
+    nameJa: "i8 ライフギャラリー",
     nameEn: "I8 Life Gallery",
     descJa: "i8 STUDIOのチームメンバーの日常やカルチャーをお伝えします。",
     descEn: "A glimpse into the daily life, culture, and behind-the-scenes at i8 STUDIO.",
@@ -71,4 +71,52 @@ export function getCategoryBySlugOrRoute(slugOrRoute: string): BlogCategoryDef |
 export function getCategoryAliases(slugOrRoute: string): string[] {
   const cat = getCategoryBySlugOrRoute(slugOrRoute);
   return cat ? cat.aliases : [slugOrRoute];
+}
+
+export function translateBlogEyebrow(eb?: string, isJa = true): string {
+  if (!eb) return "";
+  if (!isJa) return eb;
+  const trimmed = eb.trim();
+  const map: Record<string, string> = {
+    "CONSULTATION": "ヒアリング・要件定義",
+    "MODELING": "3Dモデリング",
+    "CAMERA ANGLE": "アングル提案・選定",
+    "VISUAL REFINEMENT": "ビジュアル調整",
+    "REVIEW": "初稿レビュー",
+    "DELIVERY": "最終納品",
+    "OUR PHILOSOPHY": "私たちのこだわり",
+    "Check Cam": "アングル確認",
+    "CHECK CAM": "アングル確認",
+    "Render v1": "初回レンダリング",
+    "RENDER V1": "初回レンダリング",
+    "Render v2": "精密レンダリング",
+    "RENDER V2": "精密レンダリング",
+    "Final Render": "最終レンダリング",
+    "FINAL RENDER": "最終レンダリング",
+    "AI INTEGRATION": "AI連携",
+    "INNOVATION": "技術革新",
+    "Insight": "インサイト",
+    "Process": "制作工程",
+    "PROCESS": "制作工程",
+  };
+  return map[trimmed] || map[trimmed.toUpperCase()] || trimmed;
+}
+
+export function translateBlogBadge(badge?: string, isJa = true): string {
+  if (!badge) return "";
+  if (!isJa) return badge;
+  const trimmed = badge.trim();
+  const map: Record<string, string> = {
+    "INNOVATION": "技術革新",
+    "納品": "最終納品",
+    "１回目 レンダー": "初回レンダリング",
+    "２回目 レンダー": "精密レンダリング",
+    "アングル確認": "アングル確認",
+    "レンダリング v1": "初回レンダリング",
+    "レンダリング v2": "精密レンダリング",
+  };
+  if (map[trimmed]) return map[trimmed];
+  return trimmed
+    .replace(/^STEP\s*0?(\d+)$/i, (_, n) => `ステップ ${parseInt(n) < 10 ? '0' + parseInt(n) : n}`)
+    .replace(/STEP\s*(\d+)/gi, "ステップ $1");
 }

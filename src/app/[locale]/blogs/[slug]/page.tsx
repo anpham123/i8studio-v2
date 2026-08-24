@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, articleJsonLd, getSiteUrl } from "@/lib/seo";
@@ -141,7 +142,7 @@ export default async function BlogDetailPage({ params }: Props) {
             const beforeImg = section.image || firstAdditional;
             const afterImg = firstAdditional || section.image;
 
-            return <ComparisonSection key={key} data={section} before={beforeImg} after={afterImg} />;
+            return <ComparisonSection key={key} data={section} before={beforeImg} after={afterImg} locale={locale} />;
           }
           default:
             return <StageSection key={key} data={section} locale={locale} />;
@@ -153,6 +154,7 @@ export default async function BlogDetailPage({ params }: Props) {
         <ComparisonSection
           before={post.comparisonBefore || undefined}
           after={post.comparisonAfter || undefined}
+          locale={locale}
         />
       )}
 

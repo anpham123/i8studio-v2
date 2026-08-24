@@ -19,6 +19,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
     where: {
       isPublished: true,
       category: { in: aliases },
+      locale,
     },
     orderBy: { publishedAt: "desc" },
   });
@@ -29,7 +30,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[var(--accent)] text-[11px] uppercase tracking-[0.24em] font-medium mb-4">
-            BLOG
+            {isJa ? "ブログ" : "BLOG"}
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-light text-[var(--ink)] leading-[1.2] mb-4">
             {isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog")}

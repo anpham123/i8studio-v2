@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Clock, MessageCircle, Shield, Send } from "lucide-react";
 import FadeIn from "./FadeIn";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface ContactSectionProps {
   settings: Record<string, string>;
@@ -22,12 +22,16 @@ const DEFAULT_SERVICES = [
 
 export default function ContactSection({ settings, serviceNames }: ContactSectionProps) {
   const t = useTranslations("contact");
+  const locale = useLocale();
+  const isJa = locale === "ja";
   const [form, setForm] = useState({ fullName: "", email: "", service: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const services = serviceNames && serviceNames.length > 0
-    ? [...serviceNames, "Other"]
-    : DEFAULT_SERVICES;
+    ? [...serviceNames, isJa ? "その他" : "Other"]
+    : (isJa
+        ? ["CGパース制作", "CG動画・アニメーション", "VR体験・ウォークスルー", "BIMモデリング", "パチンコ・パチスロCG", "アニメ・イラスト制作", "その他"]
+        : DEFAULT_SERVICES);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +58,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-            Contact
+            {isJa ? "お問い合わせ" : "Contact"}
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
             {t("title")}
@@ -85,7 +89,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                       value={form.fullName}
                       onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
-                      placeholder="Tanaka Hiroshi"
+                      placeholder={isJa ? "山田 太郎" : "Tanaka Hiroshi"}
                     />
                   </div>
 
@@ -99,7 +103,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
-                      placeholder="hello@company.jp"
+                      placeholder={isJa ? "info@example.co.jp" : "hello@company.jp"}
                     />
                   </div>
 
@@ -129,7 +133,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm resize-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
-                      placeholder="Tell us about your project..."
+                      placeholder={isJa ? "プロジェクトの概要、ご要望、スケジュールなどをご記入ください..." : "Tell us about your project..."}
                     />
                   </div>
 
@@ -180,32 +184,34 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
               {[
                 {
                   icon: Mail,
-                  label: "Email",
+                  label: isJa ? "メールアドレス" : "Email",
                   value: settings.email || "info@i8studio.vn",
                   href: `mailto:${settings.email || "info@i8studio.vn"}`,
                 },
                 {
                   icon: Phone,
-                  label: "Phone / WhatsApp",
+                  label: isJa ? "お電話 / WhatsApp" : "Phone / WhatsApp",
                   value: settings.phone || "0914 049 090",
                   href: `tel:${settings.phone || "0914049090"}`,
                 },
                 {
                   icon: MessageCircle,
-                  label: "Line",
-                  value: settings.lineUrl || "Contact via Line",
+                  label: "LINE",
+                  value: settings.lineUrl ? (isJa ? "LINEで相談する" : "Contact via Line") : (isJa ? "LINEでのお問い合わせ" : "Contact via Line"),
                   href: settings.lineUrl || "#",
                 },
                 {
                   icon: MapPin,
-                  label: "Address",
-                  value: settings.address || "Da Nang, Vietnam",
+                  label: isJa ? "所在地" : "Address",
+                  value: settings.address || (isJa ? "ベトナム・ダナン" : "Da Nang, Vietnam"),
                   href: null,
                 },
                 {
                   icon: Clock,
-                  label: "Working Hours",
-                  value: settings.workingHours || t("workingHours"),
+                  label: isJa ? "営業時間" : "Working Hours",
+                  value: isJa
+                    ? (settings.workingHoursJa || settings.workingHours || "月〜金 9:30 - 18:30 (日本時間)")
+                    : (settings.workingHours || "Mon - Fri 7:30 - 16:30 VN"),
                   href: null,
                 },
               ].map((item) => (
@@ -232,12 +238,20 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
               {/* Trust badges */}
               <div className="mt-8 border border-gray-200 rounded-xl p-5 bg-gray-50">
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    "200+ Projects",
-                    "50+ Clients",
-                    "NDA Available",
-                    "Fast Turnaround",
-                  ].map((badge) => (
+                  {(isJa
+                    ? [
+                        "200件以上の実績",
+                        "50社以上のクライアント",
+                        "NDA対応可能",
+                        "迅速な納期対応",
+                      ]
+                    : [
+                        "200+ Projects",
+                        "50+ Clients",
+                        "NDA Available",
+                        "Fast Turnaround",
+                      ]
+                  ).map((badge) => (
                     <div key={badge} className="flex items-center gap-2 text-gray-500 text-xs">
                       <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                       {badge}

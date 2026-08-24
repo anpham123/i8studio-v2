@@ -1,9 +1,11 @@
 import { sanitizeHtml } from "@/lib/sanitize";
+import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
 import type { SectionData } from "./CheckcamSection";
 
 export default function StageSection({ data, locale = "ja" }: { data: SectionData; locale?: string }) {
-  const improvedLabel = locale === "ja" ? "改善された点" : "Improvements made";
-  const missingLabel = locale === "ja" ? "まだ不足している要素" : "Elements still missing";
+  const isJa = locale === "ja";
+  const improvedLabel = isJa ? "改善された点" : "Improvements made";
+  const missingLabel = isJa ? "まだ不足している要素" : "Elements still missing";
   const hasImage = Boolean(data?.image);
   const bodyParagraphs = Array.isArray(data?.body) ? data.body : (data?.body ? [data.body] : []);
 
@@ -51,13 +53,13 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                 {(data?.eyebrow || data?.eyebrowBadge) && (
                   <div className="flex items-center gap-3 mb-4">
                     {data?.eyebrow && (
-                      <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em]">
-                        {data.eyebrow}
+                      <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] font-medium">
+                        {translateBlogEyebrow(data.eyebrow, isJa)}
                       </span>
                     )}
                     {data?.eyebrowBadge && (
-                      <span className="bg-[var(--accent)] text-black text-[10px] px-2 py-1 rounded">
-                        {data.eyebrowBadge.trim()}
+                      <span className="bg-[var(--accent)] text-black text-[10px] px-2 py-1 rounded font-medium">
+                        {translateBlogBadge(data.eyebrowBadge, isJa)}
                       </span>
                     )}
                   </div>

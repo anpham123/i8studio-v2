@@ -35,7 +35,9 @@ export default function PortfolioFlipbooks({ flipbooks, isJa, hasPortfolios }: P
       <section className={hasPortfolios ? "bg-[#fafaf8] border-t border-gray-100" : ""}>
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <div className="text-center mb-14">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">DOCUMENTS</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+              {isJa ? "資料・ドキュメント" : "DOCUMENTS"}
+            </p>
             <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "ポートフォリオ PDF" : "Portfolio PDF"}
             </h2>

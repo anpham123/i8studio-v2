@@ -38,7 +38,7 @@
       "techniqueSharing": "テクニック共有",
       "knowledge": "ナレッジ",
       "ai": "AI特集",
-      "lifeGallery": "I8 Life Gallery"
+      "lifeGallery": "i8 ライフギャラリー"
     }
   },
   "portfolio": {
@@ -72,7 +72,7 @@
   },
   "works": {
     "subtitle": "実績",
-    "title": "Works",
+    "title": "実績",
     "viewAll": "すべての実績を見る",
     "viewProject": "プロジェクトを見る →",
     "emptyCategory": "このカテゴリにはまだ実績がありません。",
@@ -201,13 +201,13 @@
     "subscribeError": "エラーが発生しました。もう一度お試しください。"
   },
   "solution": {
-    "label": "SOLUTION",
-    "title": "What We Create",
+    "label": "ソリューション",
+    "title": "私たちが創るもの",
     "heroLine1": "建築・不動産プロジェクトのための",
     "heroLine2": "高品質なビジュアライゼーションを提供します。",
-    "viewWorks": "VIEW WORKS",
+    "viewWorks": "実績を見る",
     "ctaSubtitle": "ご要望に合わせてご提案いたします",
-    "ctaTitle": "Let's work together",
+    "ctaTitle": "一緒にプロジェクトを創りましょう",
     "ctaButton": "お問い合わせ →",
     "s1": {
       "desc": "フォトリアルな静止画レンダリング。外観・内観・空撮など\n多様なアングルで、プロジェクトの魅力を最大限に表現します。",
@@ -267,9 +267,9 @@
     "notFound": "ページが見つかりません"
   },
   "work": {
-    "title": "Works",
+    "title": "実績",
     "filter": "絞り込み",
-    "typeLabel": "TYPE",
+    "typeLabel": "タイプ",
     "categoryLabel": "建築カテゴリー",
     "types": {
       "still": "静止画",

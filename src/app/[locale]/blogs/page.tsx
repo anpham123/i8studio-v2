@@ -32,7 +32,7 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const catDef = activeCategory ? getCategoryBySlugOrRoute(activeCategory) : undefined;
   const aliases = activeCategory ? getCategoryAliases(activeCategory) : undefined;
 
-  const where: Record<string, unknown> = { isPublished: true };
+  const where: Record<string, unknown> = { isPublished: true, locale };
   if (aliases) {
     where.category = { in: aliases };
   }
@@ -45,15 +45,22 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const featured = !activeCategory ? posts.find((p) => p.isFeatured) : undefined;
   const rest = posts.filter((p) => p.id !== featured?.id);
 
-  const heroEyebrow = activeCategory ? "BLOG" : "i8 STUDIO";
+  const heroEyebrow = activeCategory ? (isJa ? "ブログ" : "BLOG") : "i8 STUDIO";
   const heroTitle = activeCategory
-    ? (isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog"))
-    : "Blog";
+    ? (isJa ? (catDef?.nameJa || "ブログ") : (catDef?.nameEn || "Blog"))
+    : (isJa ? "ブログ" : "Blog");
   const heroDesc = activeCategory
     ? (isJa ? catDef?.descJa : catDef?.descEn)
     : (isJa
         ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
         : "Production process, technical insights, and architectural CG trends.");
+
+  const getCategoryName = (cat: string) => {
+    if (!cat) return isJa ? "ブログ" : "Blog";
+    if (!isJa) return cat;
+    const found = BLOG_CATEGORIES.find((c) => c.slug.toLowerCase() === cat.toLowerCase() || c.aliases?.some((a) => a.toLowerCase() === cat.toLowerCase()) || c.nameEn.toLowerCase() === cat.toLowerCase());
+    return found?.nameJa || cat;
+  };
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
@@ -99,7 +106,7 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
               <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                    {featured.category || "Blog"}
+                    {getCategoryName(featured.category)}
                   </span>
                   <span className="text-[var(--ink-muted)] text-[11px]">
                     {formatDate(featured.publishedAt)}
@@ -148,7 +155,7 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                      {post.category || "Blog"}
+                      {getCategoryName(post.category)}
                     </span>
                     <span className="text-[var(--ink-muted)] text-[11px]">·</span>
                     <span className="text-[var(--ink-muted)] text-[11px]">

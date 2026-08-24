@@ -143,8 +143,16 @@ export default function Footer({ settings }: FooterProps) {
                   </a>
                 </li>
               )}
-              {settings.address && <li>{settings.address}</li>}
-              <li>{settings.workingHours || t("workingHours")}</li>
+              <li>
+                {locale === "ja"
+                  ? (settings.addressJa || "ベトナム・ダナン")
+                  : (settings.address || "Da Nang, Vietnam")}
+              </li>
+              <li>
+                {locale === "ja"
+                  ? (settings.workingHoursJa || settings.workingHours || t("workingHours"))
+                  : (settings.workingHours || "Mon - Fri 7:30 - 16:30 VN")}
+              </li>
             </ul>
           </div>
 
