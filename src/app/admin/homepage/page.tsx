@@ -26,14 +26,17 @@ function isVideoFile(url?: string) {
 }
 
 /**
- * Masonry layout: Block repeats every 17 items
- * 0-3: 3:5 (portrait), 4: 21:9 (ultrawide), 5-16: 16:9 (landscape)
+ * Masonry layout mapping (HeroEditorial):
+ * - Position 1 (idx 0): Full-screen Hero (any ratio, displayed as object-cover)
+ * - Remaining positions map to masonry grid:
+ *   Block repeats every 17 items: 0-3: 3:5, 4: 21:9, 5-16: 16:9
  */
-function getPositionRatio(idx: number): { ratio: string; label: string; color: string; icon: string } {
-  const blockIdx = idx % 17;
-  if (blockIdx <= 3) return { ratio: "3:5", label: "Dọc", color: "bg-violet-100 text-violet-700 border-violet-200", icon: "⬜" };
-  if (blockIdx === 4) return { ratio: "21:9", label: "Siêu rộng", color: "bg-orange-100 text-orange-700 border-orange-200", icon: "▭" };
-  return { ratio: "16:9", label: "Ngang", color: "bg-cyan-100 text-cyan-700 border-cyan-200", icon: "◻" };
+function getPositionRatio(idx: number): { ratio: string; label: string; color: string } {
+  if (idx === 0) return { ratio: "Full", label: "Hero full màn hình", color: "bg-amber-100 text-amber-800 border-amber-300" };
+  const masonryIdx = (idx - 1) % 17;
+  if (masonryIdx <= 3) return { ratio: "3:5", label: "Dọc (600×1000)", color: "bg-violet-100 text-violet-700 border-violet-200" };
+  if (masonryIdx === 4) return { ratio: "21:9", label: "Siêu rộng (2100×900)", color: "bg-orange-100 text-orange-700 border-orange-200" };
+  return { ratio: "16:9", label: "Ngang (1920×1080)", color: "bg-cyan-100 text-cyan-700 border-cyan-200" };
 }
 
 export default function HomepagePage() {
@@ -306,22 +309,27 @@ export default function HomepagePage() {
 
       {/* Aspect Ratio Guide */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-        <p className="text-sm font-semibold text-amber-800 mb-2">📐 Tỷ lệ khung hình trang chủ (Masonry Grid)</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-amber-700">
-          <div className="bg-white rounded-lg p-2 border border-amber-100">
-            <div className="font-bold text-amber-900">Vị trí 1-4</div>
+        <p className="text-sm font-semibold text-amber-800 mb-2">📐 Tỷ lệ khung hình trang chủ</p>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-amber-700">
+          <div className="bg-amber-100 rounded-lg p-2 border border-amber-200">
+            <div className="font-bold text-amber-900">🎬 Vị trí 1</div>
+            <div>Hero <span className="font-mono font-bold">Full</span> màn hình</div>
+            <div className="text-amber-500">Tỷ lệ tự do, video/ảnh</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 border border-violet-200">
+            <div className="font-bold text-violet-900">Vị trí 2-5</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">3:5</span> (dọc)</div>
-            <div className="text-amber-500">VD: 600×1000px</div>
+            <div className="text-violet-500">VD: 600×1000px</div>
           </div>
-          <div className="bg-white rounded-lg p-2 border border-amber-100">
-            <div className="font-bold text-amber-900">Vị trí 5</div>
+          <div className="bg-white rounded-lg p-2 border border-orange-200">
+            <div className="font-bold text-orange-900">Vị trí 6</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">21:9</span> (siêu rộng)</div>
-            <div className="text-amber-500">VD: 2100×900px</div>
+            <div className="text-orange-500">VD: 2100×900px</div>
           </div>
-          <div className="bg-white rounded-lg p-2 border border-amber-100">
-            <div className="font-bold text-amber-900">Vị trí 6+</div>
+          <div className="bg-white rounded-lg p-2 border border-cyan-200">
+            <div className="font-bold text-cyan-900">Vị trí 7+</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">16:9</span> (ngang)</div>
-            <div className="text-amber-500">VD: 1920×1080px</div>
+            <div className="text-cyan-500">VD: 1920×1080px</div>
           </div>
           <div className="bg-white rounded-lg p-2 border border-amber-100">
             <div className="font-bold text-amber-900">💡 Khuyến nghị</div>
