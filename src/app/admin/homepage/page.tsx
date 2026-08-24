@@ -38,6 +38,7 @@ export default function HomepagePage() {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   // Add modal form
   const [addForm, setAddForm] = useState({ title: "", type: "image" as string });
   const [addImage, setAddImage] = useState<File | null>(null);
@@ -63,21 +64,38 @@ export default function HomepagePage() {
   const activeItems = items.filter((i) => i.active).sort((a, b) => a.order - b.order);
   const allSorted = items.sort((a, b) => a.order - b.order);
 
-  /* ─── Upload helpers ─── */
+  /* ─── Upload helpers with progress ─── */
+  const uploadWithProgress = (url: string, file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        try {
+          const json = JSON.parse(xhr.responseText);
+          resolve(json.url || "");
+        } catch { resolve(""); }
+      };
+      xhr.onerror = () => reject(new Error("Upload failed"));
+      xhr.open("POST", url);
+      xhr.send(formData);
+    });
+  };
+
   const uploadImage = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    const json = await res.json();
-    return json.url || "";
+    setUploadProgress(0);
+    return uploadWithProgress("/api/upload", file);
   };
 
   const uploadVideoFile = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload-video", { method: "POST", body: formData });
-    const json = await res.json();
-    return json.url || "";
+    setUploadProgress(0);
+    return uploadWithProgress("/api/upload-video", file);
   };
 
   /* ─── Add new ─── */
@@ -436,11 +454,23 @@ export default function HomepagePage() {
                 )}
               </div>
             </div>
+            {/* Upload progress bar */}
+            {saving && uploadProgress > 0 && (
+              <div className="px-6 py-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-blue-600">Đang upload...</span>
+                  <span className="text-xs font-bold text-blue-600">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              </div>
+            )}
             <div className="px-6 py-4 border-t flex justify-end gap-3">
               <button onClick={() => setShowAddModal(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Hủy</button>
               <button onClick={handleAdd} disabled={saving || (!addImage && !addVideo)}
                 className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-                <Upload size={16} /> {saving ? "Đang upload..." : "Thêm"}
+                <Upload size={16} /> {saving ? `Đang upload... ${uploadProgress}%` : "Thêm"}
               </button>
             </div>
           </div>
@@ -473,7 +503,7 @@ export default function HomepagePage() {
                     <input ref={editImageRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) editUploadImage(e.target.files[0]); }} />
                     <button onClick={() => editImageRef.current?.click()} disabled={uploading}
                       className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50">
-                      <Upload size={14} /> {uploading ? "Đang upload..." : "Upload ảnh mới"}
+                      <Upload size={14} /> {uploading ? `Đang upload ${uploadProgress}%` : "Upload ảnh mới"}
                     </button>
                   </div>
                 </div>
@@ -511,6 +541,18 @@ export default function HomepagePage() {
                 </button>
               </div>
             </div>
+            {/* Upload progress bar */}
+            {uploading && uploadProgress > 0 && (
+              <div className="px-6 py-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium text-blue-600">Đang upload...</span>
+                  <span className="text-xs font-bold text-blue-600">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              </div>
+            )}
             <div className="px-6 py-4 border-t flex justify-end gap-3 sticky bottom-0 bg-white rounded-b-2xl">
               <button onClick={() => setEditItem(null)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Hủy</button>
               <button onClick={saveEdit} disabled={saving}
