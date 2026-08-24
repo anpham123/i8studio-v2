@@ -41,7 +41,7 @@ export default function InsightSection({ data }: { data: SectionData }) {
 
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-gray-200/60">
+          <div className="mt-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
               {data.additionalImages.map((item, i) => {
                 const imgSrc = typeof item === "string" ? item : item.image;

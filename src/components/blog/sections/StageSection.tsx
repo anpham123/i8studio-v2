@@ -126,7 +126,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-gray-100">
+          <div className="mt-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
               {data.additionalImages.map((item, i) => {
                 const imgSrc = typeof item === "string" ? item : item.image;

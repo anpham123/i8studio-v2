@@ -235,6 +235,37 @@ main {
   margin-bottom: 0.85rem;
 }
 
+/* ── Japanese Typography & Word-boundary Rules (Kinsoku Shori & Auto-phrase) ── */
+:lang(ja),
+[lang="ja"],
+.blog-content,
+.prose,
+.tiptap,
+.ProseMirror {
+  line-break: strict;
+  word-break: auto-phrase;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+h1, h2, h3, h4, h5, h6,
+.blog-title,
+.section-title {
+  line-break: strict;
+  word-break: auto-phrase;
+  text-wrap: balance;
+}
+
+.blog-content p,
+.blog-content div,
+.blog-content li,
+.prose p,
+.prose li {
+  line-break: strict;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
 /* Gold accent text from Tiptap color */
 .blog-content span[style*="color: rgb(184, 147, 90)"],
 .blog-content span[style*="color:#b8935a"],
@@ -283,8 +314,10 @@ table.comparison-table {
   color: #111827 !important;
   border: 1px solid #cbd5e1 !important;
   text-align: left;
+  vertical-align: middle !important;
   background-color: #dbe4ee !important;
   font-size: 0.9375rem !important;
+  line-height: 1.5 !important;
 }
 
 .ProseMirror table th *,
@@ -294,6 +327,22 @@ table.comparison-table {
 .comparison-table th * {
   font-weight: 700 !important;
   color: #111827 !important;
+  vertical-align: middle !important;
+}
+
+.ProseMirror table th p,
+.blog-content table th p,
+.prose table th p,
+.tiptap table th p,
+.comparison-table th p,
+.ProseMirror table td p,
+.blog-content table td p,
+.prose table td p,
+.tiptap table td p,
+.comparison-table td p {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
 }
 
 .ProseMirror table th:first-child,
@@ -302,6 +351,7 @@ table.comparison-table {
 .tiptap table th:first-child,
 .comparison-table th:first-child {
   text-align: center !important;
+  vertical-align: middle !important;
   width: 22%;
   min-width: 100px;
 }
@@ -316,6 +366,9 @@ table.comparison-table {
   font-weight: 700 !important;
   font-size: 0.9375rem !important;
   border-bottom: 2px solid #cbd5e1 !important;
+  vertical-align: middle !important;
+  padding: 0.875rem 1rem !important;
+  line-height: 1.5 !important;
 }
 
 .blog-content table:not(:has(th)) tr:first-child td *,
@@ -324,6 +377,7 @@ table.comparison-table {
 .ProseMirror table:not(:has(th)) tr:first-child td * {
   color: #111827 !important;
   font-weight: 700 !important;
+  vertical-align: middle !important;
 }
 
 .ProseMirror table td,
@@ -354,6 +408,7 @@ table.comparison-table {
 .tiptap table td:first-child,
 .comparison-table td:first-child {
   text-align: center !important;
+  vertical-align: middle !important;
   font-weight: 700 !important;
   color: #111827 !important;
   background-color: #f8fafc !important;

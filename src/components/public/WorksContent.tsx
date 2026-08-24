@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import Lightbox from "@/components/public/Lightbox";
 import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(Flip);
+}
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -79,6 +87,14 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const flipStateRef = useRef<Flip.FlipState | null>(null);
+  const isFirstRender = useRef(true);
+  const activeTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const isFlippingRef = useRef(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -139,7 +155,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
         }
       }
 
-      if (type as string === "vr") {
+      if ((type as string) === "vr") {
         type = "vr360";
       }
 
@@ -149,32 +165,29 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
         if (subtitle.includes("residence") || subtitle.includes("house") || subtitle.includes("villa") || subtitle.includes("home") ||
           titleLower.includes("residence") || titleLower.includes("house") || titleLower.includes("villa") || titleLower.includes("home")) {
           category = "residential";
-        } else if (subtitle.includes("apartment") || subtitle.includes("condo") || subtitle.includes("mansion") ||
-          titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("mansion")) {
+        } else if (subtitle.includes("apartment") || subtitle.includes("condo") || subtitle.includes("complex") ||
+          titleLower.includes("apartment") || titleLower.includes("condo") || titleLower.includes("complex")) {
           category = "apartment";
-        } else if (subtitle.includes("resort") || subtitle.includes("hotel") || subtitle.includes("pool") || subtitle.includes("sauna") ||
-          titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("pool") || titleLower.includes("sauna")) {
+        } else if (subtitle.includes("resort") || subtitle.includes("hotel") || subtitle.includes("spa") || subtitle.includes("sauna") ||
+          titleLower.includes("resort") || titleLower.includes("hotel") || titleLower.includes("spa") || titleLower.includes("sauna")) {
           category = "resort";
-        } else if (subtitle.includes("commercial") || subtitle.includes("mall") || subtitle.includes("showroom") || subtitle.includes("shop") || subtitle.includes("store") ||
-          titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("showroom") || titleLower.includes("shop") || titleLower.includes("store")) {
+        } else if (subtitle.includes("commercial") || subtitle.includes("mall") || subtitle.includes("shop") || subtitle.includes("store") || subtitle.includes("retail") || subtitle.includes("dining") || subtitle.includes("restaurant") ||
+          titleLower.includes("commercial") || titleLower.includes("mall") || titleLower.includes("shop") || titleLower.includes("store") || titleLower.includes("retail") || titleLower.includes("dining") || titleLower.includes("restaurant")) {
           category = "commercial";
-        } else if (subtitle.includes("office") || subtitle.includes("workspace") || subtitle.includes("tower") ||
-          titleLower.includes("office") || titleLower.includes("workspace") || titleLower.includes("tower")) {
+        } else if (subtitle.includes("office") || subtitle.includes("tower") || subtitle.includes("headquarter") ||
+          titleLower.includes("office") || titleLower.includes("tower") || titleLower.includes("headquarter")) {
           category = "office";
-        } else if (subtitle.includes("library") || subtitle.includes("public") || subtitle.includes("museum") || subtitle.includes("temple") || subtitle.includes("facility") ||
-          titleLower.includes("library") || titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("temple") || titleLower.includes("facility")) {
+        } else if (subtitle.includes("public") || subtitle.includes("museum") || subtitle.includes("library") || subtitle.includes("school") || subtitle.includes("terminal") ||
+          titleLower.includes("public") || titleLower.includes("museum") || titleLower.includes("library") || titleLower.includes("school") || titleLower.includes("terminal")) {
           category = "public";
-        } else if (subtitle.includes("urban") || subtitle.includes("city") || subtitle.includes("landscape") || subtitle.includes("street") || subtitle.includes("plan") ||
-          titleLower.includes("urban") || titleLower.includes("city") || titleLower.includes("landscape") || titleLower.includes("street") || titleLower.includes("plan")) {
+        } else if (subtitle.includes("urban") || subtitle.includes("masterplan") || subtitle.includes("city") || subtitle.includes("landscape") ||
+          titleLower.includes("urban") || titleLower.includes("masterplan") || titleLower.includes("city") || titleLower.includes("landscape")) {
           category = "urban";
-        } else {
-          const categories: WorkCategory[] = ["residential", "resort", "commercial", "public"];
-          category = categories[index % categories.length];
         }
       }
 
-      // Span layout
-      const span = (category === "residential" || category === "resort" || category === "public") ? "wide" : "narrow";
+      // Aspect ratio determination based on order/index for aesthetic masonry flow
+      const span = index % 5 === 0 || index % 5 === 3 ? "wide" : "narrow";
 
       return {
         id: w.id,
@@ -199,12 +212,164 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
     });
   }, [mappedWorks, activeType, activeCat]);
 
+  // Initial page entrance animation (Row-by-Row Fly In)
+  useEffect(() => {
+    if (!mounted || !containerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReducedMotion) return;
+
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // 1. Sidebar entrance
+      if (sidebarRef.current) {
+        tl.fromTo(
+          sidebarRef.current.children,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.04 },
+          0
+        );
+      }
+
+      // 2. Row-by-Row Fly In for cards (Row 1 -> Row 2 -> Row 3)
+      const cards = containerRef.current?.querySelectorAll<HTMLElement>(".work-card");
+      if (cards && cards.length > 0) {
+        const numCols = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
+        const rowGroups: HTMLElement[][] = [];
+
+        Array.from(cards).forEach((card, idx) => {
+          const rowIndex = Math.floor(idx / numCols);
+          if (!rowGroups[rowIndex]) rowGroups[rowIndex] = [];
+          rowGroups[rowIndex].push(card);
+        });
+
+        rowGroups.forEach((rowCards, rowIndex) => {
+          const startTime = 0.05 + rowIndex * 0.1; // Snappier row progression
+          tl.fromTo(
+            rowCards,
+            { opacity: 0, y: 60, scale: 0.96 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.5,
+              stagger: 0.03,
+              clearProps: "transform,opacity",
+            },
+            startTime
+          );
+        });
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [mounted]);
+
+  // Handle filter change with 3D Flip Card transition
+  const handleFilterChange = (newType?: WorkType | "all", newCat?: WorkCategory | "all") => {
+    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion || !gridRef.current) {
+      if (newType !== undefined) setActiveType(newType);
+      if (newCat !== undefined) setActiveCat(newCat);
+      return;
+    }
+
+    // Kill any running filter timeline to prevent overlapping or stuck states
+    if (activeTimelineRef.current) {
+      activeTimelineRef.current.kill();
+      activeTimelineRef.current = null;
+      if (gridRef.current) {
+        gsap.set(gridRef.current.querySelectorAll(".work-card"), { clearProps: "all" });
+      }
+    }
+
+    const cards = gridRef.current.querySelectorAll<HTMLElement>(".work-card");
+    if (!cards || cards.length === 0) {
+      if (newType !== undefined) setActiveType(newType);
+      if (newCat !== undefined) setActiveCat(newCat);
+      return;
+    }
+
+    isFlippingRef.current = true;
+
+    // 1. Flip out current cards from 0° -> 90° (Fast & unified, no lag)
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Switch to new filter data in React immediately
+        if (newType !== undefined) setActiveType(newType);
+        if (newCat !== undefined) setActiveCat(newCat);
+      },
+    });
+
+    activeTimelineRef.current = tl;
+
+    tl.to(cards, {
+      rotationY: 90,
+      opacity: 0,
+      scale: 0.95,
+      transformPerspective: 1000,
+      duration: 0.18,
+      ease: "power2.in",
+      stagger: 0.005,
+    });
+  };
+
+  // 3D Flip In ONLY when filtered content updates via user filter click
+  useIsomorphicLayoutEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    // Only run 3D Flip In if user actively triggered a filter change
+    if (!isFlippingRef.current) return;
+
+    if (!gridRef.current) {
+      isFlippingRef.current = false;
+      return;
+    }
+
+    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      isFlippingRef.current = false;
+      return;
+    }
+
+    // 2. Flip in newly updated cards from -90° -> 0° (Seamless continuous motion)
+    const cards = gridRef.current.querySelectorAll<HTMLElement>(".work-card");
+    if (cards && cards.length > 0) {
+      gsap.fromTo(
+        cards,
+        { rotationY: -90, opacity: 0, scale: 0.95, transformPerspective: 1000 },
+        {
+          rotationY: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.28,
+          ease: "power2.out",
+          stagger: 0.008,
+          clearProps: "all",
+          onComplete: () => {
+            isFlippingRef.current = false;
+            activeTimelineRef.current = null;
+          },
+        }
+      );
+    } else {
+      isFlippingRef.current = false;
+    }
+  }, [filtered]);
+
   return (
-    <div className="bg-white min-h-screen">
+    <div ref={containerRef} className="bg-white min-h-screen">
       <div className="flex max-w-[1920px] mx-auto px-6 md:px-[60px] pt-4 md:pt-6 pb-24 gap-12">
 
         {/* ========== DESKTOP SIDEBAR ========== */}
-        <aside className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin">
+        <aside
+          ref={sidebarRef}
+          className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin"
+        >
           <div>
             {/* Page title */}
             <h1 className="text-[32px] font-normal text-[#111] tracking-[0.03em] font-serif mb-6">{t("title")}</h1>
@@ -219,10 +384,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             </div>
             <div className="flex flex-col gap-1">
               <button
-                onClick={() => setActiveType("all")}
+                onClick={() => handleFilterChange("all", undefined)}
                 className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
-                    ? "text-[#111] font-medium border-[#111]"
-                    : "text-[#555] hover:text-[#111] border-transparent"
+                  ? "text-[#111] font-medium border-[#111]"
+                  : "text-[#555] hover:text-[#111] border-transparent"
                   }`}
               >
                 {showAllLabel}
@@ -230,10 +395,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
               {TYPE_KEYS.map((key) => (
                 <button
                   key={key}
-                  onClick={() => setActiveType(key)}
+                  onClick={() => handleFilterChange(key, undefined)}
                   className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
-                      ? "text-[#111] font-medium border-[#111]"
-                      : "text-[#555] hover:text-[#111] border-transparent"
+                    ? "text-[#111] font-medium border-[#111]"
+                    : "text-[#555] hover:text-[#111] border-transparent"
                     }`}
                 >
                   {t(`types.${key}`)}
@@ -249,10 +414,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
             </div>
             <div className="flex flex-col gap-1">
               <button
-                onClick={() => setActiveCat("all")}
+                onClick={() => handleFilterChange(undefined, "all")}
                 className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
-                    ? "text-[#111] font-medium border-[#111]"
-                    : "text-[#555] hover:text-[#111] border-transparent"
+                  ? "text-[#111] font-medium border-[#111]"
+                  : "text-[#555] hover:text-[#111] border-transparent"
                   }`}
               >
                 {showAllLabel}
@@ -260,10 +425,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
               {CAT_KEYS.map((key) => (
                 <button
                   key={key}
-                  onClick={() => setActiveCat(key)}
+                  onClick={() => handleFilterChange(undefined, key)}
                   className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
-                      ? "text-[#111] font-medium border-[#111]"
-                      : "text-[#555] hover:text-[#111] border-transparent"
+                    ? "text-[#111] font-medium border-[#111]"
+                    : "text-[#555] hover:text-[#111] border-transparent"
                     }`}
                 >
                   {t(`categories.${key}`)}
@@ -326,10 +491,14 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
           {filtered.length === 0 ? (
             <p className="text-[14px] text-[#999] mt-8">{t("emptyState")}</p>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full">
+            <div
+              ref={gridRef}
+              className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
+            >
               {filtered.map((work) => (
                 <div
                   key={work.id}
+                  data-flip-id={work.id}
                   onClick={() => {
                     if (work.vrUrl) {
                       setVrModal({ url: work.vrUrl, title: work.title });
@@ -339,10 +508,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                       setLightbox({ src: work.image, alt: work.title, type: work.type });
                     }
                   }}
-                  className="break-inside-avoid w-full group cursor-pointer inline-block"
+                  className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
                 >
                   <div
-                    className="relative overflow-hidden w-full bg-gray-100 rounded-[3px] transition-transform duration-500 ease-out"
+                    className="work-card-media relative overflow-hidden w-full bg-gray-100 rounded-[3px] transition-transform duration-500 ease-out will-change-transform"
                     style={{ aspectRatio: work.span === "wide" ? "16/10" : "3/4" }}
                   >
                     {work.image ? (
@@ -350,18 +519,23 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                         src={work.image}
                         alt={work.title}
                         loading="lazy"
-                        className="absolute inset-0 w-full h-full object-cover transition-all duration-[1.2s] ease-out group-hover:scale-105 opacity-0"
-                        onLoad={(e) => { e.currentTarget.classList.remove("opacity-0"); e.currentTarget.classList.add("opacity-100"); }}
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        className="absolute inset-0 w-full h-full object-cover transition-all duration-[0.7s] ease-out group-hover:scale-[1.035] opacity-0"
+                        onLoad={(e) => {
+                          e.currentTarget.classList.remove("opacity-0");
+                          e.currentTarget.classList.add("opacity-100");
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
                       />
                     ) : (
                       <div
-                        className="absolute inset-0 w-full h-full transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full transition-transform duration-[0.7s] ease-out group-hover:scale-[1.035]"
                         style={{ backgroundColor: work.bg }}
                       />
                     )}
                   </div>
-                  <div className="mt-3.5 mb-2">
+                  <div className="work-card-info mt-3.5 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
                     <h3 className="text-[15px] font-normal text-[#111] tracking-[0.03em] leading-tight mb-1">
                       <span className="bg-left-bottom bg-gradient-to-r from-gray-900 to-gray-900 bg-[length:0%_1px] bg-no-repeat group-hover:bg-[length:100%_1px] transition-[background-size] duration-500 pb-0.5">
                         {work.title}
@@ -415,12 +589,12 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <div className="flex flex-col gap-1">
                   <button
                     onClick={() => {
-                      setActiveType("all");
+                      handleFilterChange("all", undefined);
                       setIsFilterOpen(false);
                     }}
                     className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
-                        ? "text-[#111] font-medium border-[#111]"
-                        : "text-[#555] hover:text-[#111] border-transparent"
+                      ? "text-[#111] font-medium border-[#111]"
+                      : "text-[#555] hover:text-[#111] border-transparent"
                       }`}
                   >
                     {showAllLabel}
@@ -429,12 +603,12 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                     <button
                       key={key}
                       onClick={() => {
-                        setActiveType(key);
+                        handleFilterChange(key, undefined);
                         setIsFilterOpen(false);
                       }}
                       className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
-                          ? "text-[#111] font-medium border-[#111]"
-                          : "text-[#555] hover:text-[#111] border-transparent"
+                        ? "text-[#111] font-medium border-[#111]"
+                        : "text-[#555] hover:text-[#111] border-transparent"
                         }`}
                     >
                       {t(`types.${key}`)}
@@ -451,12 +625,12 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 <div className="flex flex-col gap-1">
                   <button
                     onClick={() => {
-                      setActiveCat("all");
+                      handleFilterChange(undefined, "all");
                       setIsFilterOpen(false);
                     }}
                     className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
-                        ? "text-[#111] font-medium border-[#111]"
-                        : "text-[#555] hover:text-[#111] border-transparent"
+                      ? "text-[#111] font-medium border-[#111]"
+                      : "text-[#555] hover:text-[#111] border-transparent"
                       }`}
                   >
                     {showAllLabel}
@@ -465,12 +639,12 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                     <button
                       key={key}
                       onClick={() => {
-                        setActiveCat(key);
+                        handleFilterChange(undefined, key);
                         setIsFilterOpen(false);
                       }}
                       className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
-                          ? "text-[#111] font-medium border-[#111]"
-                          : "text-[#555] hover:text-[#111] border-transparent"
+                        ? "text-[#111] font-medium border-[#111]"
+                        : "text-[#555] hover:text-[#111] border-transparent"
                         }`}
                     >
                       {t(`categories.${key}`)}
