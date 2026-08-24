@@ -592,7 +592,7 @@ export default function HomepagePage() {
 
       {/* ─── Lightbox ─── */}
       {lightbox && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setLightbox(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-8" onClick={() => setLightbox(null)}>
           <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 text-white/70 hover:text-white z-10"><X size={28} /></button>
           {lightbox.idx > 0 && (
             <button onClick={(e) => { e.stopPropagation(); setLightbox({ item: allSorted[lightbox.idx - 1], idx: lightbox.idx - 1 }); }}
@@ -602,11 +602,11 @@ export default function HomepagePage() {
             <button onClick={(e) => { e.stopPropagation(); setLightbox({ item: allSorted[lightbox.idx + 1], idx: lightbox.idx + 1 }); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10"><ChevronRight size={36} /></button>
           )}
-          <div className="max-w-[90vw] max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col items-center justify-center w-full h-full" onClick={(e) => e.stopPropagation()}>
             {(lightbox.item.type === "video" || isVideoFile(lightbox.item.videoUrl)) && lightbox.item.videoUrl ? (
-              <video src={lightbox.item.videoUrl} className="max-w-full max-h-[85vh] rounded-lg" controls autoPlay muted poster={lightbox.item.image} />
+              <video src={lightbox.item.videoUrl} className="max-w-full max-h-[80vh] rounded-lg object-contain" controls autoPlay muted poster={lightbox.item.image} />
             ) : lightbox.item.image ? (
-              <img src={lightbox.item.image} alt={lightbox.item.title} className="max-w-full max-h-[85vh] rounded-lg object-contain" />
+              <img src={lightbox.item.image} alt={lightbox.item.title} className="max-w-full max-h-[80vh] rounded-lg object-contain" />
             ) : (
               <div className="w-64 h-40 bg-gray-800 rounded-lg flex items-center justify-center"><ImageIcon size={48} className="text-gray-600" /></div>
             )}
