@@ -25,6 +25,17 @@ function isVideoFile(url?: string) {
   return url ? /\.(mp4|webm|mov)$/i.test(url) : false;
 }
 
+/**
+ * Masonry layout: Block repeats every 17 items
+ * 0-3: 3:5 (portrait), 4: 21:9 (ultrawide), 5-16: 16:9 (landscape)
+ */
+function getPositionRatio(idx: number): { ratio: string; label: string; color: string; icon: string } {
+  const blockIdx = idx % 17;
+  if (blockIdx <= 3) return { ratio: "3:5", label: "Dọc", color: "bg-violet-100 text-violet-700 border-violet-200", icon: "⬜" };
+  if (blockIdx === 4) return { ratio: "21:9", label: "Siêu rộng", color: "bg-orange-100 text-orange-700 border-orange-200", icon: "▭" };
+  return { ratio: "16:9", label: "Ngang", color: "bg-cyan-100 text-cyan-700 border-cyan-200", icon: "◻" };
+}
+
 export default function HomepagePage() {
   const [items, setItems] = useState<HomeMedia[]>([]);
   const [loading, setLoading] = useState(true);
@@ -396,6 +407,17 @@ export default function HomepagePage() {
                   <Maximize2 size={14} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
+
+              {/* Aspect ratio badge */}
+              {(() => {
+                const r = getPositionRatio(idx);
+                return (
+                  <div className={`shrink-0 border rounded-lg px-2 py-1 text-center ${r.color}`} title={`Vị trí ${idx + 1}: Tỷ lệ ${r.ratio} (${r.label})`}>
+                    <div className="text-[10px] font-bold leading-tight">{r.ratio}</div>
+                    <div className="text-[9px] opacity-70">{r.label}</div>
+                  </div>
+                );
+              })()}
 
               {/* Info */}
               <div className="flex-1 min-w-0">
