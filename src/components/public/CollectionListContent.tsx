@@ -25,21 +25,21 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
 
   const collections = (dbCollections && dbCollections.length > 0)
     ? dbCollections.map((c) => ({
-        slug: c.slug,
-        titleJa: c.titleJa,
-        titleEn: c.titleEn,
-        descJa: c.descJa,
-        descEn: c.descEn,
-        cover: c.coverImage,
-      }))
+      slug: c.slug,
+      titleJa: c.titleJa,
+      titleEn: c.titleEn,
+      descJa: c.descJa,
+      descEn: c.descEn,
+      cover: c.coverImage,
+    }))
     : COLLECTIONS.map((c) => ({
-        slug: c.slug,
-        titleJa: c.titleJa,
-        titleEn: c.titleEn,
-        descJa: c.descJa,
-        descEn: c.descEn,
-        cover: c.cover,
-      }));
+      slug: c.slug,
+      titleJa: c.titleJa,
+      titleEn: c.titleEn,
+      descJa: c.descJa,
+      descEn: c.descEn,
+      cover: c.cover,
+    }));
 
   const [activeIndex, setActiveIndex] = useState(0);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -112,7 +112,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
       {/* ── Desktop Layout: Interactive Editorial Project Index + Sticky Showcase (lg+) ──────────────────── */}
       <section className="hidden lg:block relative max-w-[1600px] mx-auto px-8 xl:px-14 py-16 xl:py-24">
         <div className="grid grid-cols-12 gap-10 xl:gap-16 items-start">
-          
+
           {/* Left Side: Scrollable Project Index */}
           <div className="col-span-5 py-12 space-y-16 xl:space-y-24">
             {collections.map((col, idx) => {
@@ -135,9 +135,8 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                   >
                     {/* Index Number */}
                     <span
-                      className={`text-xs font-roboto font-bold tracking-widest mt-2 transition-colors duration-300 ${
-                        isActive ? "text-[#b8935a]" : "text-gray-300 group-hover:text-gray-400"
-                      }`}
+                      className={`text-xs font-roboto font-bold tracking-widest mt-2 transition-colors duration-300 ${isActive ? "text-[#b8935a]" : "text-gray-300 group-hover:text-gray-400"
+                        }`}
                     >
                       {numStr}
                     </span>
@@ -146,11 +145,10 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <h2
-                          className={`font-serif text-xl lg:text-2xl xl:text-3xl whitespace-nowrap leading-tight transition-all duration-500 ${
-                            isActive
+                          className={`font-serif text-xl lg:text-2xl xl:text-3xl whitespace-nowrap leading-tight transition-all duration-500 ${isActive
                               ? "text-[#111] font-normal translate-x-1"
                               : "text-gray-300 font-light group-hover:text-gray-600"
-                          }`}
+                            }`}
                           style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                         >
                           {title}
@@ -194,27 +192,34 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
             })}
           </div>
 
-          {/* Right Side: Sticky Featured Showcase */}
-          <div className="col-span-7 sticky top-28 h-[calc(100vh-140px)] min-h-[520px] max-h-[760px] pb-6">
-            <div className="relative w-full h-full">
+          {/* Right Side: Sticky Featured Showcase (Khổ 16:9 full ảnh không cắt) */}
+          <div className="col-span-7 sticky top-28 pb-6">
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-[#111] group flex items-center justify-center">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCol.slug}
-                  initial={{ opacity: 0, scale: 0.98, y: 12 }}
+                  initial={{ opacity: 0, scale: 0.98, y: 8 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 1.01, y: -8 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-neutral-900 group"
+                  exit={{ opacity: 0, scale: 1.01, y: -6 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-full h-full flex items-center justify-center overflow-hidden"
                 >
                   <Link
                     href={`${basePath}/${encodeURIComponent(activeCol.slug)}`}
-                    className="block w-full h-full relative"
+                    className="block w-full h-full relative flex items-center justify-center"
                   >
+                    {/* Ambient blurred backdrop for non-16:9 images */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center blur-2xl opacity-35 scale-125 transition-transform duration-700 pointer-events-none"
+                      style={{ backgroundImage: `url(${activeCol.cover})` }}
+                    />
+
+                    {/* 100% Full Uncropped Image */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activeCol.cover}
                       alt={isJa ? activeCol.titleJa : activeCol.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
+                      className="max-w-full max-h-full object-contain relative z-[1] group-hover:scale-[1.02] transition-transform duration-700 ease-out drop-shadow-2xl"
                       onError={(e) => {
                         const t = e.currentTarget;
                         t.style.display = "none";
@@ -222,7 +227,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                         if (p) {
                           p.classList.add("flex", "items-center", "justify-center");
                           const s = document.createElement("span");
-                          s.className = "text-white/40 text-lg font-medium";
+                          s.className = "text-white/40 text-lg font-medium relative z-10";
                           s.textContent = isJa ? activeCol.titleJa : activeCol.titleEn;
                           p.appendChild(s);
                         }
@@ -230,27 +235,27 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                     />
 
                     {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10 transition-opacity group-hover:opacity-90" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent transition-opacity group-hover:opacity-95 z-[2] pointer-events-none" />
 
                     {/* Overlay Details */}
-                    <div className="absolute bottom-0 left-0 right-0 p-8 xl:p-10 flex items-end justify-between z-10 text-white">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 xl:p-8 flex items-end justify-between z-10 text-white">
                       <div className="max-w-lg">
-                        <span className="text-[11px] uppercase tracking-[0.25em] text-[#e8dcc8] font-semibold block mb-2.5">
+                        <span className="text-[11px] uppercase tracking-[0.25em] text-[#e8dcc8] font-semibold block mb-2">
                           SPACE COLLECTION · {String(activeIndex + 1).padStart(2, "0")} / {String(collections.length).padStart(2, "0")}
                         </span>
                         <h3
-                          className="font-serif text-2xl xl:text-3xl text-white mb-2 leading-tight"
+                          className="font-serif text-xl xl:text-2xl text-white mb-1.5 leading-tight"
                           style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                         >
                           {isJa ? activeCol.titleJa : activeCol.titleEn}
                         </h3>
-                        <p className="text-white/80 text-sm line-clamp-2 leading-relaxed font-light">
+                        <p className="text-white/80 text-xs xl:text-sm line-clamp-2 leading-relaxed font-light">
                           {isJa ? activeCol.descJa : activeCol.descEn}
                         </p>
                       </div>
 
-                      <div className="shrink-0 ml-6">
-                        <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/15 hover:bg-white text-white hover:text-[#111] backdrop-blur-md text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-xl border border-white/20 hover:border-white">
+                      <div className="shrink-0 ml-4">
+                        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 hover:bg-white text-white hover:text-[#111] backdrop-blur-md text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-xl border border-white/20 hover:border-white">
                           <span>{isJa ? "詳細を見る" : "Explore Space"}</span>
                           <span>→</span>
                         </span>
@@ -294,7 +299,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
 
               <Link
                 href={`${basePath}/${encodeURIComponent(col.slug)}`}
-                className="group block rounded-xl overflow-hidden shadow-md bg-neutral-900 relative aspect-[16/10]"
+                className="group block rounded-xl overflow-hidden shadow-md bg-neutral-900 relative aspect-[16/9]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

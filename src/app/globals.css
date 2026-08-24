@@ -188,91 +188,185 @@ main {
 }
 
 /* Blog rich text content styles */
-.blog-content mark {
-  background-color: #fff3a0;
-  padding: 2px 4px;
-  border-radius: 2px;
+.blog-content mark,
+.prose mark,
+.ProseMirror mark {
+  background: #fef08a !important;
+  color: #111111 !important;
+  padding: 0.12em 0.35em !important;
+  margin: 0 0.1em !important;
+  border-radius: 0.25rem !important;
+  font-weight: 700 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 
-.blog-content strong {
-  font-weight: 500;
+.blog-content strong,
+.blog-content b,
+.prose strong,
+.prose b,
+.ProseMirror strong,
+.ProseMirror b {
+  font-weight: 700 !important;
 }
 
-.blog-content em {
-  font-style: italic;
+.blog-content em,
+.blog-content i,
+.prose em,
+.prose i,
+.ProseMirror em,
+.ProseMirror i {
+  font-style: italic !important;
+}
+
+.blog-content u,
+.prose u,
+.ProseMirror u {
+  text-decoration: underline !important;
+}
+
+.blog-content s,
+.prose s,
+.ProseMirror s {
+  text-decoration: line-through !important;
 }
 
 .blog-content p {
-  font-weight: 400;
+  margin-bottom: 0.85rem;
 }
 
 /* Gold accent text from Tiptap color */
 .blog-content span[style*="color: rgb(184, 147, 90)"],
 .blog-content span[style*="color:#b8935a"],
 .blog-content span[style*="color: #b8935a"] {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* ── Comparison Table Styles (Admin Editor & Public Blog) ── */
 .ProseMirror table,
 .blog-content table,
+.prose table,
+.tiptap table,
 .comparison-table,
 table.comparison-table {
-  width: 100%;
+  width: 100% !important;
   border-collapse: collapse !important;
   border: 1px solid #cbd5e1 !important;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   margin: 1.5rem 0 !important;
   font-size: 0.875rem;
   line-height: 1.6;
   table-layout: auto;
-  border-radius: 6px;
-  overflow: hidden;
 }
 
+.ProseMirror table thead,
 .ProseMirror table thead tr,
+.blog-content table thead,
 .blog-content table thead tr,
+.prose table thead,
+.prose table thead tr,
+.tiptap table thead,
+.tiptap table thead tr,
+.comparison-table thead,
 .comparison-table thead tr {
-  background-color: #f0f4f8 !important;
+  background-color: #dbe4ee !important;
   border-bottom: 2px solid #cbd5e1 !important;
 }
 
 .ProseMirror table th,
 .blog-content table th,
+.prose table th,
+.tiptap table th,
 .comparison-table th {
-  padding: 0.75rem 1rem !important;
+  padding: 0.875rem 1rem !important;
   font-weight: 700 !important;
-  color: #1e293b !important;
+  color: #111827 !important;
   border: 1px solid #cbd5e1 !important;
   text-align: left;
-  background-color: #f0f4f8 !important;
+  background-color: #dbe4ee !important;
+  font-size: 0.9375rem !important;
+}
+
+.ProseMirror table th *,
+.blog-content table th *,
+.prose table th *,
+.tiptap table th *,
+.comparison-table th * {
+  font-weight: 700 !important;
+  color: #111827 !important;
 }
 
 .ProseMirror table th:first-child,
 .blog-content table th:first-child,
+.prose table th:first-child,
+.tiptap table th:first-child,
 .comparison-table th:first-child {
-  text-align: center;
-  width: 15%;
-  min-width: 80px;
+  text-align: center !important;
+  width: 22%;
+  min-width: 100px;
+}
+
+/* Trường hợp bảng hàng đầu tiên là td (không dùng thẻ th) */
+.blog-content table:not(:has(th)) tr:first-child td,
+.prose table:not(:has(th)) tr:first-child td,
+.tiptap table:not(:has(th)) tr:first-child td,
+.ProseMirror table:not(:has(th)) tr:first-child td {
+  background-color: #dbe4ee !important;
+  color: #111827 !important;
+  font-weight: 700 !important;
+  font-size: 0.9375rem !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+.blog-content table:not(:has(th)) tr:first-child td *,
+.prose table:not(:has(th)) tr:first-child td *,
+.tiptap table:not(:has(th)) tr:first-child td *,
+.ProseMirror table:not(:has(th)) tr:first-child td * {
+  color: #111827 !important;
+  font-weight: 700 !important;
 }
 
 .ProseMirror table td,
 .blog-content table td,
+.prose table td,
+.tiptap table td,
 .comparison-table td {
   padding: 0.75rem 1rem !important;
-  color: #334155 !important;
+  color: #111827 !important;
   border: 1px solid #cbd5e1 !important;
-  vertical-align: middle;
+  vertical-align: middle !important;
   background-color: #ffffff;
+  font-size: 0.875rem !important;
+  line-height: 1.65 !important;
+}
+
+.ProseMirror table td *,
+.blog-content table td *,
+.prose table td *,
+.tiptap table td *,
+.comparison-table td * {
+  color: #111827 !important;
 }
 
 .ProseMirror table td:first-child,
 .blog-content table td:first-child,
+.prose table td:first-child,
+.tiptap table td:first-child,
 .comparison-table td:first-child {
-  text-align: center;
-  font-weight: 600;
-  color: #1e293b !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
   background-color: #f8fafc !important;
+  width: 22%;
+  min-width: 100px;
+}
+
+.ProseMirror table tr:nth-child(even) td:not(:first-child),
+.blog-content table tr:nth-child(even) td:not(:first-child),
+.prose table tr:nth-child(even) td:not(:first-child),
+.tiptap table tr:nth-child(even) td:not(:first-child),
+.comparison-table tr:nth-child(even) td:not(:first-child) {
+  background-color: #f8fafc;
 }
 
 /* Selected / Focused cell in Tiptap editor */
@@ -401,114 +495,123 @@ mark,
   color: #9a7642 !important;
 }
 
-/* ── Blog Table Styles ─────────────────────────────────── */
-.blog-content table,
-.prose table,
-.tiptap table,
-.ProseMirror table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif !important;
+/* ── Rich Text & List Styles (Admin Editor & Public Pages) ── */
+.ProseMirror,
+.tiptap,
+.blog-content,
+.prose {
+  word-break: break-word;
 }
 
-/* Loại bỏ HOÀN TOÀN viền, nền và khoảng cách thừa của TẤT CẢ thẻ con bên trong bảng */
-.blog-content table p,
-.blog-content table span,
-.blog-content table div,
-.blog-content table strong,
-.blog-content table b,
-.blog-content th *,
-.blog-content td *,
-.prose table th *,
-.prose table td *,
-.tiptap table th *,
-.tiptap table td *,
-.ProseMirror table th *,
-.ProseMirror table td * {
-  border: none !important;
-  border-width: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  padding: 0 !important;
+/* Bullet list (Danh sách gạch đầu dòng / chấm tròn) */
+.ProseMirror ul,
+.tiptap ul,
+.blog-content ul,
+.prose ul {
+  list-style-type: disc !important;
+  padding-left: 1.625rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Ordered list (Danh sách số thứ tự 1, 2, 3...) */
+.ProseMirror ol,
+.tiptap ol,
+.blog-content ol,
+.prose ol {
+  list-style-type: decimal !important;
+  padding-left: 1.625rem !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Nested lists */
+.ProseMirror ul ul,
+.tiptap ul ul,
+.blog-content ul ul,
+.prose ul ul,
+.ProseMirror ol ul,
+.tiptap ol ul,
+.blog-content ol ul,
+.prose ol ul {
+  list-style-type: circle !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.ProseMirror ol ol,
+.tiptap ol ol,
+.blog-content ol ol,
+.prose ol ol,
+.ProseMirror ul ol,
+.tiptap ul ol,
+.blog-content ul ol,
+.prose ul ol {
+  list-style-type: lower-latin !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+/* List items */
+.ProseMirror li,
+.tiptap li,
+.blog-content li,
+.prose li {
+  display: list-item !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.75 !important;
+}
+
+.ProseMirror li > p,
+.tiptap li > p,
+.blog-content li > p,
+.prose li > p {
+  display: inline !important;
   margin: 0 !important;
-  box-shadow: none !important;
-  outline: none !important;
 }
 
-/* Dòng tiêu đề đầu tiên: Bôi đậm đen nét chuẩn, chỉ có viền ở ô th */
-.blog-content th,
-.prose table th,
-.tiptap table th,
-.ProseMirror table th {
-  background-color: #f0f4f8 !important;
-  color: #111827 !important;
-  font-weight: 700 !important;
-  font-size: 1.0625rem !important; /* ~17px (lớn hơn 14px khoảng 2.5-3pt) */
-  line-height: 1.5 !important;
-  text-align: left !important;
-  padding: 0.875rem 1rem !important;
-  border: 1px solid #cbd5e1 !important;
+/* Blockquote */
+.ProseMirror blockquote,
+.tiptap blockquote,
+.blog-content blockquote,
+.prose blockquote {
+  border-left: 3px solid var(--accent, #b8935a) !important;
+  padding-left: 1rem !important;
+  margin: 1.25rem 0 !important;
+  font-style: italic !important;
+  color: #4b5563 !important;
 }
 
-/* Chữ bên trong tiêu đề th giữ nguyên độ đậm và màu sắc */
-.blog-content th *,
-.prose table th *,
-.tiptap table th *,
-.ProseMirror table th * {
+/* Headings in editor */
+.ProseMirror h2,
+.tiptap h2,
+.blog-content h2 {
+  font-size: 1.35rem !important;
   font-weight: 700 !important;
   color: #111827 !important;
-  font-size: inherit !important;
-  line-height: inherit !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.625rem !important;
+  line-height: 1.3 !important;
 }
 
-/* Tiêu đề cột đầu tiên: Căn giữa */
-.blog-content th:first-child,
-.prose table th:first-child,
-.tiptap table th:first-child,
-.ProseMirror table th:first-child {
-  text-align: center !important;
+.ProseMirror h3,
+.tiptap h3,
+.blog-content h3 {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.4 !important;
 }
 
-.blog-content td,
-.prose table td,
-.tiptap table td,
-.ProseMirror table td {
-  padding: 0.75rem 1rem !important;
-  border: 1px solid #cbd5e1 !important;
-  font-size: 0.875rem !important; /* ~14px */
-  line-height: 1.65 !important;
-  color: #334155 !important;
-  vertical-align: middle !important;
-}
-
-/* Cột đầu tiên trong bảng: Căn giữa và bôi đậm đen đậm y hệt Admin */
-.blog-content tbody td:first-child,
-.blog-content tr td:first-child,
-.prose table td:first-child,
-.tiptap table td:first-child,
-.ProseMirror table td:first-child {
-  text-align: center !important;
-  font-weight: 700 !important;
-  color: #111827 !important;
-  background-color: #f8fafc;
-}
-
-.blog-content tbody td:first-child *,
-.blog-content tr td:first-child *,
-.prose table td:first-child *,
-.tiptap table td:first-child *,
-.ProseMirror table td:first-child * {
-  font-weight: 700 !important;
-  color: #111827 !important;
-}
-
-.blog-content tr:nth-child(even) td,
-.prose table tr:nth-child(even) td,
-.tiptap table tr:nth-child(even) td,
-.ProseMirror table tr:nth-child(even) td {
-  background-color: #f8fafc;
+/* Horizontal rule */
+.ProseMirror hr,
+.tiptap hr,
+.blog-content hr,
+.prose hr {
+  border: 0 !important;
+  border-top: 1px solid #e5e7eb !important;
+  margin: 1.5rem 0 !important;
 }

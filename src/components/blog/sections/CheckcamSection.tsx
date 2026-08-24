@@ -158,24 +158,24 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
         {/* Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
           <div className="mt-12 pt-8 border-t border-gray-200/60">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-stretch">
               {data.additionalImages.map((item, i) => {
                 const imgSrc = typeof item === "string" ? item : item.image;
                 const imgCap = typeof item === "string" ? (data.additionalImageCaptions?.[i] || "") : (item.caption || "");
 
                 return (
-                  <div key={i} className="flex flex-col bg-white rounded-lg border border-gray-200/60 overflow-hidden shadow-xs">
-                    <div className="aspect-[4/3] w-full bg-[var(--surface-warm)] overflow-hidden">
+                  <div key={i} className="flex flex-col bg-white rounded-xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
+                    <div className="h-[230px] sm:h-[260px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-2.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imgSrc}
                         alt={imgCap || `${data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="max-w-full max-h-full object-contain rounded hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
                       />
                     </div>
                     {imgCap && (
                       <p
-                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2.5 text-center leading-relaxed"
+                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2.5 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto"
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
                       />
                     )}

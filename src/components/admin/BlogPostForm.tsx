@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/admin/Toast";
 import { slugify } from "@/lib/utils";
@@ -112,6 +113,11 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
     } catch { return []; }
   });
   const [saving, setSaving] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [categories, setCategories] = useState<{ id: string; slug: string; nameJa: string; nameEn: string }[]>([]);
 
   // Fetch blog categories
@@ -208,7 +214,21 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
     if (!form.slug.trim()) { toast("Vui lòng nhập slug", "error"); return; }
 
     setSaving(true);
-    const payload = { ...form, sections: JSON.stringify(sections), readTime: Number(form.readTime) || 5 };
+    let finalCoverImage = form.coverImage;
+    // If heroImage was cleared and coverImage was matching the initial hero/cover, clear coverImage too
+    if (!form.heroImage && (form.coverImage === initial?.heroImage || form.coverImage === initial?.coverImage)) {
+      finalCoverImage = "";
+    } else if (!finalCoverImage && form.heroImage) {
+      finalCoverImage = form.heroImage;
+    }
+
+    const payload = {
+      ...form,
+      heroImage: form.heroImage || "",
+      coverImage: finalCoverImage || "",
+      sections: JSON.stringify(sections),
+      readTime: Number(form.readTime) || 5,
+    };
     const url = isEdit ? `/api/blog-posts/${initial!.id}` : "/api/blog-posts";
     const method = isEdit ? "PUT" : "POST";
 
@@ -237,18 +257,21 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
   return (
     <div className="space-y-6">
-      {/* Save bar — sticky at top */}
-      <div className="flex items-center justify-between sticky top-0 z-20 bg-gray-50 -mx-6 px-6 py-3 border-b border-gray-100 -mt-6 mb-2">
-        <h2 className="text-lg font-semibold text-gray-800">{isEdit ? "Chỉnh sửa Blog Post" : "Tạo Blog Post mới"}</h2>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          {saving ? "Đang lưu..." : "Lưu"}
-        </button>
-      </div>
+      {/* Top Header Save Button via Portal */}
+      {mounted && typeof document !== "undefined" && document.getElementById("admin-header-actions") &&
+        createPortal(
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm"
+            title="Lưu bài viết"
+          >
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {saving ? "Đang lưu..." : "Lưu"}
+          </button>,
+          document.getElementById("admin-header-actions")!
+        )
+      }
 
       {/* Hero */}
       <div className={cardCls}>
@@ -279,7 +302,23 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
           </div>
           <div className="md:col-span-2">
             <label className={labelCls}>Hero Image</label>
-            <ImageUpload value={form.heroImage} onChange={(v) => set("heroImage", v)} />
+            <ImageUpload
+              value={form.heroImage}
+              onChange={(v) => {
+                setForm((prev) => {
+                  const shouldSyncCover =
+                    !prev.coverImage ||
+                    prev.coverImage === prev.heroImage ||
+                    prev.coverImage === initial?.heroImage ||
+                    prev.coverImage === initial?.coverImage;
+                  return {
+                    ...prev,
+                    heroImage: v,
+                    ...(shouldSyncCover ? { coverImage: v } : {}),
+                  };
+                });
+              }}
+            />
           </div>
         </div>
       </div>
@@ -507,18 +546,6 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
             </label>
           </div>
         </div>
-      </div>
-
-      {/* Bottom save */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          {saving ? "Đang lưu..." : "Lưu"}
-        </button>
       </div>
     </div>
   );

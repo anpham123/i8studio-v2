@@ -459,8 +459,26 @@ export default function EditServicePage() {
                       <input value={step.titleEn} onChange={(e) => { const n = [...process]; n[i] = { ...n[i], titleEn: e.target.value }; setProcess(n); }} placeholder="Tiêu đề (EN)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <input value={step.descJa} onChange={(e) => { const n = [...process]; n[i] = { ...n[i], descJa: e.target.value }; setProcess(n); }} placeholder="Mô tả (JA)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-                      <input value={step.descEn} onChange={(e) => { const n = [...process]; n[i] = { ...n[i], descEn: e.target.value }; setProcess(n); }} placeholder="Mô tả (EN)" className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+                      <div>
+                        <label className="block text-[11px] font-medium text-gray-500 mb-1">🇯🇵 Mô tả (JA) - Xuống dòng để tạo từng đoạn có dấu chấm</label>
+                        <textarea
+                          value={step.descJa}
+                          onChange={(e) => { const n = [...process]; n[i] = { ...n[i], descJa: e.target.value }; setProcess(n); }}
+                          placeholder="Mô tả tiếng Nhật (xuống dòng nếu có 2, 3, 4 đoạn)..."
+                          rows={3}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-medium text-gray-500 mb-1">🇬🇧 Mô tả (EN) - Newline for each bullet point</label>
+                        <textarea
+                          value={step.descEn}
+                          onChange={(e) => { const n = [...process]; n[i] = { ...n[i], descEn: e.target.value }; setProcess(n); }}
+                          placeholder="Mô tả tiếng Anh (xuống dòng nếu có 2, 3, 4 đoạn)..."
+                          rows={3}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
