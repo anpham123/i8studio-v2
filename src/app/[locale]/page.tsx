@@ -37,12 +37,13 @@ export default async function HomePage() {
     where: { image: { not: "" }, featured: true },
     orderBy: [{ homeOrder: "asc" }, { createdAt: "desc" }],
     take: limit,
-    select: { id: true, title: true, image: true },
+    select: { id: true, title: true, image: true, videoUrl: true },
   });
 
   const heroImages = works.map((w) => ({
     url: w.image,
     alt: w.title,
+    videoUrl: w.videoUrl || undefined,
   }));
 
   return (

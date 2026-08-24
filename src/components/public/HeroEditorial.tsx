@@ -10,6 +10,7 @@ import { useRef } from "react";
 interface HeroImage {
   url: string;
   alt: string;
+  videoUrl?: string;
 }
 
 interface HeroEditorialProps {
@@ -135,6 +136,10 @@ const MASONRY_ROWS = [
 /* ------------------------------------------------------------------ */
 /*  Staggered reveal for each tile                                     */
 /* ------------------------------------------------------------------ */
+function isVideoFile(url: string) {
+  return /\.(mp4|webm|mov)$/i.test(url);
+}
+
 function GridTile({
   image,
   index,
@@ -149,6 +154,7 @@ function GridTile({
   maxHeight?: string;
 }) {
   const hasImage = image?.url;
+  const hasVideo = image?.videoUrl && isVideoFile(image.videoUrl);
 
   return (
     <motion.div
@@ -165,7 +171,17 @@ function GridTile({
         ease: [0.21, 0.47, 0.32, 0.98],
       }}
     >
-      {hasImage ? (
+      {hasVideo ? (
+        <video
+          src={image!.videoUrl}
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={image!.url || undefined}
+        />
+      ) : hasImage ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={image.url}
@@ -228,7 +244,24 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
       <div className="relative w-full px-3 pt-3" style={{ height: 'calc(100vh - var(--header-h, 76px))' }}>
         <div className="relative w-full h-full rounded-[6px] overflow-hidden">
         {/* Hero image */}
-        {heroImage?.url ? (
+        {heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) ? (
+          <motion.div
+            className="absolute inset-0"
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <video
+              src={heroImage.videoUrl}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              poster={heroImage.url || undefined}
+            />
+          </motion.div>
+        ) : heroImage?.url ? (
           <motion.img
             src={heroImage.url}
             alt={heroImage.alt}
