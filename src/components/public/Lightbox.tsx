@@ -104,18 +104,26 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
               />
             )
           ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={src}
-              alt={alt}
-              style={{
-                maxWidth: "90vw",
-                maxHeight: "calc(100vh - 80px)",
-                objectFit: "contain",
-                borderRadius: 12,
-                display: "block",
-              }}
-            />
+            <div className="relative flex flex-col items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={alt}
+                style={{
+                  maxWidth: "92vw",
+                  maxHeight: "calc(100vh - 90px)",
+                  objectFit: "contain",
+                  borderRadius: 14,
+                  display: "block",
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)",
+                }}
+              />
+              {alt && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/60 backdrop-blur-md text-white font-serif text-sm sm:text-base font-light tracking-wide shadow-xl pointer-events-none whitespace-nowrap">
+                  {alt}
+                </div>
+              )}
+            </div>
           )}
         </motion.div>
       </motion.div>
