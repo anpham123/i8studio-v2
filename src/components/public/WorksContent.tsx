@@ -70,6 +70,184 @@ const WORKS: Work[] = [
 const TYPE_KEYS: WorkType[] = ["still", "animation", "composite", "vr360", "walkthrough", "ar", "digital"];
 const CAT_KEYS: WorkCategory[] = ["residential", "apartment", "resort", "commercial", "office", "public", "urban"];
 
+const INITIAL_BATCH = 12;
+const BATCH_INCREMENT = 6;
+
+// Helper: Group cards by actual visual rows on the screen
+function groupCardsByVisualRows(cards: HTMLElement[]): HTMLElement[][] {
+  if (cards.length === 0) return [];
+
+  // Map cards with their actual top and left positions on the screen
+  const cardData = cards.map((card) => {
+    const rect = card.getBoundingClientRect();
+    return {
+      card,
+      top: rect.top + (typeof window !== "undefined" ? window.scrollY : 0),
+      left: rect.left,
+    };
+  });
+
+  // Sort by vertical position first
+  cardData.sort((a, b) => a.top - b.top);
+
+  // Group into horizontal rows based on vertical proximity
+  const rows: HTMLElement[][] = [];
+  let currentRow: { card: HTMLElement; top: number; left: number }[] = [];
+  let currentRowAvgTop = 0;
+  const ROW_THRESHOLD = 90; // Tolerance for masonry height differences in a row
+
+  cardData.forEach((item) => {
+    if (currentRow.length === 0) {
+      currentRow.push(item);
+      currentRowAvgTop = item.top;
+    } else {
+      if (Math.abs(item.top - currentRowAvgTop) <= ROW_THRESHOLD) {
+        currentRow.push(item);
+        currentRowAvgTop =
+          currentRow.reduce((sum, c) => sum + c.top, 0) / currentRow.length;
+      } else {
+        currentRow.sort((a, b) => a.left - b.left);
+        rows.push(currentRow.map((c) => c.card));
+        currentRow = [item];
+        currentRowAvgTop = item.top;
+      }
+    }
+  });
+
+  if (currentRow.length > 0) {
+    currentRow.sort((a, b) => a.left - b.left);
+    rows.push(currentRow.map((c) => c.card));
+  }
+
+  return rows;
+}
+
+// Helper: Setup scroll-triggered row-by-row Push-up Reveal
+function setupScrollRowObserver(
+  container: HTMLElement | null,
+  observerRef: React.MutableRefObject<IntersectionObserver | null>,
+  baseDelay = 0,
+  isFilterReset = false
+) {
+  if (!container) return;
+  const cards = Array.from(container.querySelectorAll<HTMLElement>(".work-card"));
+  if (cards.length === 0) return;
+
+  const rows = groupCardsByVisualRows(cards);
+  if (rows.length === 0) return;
+
+  // Clean up any existing observer
+  if (observerRef.current) {
+    observerRef.current.disconnect();
+    observerRef.current = null;
+  }
+
+  const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800;
+  const rowsToObserve: { rowCards: HTMLElement[]; triggerEl: HTMLElement }[] = [];
+  const initialRowsToAnimate: { rowCards: HTMLElement[]; index: number }[] = [];
+
+  rows.forEach((rowCards, rowIndex) => {
+    // If cards in this row were already revealed and this is not a filter reset, skip
+    if (!isFilterReset && rowCards.every((c) => c.dataset.revealed === "true")) {
+      return;
+    }
+
+    const firstCard = rowCards[0];
+    const rect = firstCard.getBoundingClientRect();
+
+    // Check if row is currently visible in viewport
+    if (rect.top < viewportHeight - 50 && rect.bottom > 0) {
+      initialRowsToAnimate.push({ rowCards, index: rowIndex });
+      rowCards.forEach((c) => {
+        c.dataset.revealed = "true";
+      });
+    } else {
+      // Below viewport: set initial hidden push-up state
+      rowCards.forEach((c) => {
+        c.dataset.revealed = "false";
+      });
+      gsap.set(rowCards, {
+        opacity: 0,
+        y: 90,
+        clipPath: "inset(50% 0% 0% 0%)",
+      });
+      rowsToObserve.push({ rowCards, triggerEl: firstCard });
+    }
+  });
+
+  // Animate initial rows inside the viewport
+  if (initialRowsToAnimate.length > 0) {
+    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    initialRowsToAnimate.forEach(({ rowCards, index }) => {
+      tl.fromTo(
+        rowCards,
+        {
+          opacity: 0,
+          y: 90,
+          clipPath: "inset(50% 0% 0% 0%)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 0.75,
+          stagger: 0.045,
+          ease: "power4.out",
+          clearProps: "transform,opacity,clipPath",
+        },
+        baseDelay + index * 0.14
+      );
+    });
+  }
+
+  // Create observer to trigger Push-up Reveal for every row as user scrolls down
+  if (rowsToObserve.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const targetEl = entry.target as HTMLElement;
+            const targetRow = rowsToObserve.find((r) => r.triggerEl === targetEl);
+            if (targetRow) {
+              gsap.fromTo(
+                targetRow.rowCards,
+                {
+                  opacity: 0,
+                  y: 90,
+                  clipPath: "inset(50% 0% 0% 0%)",
+                },
+                {
+                  opacity: 1,
+                  y: 0,
+                  clipPath: "inset(0% 0% 0% 0%)",
+                  duration: 0.75,
+                  stagger: 0.045,
+                  ease: "power4.out",
+                  clearProps: "transform,opacity,clipPath",
+                }
+              );
+              targetRow.rowCards.forEach((c) => {
+                c.dataset.revealed = "true";
+              });
+              observer.unobserve(targetEl);
+            }
+          }
+        });
+      },
+      {
+        rootMargin: "0px 0px -40px 0px", // Triggers naturally as row enters screen
+        threshold: 0.05,
+      }
+    );
+
+    rowsToObserve.forEach(({ triggerEl }) => {
+      observer.observe(triggerEl);
+    });
+
+    observerRef.current = observer;
+  }
+}
+
 interface WorksContentProps {
   initialWorks?: DBWork[];
   settings?: Record<string, string>;
@@ -86,17 +264,29 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
-  const flipStateRef = useRef<Flip.FlipState | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const scrollRowObserverRef = useRef<IntersectionObserver | null>(null);
   const isFirstRender = useRef(true);
   const activeTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const isFlippingRef = useRef(false);
+  const isFilteringRef = useRef(false);
+  const prevRenderedCountRef = useRef(INITIAL_BATCH);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollRowObserverRef.current) {
+        scrollRowObserverRef.current.disconnect();
+      }
+    };
   }, []);
 
   // Social Links
@@ -212,7 +402,40 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
     });
   }, [mappedWorks, activeType, activeCat]);
 
-  // Initial page entrance animation (Row-by-Row Fly In)
+  // Progressive slice of displayed items
+  const displayedWorks = useMemo(() => {
+    return filtered.slice(0, visibleCount);
+  }, [filtered, visibleCount]);
+
+  const hasMore = displayedWorks.length < filtered.length;
+
+  // Infinite scroll observer for loading more items as user scrolls
+  useEffect(() => {
+    if (!hasMore) return;
+    const target = sentinelRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + BATCH_INCREMENT, filtered.length));
+        }
+      },
+      {
+        rootMargin: "350px",
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, filtered.length]);
+
+  // Initial page entrance animation & setup scroll row observer
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
 
@@ -220,62 +443,34 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReducedMotion) return;
 
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
       // 1. Sidebar entrance
       if (sidebarRef.current) {
-        tl.fromTo(
+        gsap.fromTo(
           sidebarRef.current.children,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.04 },
-          0
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.04, ease: "power3.out" }
         );
       }
 
-      // 2. Row-by-Row Fly In for cards (Row 1 -> Row 2 -> Row 3)
-      const cards = containerRef.current?.querySelectorAll<HTMLElement>(".work-card");
-      if (cards && cards.length > 0) {
-        const numCols = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
-        const rowGroups: HTMLElement[][] = [];
-
-        Array.from(cards).forEach((card, idx) => {
-          const rowIndex = Math.floor(idx / numCols);
-          if (!rowGroups[rowIndex]) rowGroups[rowIndex] = [];
-          rowGroups[rowIndex].push(card);
-        });
-
-        rowGroups.forEach((rowCards, rowIndex) => {
-          const startTime = 0.05 + rowIndex * 0.1; // Snappier row progression
-          tl.fromTo(
-            rowCards,
-            { opacity: 0, y: 60, scale: 0.96 },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.5,
-              stagger: 0.03,
-              clearProps: "transform,opacity",
-            },
-            startTime
-          );
-        });
-      }
+      // 2. Setup row-by-row Push-up Reveal on scroll
+      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.08, true);
     }, containerRef);
 
     return () => ctx.revert();
   }, [mounted]);
 
-  // Handle filter change with 3D Flip Card transition
+  // Handle filter change: smooth slide-out followed by row-by-row push-up reveal on scroll
   const handleFilterChange = (newType?: WorkType | "all", newCat?: WorkCategory | "all") => {
     const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion || !gridRef.current) {
       if (newType !== undefined) setActiveType(newType);
       if (newCat !== undefined) setActiveCat(newCat);
+      setVisibleCount(INITIAL_BATCH);
+      prevRenderedCountRef.current = INITIAL_BATCH;
       return;
     }
 
-    // Kill any running filter timeline to prevent overlapping or stuck states
+    // Kill any running timeline to prevent overlapping states
     if (activeTimelineRef.current) {
       activeTimelineRef.current.kill();
       activeTimelineRef.current = null;
@@ -288,78 +483,70 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
     if (!cards || cards.length === 0) {
       if (newType !== undefined) setActiveType(newType);
       if (newCat !== undefined) setActiveCat(newCat);
+      setVisibleCount(INITIAL_BATCH);
+      prevRenderedCountRef.current = INITIAL_BATCH;
       return;
     }
 
-    isFlippingRef.current = true;
+    isFilteringRef.current = true;
 
-    // 1. Flip out current cards from 0° -> 90° (Fast & unified, no lag)
+    // Slide out current cards upward slightly before swapping data
     const tl = gsap.timeline({
       onComplete: () => {
-        // Switch to new filter data in React immediately
+        // Switch to new filter data in React immediately and reset count
         if (newType !== undefined) setActiveType(newType);
         if (newCat !== undefined) setActiveCat(newCat);
+        setVisibleCount(INITIAL_BATCH);
+        prevRenderedCountRef.current = INITIAL_BATCH;
       },
     });
 
     activeTimelineRef.current = tl;
 
     tl.to(cards, {
-      rotationY: 90,
       opacity: 0,
-      scale: 0.95,
-      transformPerspective: 1000,
-      duration: 0.18,
+      y: -20,
+      duration: 0.16,
       ease: "power2.in",
-      stagger: 0.005,
+      stagger: 0.01,
     });
   };
 
-  // 3D Flip In ONLY when filtered content updates via user filter click
+  // Push-up Reveal Animation on filter update
   useIsomorphicLayoutEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
 
-    // Only run 3D Flip In if user actively triggered a filter change
-    if (!isFlippingRef.current) return;
+    if (!isFilteringRef.current) return;
 
     if (!gridRef.current) {
-      isFlippingRef.current = false;
+      isFilteringRef.current = false;
       return;
     }
 
     const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
-      isFlippingRef.current = false;
+      isFilteringRef.current = false;
       return;
     }
 
-    // 2. Flip in newly updated cards from -90° -> 0° (Seamless continuous motion)
-    const cards = gridRef.current.querySelectorAll<HTMLElement>(".work-card");
-    if (cards && cards.length > 0) {
-      gsap.fromTo(
-        cards,
-        { rotationY: -90, opacity: 0, scale: 0.95, transformPerspective: 1000 },
-        {
-          rotationY: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.28,
-          ease: "power2.out",
-          stagger: 0.008,
-          clearProps: "all",
-          onComplete: () => {
-            isFlippingRef.current = false;
-            activeTimelineRef.current = null;
-          },
-        }
-      );
-    } else {
-      isFlippingRef.current = false;
+    // Re-setup scroll row observer for newly filtered cards
+    setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.05, true);
+    isFilteringRef.current = false;
+  }, [activeType, activeCat]);
+
+  // Setup scroll row observer when new items are appended via infinite scroll
+  useIsomorphicLayoutEffect(() => {
+    if (isFirstRender.current || isFilteringRef.current) return;
+
+    if (gridRef.current && displayedWorks.length > prevRenderedCountRef.current) {
+      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0, false);
     }
-  }, [filtered]);
+
+    prevRenderedCountRef.current = displayedWorks.length;
+  }, [displayedWorks.length]);
 
   return (
     <div ref={containerRef} className="bg-white min-h-screen">
