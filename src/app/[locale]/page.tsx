@@ -41,7 +41,6 @@ export default async function HomePage() {
       const media = await (prisma as any).homeMedia.findMany({
         where: { active: true },
         orderBy: { order: "asc" },
-        take: limit,
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       heroImages = media.map((m: any) => ({
