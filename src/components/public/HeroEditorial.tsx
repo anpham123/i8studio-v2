@@ -211,20 +211,6 @@ function GridTile({
             style={{ backgroundColor: fallbackColor }}
           />
         )}
-
-        {/* Hover Overlay with Title and Expand Icon */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4 sm:p-6 z-10">
-          <div className="flex justify-end">
-            <span className="w-8 h-8 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center text-white text-xs shadow-lg">
-              ⤢
-            </span>
-          </div>
-          {image?.alt && (
-            <p className="font-serif text-white text-sm sm:text-base md:text-xl font-medium tracking-wide drop-shadow-md line-clamp-1">
-              {image.alt}
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
