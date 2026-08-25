@@ -55,9 +55,9 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
   const isWheelingRef = useRef(false);
   const touchStartYRef = useRef(0);
 
-  const CARD_HEIGHT = 360;
+  const CARD_HEIGHT = 450;
   const GAP = 28;
-  const CARD_STEP = CARD_HEIGHT + GAP; // 388px
+  const CARD_STEP = CARD_HEIGHT + GAP; // 478px
 
   const goToNext = useCallback(() => {
     setActiveIndex((prev) => Math.min(prev + 1, collections.length - 1));
@@ -223,7 +223,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                   </p>
                 )}
 
-                {/* Action Link & Navigation Arrows */}
+                {/* Action Link */}
                 <div className="flex items-center gap-4 pt-2">
                   <Link
                     href={`${basePath}/${encodeURIComponent(activeCol.slug)}`}
@@ -232,26 +232,6 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                     <span>{isJa ? "詳細を見る" : "Explore Space"}</span>
                     <span>→</span>
                   </Link>
-
-                  {/* Up / Down Controls */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={goToPrev}
-                      disabled={activeIndex === 0}
-                      className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:text-black hover:border-black transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
-                      title="Previous (Arrow Up)"
-                    >
-                      ↑
-                    </button>
-                    <button
-                      onClick={goToNext}
-                      disabled={activeIndex === collections.length - 1}
-                      className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-600 hover:text-black hover:border-black transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
-                      title="Next (Arrow Down)"
-                    >
-                      ↓
-                    </button>
-                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -273,16 +253,16 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
           </div>
 
           {/* ── Right Column: Vertical Reel with Visible Top & Bottom Peeking Cards ──── */}
-          <div className="lg:col-span-7 relative h-[680px] sm:h-[760px] lg:h-[820px] flex items-center justify-center overflow-hidden">
+          <div className="lg:col-span-7 relative h-[720px] sm:h-[780px] lg:h-[840px] flex items-center justify-center overflow-hidden">
             {/* Top & Bottom Subtle Edge Softeners */}
-            <div className="absolute top-0 inset-x-0 h-12 bg-gradient-to-b from-[#fafaf8] to-transparent z-30 pointer-events-none" />
-            <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-[#fafaf8] to-transparent z-30 pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-[#fafaf8] to-transparent z-30 pointer-events-none" />
+            <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-[#fafaf8] to-transparent z-30 pointer-events-none" />
 
             {/* Filmstrip Reel centered at Y = -activeIndex * CARD_STEP */}
             <motion.div
               animate={{ y: -activeIndex * CARD_STEP }}
               transition={{ type: "spring", stiffness: 200, damping: 26, mass: 0.8 }}
-              className="flex flex-col items-center gap-7 absolute w-full max-w-[600px] xl:max-w-[660px]"
+              className="flex flex-col items-center gap-7 absolute w-full max-w-[760px] xl:max-w-[850px] 2xl:max-w-[920px]"
               style={{
                 top: "50%",
                 marginTop: `-${CARD_HEIGHT / 2}px`,
@@ -299,8 +279,8 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                   targetScale = 1.0;
                   targetOpacity = 1.0;
                 } else if (distance === 1) {
-                  targetScale = 0.7;
-                  targetOpacity = 0.6; // Clearly visible so users know there is previous & next content
+                  targetScale = 0.78;
+                  targetOpacity = 0.65; // Clearly visible top & bottom preview cards
                 }
 
                 return (
