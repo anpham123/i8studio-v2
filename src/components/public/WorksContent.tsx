@@ -39,6 +39,7 @@ interface DBWork {
 interface Work {
   id: string;
   title: string;
+  titleJa?: string;
   type: WorkType;
   category: WorkCategory;
   bg: string;
@@ -382,6 +383,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
       return {
         id: w.id,
         title,
+        titleJa: w.titleJa || "",
         type,
         category,
         image: w.image,
@@ -693,12 +695,13 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                   key={work.id}
                   data-flip-id={work.id}
                   onClick={() => {
+                    const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
                     if (work.vrUrl) {
                       setVrModal({ url: work.vrUrl, title: work.title });
                     } else if (work.videoUrl) {
-                      setLightbox({ src: work.videoUrl, alt: work.title, isVideo: true, type: work.type });
+                      setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type });
                     } else if (work.image) {
-                      setLightbox({ src: work.image, alt: work.title, type: work.type });
+                      setLightbox({ src: work.image, alt: altText, type: work.type });
                     }
                   }}
                   className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
@@ -710,7 +713,7 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                     {work.image ? (
                       <img
                         src={work.image}
-                        alt={work.title}
+                        alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
                         loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover transition-all duration-[0.7s] ease-out group-hover:scale-[1.035] opacity-0"
                         onLoad={(e) => {

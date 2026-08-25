@@ -21,7 +21,7 @@ interface HeroEditorialProps {
 }
 
 interface MasonryItem {
-  flex: number;
+  targetCols: number;
   aspect: string;
   maxHeight?: string;
   minHeight?: string;
@@ -37,102 +37,40 @@ const PLACEHOLDER_COLORS = [
 ];
 
 /*
- * Masonry layout definition:
- * Single large image rows (Rows with 1 item) occupy full-screen height
- * so they fill the viewport completely when scrolled into view.
+ * Masonry block pattern (17 items per repeating cycle):
+ * Row 1: 4 vertical cards (3:5)
+ * Row 2: 1 full-screen cinematic banner (16:9)
+ * Row 3-6: 3 widescreen cards per row (16:9)
  */
-const MASONRY_ROWS = [
-  // Block 1 (Rows 1-6)
+const MASONRY_BLOCK = [
   [
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
+    { targetCols: 4, aspect: "3/5" },
+    { targetCols: 4, aspect: "3/5" },
+    { targetCols: 4, aspect: "3/5" },
+    { targetCols: 4, aspect: "3/5" },
   ],
   [
-    { flex: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
+    { targetCols: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
   ],
   [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-
-  // Block 2 (Rows 7-12)
-  [
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-  ],
-  [
-    { flex: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-
-  // Block 3 (Rows 13-18)
-  [
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-    { flex: 1, aspect: "3/5" },
-  ],
-  [
-    { flex: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-  ],
-  [
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
-    { flex: 1, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 3, aspect: "16/9" },
   ],
 ];
 
@@ -241,18 +179,24 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
 
-  // Determine active rows dynamically (limit - 1 because hero uses 1 image)
-  const masonryLimit = Math.max(0, limit - 1);
-  let cumulativeItems = 0;
-  let rowCount = 0;
-  for (let i = 0; i < MASONRY_ROWS.length; i++) {
-    cumulativeItems += MASONRY_ROWS[i].length;
-    rowCount = i + 1;
-    if (cumulativeItems >= masonryLimit) {
-      break;
+  // Determine active rows dynamically to fit all uploaded masonry images (no limit)
+  const totalMasonryCount = masonryImages.length;
+  const activeRows: Array<Array<{ targetCols: number; aspect: string; minHeight?: string; maxHeight?: string }>> = [];
+  let itemsAllocated = 0;
+  let blockIndex = 0;
+
+  while (itemsAllocated < totalMasonryCount) {
+    for (const rowTemplate of MASONRY_BLOCK) {
+      if (itemsAllocated >= totalMasonryCount) break;
+      const remaining = totalMasonryCount - itemsAllocated;
+      const countForThisRow = Math.min(rowTemplate.length, remaining);
+      const row = rowTemplate.slice(0, countForThisRow);
+      activeRows.push(row);
+      itemsAllocated += countForThisRow;
     }
+    blockIndex++;
+    if (blockIndex > 500) break; // safety guard
   }
-  const activeRows = MASONRY_ROWS.slice(0, rowCount);
 
   // Scroll-Triggered Row-by-Row Push-Up Reveal Animation (Same as Works page)
   useEffect(() => {
@@ -465,17 +409,24 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             return (
               <div
                 key={rowIdx}
-                className="hero-row flex gap-3 sm:gap-4 justify-center py-2"
+                className="hero-row flex gap-3 sm:gap-4 justify-start py-2"
                 style={{ alignItems: "stretch" }}
               >
                 {rowItems.map((item: MasonryItem) => {
                   const currentImage = masonryImages[item.tileIdx];
 
+                  const colWidthClass =
+                    item.targetCols === 4
+                      ? "w-[calc((100%-3*0.75rem)/4)] sm:w-[calc((100%-3*1rem)/4)] flex-[0_0_calc((100%-3*0.75rem)/4)] sm:flex-[0_0_calc((100%-3*1rem)/4)]"
+                      : item.targetCols === 3
+                      ? "w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*1rem)/3)] flex-[0_0_calc((100%-2*0.75rem)/3)] sm:flex-[0_0_calc((100%-2*1rem)/3)]"
+                      : "w-full flex-[0_0_100%]";
+
                   return (
                     <div
                       key={item.tileIdx}
-                      className="flex justify-center relative hover:z-30"
-                      style={{ flex: item.flex, minWidth: 0 }}
+                      className={`flex justify-center relative hover:z-30 ${colWidthClass}`}
+                      style={{ minWidth: 0 }}
                     >
                       <GridTile
                         image={currentImage}

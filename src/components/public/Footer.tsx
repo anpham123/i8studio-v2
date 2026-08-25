@@ -45,6 +45,9 @@ const SOCIAL = [
   { key: "socialYoutube",   Icon: IconYoutube,   label: "YouTube" },
 ];
 
+// ─── CHỈNH KÍCH THƯỚC LOGO TẠI ĐÂY (px) ──────────────────────────
+const FOOTER_LOGO_HEIGHT = 75; // Kích cỡ logo sau khi cắt sạch khoảng trắng (Rất to & sắc nét)
+
 export default function Footer({ settings }: FooterProps) {
   const t     = useTranslations("footer");
   const navT  = useTranslations("nav");
@@ -59,28 +62,57 @@ export default function Footer({ settings }: FooterProps) {
     { label: navT("blogs"),    href: `/${locale}/blogs` },
   ];
 
+  const aboutLinks = [
+    { label: navT("aboutSub.companyOverview"), href: `/${locale}/about-us` },
+    { label: navT("aboutSub.portfolio"),       href: `/${locale}/about-us/portfolio` },
+    { label: navT("aboutSub.workflow"),        href: `/${locale}/about-us/workflow` },
+    { label: navT("aboutSub.collection"),      href: `/${locale}/about-us/collection` },
+    { label: navT("aboutSub.qa"),              href: `/${locale}/qa` },
+  ];
+
+  const blogLinks = [
+    { label: navT("blogSub.caseStudy"),        href: `/${locale}/blogs/case-study` },
+    { label: navT("blogSub.techniqueSharing"), href: `/${locale}/blogs/tips` },
+    { label: navT("blogSub.knowledge"),        href: `/${locale}/blogs/knowledge` },
+    { label: navT("blogSub.ai"),               href: `/${locale}/blogs/ai-feature` },
+    { label: navT("blogSub.lifeGallery"),      href: `/${locale}/blogs/life-gallery` },
+  ];
+
   return (
     <footer className="bg-[#fafafa] border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-10 lg:gap-16">
+        
+        {/* ── BỐ CỤC FOOTER ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
 
-          {/* Col 1: Logo + tagline + social */}
-          <div className="w-full md:w-1/3 max-w-sm">
-            <Link href={`/${locale}`} className="inline-block mb-3">
-              {(settings.footerLogoImage || settings.logoImage) ? (
-                <img
-                  src={settings.footerLogoImage || settings.logoImage}
-                  alt={settings.siteName || "i8 STUDIO"}
-                  style={{ height: parseInt(settings.logoFooterHeight) || Math.min(48, parseInt(settings.logoHeight) || 40), width: "auto", objectFit: "contain" }}
-                />
-              ) : (
-                <span className="text-xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
-              )}
-            </Link>
-            <p className="text-gray-600 text-[15px] sm:text-[16px] leading-relaxed mb-6">
+          {/* Cột 1 (Phần 1): Logo + Slogan + Socials + Contact Info */}
+          <div className="lg:col-span-4 flex flex-col lg:pr-8 xl:pr-12">
+            {/* Logo */}
+            <div className="mb-3">
+              <Link href={`/${locale}`} className="inline-block">
+                {(settings.footerLogoImage || settings.logoImage) ? (
+                  <img
+                    src={settings.footerLogoImage || settings.logoImage}
+                    alt={settings.siteName || "i8 STUDIO"}
+                    style={{
+                      height: parseInt(settings.logoFooterHeight) ? Math.max(FOOTER_LOGO_HEIGHT, parseInt(settings.logoFooterHeight)) : FOOTER_LOGO_HEIGHT,
+                      width: "auto",
+                      objectFit: "contain",
+                    }}
+                    className="transition-transform duration-300 hover:scale-105"
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
+                )}
+              </Link>
+            </div>
+
+            <p className="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal">
               {t("tagline")}
             </p>
-            <div className="flex gap-2.5">
+
+            {/* Social icons */}
+            <div className="flex gap-2.5 mb-4">
               {SOCIAL.map(({ key, Icon, label }) => {
                 const raw = settings[key];
                 const url = raw && !raw.startsWith("http") ? `https://${raw}` : raw;
@@ -93,8 +125,8 @@ export default function Footer({ settings }: FooterProps) {
                     aria-label={label}
                     className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                       url
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900"
-                        : "bg-gray-50 text-gray-200 cursor-default"
+                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 shadow-sm hover:scale-105"
+                        : "bg-gray-50 text-gray-300 cursor-default"
                     }`}
                   >
                     <Icon />
@@ -102,33 +134,9 @@ export default function Footer({ settings }: FooterProps) {
                 );
               })}
             </div>
-          </div>
 
-          {/* Col 2: Navigation */}
-          <div className="w-full md:w-auto md:min-w-[180px]">
-            <h4 className="text-gray-900 font-bold text-sm sm:text-[15px] mb-5 uppercase tracking-wider">
-              {t("navigation")}
-            </h4>
-            <ul className="space-y-3">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Col 3: Contact */}
-          <div className="w-full md:w-1/3 max-w-sm">
-            <h4 className="text-gray-900 font-bold text-sm sm:text-[15px] mb-5 uppercase tracking-wider">
-              {t("contact")}
-            </h4>
-            <ul className="space-y-3 text-[15px] sm:text-[16px] text-gray-600">
+            {/* Contact Details (Liền mạch và gọn gàng) */}
+            <ul className="space-y-2 text-[14px] sm:text-[15px] text-gray-600">
               {settings.email && (
                 <li>
                   <a href={`mailto:${settings.email}`} className="hover:text-gray-900 transition-colors">
@@ -156,15 +164,77 @@ export default function Footer({ settings }: FooterProps) {
             </ul>
           </div>
 
+          {/* Cụm 3 cột (Phần 2): NAVIGATION, ABOUT US, BLOGS với khoảng cách thoáng rộng */}
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-10 xl:gap-14 lg:pl-10 xl:pl-20">
+
+            {/* Col 2: NAVIGATION */}
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+                {t("navigation")}
+              </h4>
+              <ul className="space-y-3">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Col 3: ABOUT US */}
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+                {navT("aboutUs")}
+              </h4>
+              <ul className="space-y-3">
+                {aboutLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Col 4: BLOGS */}
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+                {navT("blogs")}
+              </h4>
+              <ul className="space-y-3">
+                {blogLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+
         </div>
       </div>
 
       {/* Bottom bar */}
       <div className="border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-[13px] sm:text-[14px]">{t("rights")}</p>
+          <p className="text-gray-500 text-[14px] sm:text-[15px]">{t("rights")}</p>
           <div className="flex items-center gap-4">
-            <p className="text-gray-400 text-[13px] sm:text-[14px]">{t("trust")}</p>
+            <p className="text-gray-400 text-[14px] sm:text-[15px]">{t("trust")}</p>
             <ScrollToTopButton />
           </div>
         </div>

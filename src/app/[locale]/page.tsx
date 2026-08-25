@@ -26,13 +26,7 @@ export default async function HomePage() {
   const orgJsonLd = organizationJsonLd();
   const siteJsonLd = websiteJsonLd();
 
-  // Fetch homeWorksLimit setting
-  const limitSetting = await prisma.setting.findUnique({
-    where: { key: "homeWorksLimit" },
-  });
-  const limit = limitSetting ? (parseInt(limitSetting.value) || 49) : 49;
-
-  // Fetch homepage media (standalone, not linked to Works)
+  // Fetch homepage media (standalone, not linked to Works) — Unlimited
   let heroImages: { url: string; alt: string; videoUrl?: string }[] = [];
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,7 +35,6 @@ export default async function HomePage() {
       const media = await (prisma as any).homeMedia.findMany({
         where: { active: true },
         orderBy: { order: "asc" },
-        take: limit,
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       heroImages = media.map((m: any) => ({
@@ -66,8 +59,8 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
       />
 
-      {/* Hero */}
-      <HeroEditorial images={heroImages} limit={limit} />
+      {/* Hero with unlimited images */}
+      <HeroEditorial images={heroImages} />
     </>
   );
 }
