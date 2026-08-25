@@ -37,12 +37,74 @@ const PLACEHOLDER_COLORS = [
 ];
 
 /*
- * Masonry block pattern (17 items per repeating cycle):
- * Row 1: 4 vertical cards (3:5)
- * Row 2: 1 full-screen cinematic banner (16:9)
- * Row 3-6: 3 widescreen cards per row (16:9)
+ * Masonry layout definition:
+ * Single large image rows (Rows with 1 item) occupy full-screen height
+ * so they fill the viewport completely when scrolled into view.
  */
-const MASONRY_BLOCK = [
+const MASONRY_ROWS = [
+  // Block 1 (Rows 1-6)
+  [
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+  ],
+  [
+    { flex: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+
+  // Block 2 (Rows 7-12)
+  [
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+    { flex: 1, aspect: "3/5" },
+  ],
+  [
+    { flex: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+  [
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+    { flex: 1, aspect: "16/9" },
+  ],
+
+  // Block 3 (Rows 13-18)
   [
     { flex: 1, aspect: "3/5" },
     { flex: 1, aspect: "3/5" },
@@ -115,11 +177,10 @@ function GridTile({
       {/* Card container: static for large full-screen images (like Hero), 3D hover lift for smaller cards */}
       <div
         onClick={onClick}
-        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${
-          isFullScreenHeroType
+        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
             ? "hover:opacity-95"
             : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
-        }`}
+          }`}
         style={{
           transformOrigin: "center center",
         }}
@@ -180,24 +241,18 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
 
-  // Determine active rows dynamically to fit all masonry images
-  const totalMasonryCount = masonryImages.length;
-  const activeRows: Array<Array<{ flex: number; aspect: string; minHeight?: string }>> = [];
-  let itemsAllocated = 0;
-  let blockIndex = 0;
-
-  while (itemsAllocated < totalMasonryCount) {
-    for (const rowTemplate of MASONRY_BLOCK) {
-      if (itemsAllocated >= totalMasonryCount) break;
-      const remaining = totalMasonryCount - itemsAllocated;
-      const countForThisRow = Math.min(rowTemplate.length, remaining);
-      const row = rowTemplate.slice(0, countForThisRow);
-      activeRows.push(row);
-      itemsAllocated += countForThisRow;
+  // Determine active rows dynamically (limit - 1 because hero uses 1 image)
+  const masonryLimit = Math.max(0, limit - 1);
+  let cumulativeItems = 0;
+  let rowCount = 0;
+  for (let i = 0; i < MASONRY_ROWS.length; i++) {
+    cumulativeItems += MASONRY_ROWS[i].length;
+    rowCount = i + 1;
+    if (cumulativeItems >= masonryLimit) {
+      break;
     }
-    blockIndex++;
-    if (blockIndex > 50) break; // safety guard
   }
+  const activeRows = MASONRY_ROWS.slice(0, rowCount);
 
   // Scroll-Triggered Row-by-Row Push-Up Reveal Animation (Same as Works page)
   useEffect(() => {
