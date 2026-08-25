@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import Link from "next/link";
 import Lightbox from "@/components/public/Lightbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
@@ -248,12 +249,20 @@ function setupScrollRowObserver(
   }
 }
 
+interface CollectionNav {
+  slug: string;
+  titleJa: string;
+  titleEn: string;
+}
+
 interface WorksContentProps {
   initialWorks?: DBWork[];
   settings?: Record<string, string>;
+  collections?: CollectionNav[];
+  locale?: string;
 }
 
-export default function WorksContent({ initialWorks, settings = {} }: WorksContentProps) {
+export default function WorksContent({ initialWorks, settings = {}, collections = [] }: WorksContentProps) {
   const t = useTranslations("work");
   const locale = useLocale();
 
@@ -628,6 +637,27 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                 </button>
               ))}
             </div>
+
+            {/* COLLECTION links */}
+            {collections.length > 0 && (
+              <>
+                <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                  COLLECTION
+                </div>
+                <div className="flex flex-col gap-1">
+                  {collections.map((col) => (
+                    <Link
+                      key={col.slug}
+                      href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
+                      className="text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#555] hover:text-[#111] border-transparent"
+                    >
+                      {locale === "ja" ? col.titleJa : col.titleEn}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* CTA & Social Links */}
@@ -844,6 +874,28 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
                     </button>
                   ))}
                 </div>
+
+                {/* COLLECTION links */}
+                {collections.length > 0 && (
+                  <>
+                    <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                      COLLECTION
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      {collections.map((col) => (
+                        <Link
+                          key={col.slug}
+                          href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
+                          className="text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#555] hover:text-[#111] border-transparent"
+                          onClick={() => setIsFilterOpen(false)}
+                        >
+                          {locale === "ja" ? col.titleJa : col.titleEn}
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Drawer CTA & Socials */}

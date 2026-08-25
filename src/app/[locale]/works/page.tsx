@@ -24,6 +24,18 @@ export default async function WorksPage() {
   const works = await prisma.work.findMany({ orderBy: [{ order: "asc" }, { createdAt: "desc" }] });
   const settings = await prisma.setting.findMany();
 
+  // Fetch active collections for sidebar navigation
+  let collections: { slug: string; titleJa: string; titleEn: string }[] = [];
+  try {
+    collections = await prisma.collection.findMany({
+      where: { active: true },
+      orderBy: { order: "asc" },
+      select: { slug: true, titleJa: true, titleEn: true },
+    });
+  } catch {
+    collections = [];
+  }
+
   const settingsMap = settings.reduce((acc, curr) => {
     acc[curr.key] = curr.value;
     return acc;
@@ -45,5 +57,11 @@ export default async function WorksPage() {
     featured: w.featured,
   }));
 
-  return <WorksContent initialWorks={serializedWorks} settings={settingsMap} />;
+  return (
+    <WorksContent
+      initialWorks={serializedWorks}
+      settings={settingsMap}
+      collections={collections}
+    />
+  );
 }
