@@ -645,7 +645,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
               <>
                 <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
-                  COLLECTION
+                  {locale === "ja" ? "コレクション" : "COLLECTION"}
                 </div>
                 <div className="flex flex-col gap-1">
                   {collections.map((col) => (
@@ -883,7 +883,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                   <>
                     <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
                     <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
-                      COLLECTION
+                      {locale === "ja" ? "コレクション" : "COLLECTION"}
                     </div>
                     <div className="flex flex-col gap-1">
                       {collections.map((col) => (

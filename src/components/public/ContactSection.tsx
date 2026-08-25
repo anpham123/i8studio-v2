@@ -196,21 +196,23 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                 },
                 {
                   icon: MessageCircle,
-                  label: "LINE",
-                  value: settings.lineUrl ? (isJa ? "LINEで相談する" : "Contact via Line") : (isJa ? "LINEでのお問い合わせ" : "Contact via Line"),
+                  label: isJa ? "LINE" : "LINE",
+                  value: settings.lineUrl ? (isJa ? "LINE公式アカウント" : "Contact via LINE") : (isJa ? "LINEでのお問い合わせ" : "Contact via LINE"),
                   href: settings.lineUrl || "#",
                 },
                 {
                   icon: MapPin,
                   label: isJa ? "所在地" : "Address",
-                  value: settings.address || (isJa ? "ベトナム・ダナン" : "Da Nang, Vietnam"),
+                  value: isJa
+                    ? (settings.addressJa || "ベトナム・ダナン")
+                    : (settings.address || "Da Nang, Vietnam"),
                   href: null,
                 },
                 {
                   icon: Clock,
                   label: isJa ? "営業時間" : "Working Hours",
                   value: isJa
-                    ? (settings.workingHoursJa || settings.workingHours || "月〜金 9:30 - 18:30 (日本時間)")
+                    ? (settings.workingHoursJa || "月〜金 7:30〜16:30（ベトナム時間） / 9:30〜18:30（日本時間）")
                     : (settings.workingHours || "Mon - Fri 7:30 - 16:30 VN"),
                   href: null,
                 },

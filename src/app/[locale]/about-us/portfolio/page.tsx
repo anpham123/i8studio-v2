@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
+// Force dynamic to always fetch the latest DB portfolio & flipbook items
+export const dynamic = "force-dynamic";
 import { buildMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";

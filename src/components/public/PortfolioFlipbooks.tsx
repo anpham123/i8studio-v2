@@ -25,6 +25,14 @@ interface Props {
   hasPortfolios: boolean;
 }
 
+const JAP_TITLE_MAP: Record<string, string> = {
+  "Apartment Porfolio": "集合住宅 ポートフォリオ",
+  "Apartment Portfolio": "集合住宅 ポートフォリオ",
+  "Porfolio Resort - Hotel": "宿泊施設・リゾート ポートフォリオ",
+  "Portfolio Resort - Hotel": "宿泊施設・リゾート ポートフォリオ",
+  "Townhouse Portfolio": "住宅 ポートフォリオ",
+};
+
 export default function PortfolioFlipbooks({ flipbooks, isJa, hasPortfolios }: Props) {
   const [activeBook, setActiveBook] = useState<FlipbookItem | null>(null);
 
@@ -50,7 +58,7 @@ export default function PortfolioFlipbooks({ flipbooks, isJa, hasPortfolios }: P
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {flipbooks.map((fb) => {
-              const fbTitle = isJa ? (fb.titleJa || fb.title) : fb.title;
+              const fbTitle = isJa ? (fb.titleJa || JAP_TITLE_MAP[fb.title] || fb.title) : fb.title;
               const fbDesc = isJa ? (fb.descriptionJa || fb.description) : fb.description;
               return (
                 <button

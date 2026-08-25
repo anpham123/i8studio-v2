@@ -67,7 +67,6 @@ export default function Footer({ settings }: FooterProps) {
     { label: navT("aboutSub.portfolio"),       href: `/${locale}/about-us/portfolio` },
     { label: navT("aboutSub.workflow"),        href: `/${locale}/about-us/workflow` },
     { label: navT("aboutSub.collection"),      href: `/${locale}/about-us/collection` },
-    { label: navT("aboutSub.qa"),              href: `/${locale}/qa` },
   ];
 
   const blogLinks = [
@@ -90,20 +89,16 @@ export default function Footer({ settings }: FooterProps) {
             {/* Logo */}
             <div className="mb-3">
               <Link href={`/${locale}`} className="inline-block">
-                {(settings.footerLogoImage || settings.logoImage) ? (
-                  <img
-                    src={settings.footerLogoImage || settings.logoImage}
-                    alt={settings.siteName || "i8 STUDIO"}
-                    style={{
-                      height: parseInt(settings.logoFooterHeight) ? Math.max(FOOTER_LOGO_HEIGHT, parseInt(settings.logoFooterHeight)) : FOOTER_LOGO_HEIGHT,
-                      width: "auto",
-                      objectFit: "contain",
-                    }}
-                    className="transition-transform duration-300 hover:scale-105"
-                  />
-                ) : (
-                  <span className="text-2xl font-bold text-gray-900 tracking-tight">i8 STUDIO</span>
-                )}
+                <img
+                  src="/images/logo.webp"
+                  alt={settings.siteName || "i8 STUDIO"}
+                  style={{
+                    height: parseInt(settings.logoFooterHeight) ? Math.max(FOOTER_LOGO_HEIGHT, parseInt(settings.logoFooterHeight)) : FOOTER_LOGO_HEIGHT,
+                    width: "auto",
+                    objectFit: "contain",
+                  }}
+                  className="transition-transform duration-300 hover:scale-105"
+                />
               </Link>
             </div>
 

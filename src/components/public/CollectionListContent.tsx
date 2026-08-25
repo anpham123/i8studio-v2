@@ -198,15 +198,6 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="space-y-5 sm:space-y-6"
               >
-                {/* Space Index & Counter */}
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-sm font-bold text-[#b8935a] tracking-widest">
-                    {String(activeIndex + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-xs uppercase tracking-[0.25em] text-gray-400 font-medium">
-                    / {String(collections.length).padStart(2, "0")} · {isJa ? "空間コレクション" : "SPACE COLLECTION"}
-                  </span>
-                </div>
 
                 {/* Main Large Title */}
                 <h2

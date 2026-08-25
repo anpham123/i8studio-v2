@@ -159,14 +159,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
         { label: t("aboutSub.workflow"), href: `/${locale}/about-us/workflow` },
       ],
     },
-    {
-      label: t("contact"),
-      href: `/${locale}/contact`,
-      children: [
-        { label: t("contact"), href: `/${locale}/contact` },
-        { label: t("aboutSub.qa"), href: `/${locale}/qa` },
-      ],
-    },
+    { label: t("contact"), href: `/${locale}/contact` },
     {
       label: t("blogs"),
       href: `/${locale}/blogs`,

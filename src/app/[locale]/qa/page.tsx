@@ -1,45 +1,5 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
-import { prisma } from "@/lib/prisma";
-import { buildMetadata, faqPageJsonLd } from "@/lib/seo";
-import QASection from "@/components/public/QASection";
-
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
-  return buildMetadata({
-    title: "FAQ — Frequently Asked Questions",
-    description:
-      "Answers to common questions about i8 STUDIO's 3DCG, Animation, VR & BIM services — pricing, timelines, process, and working with Japanese clients.",
-    path: "/qa",
-    locale: params.locale,
-  });
-}
-
-export default async function QAPage({ params }: { params: { locale: string } }) {
-  const { locale } = params;
-  const qaItems = await prisma.qA.findMany({ orderBy: { order: "asc" } });
-
-  const faqLd = faqPageJsonLd(
-    qaItems.map((q) => ({
-      question: locale === "ja" ? q.questionJa || q.question : q.question,
-      answer: locale === "ja" ? q.answerJa || q.answer : q.answer,
-    }))
-  );
-
-  return (
-    <div className="min-h-screen">
-      {qaItems.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
-        />
-      )}
-      <QASection items={qaItems} locale={locale} preview={false} />
-    </div>
-  );
+export default function QAPage({ params }: { params: { locale: string } }) {
+  redirect(`/${params.locale}/contact#qa`);
 }

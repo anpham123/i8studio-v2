@@ -28,7 +28,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
   const displayed = preview ? items.slice(0, 5) : items;
 
   return (
-    <section id="qa" className="section-noise py-20 lg:py-28 bg-white">
+    <section id="qa" className="section-noise py-20 lg:py-28 bg-[#f8f9fa] border-t border-gray-200/70">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-12">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
@@ -39,7 +39,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
           </h2>
         </FadeIn>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {displayed.map((item, i) => {
             const question = locale === "ja" ? item.questionJa || item.question : item.question;
             const answer = locale === "ja" ? item.answerJa || item.answer : item.answer;
@@ -47,7 +47,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
 
             return (
               <FadeIn key={item.id} delay={i * 0.05}>
-                <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                <div className="border border-gray-200/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow transition-shadow">
                   <button
                     onClick={() => setOpenId(isOpen ? null : item.id)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left"
@@ -86,7 +86,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
         {preview && items.length > 5 && (
           <FadeIn className="text-center mt-8">
             <Link
-              href={`/${locale}/qa`}
+              href={`/${locale}/contact#qa`}
               className="inline-flex items-center gap-1 text-gray-900 hover:text-gray-600 font-medium transition-colors border-b border-gray-900 pb-0.5"
             >
               {t("viewMore")} <ArrowRight size={14} />
