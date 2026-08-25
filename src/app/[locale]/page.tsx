@@ -30,7 +30,7 @@ export default async function HomePage() {
   const limitSetting = await prisma.setting.findUnique({
     where: { key: "homeWorksLimit" },
   });
-  const limit = limitSetting ? (parseInt(limitSetting.value) || 11) : 11;
+  const limit = limitSetting ? (parseInt(limitSetting.value) || 49) : 49;
 
   // Fetch homepage media (standalone, not linked to Works)
   let heroImages: { url: string; alt: string; videoUrl?: string }[] = [];
@@ -41,6 +41,7 @@ export default async function HomePage() {
       const media = await (prisma as any).homeMedia.findMany({
         where: { active: true },
         orderBy: { order: "asc" },
+        take: limit,
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       heroImages = media.map((m: any) => ({
