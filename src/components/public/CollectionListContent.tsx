@@ -192,9 +192,9 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
             })}
           </div>
 
-          {/* Right Side: Sticky Featured Showcase (Hiển thị Full 100% ảnh không cắt, nền trắng không viền đen) */}
+          {/* Right Side: Sticky Featured Showcase (Hiển thị Full 100% ảnh + Ambient Blur Backdrop sang trọng) */}
           <div className="col-span-7 sticky top-28 pb-6">
-            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-white group flex items-center justify-center border border-gray-100">
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-neutral-950 group flex items-center justify-center border border-black/10">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCol.slug}
@@ -202,34 +202,43 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 1.01, y: -6 }}
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full h-full flex items-center justify-center overflow-hidden bg-white"
+                  className="relative w-full h-full flex items-center justify-center overflow-hidden bg-neutral-950"
                 >
                   <Link
                     href={`${basePath}/${encodeURIComponent(activeCol.slug)}`}
-                    className="block w-full h-full relative flex items-center justify-center bg-white"
+                    className="block w-full h-full relative flex items-center justify-center overflow-hidden"
                   >
-                    {/* 100% Full Uncropped Image (Hiển thị trọn vẹn toàn bộ ảnh) */}
+                    {/* Ambient Blurred Backdrop (Dải màu mờ ảo tự nhiên lấy từ chính bức ảnh lấp đầy 2 bên) */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center blur-3xl opacity-55 scale-125 transition-transform duration-700 pointer-events-none"
+                      style={{ backgroundImage: `url(${activeCol.cover})` }}
+                    />
+
+                    {/* 100% Full Uncropped Image (Hiển thị trọn vẹn 100% không cắt xén) */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activeCol.cover}
                       alt={isJa ? activeCol.titleJa : activeCol.titleEn}
-                      className="max-w-full max-h-full object-contain relative z-[1] group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+                      className="max-w-full max-h-full object-contain relative z-[1] group-hover:scale-[1.02] transition-transform duration-700 ease-out drop-shadow-2xl"
                       onError={(e) => {
                         const t = e.currentTarget;
                         t.style.display = "none";
                         const p = t.parentElement;
                         if (p) {
-                          p.classList.add("flex", "items-center", "justify-center", "bg-neutral-100");
+                          p.classList.add("flex", "items-center", "justify-center", "bg-neutral-900");
                           const s = document.createElement("span");
-                          s.className = "text-gray-400 text-lg font-medium relative z-10";
+                          s.className = "text-white/40 text-lg font-medium relative z-10";
                           s.textContent = isJa ? activeCol.titleJa : activeCol.titleEn;
                           p.appendChild(s);
                         }
                       }}
                     />
 
-                    {/* Overlay Details with smooth bottom gradient */}
-                    <div className="absolute bottom-0 left-0 right-0 pt-16 pb-6 px-6 xl:px-8 flex items-end justify-between z-10 text-white bg-gradient-to-t from-black/85 via-black/35 to-transparent rounded-b-2xl">
+                    {/* Gradient Overlay for Text Readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent transition-opacity group-hover:opacity-90 z-[2] pointer-events-none" />
+
+                    {/* Overlay Details */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 xl:p-8 flex items-end justify-between z-10 text-white">
                       <div className="max-w-lg">
                         <span className="text-[11px] uppercase tracking-[0.25em] text-[#e8dcc8] font-semibold block mb-2">
                           {isJa ? "空間コレクション" : "SPACE COLLECTION"} · {String(activeIndex + 1).padStart(2, "0")} / {String(collections.length).padStart(2, "0")}
@@ -246,7 +255,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                       </div>
 
                       <div className="shrink-0 ml-4">
-                        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 hover:bg-white text-white hover:text-[#111] backdrop-blur-md text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-lg border border-white/30 hover:border-white">
+                        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 hover:bg-white text-white hover:text-[#111] backdrop-blur-md text-xs font-semibold uppercase tracking-wider transition-all duration-300 shadow-xl border border-white/25 hover:border-white">
                           <span>{isJa ? "詳細を見る" : "Explore Space"}</span>
                           <span>→</span>
                         </span>
