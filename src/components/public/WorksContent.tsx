@@ -452,8 +452,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
         );
       }
 
-      // 2. Setup row-by-row Push-up Reveal on scroll
-      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.08, true);
+      // 2. Setup row-by-row Push-up Reveal on scroll after DOM layout
+      requestAnimationFrame(() => {
+        setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.08, true);
+      });
     }, containerRef);
 
     return () => ctx.revert();
@@ -533,8 +535,10 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
     }
 
     // Re-setup scroll row observer for newly filtered cards
-    setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.05, true);
-    isFilteringRef.current = false;
+    requestAnimationFrame(() => {
+      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.05, true);
+      isFilteringRef.current = false;
+    });
   }, [activeType, activeCat]);
 
   // Setup scroll row observer when new items are appended via infinite scroll
@@ -542,7 +546,9 @@ export default function WorksContent({ initialWorks, settings = {} }: WorksConte
     if (isFirstRender.current || isFilteringRef.current) return;
 
     if (gridRef.current && displayedWorks.length > prevRenderedCountRef.current) {
-      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0, false);
+      requestAnimationFrame(() => {
+        setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0, false);
+      });
     }
 
     prevRenderedCountRef.current = displayedWorks.length;
