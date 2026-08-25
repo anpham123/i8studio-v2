@@ -192,9 +192,9 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
             })}
           </div>
 
-          {/* Right Side: Sticky Featured Showcase (Khổ 16:9 full ảnh không cắt) */}
+          {/* Right Side: Sticky Featured Showcase (Khổ 16:9 lấp đầy khung hình không bị viền đen) */}
           <div className="col-span-7 sticky top-28 pb-6">
-            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-[#111] group flex items-center justify-center">
+            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl bg-white group flex items-center justify-center border border-gray-100">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeCol.slug}
@@ -206,26 +206,20 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                 >
                   <Link
                     href={`${basePath}/${encodeURIComponent(activeCol.slug)}`}
-                    className="block w-full h-full relative flex items-center justify-center"
+                    className="block w-full h-full relative"
                   >
-                    {/* Ambient blurred backdrop for non-16:9 images */}
-                    <div
-                      className="absolute inset-0 bg-cover bg-center blur-2xl opacity-35 scale-125 transition-transform duration-700 pointer-events-none"
-                      style={{ backgroundImage: `url(${activeCol.cover})` }}
-                    />
-
-                    {/* 100% Full Uncropped Image */}
+                    {/* Full Cover Image (Luôn vừa khít khung 16:9, không bị viền đen 2 bên) */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activeCol.cover}
                       alt={isJa ? activeCol.titleJa : activeCol.titleEn}
-                      className="max-w-full max-h-full object-contain relative z-[1] group-hover:scale-[1.02] transition-transform duration-700 ease-out drop-shadow-2xl"
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                       onError={(e) => {
                         const t = e.currentTarget;
                         t.style.display = "none";
                         const p = t.parentElement;
                         if (p) {
-                          p.classList.add("flex", "items-center", "justify-center");
+                          p.classList.add("flex", "items-center", "justify-center", "bg-neutral-800");
                           const s = document.createElement("span");
                           s.className = "text-white/40 text-lg font-medium relative z-10";
                           s.textContent = isJa ? activeCol.titleJa : activeCol.titleEn;
@@ -234,8 +228,8 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
                       }}
                     />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent transition-opacity group-hover:opacity-95 z-[2] pointer-events-none" />
+                    {/* Gradient Overlay for Text Readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity group-hover:opacity-90 z-[2] pointer-events-none" />
 
                     {/* Overlay Details */}
                     <div className="absolute bottom-0 left-0 right-0 p-6 xl:p-8 flex items-end justify-between z-10 text-white">
