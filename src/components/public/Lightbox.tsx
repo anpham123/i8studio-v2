@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const Panorama360Viewer = dynamic(() => import("./Panorama360Viewer"), { ssr: false });
@@ -56,13 +56,43 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
         }}
         onClick={onClose}
       >
-        {/* Close button */}
-        <button
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-        >
-          <X size={20} />
-        </button>
+        {/* Action buttons */}
+        <div className="absolute top-6 right-6 flex items-center gap-3 z-10">
+          {!isVideo && !is360 && (
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const res = await fetch(src);
+                  const blob = await res.blob();
+                  const blobUrl = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = blobUrl;
+                  const jpName = (alt.split("|")[0] || "image").trim();
+                  a.download = `${jpName}.webp`;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(blobUrl);
+                  document.body.removeChild(a);
+                } catch {
+                  window.open(src, "_blank");
+                }
+              }}
+              title="Tải ảnh về máy (Tiếng Nhật)"
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              <Download size={18} />
+            </button>
+          )}
+
+          {/* Close button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
         {/* Media container */}
         <motion.div

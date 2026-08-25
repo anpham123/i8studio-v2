@@ -7,7 +7,7 @@ import {
   LayoutDashboard, FileText, Image, Wrench, Layers,
   BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
-  Tag, DollarSign, Building2, Home,
+  Tag, DollarSign, Building2, Home, FileSpreadsheet,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -74,6 +74,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { href: "/admin/media", label: "Media", icon: Folder },
       { href: "/admin/settings/branding", label: "Thương hiệu", icon: Brush },
+      { href: "/admin/settings/seo-rename", label: "Đổi tên SEO", icon: FileSpreadsheet },
       { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
     ],
   },

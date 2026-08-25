@@ -86,7 +86,7 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={work.image}
-                          alt={title}
+                          alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
                           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           loading="lazy"
                           onError={(e) => { e.currentTarget.style.display = "none"; }}
