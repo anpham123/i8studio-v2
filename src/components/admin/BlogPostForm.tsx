@@ -133,6 +133,13 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
   // Section management
   const addSection = () => setSections((s) => [...s, emptySection()]);
+  const insertSectionAfter = (i: number) => {
+    setSections((s) => {
+      const arr = [...s];
+      arr.splice(i + 1, 0, emptySection());
+      return arr;
+    });
+  };
   const removeSection = (i: number) => setSections((s) => s.filter((_, j) => j !== i));
   const moveSection = (i: number, dir: -1 | 1) => {
     setSections((s) => {
@@ -340,11 +347,8 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
       {/* Dynamic Sections */}
       <div className={cardCls}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
           <h3 className="text-sm font-bold text-gray-700">📑 Content Sections ({sections.length})</h3>
-          <button onClick={addSection} className="flex items-center gap-1.5 text-blue-600 text-sm font-medium hover:text-blue-700">
-            <Plus size={14} /> Thêm section
-          </button>
         </div>
 
         <div className="space-y-4">
@@ -364,10 +368,18 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                   </select>
                   <span className="text-xs text-gray-400">Section {si + 1}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => moveSection(si, -1)} className="p-1 text-gray-400 hover:text-gray-600" title="Di chuyển lên"><ChevronUp size={14} /></button>
-                  <button onClick={() => moveSection(si, 1)} className="p-1 text-gray-400 hover:text-gray-600" title="Di chuyển xuống"><ChevronDown size={14} /></button>
-                  <button onClick={() => removeSection(si)} className="p-1 text-red-400 hover:text-red-600" title="Xóa"><Trash2 size={14} /></button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => insertSectionAfter(si)}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md border border-blue-100 transition-colors font-medium"
+                    title="Chèn Section mới ngay dưới đây"
+                  >
+                    <Plus size={12} /> Chèn bên dưới
+                  </button>
+                  <button type="button" onClick={() => moveSection(si, -1)} className="p-1 text-gray-400 hover:text-gray-600" title="Di chuyển lên"><ChevronUp size={14} /></button>
+                  <button type="button" onClick={() => moveSection(si, 1)} className="p-1 text-gray-400 hover:text-gray-600" title="Di chuyển xuống"><ChevronDown size={14} /></button>
+                  <button type="button" onClick={() => removeSection(si)} className="p-1 text-red-400 hover:text-red-600" title="Xóa"><Trash2 size={14} /></button>
                 </div>
               </div>
 
@@ -399,6 +411,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                     <RichEditor value={p} onChange={(v) => updateBody(si, bi, v)} />
                     {sec.body.length > 1 && (
                       <button
+                        type="button"
                         onClick={() => removeBodyParagraph(si, bi)}
                         className="absolute -top-1 -right-1 bg-red-100 text-red-500 rounded-full p-0.5 hover:bg-red-200"
                         title="Xóa paragraph"
@@ -408,7 +421,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                     )}
                   </div>
                 ))}
-                <button onClick={() => addBodyParagraph(si)} className="text-xs text-blue-500 hover:text-blue-600">+ Thêm paragraph</button>
+                <button type="button" onClick={() => addBodyParagraph(si)} className="text-xs text-blue-500 hover:text-blue-600">+ Thêm paragraph</button>
               </div>
 
               {/* Image upload — available for ALL section types */}
@@ -484,6 +497,15 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
               )}
             </div>
           ))}
+
+          {/* Bottom Full-width Add Section Button */}
+          <button
+            type="button"
+            onClick={addSection}
+            className="w-full py-3.5 border-2 border-dashed border-blue-200 hover:border-blue-500 rounded-xl bg-blue-50/40 hover:bg-blue-50/80 text-blue-600 font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:shadow-sm cursor-pointer"
+          >
+            <Plus size={16} />  Thêm Section {sections.length + 1}
+          </button>
         </div>
       </div>
 

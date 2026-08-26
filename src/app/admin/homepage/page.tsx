@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import AdminShell from "@/components/admin/AdminShell";
 import { useToast } from "@/components/admin/Toast";
@@ -76,8 +76,15 @@ export default function HomepagePage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const activeItems = items.filter((i) => i.active).sort((a, b) => a.order - b.order);
-  const allSorted = items.sort((a, b) => a.order - b.order);
+  const allSorted = useMemo(() => {
+    return [...items].sort((a, b) =>
+      a.order !== b.order ? a.order - b.order : a.createdAt.localeCompare(b.createdAt)
+    );
+  }, [items]);
+
+  const activeItems = useMemo(() => {
+    return allSorted.filter((i) => i.active);
+  }, [allSorted]);
 
   /* ─── Upload helpers with progress ─── */
   const uploadWithProgress = (url: string, file: File): Promise<string> => {
@@ -123,6 +130,7 @@ export default function HomepagePage() {
     if (addImage) imageUrl = await uploadImage(addImage);
     if (addVideo) videoUrl = await uploadVideoFile(addVideo);
 
+    const maxOrder = items.reduce((max, i) => Math.max(max, i.order || 0), 0);
     const res = await fetch("/api/home-media", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -131,6 +139,7 @@ export default function HomepagePage() {
         image: imageUrl,
         videoUrl: videoUrl,
         type: addVideo ? "video" : "image",
+        order: maxOrder + 1,
       }),
     });
     const json = await res.json();
@@ -149,7 +158,14 @@ export default function HomepagePage() {
   /* ─── Edit ─── */
   const openEdit = (item: HomeMedia) => {
     setEditItem(item);
-    setEditForm({ title: item.title, image: item.image, videoUrl: item.videoUrl, type: item.type, active: item.active });
+    setEditForm({
+      title: item.title,
+      image: item.image,
+      videoUrl: item.videoUrl,
+      type: item.type,
+      active: item.active,
+      order: item.order,
+    });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -159,11 +175,14 @@ export default function HomepagePage() {
     const res = await fetch(`/api/home-media/${editItem.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
+      body: JSON.stringify({
+        ...editForm,
+        order: editItem.order, // strictly keep the exact same position
+      }),
     });
     const json = await res.json();
     if (json.data) {
-      setItems((p) => p.map((i) => i.id === editItem.id ? { ...i, ...json.data } : i));
+      setItems((p) => p.map((i) => (i.id === editItem.id ? { ...i, ...json.data, order: editItem.order } : i)));
       setEditItem(null);
       toast("Lưu thành công!", "success");
       // Auto revalidate
@@ -207,8 +226,14 @@ export default function HomepagePage() {
   const deletePermanently = async (item: HomeMedia) => {
     const res = await fetch(`/api/home-media/${item.id}`, { method: "DELETE" });
     if (res.ok) {
-      setItems((p) => p.filter((i) => i.id !== item.id));
+      const remaining = allSorted.filter((i) => i.id !== item.id);
+      const updates = remaining.map((it, i) => ({ id: it.id, order: i + 1 }));
+      setItems(remaining.map((it, i) => ({ ...it, order: i + 1 })));
       setDeleteConfirm(null);
+      await fetch("/api/home-media/reorder", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: updates }),
+      });
       toast(`Đã xóa "${item.title}"`, "success");
       fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
     } else toast("Lỗi khi xóa", "error");
@@ -218,16 +243,13 @@ export default function HomepagePage() {
   const moveUp = async (index: number) => {
     if (index === 0) return;
     const sorted = [...allSorted];
-    const [a, b] = [sorted[index], sorted[index - 1]];
-    const newItems = sorted.map((i) => {
-      if (i.id === a.id) return { ...i, order: b.order };
-      if (i.id === b.id) return { ...i, order: a.order };
-      return i;
-    });
-    setItems(newItems);
+    const [moved] = sorted.splice(index, 1);
+    sorted.splice(index - 1, 0, moved);
+    const updates = sorted.map((item, i) => ({ id: item.id, order: i + 1 }));
+    setItems(sorted.map((item, i) => ({ ...item, order: i + 1 })));
     await fetch("/api/home-media/reorder", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ id: a.id, order: b.order }, { id: b.id, order: a.order }] }),
+      body: JSON.stringify({ items: updates }),
     });
     toast("Đã di chuyển lên", "success");
   };
@@ -235,16 +257,13 @@ export default function HomepagePage() {
   const moveDown = async (index: number) => {
     if (index >= allSorted.length - 1) return;
     const sorted = [...allSorted];
-    const [a, b] = [sorted[index], sorted[index + 1]];
-    const newItems = sorted.map((i) => {
-      if (i.id === a.id) return { ...i, order: b.order };
-      if (i.id === b.id) return { ...i, order: a.order };
-      return i;
-    });
-    setItems(newItems);
+    const [moved] = sorted.splice(index, 1);
+    sorted.splice(index + 1, 0, moved);
+    const updates = sorted.map((item, i) => ({ id: item.id, order: i + 1 }));
+    setItems(sorted.map((item, i) => ({ ...item, order: i + 1 })));
     await fetch("/api/home-media/reorder", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ id: a.id, order: b.order }, { id: b.id, order: a.order }] }),
+      body: JSON.stringify({ items: updates }),
     });
     toast("Đã di chuyển xuống", "success");
   };

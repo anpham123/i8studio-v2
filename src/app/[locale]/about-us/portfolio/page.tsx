@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 // Force dynamic to always fetch the latest DB portfolio & flipbook items
 export const dynamic = "force-dynamic";
@@ -52,10 +53,10 @@ export default async function AboutPortfolioPage({
               <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           </div>
-          <h1 className="text-3xl font-light text-[#111] mb-4" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+          <h1 className="text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
             {isJa ? "ポートフォリオ" : "Portfolio"}
           </h1>
-          <p className="text-gray-500 text-lg leading-relaxed">
+          <p className="text-gray-500 text-lg leading-relaxed mt-4">
             {t("comingSoon")}
           </p>
         </div>
@@ -65,18 +66,85 @@ export default async function AboutPortfolioPage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero */}
-      <section className="bg-[#fafaf8] border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
-            {isJa ? "ポートフォリオ" : "PORTFOLIO"}
-          </p>
-          <h1 className="text-3xl md:text-5xl font-light text-[#111] mb-6" style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}>
-            {isJa ? "ポートフォリオ" : "Portfolio"}
-          </h1>
-          <p className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto">
-            {isJa ? "i8 STUDIOの厳選されたプロジェクトをご覧ください。" : "Explore our curated selection of projects."}
-          </p>
+      {/* ── Hero: Split Editorial Portfolio Banner (Matching User Reference) ── */}
+      <section className="bg-white border-b border-gray-100 overflow-hidden">
+        <div className="w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[950px] grid grid-cols-1 lg:grid-cols-2 items-stretch">
+          
+          {/* Left Column: White Editorial Layout */}
+          <div className="bg-white p-8 sm:p-12 md:p-14 lg:p-16 xl:p-20 flex flex-col justify-between items-start z-10">
+            {/* Top Eyebrow */}
+            <div className="w-full">
+              <p className="text-xs sm:text-sm font-extrabold tracking-[0.22em] text-[#111] uppercase font-sans">
+                ARCHITECTURAL
+              </p>
+              <p className="text-[11px] sm:text-xs font-normal tracking-[0.28em] text-gray-500 uppercase font-sans mt-0.5">
+                VISUALIZATION
+              </p>
+            </div>
+
+            {/* Center Typographic Statement & Narrative */}
+            <div className="my-auto py-8 sm:py-10 md:py-12 w-full space-y-6">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#111] tracking-[0.22em] sm:tracking-[0.28em] uppercase select-none leading-[1.18] font-roboto">
+                <span className="block">P O R T -</span>
+                <span className="block mt-1 sm:mt-2">F O L I O</span>
+              </h1>
+
+              {/* Architectural Divider */}
+              <div className="w-20 h-0.5 bg-[#b8935a]" />
+
+              {/* Rich Narrative Description */}
+              <div className="space-y-2.5 max-w-xl">
+                <p className="text-gray-800 text-sm sm:text-base md:text-lg font-normal leading-relaxed">
+                  {isJa
+                    ? "建築のアイデアを、鮮明でリアルなビジュアル体験へと具現化します。"
+                    : "Transforming architectural ideas into realistic visual experiences."}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-500 font-normal leading-relaxed">
+                  {isJa ? (
+                    <>
+                      <span className="font-semibold text-gray-700">Explore our works in:</span> 建築3DCGパース | VR | アニメーション | Digital Visualization
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-semibold text-gray-700">Explore our works in:</span> Architectural CG | VR | Animation | Digital Visualization
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom Credits & Action Link */}
+            <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-6 pt-6 border-t border-gray-100">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-500 font-normal tracking-wide">
+                  By i8 STUDIO
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  {isJa ? "建築CGパース・VR・アニメーション制作スタジオ" : "Architectural 3DCG & VR Studio"}
+                </p>
+              </div>
+
+              <Link
+                href={`/${params.locale}/works`}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111] hover:bg-[#333] text-white text-xs font-semibold shadow-sm transition-all hover:scale-105 group"
+              >
+                <span>{isJa ? "プロジェクト一覧" : "Selected works"}</span>
+                <span className="text-white/70 group-hover:text-white group-hover:translate-x-0.5 transition-all">→</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Column: Architectural Forest Pavilion Render */}
+          <div className="relative w-full h-[420px] sm:h-[520px] lg:h-auto min-h-full overflow-hidden bg-gray-900 group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/uploads/1781662116949-House_in_forest__Summer_.webp"
+              alt="Architectural Visualization Portfolio — i8 STUDIO"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+          </div>
+
         </div>
       </section>
 

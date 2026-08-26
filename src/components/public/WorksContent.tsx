@@ -22,6 +22,11 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
 type WorkType = "still" | "animation" | "composite" | "vr360" | "walkthrough" | "ar" | "digital";
 type WorkCategory = "residential" | "apartment" | "resort" | "commercial" | "office" | "public" | "urban";
 
+function isVideoFile(url?: string): boolean {
+  if (!url) return false;
+  return /\.(mp4|webm|mov|ogg)($|\?)/i.test(url) || url.startsWith("/uploads/");
+}
+
 interface DBWork {
   id: string;
   title: string;
@@ -32,6 +37,7 @@ interface DBWork {
   buildingCategory?: string;
   image: string;
   videoUrl: string;
+  hoverVideo?: string;
   vrUrl?: string;
   order: number;
   featured: boolean;
@@ -46,6 +52,7 @@ interface Work {
   bg: string;
   span: "wide" | "narrow";
   image?: string;
+  hoverVideo?: string;
   videoUrl?: string;
   vrUrl?: string;
   clientName?: string;
@@ -96,7 +103,7 @@ function groupCardsByVisualRows(cards: HTMLElement[]): HTMLElement[][] {
   const rows: HTMLElement[][] = [];
   let currentRow: { card: HTMLElement; top: number; left: number }[] = [];
   let currentRowAvgTop = 0;
-  const ROW_THRESHOLD = 90; // Tolerance for masonry height differences in a row
+  const ROW_THRESHOLD = 140; // Tolerance for masonry height differences in a row
 
   cardData.forEach((item) => {
     if (currentRow.length === 0) {
@@ -250,6 +257,172 @@ function setupScrollRowObserver(
   }
 }
 
+function WorkCardItem({
+  work,
+  onClick,
+  typeLabel,
+  index = 0,
+}: {
+  work: Work;
+  onClick: () => void;
+  typeLabel: string;
+  index?: number;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
+
+  const hoverVideoSrc = work.hoverVideo || (isVideoFile(work.videoUrl) ? work.videoUrl : undefined);
+  const hasHoverVideo = Boolean(hoverVideoSrc);
+
+  // Cinematic Camera Motion Mode for static images:
+  // 0: Zoom chậm từ xa lại gần (Slow Push-in / Dolly-in)
+  // 1: Quay lia chậm từ trái sang phải (Slow Pan Left-to-Right)
+  // 2: Quay lia chậm từ phải sang trái (Slow Pan Right-to-Left)
+  // 3: Zoom chậm lia từ dưới lên trên (Slow Pan Upward)
+  const motionMode = useMemo(() => {
+    const hash = (work.id || "").split("").reduce((acc, char) => acc + char.charCodeAt(0), index);
+    return hash % 4;
+  }, [work.id, index]);
+
+  const getCinematicTransform = () => {
+    if (!isHovered) return "scale(1) translate3d(0, 0, 0)";
+    switch (motionMode) {
+      case 0:
+        // Zoom sâu từ xa lại gần (Deep push-in zoom)
+        return "scale(1.24) translate3d(0, 0, 0)";
+      case 1:
+        // Zoom sâu + quay lia sang phải (Deep zoom & pan right)
+        return "scale(1.22) translate3d(6%, 0, 0)";
+      case 2:
+        // Zoom sâu + quay lia sang trái (Deep zoom & pan left)
+        return "scale(1.22) translate3d(-6%, 0, 0)";
+      case 3:
+        // Zoom sâu + lia từ dưới lên trên (Deep zoom & pan upward)
+        return "scale(1.22) translate3d(0, -5%, 0)";
+      default:
+        return "scale(1.22) translate3d(0, 0, 0)";
+    }
+  };
+
+  useEffect(() => {
+    if (!hasHoverVideo || !videoRef.current) return;
+    const video = videoRef.current;
+
+    // Detect mobile touch devices & prefers-reduced-motion accessibility
+    const isTouch = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (isTouch || prefersReducedMotion) return;
+
+    if (isHovered) {
+      const promise = video.play();
+      playPromiseRef.current = promise;
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            setIsVideoPlaying(true);
+          })
+          .catch(() => {
+            // Autoplay safe fallback
+            setIsVideoPlaying(false);
+          });
+      }
+    } else {
+      if (playPromiseRef.current) {
+        playPromiseRef.current
+          .then(() => {
+            video.pause();
+            video.currentTime = 0;
+            setIsVideoPlaying(false);
+          })
+          .catch(() => {
+            video.pause();
+            video.currentTime = 0;
+            setIsVideoPlaying(false);
+          });
+      } else {
+        video.pause();
+        video.currentTime = 0;
+        setIsVideoPlaying(false);
+      }
+    }
+  }, [isHovered, hasHoverVideo]);
+
+  return (
+    <div
+      data-flip-id={work.id}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
+    >
+      <div className="work-card-media relative overflow-hidden w-full bg-gray-100 rounded-[3px] will-change-transform transition-all">
+        {/* Static thumbnail image with cinematic slow zoom / pan motion */}
+        {work.image ? (
+          <img
+            src={work.image}
+            alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
+            loading="lazy"
+            className="w-full h-auto block object-cover will-change-transform opacity-0"
+            style={{
+              transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
+              transition: isHovered
+                ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1)"
+                : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1)",
+            }}
+            onLoad={(e) => {
+              e.currentTarget.classList.remove("opacity-0");
+              e.currentTarget.classList.add("opacity-100");
+            }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <div
+            className="w-full aspect-[4/3] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            style={{ backgroundColor: work.bg }}
+          />
+        )}
+
+        {/* Hover Video Preview (when video is available) */}
+        {hasHoverVideo && hoverVideoSrc && (
+          <video
+            ref={videoRef}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
+              }`}
+          >
+            {hoverVideoSrc.endsWith(".webm") && (
+              <source src={hoverVideoSrc} type="video/webm" />
+            )}
+            <source src={hoverVideoSrc} type="video/mp4" />
+          </video>
+        )}
+
+        {/* Subtle cinematic gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      </div>
+
+      <div className="work-card-info mt-3.5 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+        <h3 className="text-[15px] font-normal text-[#111] tracking-[0.03em] leading-tight mb-1">
+          <span className="bg-left-bottom bg-gradient-to-r from-gray-900 to-gray-900 bg-[length:0%_1px] bg-no-repeat group-hover:bg-[length:100%_1px] transition-[background-size] duration-500 pb-0.5">
+            {work.title}
+          </span>
+        </h3>
+        <p className="text-[12px] text-[#777] font-light tracking-[0.05em] uppercase">
+          {work.clientName || typeLabel}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 interface CollectionNav {
   slug: string;
   titleJa: string;
@@ -397,6 +570,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
         category,
         image: w.image,
         videoUrl: w.videoUrl,
+        hoverVideo: w.hoverVideo || (isVideoFile(w.videoUrl) ? w.videoUrl : undefined),
         vrUrl: w.vrUrl,
         bg: placeholderColors[index % placeholderColors.length],
         span: span as "wide" | "narrow",
@@ -720,10 +894,12 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
               ref={gridRef}
               className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
             >
-              {filtered.map((work) => (
-                <div
+              {filtered.map((work, index) => (
+                <WorkCardItem
                   key={work.id}
-                  data-flip-id={work.id}
+                  work={work}
+                  index={index}
+                  typeLabel={t(`types.${work.type}`)}
                   onClick={() => {
                     const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
                     if (work.vrUrl) {
@@ -734,44 +910,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                       setLightbox({ src: work.image, alt: altText, type: work.type });
                     }
                   }}
-                  className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
-                >
-                  <div
-                    className="work-card-media relative overflow-hidden w-full bg-gray-100 rounded-[3px] transition-transform duration-500 ease-out will-change-transform"
-                    style={{ aspectRatio: work.span === "wide" ? "16/10" : "3/4" }}
-                  >
-                    {work.image ? (
-                      <img
-                        src={work.image}
-                        alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
-                        loading="lazy"
-                        className="absolute inset-0 w-full h-full object-cover transition-all duration-[0.7s] ease-out group-hover:scale-[1.035] opacity-0"
-                        onLoad={(e) => {
-                          e.currentTarget.classList.remove("opacity-0");
-                          e.currentTarget.classList.add("opacity-100");
-                        }}
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 w-full h-full transition-transform duration-[0.7s] ease-out group-hover:scale-[1.035]"
-                        style={{ backgroundColor: work.bg }}
-                      />
-                    )}
-                  </div>
-                  <div className="work-card-info mt-3.5 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-                    <h3 className="text-[15px] font-normal text-[#111] tracking-[0.03em] leading-tight mb-1">
-                      <span className="bg-left-bottom bg-gradient-to-r from-gray-900 to-gray-900 bg-[length:0%_1px] bg-no-repeat group-hover:bg-[length:100%_1px] transition-[background-size] duration-500 pb-0.5">
-                        {work.title}
-                      </span>
-                    </h3>
-                    <p className="text-[12px] text-[#777] font-light tracking-[0.05em] uppercase">
-                      {work.clientName || t(`types.${work.type}`)}
-                    </p>
-                  </div>
-                </div>
+                />
               ))}
             </div>
           )}

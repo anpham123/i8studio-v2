@@ -139,14 +139,24 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
         const res = await fetch("/api/upload", { method: "POST", body: formData });
         const data = await res.json();
         if (data.url) {
-          editor.chain().focus().setImage({ src: data.url }).run();
+          const currentHtml = editor.getHTML();
+          // Always place/append image under the existing text content of this paragraph
+          if (currentHtml && currentHtml.trim() !== "" && currentHtml !== "<p></p>") {
+            const imgHtml = `<p><img src="${data.url}" alt="" /></p>`;
+            const finalHtml = currentHtml + imgHtml;
+            editor.commands.setContent(finalHtml);
+            onChange(finalHtml);
+          } else {
+            editor.chain().focus().setImage({ src: data.url }).run();
+          }
+          toast("Đã chèn ảnh xuống dưới đoạn văn thành công!", "success");
         }
       } catch (err) {
         console.error("Upload failed:", err);
       }
     };
     input.click();
-  }, [editor]);
+  }, [editor, onChange, toast]);
 
   const addLink = useCallback(() => {
     const url = prompt("Link URL:");
@@ -459,9 +469,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
                         {tableHeaders.map((h, i) => (
                           <th
                             key={i}
-                            className={`p-3 font-bold text-gray-900 border-r last:border-r-0 border-gray-300 text-center ${
-                              i === 0 ? "w-[18%]" : ""
-                            }`}
+                            className={`p-3 font-bold text-gray-900 border-r last:border-r-0 border-gray-300 text-center ${i === 0 ? "w-[18%]" : ""
+                              }`}
                           >
                             {h || `Cột ${i + 1}`}
                           </th>
@@ -474,9 +483,8 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
                           {row.map((cell, ci) => (
                             <td
                               key={ci}
-                              className={`p-3 text-gray-700 leading-relaxed border-r last:border-r-0 border-gray-300 ${
-                                ci === 0 ? "font-semibold text-center text-gray-900 bg-gray-50/50" : ""
-                              }`}
+                              className={`p-3 text-gray-700 leading-relaxed border-r last:border-r-0 border-gray-300 ${ci === 0 ? "font-semibold text-center text-gray-900 bg-gray-50/50" : ""
+                                }`}
                             >
                               {cell || <span className="text-gray-300 italic">(Trống)</span>}
                             </td>

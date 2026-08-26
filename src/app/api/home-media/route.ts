@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const data = await prisma.homeMedia.findMany({
-    orderBy: { order: "asc" },
+    orderBy: [
+      { order: "asc" },
+      { createdAt: "asc" },
+    ],
   });
   return NextResponse.json({ data });
 }

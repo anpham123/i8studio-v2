@@ -15,9 +15,8 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
         <div
           className={
             hasImage
-              ? `grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center ${
-                  data?.reverse ? "lg:[&>*:first-child]:order-2" : ""
-                }`
+              ? `grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16 items-center ${data?.reverse ? "lg:[&>*:first-child]:order-2" : ""
+              }`
               : ""
           }
         >

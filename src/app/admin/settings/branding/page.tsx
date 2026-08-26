@@ -12,6 +12,7 @@ interface BrandingSettings {
   footerLogoImage: string;
   logoFooterHeight: string;
   faviconImage: string;
+  aboutHeroImage: string;
   aboutImageTeam: string;
   aboutImageOffice: string;
   aboutImageQuality: string;
@@ -45,6 +46,7 @@ export default function BrandingSettingsPage() {
     footerLogoImage: "",
     logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
     faviconImage: "",
+    aboutHeroImage: "",
     aboutImageTeam: "",
     aboutImageOffice: "",
     aboutImageQuality: "",
@@ -67,6 +69,7 @@ export default function BrandingSettingsPage() {
       footerLogoImage: m.footerLogoImage || "",
       logoFooterHeight: m.logoFooterHeight || String(DEFAULT_FOOTER_HEIGHT),
       faviconImage: m.faviconImage || "",
+      aboutHeroImage: m.aboutHeroImage || "",
       aboutImageTeam: m.aboutImageTeam || "",
       aboutImageOffice: m.aboutImageOffice || "",
       aboutImageQuality: m.aboutImageQuality || "",
@@ -97,6 +100,13 @@ export default function BrandingSettingsPage() {
     setValues((v) => ({ ...v, faviconImage: url }));
     const ok = await saveToAPI({ faviconImage: url });
     if (ok) toast(url ? "Favicon đã lưu" : "Đã xoá favicon (sẽ dùng logo)", "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
+
+  const handleAboutHeroImageChange = useCallback(async (url: string) => {
+    setValues((v) => ({ ...v, aboutHeroImage: url }));
+    const ok = await saveToAPI({ aboutHeroImage: url });
+    if (ok) toast(url ? "Đã lưu ảnh nền Hero About Us" : "Đã xoá ảnh nền Hero", "success");
     else toast("Không thể lưu — vui lòng thử lại", "error");
   }, [toast]);
 
@@ -168,6 +178,7 @@ export default function BrandingSettingsPage() {
       footerLogoImage: "",
       logoFooterHeight: String(DEFAULT_FOOTER_HEIGHT),
       faviconImage: "",
+      aboutHeroImage: "",
       aboutImageTeam: "",
       aboutImageOffice: "",
       aboutImageQuality: "",
@@ -502,9 +513,13 @@ export default function BrandingSettingsPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Our Team (Ảnh chính)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Hero Section (Ảnh nền đầu trang)</label>
+              <ImageUpload value={values.aboutHeroImage} onChange={handleAboutHeroImageChange} label="Tải lên ảnh Hero" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Our Team (Mục Đội ngũ)</label>
               <ImageUpload value={values.aboutImageTeam} onChange={handleAboutImageTeamChange} label="Tải lên ảnh Team" />
             </div>
             <div>
@@ -546,6 +561,7 @@ export default function BrandingSettingsPage() {
             <div><span className="text-gray-400">logoHeight:</span> {values.logoHeight}</div>
             <div><span className="text-gray-400">footerLogoImage:</span> {values.footerLogoImage || "(trống — dùng logoImage)"}</div>
             <div><span className="text-gray-400">logoFooterHeight:</span> {values.logoFooterHeight}</div>
+            <div><span className="text-gray-400">aboutHeroImage:</span> {values.aboutHeroImage || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageTeam:</span> {values.aboutImageTeam || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageOffice:</span> {values.aboutImageOffice || "(trống)"}</div>
             <div><span className="text-gray-400">aboutImageQuality:</span> {values.aboutImageQuality || "(trống)"}</div>

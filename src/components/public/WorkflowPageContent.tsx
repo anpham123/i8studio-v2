@@ -2,9 +2,51 @@
 
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
+const easeCurve = [0.16, 1, 0.3, 1] as const;
+
+/* ------------------------------------------------------------------ */
+/*  Diagonal Wipe Reveal Animation Variants                           */
+/* ------------------------------------------------------------------ */
+const diagonalCurtainVariants: Variants = {
+  hidden: {
+    clipPath: "polygon(0 0, 160% 0, 100% 100%, -40% 100%)",
+  },
+  visible: {
+    clipPath: "polygon(160% 0, 160% 0, 160% 100%, 160% 100%)",
+    transition: {
+      duration: 2.4,
+      ease: easeCurve,
+    },
+  },
+};
+
+const diagonalTextCurtainVariants: Variants = {
+  hidden: {
+    clipPath: "polygon(0 0, 160% 0, 100% 100%, -40% 100%)",
+  },
+  visible: {
+    clipPath: "polygon(160% 0, 160% 0, 160% 100%, 160% 100%)",
+    transition: {
+      duration: 2.4,
+      delay: 0.15,
+      ease: easeCurve,
+    },
+  },
+};
+
+const imageInnerVariants: Variants = {
+  hidden: { scale: 1.18, opacity: 0.7 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      duration: 2.8,
+      ease: easeCurve,
+    },
+  },
+};
 
 interface WorkflowStep {
   stepNumber: number;
@@ -49,7 +91,7 @@ const FALLBACK_STEPS: WorkflowStep[] = [
     stepNumber: 4,
     titleJa: "レンダリング",
     titleEn: "Rendering",
-    descJa: "V-Ray / Corona等のレンダリングエンジンで高解像度出力。ノイズ除去、カラーグレーディング、レタッチを経て、フォトリアルな最終画像を納品します。",
+    descJa: "V-Ray / Corona等のレンダリングエンジンで高解像度出力。ノイズ除去、カラーグレーディング、レタッチを経て、フォトリアルな final 画像を納品します。",
     descEn: "High-resolution output via V-Ray / Corona rendering engines. Deliver photorealistic final images through denoising, color grading, and retouching.",
     image: "",
     tags: "V-Ray,Corona,Denoising,Post-production",
@@ -64,35 +106,42 @@ export default function WorkflowPageContent({ steps }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
 
-  // Use DB steps if available, otherwise fallback
   const displaySteps = steps && steps.length > 0 ? steps : FALLBACK_STEPS;
 
   return (
     <div className="min-h-screen bg-white">
       {/* ── Hero ────────────────────────── */}
-      <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center">
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
-            {isJa ? "ワークフロー" : "WORKFLOW"}
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl font-light text-[#111] mb-6"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+      <section className="bg-[#fafaf8] section-noise border-b border-gray-100 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center relative">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.2 }}
+            className="relative"
           >
-            {isJa ? "プロフェッショナルな制作工程" : "Professional Production Workflow"}
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            {isJa
-              ? "お客様のビジョンを最高品質のビジュアルへと変換する、プロフェッショナルなステップ。"
-              : "Professional steps to transform your vision into the highest quality visuals."}
-          </motion.p>
+            <motion.div
+              variants={diagonalCurtainVariants}
+              className="absolute -inset-4 z-10 bg-[#fafaf8] pointer-events-none"
+            />
+            <p className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
+              {isJa ? "ワークフロー" : "WORKFLOW"}
+            </p>
+            <h1
+              className="text-3xl md:text-5xl font-light text-[#111] mb-6"
+              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            >
+              {isJa ? "プロフェッショナルな制作工程" : "Professional Production Workflow"}
+            </h1>
+            <p className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+              {isJa
+                ? "お客様のビジョンを最高品質のビジュアルへと変換する、プロフェッショナルなステップ。"
+                : "Professional steps to transform your vision into the highest quality visuals."}
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── Steps (alternating) ───────── */}
+      {/* ── Steps (Diagonal Wipe Reveal on WHOLE SECTION: Image + Text) ───────── */}
       <section className="max-w-7xl mx-auto px-6 py-20 md:py-28 space-y-24 md:space-y-32">
         {displaySteps.map((step, i) => {
           const reverse = i % 2 === 1;
@@ -106,57 +155,81 @@ export default function WorkflowPageContent({ steps }: Props) {
           return (
             <motion.div
               key={num + "-" + i}
-              variants={fadeUp}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} gap-8 md:gap-12 lg:gap-16 items-center`}
+              viewport={{ once: false, amount: 0.2 }}
+              className={`flex flex-col ${
+                reverse ? "md:flex-row-reverse" : "md:flex-row"
+              } gap-8 md:gap-12 lg:gap-16 items-center`}
             >
-              {/* Image */}
-              <div className="w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0">
-                {step.image ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={step.image}
-                    alt={title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const t = e.currentTarget;
-                      t.style.display = "none";
-                      const p = t.parentElement;
-                      if (p) {
-                        p.classList.add("flex", "items-center", "justify-center");
-                        const s = document.createElement("span");
-                        s.className = "text-gray-400 text-sm font-medium";
-                        s.textContent = title;
-                        p.appendChild(s);
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-gray-400 text-sm font-medium">{title}</span>
-                  </div>
-                )}
+              {/* Image with Diagonal Wipe Reveal Shutter */}
+              <div className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm">
+                {/* Diagonal Wipe Shutter Curtain */}
+                <motion.div
+                  variants={diagonalCurtainVariants}
+                  className="absolute inset-0 z-10 bg-white pointer-events-none"
+                />
+
+                {/* Inner Image with slow zoom out */}
+                <motion.div
+                  variants={imageInnerVariants}
+                  className="w-full h-full"
+                >
+                  {step.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={step.image}
+                      alt={title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const t = e.currentTarget;
+                        t.style.display = "none";
+                        const p = t.parentElement;
+                        if (p) {
+                          p.classList.add("flex", "items-center", "justify-center");
+                          const s = document.createElement("span");
+                          s.className = "text-gray-400 text-sm font-medium";
+                          s.textContent = title;
+                          p.appendChild(s);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#f4f2ee]">
+                      <span className="text-gray-400 text-sm font-medium">{title}</span>
+                    </div>
+                  )}
+                </motion.div>
               </div>
 
-              {/* Text */}
-              <div className="w-full md:w-[58%] lg:w-[60%] flex-1 min-w-0">
+              {/* Text Block with matching Diagonal Wipe Reveal Shutter */}
+              <div className="relative w-full md:w-[58%] lg:w-[60%] flex-1 min-w-0 overflow-hidden">
+                {/* Diagonal Wipe Shutter Curtain on Text */}
+                <motion.div
+                  variants={diagonalTextCurtainVariants}
+                  className="absolute inset-0 z-10 bg-white pointer-events-none"
+                />
+
                 <span className="text-5xl md:text-7xl font-bold text-[#111] block mb-2 font-roboto tracking-tight">
                   {num}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-semibold md:font-bold text-[#111] mb-4" style={{ fontFamily: isJa ? "var(--font-noto-serif), serif" : "var(--font-cormorant), var(--font-noto-serif), serif" }}>
+                <h2
+                  className="text-2xl md:text-3xl font-semibold md:font-bold text-[#111] mb-4"
+                  style={{
+                    fontFamily: isJa
+                      ? "var(--font-noto-serif), serif"
+                      : "var(--font-cormorant), var(--font-noto-serif), serif",
+                  }}
+                >
                   {title}
                 </h2>
                 {(() => {
                   const rawDesc = desc || "";
-                  // Split by newlines first
                   let items = rawDesc
                     .split(/\r?\n/)
                     .map((s) => s.trim())
                     .filter(Boolean);
 
-                  // If it's a single block without newlines, split by sentence endings for Japanese (。) or English (. ) if long
                   if (items.length <= 1 && rawDesc.length > 60) {
                     if (isJa && rawDesc.includes("。")) {
                       items = rawDesc
@@ -181,8 +254,13 @@ export default function WorkflowPageContent({ steps }: Props) {
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2.5 text-gray-600 text-[15px] sm:text-base leading-relaxed">
-                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
+                            <li
+                              key={idx}
+                              className="flex items-start gap-2.5 text-gray-600 text-[15px] sm:text-base leading-relaxed"
+                            >
+                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">
+                                •
+                              </span>
                               <span className="flex-1 min-w-0">{cleanItem}</span>
                             </li>
                           );
@@ -196,7 +274,10 @@ export default function WorkflowPageContent({ steps }: Props) {
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
-                      <span key={tag} className="text-[11px] font-medium uppercase tracking-wider text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                      <span
+                        key={tag}
+                        className="text-[11px] font-medium uppercase tracking-wider text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -209,15 +290,27 @@ export default function WorkflowPageContent({ steps }: Props) {
       </section>
 
       {/* ── CTA ──────────────────────── */}
-      <section className="bg-[#fafaf8] section-noise">
-        <div className="max-w-4xl mx-auto px-6 py-20 text-center">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-            <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-8" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+      <section className="bg-[#fafaf8] section-noise overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 py-20 text-center relative">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.2 }}
+            className="relative"
+          >
+            <motion.div
+              variants={diagonalCurtainVariants}
+              className="absolute -inset-4 z-10 bg-[#fafaf8] pointer-events-none"
+            />
+            <h2
+              className="text-2xl md:text-3xl font-light text-[#111] mb-8"
+              style={{ fontFamily: "var(--font-noto-serif), serif" }}
+            >
               {isJa ? "まずはお気軽にご相談ください" : "Feel free to contact us"}
             </h2>
             <Link
               href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-10 py-4 bg-[#111] text-white text-sm font-semibold rounded-full hover:bg-[#333] transition-colors"
+              className="inline-flex items-center gap-2 px-10 py-4 bg-[#111] text-white text-sm font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
             >
               {isJa ? "お問い合わせ" : "Contact Us"} →
             </Link>
