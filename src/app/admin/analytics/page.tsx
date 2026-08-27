@@ -418,24 +418,85 @@ export default function AnalyticsPage() {
 
   return (
     <AdminShell title="Thống kê truy cập">
-      {/* Month selector */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-1 py-1 shadow-sm">
-          <button onClick={goBack}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 transition-colors">
+      {/* Month / Year selector */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Prev button */}
+          <button
+            onClick={goBack}
+            title="Tháng trước"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 border border-gray-200 transition-colors"
+          >
             <ChevronLeft size={18} />
           </button>
-          <span className="px-3 text-sm font-semibold text-gray-800 min-w-[90px] text-center">
-            {monthLabel(year, month)}
-          </span>
-          <button onClick={goForward} disabled={isCurrentMonth}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+
+          {/* Month Dropdown */}
+          <div className="relative">
+            <select
+              value={month}
+              onChange={(e) => setMonth(Number(e.target.value))}
+              className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i}>
+                  Tháng {i + 1 < 10 ? `0${i + 1}` : i + 1}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Year Dropdown */}
+          <div className="relative">
+            <select
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer"
+            >
+              {Array.from({ length: now.getFullYear() - 2020 + 3 }, (_, i) => 2020 + i).map((y) => (
+                <option key={y} value={y}>
+                  Năm {y}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={goForward}
+            disabled={isCurrentMonth}
+            title="Tháng sau"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 border border-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
             <ChevronRight size={18} />
           </button>
+
+          {/* Quick jump to current month */}
+          {!isCurrentMonth && (
+            <button
+              onClick={() => {
+                setYear(now.getFullYear());
+                setMonth(now.getMonth());
+              }}
+              className="px-3 py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ml-1"
+            >
+              Về tháng hiện tại
+            </button>
+          )}
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-          <BarChart3 size={14} />
-          <span>Biểu đồ thống kê truy cập & nguồn khách hàng</span>
+
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <BarChart3 size={15} className="text-blue-500" />
+          <span>Đang xem báo cáo: <strong className="text-gray-800">Tháng {month + 1 < 10 ? `0${month + 1}` : month + 1}/{year}</strong></span>
         </div>
       </div>
 
