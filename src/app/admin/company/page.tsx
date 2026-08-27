@@ -32,6 +32,7 @@ export default function CompanyContentPage() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
 
   // Workflow
+  const [workflowHeroImage, setWorkflowHeroImage] = useState("/uploads/workflow-hero.png");
   const [workflow, setWorkflow] = useState<WorkflowStep[]>([]);
 
   const fetchAll = useCallback(async () => {
@@ -44,7 +45,14 @@ export default function CompanyContentPage() {
         const content = JSON.parse(sec.contentJson || "{}");
         if (sec.section === "overview") setOverview((o) => ({ ...o, ...content }));
         if (sec.section === "milestones") setMilestones(Array.isArray(content) ? content : []);
-        if (sec.section === "workflow") setWorkflow(Array.isArray(content) ? content : []);
+        if (sec.section === "workflow") {
+          if (Array.isArray(content)) {
+            setWorkflow(content);
+          } else if (content && typeof content === "object") {
+            setWorkflow(Array.isArray(content.steps) ? content.steps : []);
+            if (content.heroImage) setWorkflowHeroImage(content.heroImage);
+          }
+        }
       } catch { /* ignore */ }
     }
     setLoading(false);
@@ -61,13 +69,18 @@ export default function CompanyContentPage() {
     });
     const json = await res.json();
     setSaving(false);
-    if (json.data) toast("Đã lưu", "success"); else toast("Lỗi", "error");
+    if (json.data) toast("Đã lưu thành công!", "success"); else toast("Lỗi khi lưu dữ liệu", "error");
   };
 
   const handleSave = () => {
     if (activeTab === "overview") saveSection("overview", overview);
     if (activeTab === "milestones") saveSection("milestones", milestones);
-    if (activeTab === "workflow") saveSection("workflow", workflow);
+    if (activeTab === "workflow") {
+      saveSection("workflow", {
+        heroImage: workflowHeroImage,
+        steps: workflow,
+      });
+    }
   };
 
   const inputCls = "w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400";
@@ -180,6 +193,32 @@ export default function CompanyContentPage() {
         {/* ── Workflow Tab ── */}
         {activeTab === "workflow" && (
           <div className="space-y-5">
+            {/* Hero Section Banner Image */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
+                    🖼️ Ảnh Banner Đầu Trang (Hero Section)
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Tải lên ảnh nền cho phần Hero Section trang Workflow (Nền toàn màn hình hiển thị chữ WORK / FLOW chia 2 nửa ngày - đêm)
+                  </p>
+                </div>
+              </div>
+              <ImageUpload
+                label="Ảnh Hero Section Workflow"
+                value={workflowHeroImage}
+                onChange={(url) => {
+                  setWorkflowHeroImage(url);
+                  saveSection("workflow", {
+                    heroImage: url,
+                    steps: workflow,
+                  });
+                }}
+              />
+            </div>
+
+            {/* Workflow Steps */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Workflow Steps ({workflow.length})</h3>

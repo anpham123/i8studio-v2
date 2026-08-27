@@ -14,7 +14,7 @@ const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, tra
 function AnimatedCounter({ value, delay = 0 }: { value: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.25 });
-  const [count, setCount] = useState(1);
+  const [displayValue, setDisplayValue] = useState<string>("0");
   const [isCounting, setIsCounting] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
@@ -24,37 +24,59 @@ function AnimatedCounter({ value, delay = 0 }: { value: string; delay?: number }
   const suffix = value.replace(/[0-9,\s]/g, ""); // e.g. "+"
 
   useEffect(() => {
-    if (!isInView || targetNum <= 1) {
-      if (targetNum <= 1) {
-        setCount(targetNum);
-        setIsFinished(true);
-      }
+    if (!isInView) return;
+    if (targetNum <= 0) {
+      setDisplayValue("0");
+      setIsFinished(true);
       return;
     }
 
-    let start = 1;
-    const duration = 2000; // 2.0s duration
     let animationFrameId: number;
+    let stepTimerId: NodeJS.Timeout;
 
     const timeoutId = setTimeout(() => {
       setIsCounting(true);
+
+      // Solution 1: Small numbers (like 5) count in steady, rhythmic steps with no waiting
+      if (targetNum <= 10) {
+        let currentStep = 1;
+        setDisplayValue("1");
+
+        const stepInterval = 85; // 85ms per step (e.g. 1 -> 2 -> 3 -> 4 -> 5 in ~340ms)
+        const step = () => {
+          if (currentStep >= targetNum) {
+            setDisplayValue(targetNum.toLocaleString());
+            setIsCounting(false);
+            setIsFinished(true);
+            return;
+          }
+          currentStep += 1;
+          setDisplayValue(currentStep.toLocaleString());
+          stepTimerId = setTimeout(step, stepInterval);
+        };
+
+        stepTimerId = setTimeout(step, stepInterval);
+        return;
+      }
+
+      // Large numbers (80, 150, 2000) count smoothly with snappy ease-out in ~850ms
+      const duration = 850;
       const startTime = performance.now();
 
       const updateCounter = (currentTime: number) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        // Ease out cubic
-        const easeProgress = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(start + (targetNum - start) * easeProgress);
+        // Exponential ease out for responsive, clean landing
+        const easeProgress = 1 - Math.pow(1 - progress, 3.5);
+        const current = Math.floor(1 + (targetNum - 1) * easeProgress);
 
-        setCount(current);
-
-        if (progress < 1) {
-          animationFrameId = requestAnimationFrame(updateCounter);
-        } else {
-          setCount(targetNum);
+        if (progress >= 1) {
+          setDisplayValue(targetNum.toLocaleString());
           setIsCounting(false);
           setIsFinished(true);
+        } else {
+          setDisplayValue(current.toLocaleString());
+          animationFrameId = requestAnimationFrame(updateCounter);
         }
       };
 
@@ -63,6 +85,7 @@ function AnimatedCounter({ value, delay = 0 }: { value: string; delay?: number }
 
     return () => {
       clearTimeout(timeoutId);
+      if (stepTimerId) clearTimeout(stepTimerId);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [isInView, targetNum, delay]);
@@ -72,20 +95,20 @@ function AnimatedCounter({ value, delay = 0 }: { value: string; delay?: number }
       ref={ref}
       animate={
         isCounting
-          ? { y: [0, -10, 0] }
+          ? { y: [0, -3, 0] }
           : isFinished
-            ? { y: [0, -4, 0], scale: [1, 1.15, 0.98, 1.0] }
+            ? { scale: [1, 1.08, 1] }
             : { y: 0 }
       }
       transition={
         isCounting
-          ? { repeat: Infinity, duration: 0.24, ease: "easeInOut" }
-          : { duration: 0.45, ease: "easeOut" }
+          ? { duration: 0.2, ease: "easeInOut", repeat: 1 } // Nhảy ít vòng, dứt khoát
+          : { duration: 0.35, ease: "easeOut" }
       }
       className="inline-flex items-center justify-center font-roboto tracking-tight text-[#111]"
     >
       <span className="tabular-nums inline-block">
-        {count.toLocaleString()}
+        {displayValue}
       </span>
       {suffix && (
         <span className="inline-block ml-0.5 text-[#111]">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion, type Variants } from "framer-motion";
+import { Maximize2, RotateCw } from "lucide-react";
 
 const easeCurve = [0.16, 1, 0.3, 1] as const;
 
@@ -100,9 +101,10 @@ const FALLBACK_STEPS: WorkflowStep[] = [
 
 interface Props {
   steps?: WorkflowStep[];
+  heroImage?: string;
 }
 
-export default function WorkflowPageContent({ steps }: Props) {
+export default function WorkflowPageContent({ steps, heroImage }: Props) {
   const locale = useLocale();
   const isJa = locale === "ja";
 
@@ -110,34 +112,61 @@ export default function WorkflowPageContent({ steps }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero ────────────────────────── */}
-      <section className="bg-[#fafaf8] section-noise border-b border-gray-100 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 py-24 md:py-32 text-center relative">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, amount: 0.2 }}
-            className="relative"
-          >
-            <motion.div
-              variants={diagonalCurtainVariants}
-              className="absolute -inset-4 z-10 bg-[#fafaf8] pointer-events-none"
-            />
-            <p className="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-5">
-              {isJa ? "ワークフロー" : "WORKFLOW"}
-            </p>
-            <h1
-              className="text-3xl md:text-5xl font-light text-[#111] mb-6"
-              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-            >
-              {isJa ? "プロフェッショナルな制作工程" : "Professional Production Workflow"}
-            </h1>
-            <p className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              {isJa
-                ? "お客様のビジョンを最高品質のビジュアルへと変換する、プロフェッショナルなステップ。"
-                : "Professional steps to transform your vision into the highest quality visuals."}
-            </p>
-          </motion.div>
+      {/* ── Hero: Full-Width Day/Night Split Background Banner ────────── */}
+      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex bg-gray-900">
+
+        {/* Full-width Background Image (Clean, Sharp & Clear - No dark overlay/blur) */}
+        <div className="absolute inset-0 w-full h-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={heroImage || "/uploads/workflow-hero.png"}
+            alt="Architectural Visualization Workflow — i8 STUDIO"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+
+        {/* 50 / 50 Interactive Overlay Grid */}
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 items-stretch min-h-full relative z-10 pointer-events-none">
+
+          {/* Left Column (50% Bright / Daytime Sky side) */}
+          <div className="pl-4 sm:pl-8 lg:pl-10 pr-0 pt-2 sm:pt-4 pb-6 sm:pb-8 lg:pb-10 flex flex-col justify-between items-start relative">
+            {/* "WORK" (Oversized Editorial Display Typography - Aligned to Center Divider) */}
+            <div className="w-full flex justify-end pr-1 sm:pr-2 lg:pr-3 pt-2 sm:pt-3 md:pt-4 lg:pt-5">
+              <h1
+                style={{ fontSize: "clamp(3.75rem, 11vw, 13.5rem)" }}
+                className="font-black tracking-[-0.055em] uppercase leading-[0.82] select-none font-sans text-[#181c22]/90 drop-shadow-[0_2px_20px_rgba(255,255,255,0.75)] text-right"
+              >
+                WORK
+              </h1>
+            </div>
+
+            {/* Bottom Spacer */}
+            <div className="h-4" />
+          </div>
+
+          {/* Right Column (50% Dark / Nighttime Sky side) */}
+          <div className="flex flex-col justify-between pr-4 sm:pr-8 lg:pr-10 pl-0 pt-2 sm:pt-4 pb-6 sm:pb-8 lg:pb-10 relative">
+            {/* "FLOW" (Oversized Editorial Display Typography - Aligned from Center Divider) */}
+            <div className="w-full flex justify-start pl-1 sm:pl-2 lg:pl-3 pt-2 sm:pt-3 md:pt-4 lg:pt-5">
+              <div
+                style={{ fontSize: "clamp(3.75rem, 11vw, 13.5rem)" }}
+                className="font-black tracking-[-0.055em] uppercase leading-[0.82] select-none font-sans text-white/95 drop-shadow-[0_6px_36px_rgba(0,0,0,0.95)] text-left"
+              >
+                FLOW
+              </div>
+            </div>
+
+            {/* Floating Glass Action Badges at Bottom-Right */}
+            <div className="w-full flex justify-end gap-2.5 pointer-events-auto">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl">
+                <Maximize2 size={17} />
+              </div>
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl">
+                <RotateCw size={16} />
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -158,9 +187,8 @@ export default function WorkflowPageContent({ steps }: Props) {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: false, amount: 0.2 }}
-              className={`flex flex-col ${
-                reverse ? "md:flex-row-reverse" : "md:flex-row"
-              } gap-8 md:gap-12 lg:gap-16 items-center`}
+              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"
+                } gap-8 md:gap-12 lg:gap-16 items-center`}
             >
               {/* Image with Diagonal Wipe Reveal Shutter */}
               <div className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm">
@@ -290,31 +318,21 @@ export default function WorkflowPageContent({ steps }: Props) {
       </section>
 
       {/* ── CTA ──────────────────────── */}
-      <section className="bg-[#fafaf8] section-noise overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 py-20 text-center relative">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: false, amount: 0.2 }}
-            className="relative"
+      <section className="bg-[#fafaf8] section-noise border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+          <h2
+            className="text-2xl md:text-3xl font-light text-[#111] mb-8"
+            style={{ fontFamily: "var(--font-noto-serif), serif" }}
           >
-            <motion.div
-              variants={diagonalCurtainVariants}
-              className="absolute -inset-4 z-10 bg-[#fafaf8] pointer-events-none"
-            />
-            <h2
-              className="text-2xl md:text-3xl font-light text-[#111] mb-8"
-              style={{ fontFamily: "var(--font-noto-serif), serif" }}
-            >
-              {isJa ? "まずはお気軽にご相談ください" : "Feel free to contact us"}
-            </h2>
-            <Link
-              href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-10 py-4 bg-[#111] text-white text-sm font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
-            >
-              {isJa ? "お問い合わせ" : "Contact Us"} →
-            </Link>
-          </motion.div>
+            {isJa ? "まずはお気軽にご相談ください" : "Feel free to contact us"}
+          </h2>
+          <Link
+            href={`/${locale}/contact`}
+            className="inline-flex items-center gap-2 px-10 py-4 bg-[#111] text-white text-sm font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
+          >
+            <span>{isJa ? "お問い合わせ" : "Contact Us"}</span>
+            <span>→</span>
+          </Link>
         </div>
       </section>
     </div>

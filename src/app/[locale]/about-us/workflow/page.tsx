@@ -34,12 +34,16 @@ export default async function WorkflowPage() {
     image: string;
     tags: string;
   }> = [];
+  let heroImage = "";
 
   if (row?.contentJson) {
     try {
       const parsed = JSON.parse(row.contentJson);
       if (Array.isArray(parsed)) {
         steps = parsed;
+      } else if (parsed && typeof parsed === "object") {
+        steps = Array.isArray(parsed.steps) ? parsed.steps : [];
+        heroImage = parsed.heroImage || "";
       }
     } catch {
       // ignore parse errors
@@ -49,5 +53,5 @@ export default async function WorkflowPage() {
   // Sort by stepNumber
   steps.sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0));
 
-  return <WorkflowPageContent steps={steps} />;
+  return <WorkflowPageContent steps={steps} heroImage={heroImage || undefined} />;
 }

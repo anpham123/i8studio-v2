@@ -98,9 +98,35 @@ function GridTile({
   minHeight?: string;
   onClick?: () => void;
 }) {
-  const hasImage = image?.url;
-  const hasVideo = image?.videoUrl && isVideoFile(image.videoUrl);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const hasImage = Boolean(image?.url);
+  const hasVideo = Boolean(image?.videoUrl && isVideoFile(image.videoUrl));
   const isFullScreenHeroType = Boolean(minHeight);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (hasVideo && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsVideoPlaying(true))
+          .catch(() => {});
+      }
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setIsVideoPlaying(false);
+    if (hasVideo && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
 
   return (
     <div
@@ -115,37 +141,48 @@ function GridTile({
       {/* Card container: static for large full-screen images (like Hero), 3D hover lift for smaller cards */}
       <div
         onClick={onClick}
-        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${
+          isFullScreenHeroType
             ? "hover:opacity-95"
             : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
-          }`}
+        }`}
         style={{
           transformOrigin: "center center",
         }}
       >
-        {hasVideo ? (
-          <video
-            src={image!.videoUrl}
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster={image!.url || undefined}
-          />
-        ) : hasImage ? (
+        {/* Base Image Poster (always rendered if available) */}
+        {hasImage ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={image.url}
-            alt={image.alt || `Work ${index + 1}`}
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            src={image!.url}
+            alt={image!.alt || `Work ${index + 1}`}
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
             loading={index < 6 ? "eager" : "lazy"}
-            onError={(e) => { e.currentTarget.style.display = "none"; }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
           />
         ) : (
           <div
             className="absolute inset-0"
             style={{ backgroundColor: fallbackColor }}
+          />
+        )}
+
+        {/* Hover Video: Only plays when user hovers mouse over the card */}
+        {hasVideo && (
+          <video
+            ref={videoRef}
+            src={image!.videoUrl}
+            className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${
+              isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
+            }`}
+            muted
+            loop
+            playsInline
+            preload="metadata"
           />
         )}
       </div>
@@ -162,6 +199,9 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const scrollRowObserverRef = useRef<IntersectionObserver | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
+  const [heroHovered, setHeroHovered] = useState(false);
+  const [heroVideoPlaying, setHeroVideoPlaying] = useState(false);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   // Parallax: text moves slightly faster than grid on scroll
   const { scrollYProgress } = useScroll({
@@ -309,27 +349,28 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
               });
             }
           }}
+          onMouseEnter={() => {
+            setHeroHovered(true);
+            if (heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && heroVideoRef.current) {
+              heroVideoRef.current.currentTime = 0;
+              const playPromise = heroVideoRef.current.play();
+              if (playPromise !== undefined) {
+                playPromise.then(() => setHeroVideoPlaying(true)).catch(() => {});
+              }
+            }
+          }}
+          onMouseLeave={() => {
+            setHeroHovered(false);
+            setHeroVideoPlaying(false);
+            if (heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && heroVideoRef.current) {
+              heroVideoRef.current.pause();
+              heroVideoRef.current.currentTime = 0;
+            }
+          }}
           className="relative w-full h-full rounded-2xl overflow-hidden cursor-pointer group"
         >
-          {/* Hero image */}
-          {heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) ? (
-            <motion.div
-              className="absolute inset-0"
-              initial={{ scale: 1.05, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-            >
-              <video
-                src={heroImage.videoUrl}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                autoPlay
-                muted
-                loop
-                playsInline
-                poster={heroImage.url || undefined}
-              />
-            </motion.div>
-          ) : heroImage?.url ? (
+          {/* Base Hero Image */}
+          {heroImage?.url ? (
             <motion.img
               src={heroImage.url}
               alt={heroImage.alt}
@@ -340,6 +381,21 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             />
           ) : (
             <div className="absolute inset-0 bg-[#c8c2b8]" />
+          )}
+
+          {/* Hover Video Preview for Hero */}
+          {heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && (
+            <video
+              ref={heroVideoRef}
+              src={heroImage.videoUrl}
+              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none ${
+                heroHovered && heroVideoPlaying ? "opacity-100" : "opacity-0"
+              }`}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
           )}
 
           {/* Gradient overlay for text readability */}

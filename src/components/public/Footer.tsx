@@ -102,7 +102,7 @@ export default function Footer({ settings }: FooterProps) {
               </Link>
             </div>
 
-            <p className="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal">
+            <p className="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal whitespace-pre-line">
               {t("tagline")}
             </p>
 

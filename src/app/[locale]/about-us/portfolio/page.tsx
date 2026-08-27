@@ -29,7 +29,7 @@ export default async function AboutPortfolioPage({
   const t = await getTranslations({ locale: params.locale, namespace: "portfolio" });
   const isJa = params.locale === "ja";
 
-  const [portfolios, flipbooks] = await Promise.all([
+  const [portfolios, flipbooks, companyPortfolioRow] = await Promise.all([
     prisma.portfolio.findMany({
       where: { isPublished: true },
       orderBy: { order: "asc" },
@@ -38,7 +38,18 @@ export default async function AboutPortfolioPage({
       where: { active: true },
       orderBy: { order: "asc" },
     }),
+    prisma.companyContent.findUnique({
+      where: { section: "portfolio" },
+    }),
   ]);
+
+  let heroImage = "/uploads/1781662116949-House_in_forest__Summer_.webp";
+  if (companyPortfolioRow?.contentJson) {
+    try {
+      const parsed = JSON.parse(companyPortfolioRow.contentJson);
+      if (parsed?.heroImage) heroImage = parsed.heroImage;
+    } catch { /* ignore */ }
+  }
 
   const hasContent = portfolios.length > 0 || flipbooks.length > 0;
 
@@ -115,7 +126,7 @@ export default async function AboutPortfolioPage({
           <div className="relative w-full h-[420px] sm:h-[520px] lg:h-auto min-h-full overflow-hidden bg-gray-900 group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/uploads/1781662116949-House_in_forest__Summer_.webp"
+              src={heroImage}
               alt="Architectural Visualization Portfolio — i8 STUDIO"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
             />
