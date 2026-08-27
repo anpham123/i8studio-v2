@@ -471,10 +471,11 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
 
   // Social Links
   const socialLinks = {
-    facebook: settings.socialFacebook || "https://facebook.com/i8studio",
-    instagram: settings.socialInstagram || "https://instagram.com/i8studio",
-    linkedin: settings.socialLinkedin || "https://linkedin.com/company/i8studio",
-    youtube: settings.socialYoutube || "https://youtube.com/@i8studio",
+    facebook: settings.socialFacebook || "https://www.facebook.com/i8studio.vn/",
+    instagram: settings.socialInstagram || "https://www.instagram.com/i8studio_cg/",
+    linkedin: settings.socialLinkedin || "https://www.linkedin.com/in/i8-studio/",
+    youtube: settings.socialYoutube || "https://www.youtube.com/@i8studio",
+    twitter: settings.socialTwitter || "https://x.com/i8studio_3d",
   };
 
   const showAllLabel = locale === "ja" ? "すべて表示" : locale === "vi" ? "Tất cả" : "Show all";
