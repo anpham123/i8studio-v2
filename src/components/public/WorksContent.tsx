@@ -358,23 +358,20 @@ function WorkCardItem({
       onMouseLeave={() => setIsHovered(false)}
       className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
     >
-      <div className="work-card-media relative overflow-hidden w-full bg-gray-100 rounded-[3px] will-change-transform transition-all">
+      <div className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1]/80 rounded-[3px] will-change-transform transition-all">
         {/* Static thumbnail image with cinematic slow zoom / pan motion */}
         {work.image ? (
           <img
             src={work.image}
             alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
-            loading="lazy"
-            className="w-full h-auto block object-cover will-change-transform opacity-0"
+            loading={index < 9 ? "eager" : "lazy"}
+            fetchPriority={index < 9 ? "high" : "auto"}
+            className="w-full h-full block object-cover will-change-transform"
             style={{
               transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
               transition: isHovered
                 ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1)"
                 : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1)",
-            }}
-            onLoad={(e) => {
-              e.currentTarget.classList.remove("opacity-0");
-              e.currentTarget.classList.add("opacity-100");
             }}
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -382,7 +379,7 @@ function WorkCardItem({
           />
         ) : (
           <div
-            className="w-full aspect-[4/3] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             style={{ backgroundColor: work.bg }}
           />
         )}

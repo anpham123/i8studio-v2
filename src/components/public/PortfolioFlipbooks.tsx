@@ -46,7 +46,7 @@ export default function PortfolioFlipbooks({ flipbooks, isJa, hasPortfolios }: P
             <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
               {isJa ? "資料・ドキュメント" : "DOCUMENTS"}
             </p>
-            <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#111] tracking-wide" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "ポートフォリオ PDF" : "Portfolio PDF"}
             </h2>
             <p className="text-gray-500 text-sm mt-3 max-w-lg mx-auto">

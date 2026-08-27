@@ -83,43 +83,20 @@ export default async function AboutPortfolioPage({
             </div>
 
             {/* Center Typographic Statement & Narrative */}
-            <div className="my-auto py-8 sm:py-10 md:py-12 w-full space-y-6">
+            <div className="my-auto py-8 sm:py-10 md:py-12 w-full">
               <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#111] tracking-[0.22em] sm:tracking-[0.28em] uppercase select-none leading-[1.18] font-roboto">
                 <span className="block">P O R T -</span>
                 <span className="block mt-1 sm:mt-2">F O L I O</span>
               </h1>
-
-              {/* Architectural Divider */}
-              <div className="w-20 h-0.5 bg-[#b8935a]" />
-
-              {/* Rich Narrative Description */}
-              <div className="space-y-2.5 max-w-xl">
-                <p className="text-gray-800 text-sm sm:text-base md:text-lg font-normal leading-relaxed">
-                  {isJa
-                    ? "建築のアイデアを、鮮明でリアルなビジュアル体験へと具現化します。"
-                    : "Transforming architectural ideas into realistic visual experiences."}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500 font-normal leading-relaxed">
-                  {isJa ? (
-                    <>
-                      <span className="font-semibold text-gray-700">Explore our works in:</span> 建築3DCGパース | VR | アニメーション | Digital Visualization
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-semibold text-gray-700">Explore our works in:</span> Architectural CG | VR | Animation | Digital Visualization
-                    </>
-                  )}
-                </p>
-              </div>
             </div>
 
             {/* Bottom Credits & Action Link */}
             <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-6 pt-6 border-t border-gray-100">
               <div>
-                <p className="text-xs sm:text-sm text-gray-500 font-normal tracking-wide">
-                  By i8 STUDIO
+                <p className="text-sm sm:text-base text-gray-900 font-bold tracking-wide">
+                  i8 STUDIO
                 </p>
-                <p className="text-[11px] text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-600 font-medium mt-0.5">
                   {isJa ? "建築CGパース・VR・アニメーション制作スタジオ" : "Architectural 3DCG & VR Studio"}
                 </p>
               </div>
