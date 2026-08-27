@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, ChevronUp, ChevronDown, Loader2, Trash2, Pencil } from "lucide-react";
+import { Search, ChevronUp, ChevronDown, Loader2, Trash2, Pencil, Eye } from "lucide-react";
 import Pagination from "./Pagination";
 
 export interface Column<T> {
@@ -22,6 +22,9 @@ interface DataTableProps<T extends { id: string }> {
   searchable?: boolean;
   searchPlaceholder?: string;
   onEdit?: (row: T) => void;
+  onView?: (row: T) => void;
+  editTitle?: string;
+  editIcon?: "pencil" | "eye";
   onDelete?: (row: T) => void;
   onPageChange?: (page: number) => void;
   onSearch?: (q: string) => void;
@@ -32,7 +35,7 @@ interface DataTableProps<T extends { id: string }> {
 export default function DataTable<T extends { id: string }>({
   columns, data, total, page = 1, limit = 10, loading = false,
   searchable = true, searchPlaceholder = "Tìm kiếm...",
-  onEdit, onDelete, onPageChange, onSearch, filters, emptyText = "Chưa có dữ liệu",
+  onEdit, onView, editTitle, editIcon, onDelete, onPageChange, onSearch, filters, emptyText = "Chưa có dữ liệu",
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -161,16 +164,25 @@ export default function DataTable<T extends { id: string }>({
                         : String(getValue(row, String(col.key)) ?? "")}
                     </td>
                   ))}
-                  {(onEdit || onDelete) && (
+                  {(onEdit || onView || onDelete) && (
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {onEdit && (
+                        {onView && (
+                          <button
+                            onClick={() => onView(row)}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            title={editTitle || "Xem chi tiết"}
+                          >
+                            <Eye size={15} />
+                          </button>
+                        )}
+                        {onEdit && !onView && (
                           <button
                             onClick={() => onEdit(row)}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                            title="Chỉnh sửa"
+                            title={editTitle || (editIcon === "eye" ? "Xem chi tiết" : "Chỉnh sửa")}
                           >
-                            <Pencil size={14} />
+                            {editIcon === "eye" ? <Eye size={15} /> : <Pencil size={14} />}
                           </button>
                         )}
                         {onDelete && (

@@ -173,6 +173,17 @@
     "responseTime": "24時間以内にご返信します",
     "nda": "NDA対応可能",
     "selectService": "サービスを選択",
+    "howDidYouHear": "弊社をお知りになったきっかけ",
+    "howDidYouHearPlaceholder": "選択してください（任意）",
+    "hearChannels": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "google": "Google 検索 / Webサイト",
+      "referral": "ご紹介・お知り合い",
+      "other": "その他"
+    },
     "workingHours": "月〜金 9:00-18:00 JST",
     "followUs": "フォローする"
   },

@@ -9,9 +9,66 @@ import { useToast } from "@/components/admin/Toast";
 import { formatDate } from "@/lib/utils";
 import { CheckCheck } from "lucide-react";
 
-interface Contact { id: string; fullName: string; email: string; service: string; message: string; read: boolean; createdAt: string; }
+interface Contact {
+  id: string;
+  fullName: string;
+  email: string;
+  service: string;
+  hearAboutUs?: string;
+  referrer?: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
 
 type FilterTab = "all" | "unread" | "read";
+
+/* ------------------------------------------------------------------ */
+/*  Channel Badge Helper                                              */
+/* ------------------------------------------------------------------ */
+function ChannelBadge({ channel, referrer }: { channel?: string; referrer?: string }) {
+  if (!channel && !referrer) {
+    return <span className="text-xs text-gray-400">—</span>;
+  }
+
+  const ch = (channel || "").toLowerCase();
+  let color = "bg-gray-100 text-gray-600 border-gray-200";
+  let icon = "🌐";
+
+  if (ch.includes("facebook")) {
+    color = "bg-blue-50 text-blue-700 border-blue-200";
+    icon = "📘";
+  } else if (ch.includes("instagram")) {
+    color = "bg-pink-50 text-pink-700 border-pink-200";
+    icon = "📸";
+  } else if (ch.includes("linkedin")) {
+    color = "bg-sky-50 text-sky-700 border-sky-200";
+    icon = "💼";
+  } else if (ch.includes("youtube")) {
+    color = "bg-red-50 text-red-700 border-red-200";
+    icon = "▶️";
+  } else if (ch.includes("google") || ch.includes("search")) {
+    color = "bg-emerald-50 text-emerald-700 border-emerald-200";
+    icon = "🔍";
+  } else if (ch.includes("referral") || ch.includes("giới thiệu") || ch.includes("紹介")) {
+    color = "bg-amber-50 text-amber-700 border-amber-200";
+    icon = "🤝";
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border w-fit ${color}`}>
+        <span>{icon}</span>
+        <span>{channel || "Trực tiếp"}</span>
+      </span>
+      {referrer && referrer !== "Direct / Organic" && (
+        <span className="text-[10px] text-gray-400 truncate max-w-[140px]" title={referrer}>
+          ref: {referrer}
+        </span>
+      )}
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  Sliding pill tab bar                                                */
@@ -164,6 +221,10 @@ export default function ContactsPage() {
     { key: "email", label: "Email" },
     { key: "service", label: "Dịch vụ" },
     {
+      key: "hearAboutUs", label: "Kênh tiếp cận",
+      render: (v, row) => <ChannelBadge channel={row.hearAboutUs} referrer={row.referrer} />,
+    },
+    {
       key: "read", label: "Trạng thái",
       render: (v) => (
         <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
@@ -178,6 +239,13 @@ export default function ContactsPage() {
       render: (v) => <span className="text-xs text-gray-500">{formatDate(new Date(String(v)))}</span>,
     },
   ];
+
+  // Calculate channel attribution distribution
+  const channelCounts: Record<string, number> = {};
+  data.forEach((c) => {
+    const ch = c.hearAboutUs || "Direct / Trực tiếp";
+    channelCounts[ch] = (channelCounts[ch] || 0) + 1;
+  });
 
   return (
     <AdminShell
@@ -195,6 +263,57 @@ export default function ContactsPage() {
         ) : null
       }
     >
+      {/* Channel Attribution Summary Cards (Enlarged & Enhanced) */}
+      {data.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-7">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                <span>📊</span>
+                <span>Thống Kê Nguồn Khách Hàng (Channel Attribution)</span>
+              </h4>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Phân tích tỷ lệ khách hàng tiếp cận i8 STUDIO qua các kênh mạng xã hội & tìm kiếm
+              </p>
+            </div>
+            <div className="px-3.5 py-1.5 rounded-full bg-gray-900 text-white text-xs font-semibold shadow-sm">
+              Tổng số: {data.length} liên hệ
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+            {[
+              { name: "Facebook", icon: "📘", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("facebook")).length, bg: "bg-blue-50/70 border-blue-100 text-blue-900", badge: "bg-blue-100 text-blue-700" },
+              { name: "Instagram", icon: "📸", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("instagram")).length, bg: "bg-pink-50/70 border-pink-100 text-pink-900", badge: "bg-pink-100 text-pink-700" },
+              { name: "LinkedIn", icon: "💼", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("linkedin")).length, bg: "bg-sky-50/70 border-sky-100 text-sky-900", badge: "bg-sky-100 text-sky-700" },
+              { name: "YouTube", icon: "▶️", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("youtube")).length, bg: "bg-red-50/70 border-red-100 text-red-900", badge: "bg-red-100 text-red-700" },
+              { name: "Google / Web", icon: "🔍", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("google") || (c.hearAboutUs || "").toLowerCase().includes("search")).length, bg: "bg-emerald-50/70 border-emerald-100 text-emerald-900", badge: "bg-emerald-100 text-emerald-700" },
+              { name: "Giới thiệu", icon: "🤝", count: data.filter(c => (c.hearAboutUs || "").toLowerCase().includes("referral") || (c.hearAboutUs || "").toLowerCase().includes("giới thiệu") || (c.hearAboutUs || "").toLowerCase().includes("紹介")).length, bg: "bg-amber-50/70 border-amber-100 text-amber-900", badge: "bg-amber-100 text-amber-700" },
+              { name: "Khác / Direct", icon: "🌐", count: data.filter(c => !c.hearAboutUs || (c.hearAboutUs || "").toLowerCase().includes("other") || (c.hearAboutUs || "").toLowerCase().includes("khác") || (c.hearAboutUs || "").toLowerCase().includes("その他")).length, bg: "bg-gray-50 border-gray-200 text-gray-900", badge: "bg-gray-200 text-gray-700" },
+            ].map((stat, idx) => {
+              const pct = data.length ? Math.round((stat.count / data.length) * 100) : 0;
+              return (
+                <div
+                  key={idx}
+                  className={`rounded-xl p-4 border text-center transition-all hover:shadow-md ${stat.bg}`}
+                >
+                  <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-600 mb-2">
+                    <span className="text-lg">{stat.icon}</span>
+                    <span className="truncate">{stat.name}</span>
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-1.5">
+                    {stat.count}
+                  </div>
+                  <span className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${stat.badge}`}>
+                    {pct}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Sliding tab bar */}
       <TabBar tabs={filterTabs} active={filter} onChange={handleTabChange} />
 
@@ -210,7 +329,8 @@ export default function ContactsPage() {
           columns={cols}
           data={filteredData}
           loading={loading}
-          onEdit={(r) => router.push(`/admin/contacts/${r.id}`)}
+          onView={(r) => router.push(`/admin/contacts/${r.id}`)}
+          editTitle="Xem chi tiết"
           onDelete={setDel}
           searchPlaceholder="Tìm liên hệ..."
         />

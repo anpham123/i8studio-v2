@@ -8,7 +8,17 @@ import { useToast } from "@/components/admin/Toast";
 import { Trash2, Loader2, Check, Mail, Building2, MessageSquare } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
-interface Contact { id: string; fullName: string; email: string; service: string; message: string; read: boolean; createdAt: string; }
+interface Contact {
+  id: string;
+  fullName: string;
+  email: string;
+  service: string;
+  hearAboutUs?: string;
+  referrer?: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
 
 export default function ContactDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -49,14 +59,34 @@ export default function ContactDetailPage() {
             <span className={`text-xs px-2.5 py-1 rounded-full ${!contact.read ? "bg-blue-50 text-blue-600 font-medium" : "bg-gray-100 text-gray-400"}`}>{contact.read ? "Đã đọc" : "Chưa đọc"}</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
-            <div className="flex items-center gap-3 text-sm"><Mail size={16} className="text-gray-400 shrink-0" /><a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">{contact.email}</a></div>
-            {contact.service && <div className="flex items-center gap-3 text-sm"><Building2 size={16} className="text-gray-400 shrink-0" /><span className="text-gray-700">{contact.service}</span></div>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-3 text-sm">
+              <Mail size={16} className="text-gray-400 shrink-0" />
+              <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline font-medium">{contact.email}</a>
+            </div>
+            {contact.service && (
+              <div className="flex items-center gap-3 text-sm">
+                <Building2 size={16} className="text-gray-400 shrink-0" />
+                <span className="text-gray-700">Dịch vụ: <strong>{contact.service}</strong></span>
+              </div>
+            )}
+            {contact.hearAboutUs && (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-base shrink-0">📊</span>
+                <span className="text-gray-700">Kênh biết đến: <strong>{contact.hearAboutUs}</strong></span>
+              </div>
+            )}
+            {contact.referrer && (
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-base shrink-0">🌐</span>
+                <span className="text-gray-500 text-xs truncate" title={contact.referrer}>Nguồn tự động: <strong>{contact.referrer}</strong></span>
+              </div>
+            )}
           </div>
 
           <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"><MessageSquare size={15} /> Nội dung</div>
-            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{contact.message}</div>
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"><MessageSquare size={15} /> Nội dung tin nhắn</div>
+            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed border border-gray-100">{contact.message}</div>
           </div>
         </div>
       </div>

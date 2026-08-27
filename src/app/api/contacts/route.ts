@@ -11,6 +11,8 @@ const schema = z.object({
   fullName: z.string().min(1).max(100),
   email: z.string().email(),
   service: z.string().max(100).optional().default(""),
+  hearAboutUs: z.string().max(100).optional().default(""),
+  referrer: z.string().max(500).optional().default(""),
   message: z.string().min(1).max(5000),
 });
 
@@ -64,9 +66,10 @@ export async function POST(req: NextRequest) {
     const contact = await prisma.contactSubmission.create({ data });
     return NextResponse.json({ data: contact }, { status: 201 });
   } catch (e) {
+    console.error("CONTACT SUBMISSION ERROR:", e);
     if (e instanceof z.ZodError) {
       return NextResponse.json({ error: e.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Failed" }, { status: 500 });
   }
 }

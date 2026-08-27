@@ -173,6 +173,17 @@
     "responseTime": "We respond within 24 hours",
     "nda": "NDA available upon request",
     "selectService": "Select a service",
+    "howDidYouHear": "How did you hear about us?",
+    "howDidYouHearPlaceholder": "Select a channel (Optional)",
+    "hearChannels": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "google": "Google Search / Website",
+      "referral": "Referral / Word of Mouth",
+      "other": "Other"
+    },
     "workingHours": "Mon-Fri 9:00-18:00 JST",
     "followUs": "Follow us"
   },

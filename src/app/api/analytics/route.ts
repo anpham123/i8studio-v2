@@ -85,6 +85,65 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  // Group by channel — return traffic distribution across social & search channels
+  if (groupBy === "channel") {
+    const events = await prisma.analyticsEvent.findMany({
+      where,
+      select: { metadata: true, createdAt: true },
+    });
+
+    const channelCounts: Record<string, number> = {
+      facebook: 0,
+      instagram: 0,
+      linkedin: 0,
+      youtube: 0,
+      google: 0,
+      direct: 0,
+      other: 0,
+    };
+
+    for (const e of events) {
+      let ch = "direct";
+      try {
+        if (e.metadata) {
+          const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : e.metadata;
+          if (meta.channel) {
+            ch = meta.channel.toLowerCase();
+          } else if (meta.referrer) {
+            const r = meta.referrer.toLowerCase();
+            if (r.includes("facebook") || r.includes("fb.me")) ch = "facebook";
+            else if (r.includes("instagram")) ch = "instagram";
+            else if (r.includes("linkedin") || r.includes("lnkd.in")) ch = "linkedin";
+            else if (r.includes("youtube") || r.includes("youtu.be")) ch = "youtube";
+            else if (r.includes("google") || r.includes("bing") || r.includes("yahoo")) ch = "google";
+            else ch = "other";
+          }
+        }
+      } catch {
+        ch = "direct";
+      }
+
+      if (channelCounts[ch] !== undefined) {
+        channelCounts[ch]++;
+      } else {
+        channelCounts["other"]++;
+      }
+    }
+
+    const total = events.length;
+    const channels = [
+      { key: "facebook", name: "Facebook", icon: "📘", count: channelCounts.facebook, pct: total ? Math.round((channelCounts.facebook / total) * 100) : 0 },
+      { key: "instagram", name: "Instagram", icon: "📸", count: channelCounts.instagram, pct: total ? Math.round((channelCounts.instagram / total) * 100) : 0 },
+      { key: "linkedin", name: "LinkedIn", icon: "💼", count: channelCounts.linkedin, pct: total ? Math.round((channelCounts.linkedin / total) * 100) : 0 },
+      { key: "youtube", name: "YouTube", icon: "▶️", count: channelCounts.youtube, pct: total ? Math.round((channelCounts.youtube / total) * 100) : 0 },
+      { key: "google", name: "Google / Search", icon: "🔍", count: channelCounts.google, pct: total ? Math.round((channelCounts.google / total) * 100) : 0 },
+      { key: "direct", name: "Trực tiếp / Direct", icon: "🌐", count: channelCounts.direct, pct: total ? Math.round((channelCounts.direct / total) * 100) : 0 },
+      { key: "other", name: "Kênh khác / Other", icon: "📝", count: channelCounts.other, pct: total ? Math.round((channelCounts.other / total) * 100) : 0 },
+    ];
+
+    return NextResponse.json({ data: channels, total });
+  }
+
   // Group by page — return top pages
   if (groupBy === "page") {
     const events = await prisma.analyticsEvent.findMany({

@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { Outfit, Cormorant_Garamond, Noto_Serif_JP, Playfair_Display, Roboto } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Script from "next/script";
 import "../globals.css";
 import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
@@ -104,6 +105,27 @@ export default async function LocaleLayout({
 
   return (
     <html lang={params.locale}>
+      <head>
+        {/* Google tag (gtag.js) - Google Analytics 4 */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FJ8KBNTLZB"
+        />
+        <Script
+          id="google-analytics-ga4"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-FJ8KBNTLZB', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${outfit.variable} ${cormorant.variable} ${notoSerifJP.variable} ${playfair.variable} ${roboto.variable} font-sans antialiased`}
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}

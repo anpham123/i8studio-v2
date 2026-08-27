@@ -226,13 +226,15 @@ model Setting {
 }
 
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  fullName  String
-  email     String
-  service   String   @default("")
-  message   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  fullName    String
+  email       String
+  service     String   @default("")
+  message     String
+  hearAboutUs String   @default("") // Channel selected by user (Facebook, Instagram, LinkedIn, YouTube, Google, Referral, Other)
+  referrer    String   @default("") // Auto-detected referrer or UTM parameters
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
 
 model EmailSubscriber {

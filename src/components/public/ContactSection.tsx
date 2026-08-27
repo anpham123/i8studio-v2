@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Phone, MapPin, Clock, MessageCircle, Shield, Send } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, Clock, MessageCircle, Shield, Send, Check } from "lucide-react";
 import FadeIn from "./FadeIn";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -24,14 +24,60 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
   const t = useTranslations("contact");
   const locale = useLocale();
   const isJa = locale === "ja";
-  const [form, setForm] = useState({ fullName: "", email: "", service: "", message: "" });
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    service: "",
+    hearAboutUs: "",
+    referrer: "",
+    message: "",
+  });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+
+  // Auto-detect traffic source / referrer & UTM parameters on mount
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const utmSource = params.get("utm_source");
+      const utmMedium = params.get("utm_medium");
+      const utmCampaign = params.get("utm_campaign");
+      const rawReferrer = document.referrer;
+
+      let detected = "";
+      if (utmSource) {
+        detected = `UTM: ${utmSource}${utmMedium ? ` / ${utmMedium}` : ""}${utmCampaign ? ` (${utmCampaign})` : ""}`;
+      } else if (rawReferrer) {
+        try {
+          const refUrl = new URL(rawReferrer);
+          detected = refUrl.hostname;
+        } catch {
+          detected = rawReferrer.slice(0, 100);
+        }
+      } else {
+        detected = "Direct / Organic";
+      }
+
+      setForm((prev) => ({ ...prev, referrer: detected }));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const services = serviceNames && serviceNames.length > 0
     ? [...serviceNames, isJa ? "その他" : "Other"]
     : (isJa
         ? ["CGパース制作", "CG動画・アニメーション", "VR体験・ウォークスルー", "BIMモデリング", "パチンコ・パチスロCG", "アニメ・イラスト制作", "その他"]
         : DEFAULT_SERVICES);
+
+  const channels = [
+    { key: "facebook", label: t("hearChannels.facebook"), icon: "f" },
+    { key: "instagram", label: t("hearChannels.instagram"), icon: "📸" },
+    { key: "linkedin", label: t("hearChannels.linkedin"), icon: "in" },
+    { key: "youtube", label: t("hearChannels.youtube"), icon: "▶" },
+    { key: "google", label: t("hearChannels.google"), icon: "🔍" },
+    { key: "referral", label: t("hearChannels.referral"), icon: "🤝" },
+    { key: "other", label: t("hearChannels.other"), icon: "📝" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +90,14 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
       });
       if (res.ok) {
         setStatus("success");
-        setForm({ fullName: "", email: "", service: "", message: "" });
+        setForm({
+          fullName: "",
+          email: "",
+          service: "",
+          hearAboutUs: "",
+          referrer: form.referrer,
+          message: "",
+        });
       } else {
         setStatus("error");
       }
@@ -129,12 +182,46 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                     </label>
                     <textarea
                       required
-                      rows={5}
+                      rows={4}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm resize-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
                       placeholder={isJa ? "プロジェクトの概要、ご要望、スケジュールなどをご記入ください..." : "Tell us about your project..."}
                     />
+                  </div>
+
+                  {/* Survey: How did you hear about us? (4 main platforms: Facebook, Instagram, LinkedIn, YouTube + Google/Referral) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t("howDidYouHear")}
+                      </label>
+                      <span className="text-[11px] text-gray-400">
+                        {t("howDidYouHearPlaceholder")}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {channels.map((ch) => {
+                        const isSelected = form.hearAboutUs === ch.label;
+                        return (
+                          <button
+                            key={ch.key}
+                            type="button"
+                            onClick={() => setForm({ ...form, hearAboutUs: isSelected ? "" : ch.label })}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition-all ${
+                              isSelected
+                                ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                                : "bg-gray-50/70 hover:bg-gray-100 text-gray-700 border-gray-200"
+                            }`}
+                          >
+                            <span className="shrink-0 text-sm">{ch.icon}</span>
+                            <span className="truncate">{ch.label}</span>
+                            {isSelected && <Check size={12} className="ml-auto text-white shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {status === "error" && (

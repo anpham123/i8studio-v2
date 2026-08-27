@@ -12,6 +12,7 @@ import {
 /* ------------------------------------------------------------------ */
 interface DayData { date: string; count: number }
 interface PageData { page: string; count: number }
+interface ChannelData { key: string; name: string; icon: string; count: number; pct: number }
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -124,6 +125,117 @@ function LineChart({ data, label }: { data: DayData[]; label: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Campaign Link Generator Component                                  */
+/* ------------------------------------------------------------------ */
+function CampaignLinkBuilder() {
+  const [targetPage, setTargetPage] = useState("/");
+  const [platform, setPlatform] = useState("youtube");
+  const [campaign, setCampaign] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://i8studio.vn";
+  const fullUrl = useMemo(() => {
+    let url = `${baseUrl}${targetPage}`;
+    const params = new URLSearchParams();
+    if (platform) params.set("utm_source", platform);
+    params.set("utm_medium", platform === "youtube" ? "video_desc" : platform === "instagram" ? "bio" : "social");
+    if (campaign.trim()) params.set("utm_campaign", campaign.trim().toLowerCase().replace(/\s+/g, "_"));
+    return `${url}?${params.toString()}`;
+  }, [baseUrl, targetPage, platform, campaign]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-md mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+        <div>
+          <h3 className="text-base font-bold flex items-center gap-2">
+            <span>🔗</span>
+            <span>Tạo Link Gắn Mã Đo Lường (Campaign URL Builder)</span>
+          </h3>
+          <p className="text-xs text-gray-300 mt-1">
+            Tạo sẵn đường link có gắn mã theo dõi để đặt vào mô tả YouTube, bio Instagram, bài viết Facebook hoặc LinkedIn.
+          </p>
+        </div>
+        <span className="text-[11px] bg-white/10 text-white/80 px-2.5 py-1 rounded-full">
+          Chuẩn UTM Analytics
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div>
+          <label className="block text-xs font-semibold text-gray-300 mb-1.5">1. Nền tảng (Platform)</label>
+          <select
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-400"
+          >
+            <option value="youtube" className="text-gray-900">▶️ YouTube (Mô tả video)</option>
+            <option value="facebook" className="text-gray-900">📘 Facebook (Bài viết / Fanpage)</option>
+            <option value="instagram" className="text-gray-900">📸 Instagram (Bio / Story)</option>
+            <option value="linkedin" className="text-gray-900">💼 LinkedIn (Profile / Post)</option>
+            <option value="tiktok" className="text-gray-900">🎵 TikTok (Bio link)</option>
+            <option value="email" className="text-gray-900">📧 Email Newsletter</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-300 mb-1.5">2. Trang đích (Landing Page)</label>
+          <select
+            value={targetPage}
+            onChange={(e) => setTargetPage(e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-400"
+          >
+            <option value="/" className="text-gray-900">Trang chủ (Home)</option>
+            <option value="/about-us/workflow" className="text-gray-900">Quy trình (Workflow)</option>
+            <option value="/about-us/portfolio" className="text-gray-900">Portfolio</option>
+            <option value="/works" className="text-gray-900">Dự án (Works)</option>
+            <option value="/contact" className="text-gray-900">Liên hệ (Contact)</option>
+            <option value="/price" className="text-gray-900">Bảng giá (Price)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-300 mb-1.5">3. Tên chiến dịch / bài đăng (Tùy chọn)</label>
+          <input
+            type="text"
+            value={campaign}
+            onChange={(e) => setCampaign(e.target.value)}
+            placeholder="vd: video_residence_01, reel_july..."
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+          />
+        </div>
+      </div>
+
+      {/* Result URL bar */}
+      <div className="flex flex-col sm:flex-row items-center gap-2 bg-black/40 border border-white/10 rounded-xl p-2.5">
+        <input
+          type="text"
+          readOnly
+          value={fullUrl}
+          className="w-full bg-transparent text-xs font-mono text-blue-300 px-2 outline-none select-all truncate"
+        />
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+            copied
+              ? "bg-green-500 text-white"
+              : "bg-blue-600 hover:bg-blue-500 text-white shadow-sm"
+          }`}
+        >
+          {copied ? "✓ Đã sao chép!" : "Sao chép Link"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Page                                                          */
 /* ------------------------------------------------------------------ */
 export default function AnalyticsPage() {
@@ -132,6 +244,7 @@ export default function AnalyticsPage() {
   const [month, setMonth] = useState(now.getMonth()); // 0-indexed
   const [dailyData, setDailyData] = useState<DayData[]>([]);
   const [topPages, setTopPages] = useState<PageData[]>([]);
+  const [channels, setChannels] = useState<ChannelData[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Previous month for comparison
@@ -151,9 +264,10 @@ export default function AnalyticsPage() {
     const pTo = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-${String(pToDay).padStart(2, "0")}T23:59:59`;
 
     try {
-      const [dailyRes, pagesRes, prevRes] = await Promise.all([
+      const [dailyRes, pagesRes, channelsRes, prevRes] = await Promise.all([
         fetch(`/api/analytics?type=pageview&groupBy=day&from=${from}&to=${to}`).then(r => r.json()),
         fetch(`/api/analytics?type=pageview&groupBy=page&from=${from}&to=${to}`).then(r => r.json()),
+        fetch(`/api/analytics?type=pageview&groupBy=channel&from=${from}&to=${to}`).then(r => r.json()),
         fetch(`/api/analytics?type=pageview&groupBy=day&from=${pFrom}&to=${pTo}`).then(r => r.json()),
       ]);
 
@@ -170,10 +284,12 @@ export default function AnalyticsPage() {
 
       setDailyData(filled);
       setTopPages(pagesRes.data || []);
+      setChannels(channelsRes.data || []);
       setPrevTotal((prevRes.data || []).reduce((s: number, d: DayData) => s + d.count, 0));
     } catch {
       setDailyData([]);
       setTopPages([]);
+      setChannels([]);
     }
     setLoading(false);
   }, [year, month, prevYear, prevMonth]);
@@ -226,9 +342,12 @@ export default function AnalyticsPage() {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <BarChart3 size={14} />
-          <span>Biểu đồ thống kê truy cập tháng</span>
+          <span>Biểu đồ thống kê truy cập & nguồn khách hàng</span>
         </div>
       </div>
+
+      {/* Campaign URL Builder Tool */}
+      <CampaignLinkBuilder />
 
       {loading ? (
         <div className="flex justify-center py-24">
@@ -259,7 +378,7 @@ export default function AnalyticsPage() {
                 )}
               </div>
               <div className="text-2xl font-bold text-gray-900">{totalViews.toLocaleString()}</div>
-              <div className="text-xs text-gray-500 mt-1">Lượt truy cập</div>
+              <div className="text-xs text-gray-500 mt-1">Tổng lượt truy cập</div>
             </div>
 
             {/* Avg per day */}
@@ -298,12 +417,75 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
+          {/* Traffic Channel Attribution Breakdown (Social Networks & Sources) */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <span>📊</span>
+                  <span>Lượng Truy Cập Theo Nền Tảng (Traffic Attribution by Social Channels)</span>
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Đo lường số lượng click từ YouTube, Facebook, Instagram, LinkedIn, Google và các nguồn khác
+                </p>
+              </div>
+              <div className="px-3.5 py-1.5 rounded-full bg-gray-900 text-white text-xs font-semibold">
+                Tháng {month + 1}/{year}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+              {channels.map((ch) => {
+                let cardBg = "bg-gray-50 border-gray-200 text-gray-900";
+                let badgeStyle = "bg-gray-200 text-gray-700";
+
+                if (ch.key === "facebook") {
+                  cardBg = "bg-blue-50/70 border-blue-100 text-blue-900";
+                  badgeStyle = "bg-blue-100 text-blue-700";
+                } else if (ch.key === "instagram") {
+                  cardBg = "bg-pink-50/70 border-pink-100 text-pink-900";
+                  badgeStyle = "bg-pink-100 text-pink-700";
+                } else if (ch.key === "linkedin") {
+                  cardBg = "bg-sky-50/70 border-sky-100 text-sky-900";
+                  badgeStyle = "bg-sky-100 text-sky-700";
+                } else if (ch.key === "youtube") {
+                  cardBg = "bg-red-50/70 border-red-100 text-red-900";
+                  badgeStyle = "bg-red-100 text-red-700";
+                } else if (ch.key === "google") {
+                  cardBg = "bg-emerald-50/70 border-emerald-100 text-emerald-900";
+                  badgeStyle = "bg-emerald-100 text-emerald-700";
+                } else if (ch.key === "direct") {
+                  cardBg = "bg-indigo-50/70 border-indigo-100 text-indigo-900";
+                  badgeStyle = "bg-indigo-100 text-indigo-700";
+                }
+
+                return (
+                  <div
+                    key={ch.key}
+                    className={`rounded-xl p-4 border text-center transition-all hover:shadow-md ${cardBg}`}
+                  >
+                    <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-600 mb-2">
+                      <span className="text-lg">{ch.icon}</span>
+                      <span className="truncate">{ch.name}</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-1.5">
+                      {ch.count.toLocaleString()}
+                    </div>
+                    <span className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded-full ${badgeStyle}`}>
+                      {ch.pct}%
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Chart */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6">
             <h2 className="text-base font-semibold text-gray-800 mb-1">
-              Thống kê truy cập website i8studio.vn
+              Biểu đồ xu hướng truy cập theo ngày
             </h2>
-            <p className="text-xs text-gray-400 mb-4">(theo tháng)</p>
+            <p className="text-xs text-gray-400 mb-4">(Tháng {month + 1}/{year})</p>
             <LineChart data={dailyData} label="Lượt truy cập" />
           </div>
 
