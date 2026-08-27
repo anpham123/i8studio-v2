@@ -131,9 +131,10 @@ function CampaignLinkBuilder() {
   const [targetPage, setTargetPage] = useState("/");
   const [platform, setPlatform] = useState("youtube");
   const [campaign, setCampaign] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://i8studio.vn";
+  
   const fullUrl = useMemo(() => {
     let url = `${baseUrl}${targetPage}`;
     const params = new URLSearchParams();
@@ -143,11 +144,54 @@ function CampaignLinkBuilder() {
     return `${url}?${params.toString()}`;
   }, [baseUrl, targetPage, platform, campaign]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(fullUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyText = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
+
+  const officialChannels = [
+    {
+      key: "ytb",
+      name: "YouTube (@i8studio)",
+      accountUrl: "https://www.youtube.com/@i8studio",
+      icon: "▶️",
+      placement: "Dán vào Mô tả Video / Thông tin Kênh",
+      trackingUrl: `${baseUrl}/?utm_source=youtube&utm_medium=video_desc`,
+    },
+    {
+      key: "ig",
+      name: "Instagram (@i8studio_cg)",
+      accountUrl: "https://www.instagram.com/i8studio_cg/",
+      icon: "📸",
+      placement: "Dán vào Link Bio / Tin Story Instagram",
+      trackingUrl: `${baseUrl}/?utm_source=instagram&utm_medium=bio`,
+    },
+    {
+      key: "fb",
+      name: "Facebook (/i8studio.vn/)",
+      accountUrl: "https://www.facebook.com/i8studio.vn/",
+      icon: "📘",
+      placement: "Dán vào Fanpage / Bài đăng Facebook",
+      trackingUrl: `${baseUrl}/?utm_source=facebook&utm_medium=social`,
+    },
+    {
+      key: "li",
+      name: "LinkedIn (/in/i8-studio/)",
+      accountUrl: "https://www.linkedin.com/in/i8-studio/",
+      icon: "💼",
+      placement: "Dán vào Profile / Bài viết LinkedIn",
+      trackingUrl: `${baseUrl}/?utm_source=linkedin&utm_medium=social`,
+    },
+    {
+      key: "x",
+      name: "X - Twitter (@i8studio_3d)",
+      accountUrl: "https://x.com/i8studio_3d",
+      icon: "✖️",
+      placement: "Dán vào Tiểu sử Bio / Bài đăng trên X",
+      trackingUrl: `${baseUrl}/?utm_source=x&utm_medium=social`,
+    },
+  ];
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-md mb-6">
@@ -155,10 +199,10 @@ function CampaignLinkBuilder() {
         <div>
           <h3 className="text-base font-bold flex items-center gap-2">
             <span>🔗</span>
-            <span>Tạo Link Gắn Mã Đo Lường (Campaign URL Builder)</span>
+            <span>Link Đo Lường Sẵn Có Cho 5 Nền Tảng Chính Thức</span>
           </h3>
           <p className="text-xs text-gray-300 mt-1">
-            Tạo sẵn đường link có gắn mã theo dõi để đặt vào mô tả YouTube, bio Instagram, bài viết Facebook hoặc LinkedIn.
+            Bấm &ldquo;Sao chép&rdquo; và dán trực tiếp vào phần tiểu sử (Bio), mô tả video hoặc bài viết của từng kênh tương ứng:
           </p>
         </div>
         <span className="text-[11px] bg-white/10 text-white/80 px-2.5 py-1 rounded-full">
@@ -166,70 +210,119 @@ function CampaignLinkBuilder() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">1. Nền tảng (Platform)</label>
-          <select
-            value={platform}
-            onChange={(e) => setPlatform(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-400"
-          >
-            <option value="youtube" className="text-gray-900">▶️ YouTube (Mô tả video)</option>
-            <option value="facebook" className="text-gray-900">📘 Facebook (Bài viết / Fanpage)</option>
-            <option value="instagram" className="text-gray-900">📸 Instagram (Bio / Story)</option>
-            <option value="linkedin" className="text-gray-900">💼 LinkedIn (Profile / Post)</option>
-            <option value="tiktok" className="text-gray-900">🎵 TikTok (Bio link)</option>
-            <option value="email" className="text-gray-900">📧 Email Newsletter</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">2. Trang đích (Landing Page)</label>
-          <select
-            value={targetPage}
-            onChange={(e) => setTargetPage(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-400"
-          >
-            <option value="/" className="text-gray-900">Trang chủ (Home)</option>
-            <option value="/about-us/workflow" className="text-gray-900">Quy trình (Workflow)</option>
-            <option value="/about-us/portfolio" className="text-gray-900">Portfolio</option>
-            <option value="/works" className="text-gray-900">Dự án (Works)</option>
-            <option value="/contact" className="text-gray-900">Liên hệ (Contact)</option>
-            <option value="/price" className="text-gray-900">Bảng giá (Price)</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">3. Tên chiến dịch / bài đăng (Tùy chọn)</label>
-          <input
-            type="text"
-            value={campaign}
-            onChange={(e) => setCampaign(e.target.value)}
-            placeholder="vd: video_residence_01, reel_july..."
-            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
-          />
-        </div>
+      {/* Preset official channel table */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+        {officialChannels.map((item) => {
+          const isCopied = copiedKey === item.key;
+          return (
+            <div key={item.key} className="bg-white/5 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between hover:border-white/20 transition-all">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                    <span>{item.icon}</span>
+                    <span className="truncate">{item.name}</span>
+                  </div>
+                  <a
+                    href={item.accountUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-blue-400 hover:underline shrink-0"
+                  >
+                    Xem kênh ↗
+                  </a>
+                </div>
+                <p className="text-[11px] text-gray-400 mb-2">{item.placement}</p>
+                <div className="bg-black/40 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-blue-300 truncate mb-3 border border-white/5">
+                  {item.trackingUrl}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => copyText(item.trackingUrl, item.key)}
+                className={`w-full py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  isCopied
+                    ? "bg-green-500 text-white"
+                    : "bg-blue-600 hover:bg-blue-500 text-white shadow-sm"
+                }`}
+              >
+                {isCopied ? "✓ Đã sao chép Link!" : "Sao chép Link"}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Result URL bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-2 bg-black/40 border border-white/10 rounded-xl p-2.5">
-        <input
-          type="text"
-          readOnly
-          value={fullUrl}
-          className="w-full bg-transparent text-xs font-mono text-blue-300 px-2 outline-none select-all truncate"
-        />
-        <button
-          type="button"
-          onClick={handleCopy}
-          className={`shrink-0 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-            copied
-              ? "bg-green-500 text-white"
-              : "bg-blue-600 hover:bg-blue-500 text-white shadow-sm"
-          }`}
-        >
-          {copied ? "✓ Đã sao chép!" : "Sao chép Link"}
-        </button>
+      {/* Custom URL Builder dropdown toggle */}
+      <div className="pt-4 border-t border-white/10">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-300 mb-3 flex items-center gap-1.5">
+          <span>⚙️</span>
+          <span>Tạo link tùy chỉnh cho các trang hoặc chiến dịch khác (Workflow, Portfolio, Báo giá...)</span>
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Nền tảng</label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-400"
+            >
+              <option value="youtube" className="text-gray-900">▶️ YouTube</option>
+              <option value="facebook" className="text-gray-900">📘 Facebook</option>
+              <option value="instagram" className="text-gray-900">📸 Instagram</option>
+              <option value="linkedin" className="text-gray-900">💼 LinkedIn</option>
+              <option value="x" className="text-gray-900">✖️ X (Twitter)</option>
+              <option value="tiktok" className="text-gray-900">🎵 TikTok</option>
+              <option value="email" className="text-gray-900">📧 Email Newsletter</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Trang đích</label>
+            <select
+              value={targetPage}
+              onChange={(e) => setTargetPage(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-400"
+            >
+              <option value="/" className="text-gray-900">Trang chủ (Home)</option>
+              <option value="/about-us/workflow" className="text-gray-900">Quy trình (Workflow)</option>
+              <option value="/about-us/portfolio" className="text-gray-900">Portfolio</option>
+              <option value="/works" className="text-gray-900">Dự án (Works)</option>
+              <option value="/contact" className="text-gray-900">Liên hệ (Contact)</option>
+              <option value="/price" className="text-gray-900">Bảng giá (Price)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Tên chiến dịch / bài đăng</label>
+            <input
+              type="text"
+              value={campaign}
+              onChange={(e) => setCampaign(e.target.value)}
+              placeholder="vd: video_residence_01..."
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-2 bg-black/40 border border-white/10 rounded-xl p-2">
+          <input
+            type="text"
+            readOnly
+            value={fullUrl}
+            className="w-full bg-transparent text-xs font-mono text-blue-300 px-2 outline-none select-all truncate"
+          />
+          <button
+            type="button"
+            onClick={() => copyText(fullUrl, "custom")}
+            className={`shrink-0 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              copiedKey === "custom"
+                ? "bg-green-500 text-white"
+                : "bg-blue-600 hover:bg-blue-500 text-white shadow-sm"
+            }`}
+          >
+            {copiedKey === "custom" ? "✓ Đã sao chép!" : "Sao chép Link"}
+          </button>
+        </div>
       </div>
     </div>
   );
