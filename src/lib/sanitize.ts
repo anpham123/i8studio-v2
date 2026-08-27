@@ -21,6 +21,36 @@ function formatJapanesePhrases(html: string): string {
 }
 
 /**
+ * Detect consecutive images in blog content and group them into a dedicated 3-column gallery <div>
+ */
+function formatBlogImages(html: string): string {
+  if (!html || !html.includes("<img")) return html;
+
+  // 1. Remove empty <p></p> or <p><br></p> tags that TipTap leaves between elements
+  const cleaned = html.replace(/<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "");
+
+  // 2. Match any block that contains an img (e.g. <p><img.../></p> or standalone <img.../>)
+  const imgBlockRegex = /(?:<p[^>]*>\s*(?:<a\b[^>]*>)?\s*(<img\b[^>]+>)\s*(?:<\/a>)?\s*<\/p>|<img\b[^>]+>)/gi;
+
+  const cards: string[] = [];
+  const withPlaceholders = cleaned.replace(imgBlockRegex, (match, p1) => {
+    const imgTag = p1 || match;
+    const index = cards.length;
+    cards.push(`<div class="gallery-item"><div class="img-wrapper">${imgTag}</div></div>`);
+    return `___IMG_CARD_${index}___`;
+  });
+
+  // 3. Group consecutive placeholders into a single <div class="paragraph-image-gallery">
+  const grouped = withPlaceholders.replace(/(?:\s*___IMG_CARD_\d+___\s*)+/gi, (group) => {
+    const cardIndexes = group.match(/\d+/g) || [];
+    const groupCards = cardIndexes.map((i) => cards[parseInt(i, 10)]).join("\n");
+    return `\n<div class="paragraph-image-gallery">\n${groupCards}\n</div>\n`;
+  });
+
+  return grouped.trim();
+}
+
+/**
  * Sanitize HTML content to prevent XSS attacks.
  * Allows safe HTML tags for rich text rendering while removing
  * dangerous elements like <script>, event handlers, etc.
@@ -57,5 +87,6 @@ export function sanitizeHtml(dirty: string): string {
     disallowedTagsMode: "discard",
   });
 
-  return formatJapanesePhrases(clean);
+  return formatBlogImages(formatJapanesePhrases(clean));
 }
+

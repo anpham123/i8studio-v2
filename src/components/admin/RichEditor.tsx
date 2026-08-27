@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper, NodeViewProps } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import LinkExtension from "@tiptap/extension-link";
@@ -14,6 +14,45 @@ import {
   Quote, Undo, Redo, Image as ImageIcon, Link as LinkIcon, Minus,
   Table as TableIcon, Plus, Trash2, X, Sparkles, Highlighter,
 } from "lucide-react";
+
+// Interactive Image NodeView with delete 'X' button
+function ImageNodeView({ node, deleteNode }: NodeViewProps) {
+  const src = node.attrs.src;
+  const alt = node.attrs.alt;
+
+  return (
+    <NodeViewWrapper className="paragraph-editor-image-wrapper inline-block relative my-2 mr-3 align-top">
+      <div className="relative inline-block rounded-xl border border-gray-200 bg-[#f8fafc] p-1 shadow-xs overflow-hidden hover:border-blue-400 hover:shadow-md transition-all group">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt || "Paragraph image"}
+          className="h-[180px] w-auto max-w-[280px] object-cover rounded-lg block select-none pointer-events-none"
+        />
+        {/* Nút dấu X màu đỏ để xóa ảnh */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteNode();
+          }}
+          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 active:scale-95 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer z-30"
+          title="Xóa ảnh này khỏi paragraph"
+        >
+          <X size={13} className="stroke-[3]" />
+        </button>
+      </div>
+    </NodeViewWrapper>
+  );
+}
+
+// Custom TipTap Image extension with interactive NodeView
+const CustomImage = Image.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageNodeView);
+  },
+});
 
 // Custom Highlight mark extension for keyword highlighting
 const Highlight = Mark.create({
@@ -99,7 +138,7 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
           class: "blog-link",
         },
       }),
-      Image.configure({ inline: false, allowBase64: true }),
+      CustomImage.configure({ inline: false, allowBase64: true }),
       Table.configure({
         resizable: true,
         HTMLAttributes: {

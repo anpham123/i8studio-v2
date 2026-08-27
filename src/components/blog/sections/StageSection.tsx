@@ -72,15 +72,10 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
               </div>
             </div>
 
-            <div className="blog-content">
-              {bodyParagraphs.map((p, i) => (
-                <div
-                  key={i}
-                  className="text-[#111] leading-[1.9] mb-4 text-[14px] sm:text-[15px]"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(p) }}
-                />
-              ))}
-            </div>
+            <div
+              className="blog-content text-[#111] leading-[1.9] text-[14px] sm:text-[15px]"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(bodyParagraphs.join("\n")) }}
+            />
 
             {data.tags && (
               <div className="mt-8">
@@ -133,17 +128,17 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
 
                 return (
                   <div key={i} className="flex flex-col bg-white rounded-xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
-                    <div className="h-[230px] sm:h-[260px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-2.5">
+                    <div className="h-[180px] sm:h-[200px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-1.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imgSrc}
                         alt={imgCap || `${data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="max-w-full max-h-full object-contain rounded hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
+                        className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
                       />
                     </div>
                     {imgCap && (
                       <p
-                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2.5 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto"
+                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto"
                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
                       />
                     )}
