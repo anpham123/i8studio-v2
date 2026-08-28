@@ -358,7 +358,7 @@ function WorkCardItem({
       onMouseLeave={() => setIsHovered(false)}
       className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
     >
-      <div className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1]/80 rounded-[3px] will-change-transform transition-all">
+      <div className="work-card-media relative overflow-hidden w-full bg-[#eae7e1]/80 rounded-[3px] will-change-transform transition-all">
         {/* Static thumbnail image with cinematic slow zoom / pan motion */}
         {work.image ? (
           <img
@@ -366,7 +366,7 @@ function WorkCardItem({
             alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
             loading={index < 9 ? "eager" : "lazy"}
             fetchPriority={index < 9 ? "high" : "auto"}
-            className="w-full h-full block object-cover will-change-transform"
+            className="w-full h-auto block will-change-transform"
             style={{
               transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
               transition: isHovered
@@ -379,7 +379,7 @@ function WorkCardItem({
           />
         ) : (
           <div
-            className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            className="w-full aspect-[4/3] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             style={{ backgroundColor: work.bg }}
           />
         )}
@@ -751,19 +751,19 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             <h1 className="text-[32px] font-normal text-[#111] tracking-[0.03em] font-serif mb-6">{t("title")}</h1>
 
             {/* Filter heading */}
-            <div className="text-[14px] font-semibold text-[#111] tracking-[0.08em] uppercase mb-1">{t("filter")}</div>
+            <div className="text-[15px] font-bold text-[#000] tracking-[0.08em] uppercase mb-1">{t("filter")}</div>
             <div className="border-b-[0.5px] border-[#e5e5e5] mb-5" />
 
             {/* TYPE group */}
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
               {t("typeLabel")}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               <button
                 onClick={() => handleFilterChange("all", undefined)}
-                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
-                  ? "text-[#111] font-medium border-[#111]"
-                  : "text-[#555] hover:text-[#111] border-transparent"
+                className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
+                  ? "text-[#000] font-bold border-[#000]"
+                  : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
               >
                 {showAllLabel}
@@ -772,9 +772,9 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(key, undefined)}
-                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
-                    ? "text-[#111] font-medium border-[#111]"
-                    : "text-[#555] hover:text-[#111] border-transparent"
+                  className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
+                    ? "text-[#000] font-bold border-[#000]"
+                    : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
                 >
                   {t(`types.${key}`)}
@@ -785,15 +785,15 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
 
             {/* CATEGORY group */}
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
               {t("categoryLabel")}
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5">
               <button
                 onClick={() => handleFilterChange(undefined, "all")}
-                className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
-                  ? "text-[#111] font-medium border-[#111]"
-                  : "text-[#555] hover:text-[#111] border-transparent"
+                className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
+                  ? "text-[#000] font-bold border-[#000]"
+                  : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
               >
                 {showAllLabel}
@@ -802,9 +802,9 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(undefined, key)}
-                  className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
-                    ? "text-[#111] font-medium border-[#111]"
-                    : "text-[#555] hover:text-[#111] border-transparent"
+                  className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
+                    ? "text-[#000] font-bold border-[#000]"
+                    : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
                 >
                   {t(`categories.${key}`)}
@@ -816,15 +816,15 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             {collections.length > 0 && (
               <>
                 <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
                   {locale === "ja" ? "コレクション" : "COLLECTION"}
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                   {collections.map((col) => (
                     <Link
                       key={col.slug}
                       href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
-                      className="text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#555] hover:text-[#111] border-transparent"
+                      className="text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     >
                       {locale === "ja" ? col.titleJa : col.titleEn}
                     </Link>
@@ -946,18 +946,18 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 </div>
 
                 {/* TYPE group */}
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
                   {t("typeLabel")}
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => {
                       handleFilterChange("all", undefined);
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
-                      ? "text-[#111] font-medium border-[#111]"
-                      : "text-[#555] hover:text-[#111] border-transparent"
+                    className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
+                      ? "text-[#000] font-bold border-[#000]"
+                      : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                       }`}
                   >
                     {showAllLabel}
@@ -969,9 +969,9 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                         handleFilterChange(key, undefined);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
-                        ? "text-[#111] font-medium border-[#111]"
-                        : "text-[#555] hover:text-[#111] border-transparent"
+                      className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
+                        ? "text-[#000] font-bold border-[#000]"
+                        : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                         }`}
                     >
                       {t(`types.${key}`)}
@@ -982,18 +982,18 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
 
                 {/* CATEGORY group */}
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
                   {t("categoryLabel")}
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => {
                       handleFilterChange(undefined, "all");
                       setIsFilterOpen(false);
                     }}
-                    className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
-                      ? "text-[#111] font-medium border-[#111]"
-                      : "text-[#555] hover:text-[#111] border-transparent"
+                    className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
+                      ? "text-[#000] font-bold border-[#000]"
+                      : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                       }`}
                   >
                     {showAllLabel}
@@ -1005,9 +1005,9 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                         handleFilterChange(undefined, key);
                         setIsFilterOpen(false);
                       }}
-                      className={`text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
-                        ? "text-[#111] font-medium border-[#111]"
-                        : "text-[#555] hover:text-[#111] border-transparent"
+                      className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
+                        ? "text-[#000] font-bold border-[#000]"
+                        : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                         }`}
                     >
                       {t(`categories.${key}`)}
@@ -1019,15 +1019,15 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 {collections.length > 0 && (
                   <>
                     <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#999] mb-3">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
                       {locale === "ja" ? "コレクション" : "COLLECTION"}
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       {collections.map((col) => (
                         <Link
                           key={col.slug}
                           href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
-                          className="text-left text-[14px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#555] hover:text-[#111] border-transparent"
+                          className="text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                           onClick={() => setIsFilterOpen(false)}
                         >
                           {locale === "ja" ? col.titleJa : col.titleEn}
