@@ -498,7 +498,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                       key={child.href}
                                       href={child.href}
                                       onClick={() => setMobileOpen(false)}
-                                      className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-gray-900 border border-gray-200"
+                                      className="group relative block aspect-[16/9] rounded-2xl overflow-hidden shadow-sm bg-gray-900 border border-gray-200"
                                     >
                                       {child.thumbnail ? (
                                         /* eslint-disable-next-line @next/next/no-img-element */

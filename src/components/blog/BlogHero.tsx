@@ -76,14 +76,6 @@ export default function BlogHero({
       {/* Title section BELOW image */}
       <div className="bg-[var(--surface)] pt-10 sm:pt-14 pb-2 sm:pb-4">
         <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
-          {/* Category */}
-          {category && (
-            <div className="text-[var(--accent)] text-[11px] uppercase tracking-[0.2em] mb-4">
-              <span className="opacity-60 text-[var(--ink-muted)]">{categoryLabel}</span>
-              <span className="ml-3 font-medium">{localizedCategory}</span>
-            </div>
-          )}
-
           {/* Title - Single line on desktop */}
           <h1
             className="font-serif text-[clamp(22px,3.2vw,40px)] font-semibold leading-[1.3] tracking-tight text-[#111] mb-4 max-w-full [&>br]:hidden md:[&>br]:inline"

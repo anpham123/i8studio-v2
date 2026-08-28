@@ -156,25 +156,33 @@ export default function CollectionDetailContent({
             <h2 className="text-xl font-light text-[#111] mb-8 text-center" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "他のコレクションもご覧ください" : "Explore Other Collections"}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
               {others.map((otherCol) => {
                 const otherTitle = isJa ? (otherCol.titleJa || otherCol.titleEn) : (otherCol.titleEn || otherCol.titleJa);
                 return (
                   <Link
                     key={otherCol.slug}
                     href={`${basePath}/${encodeURIComponent(otherCol.slug)}`}
-                    className="group block rounded-xl overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-all"
+                    className="group flex flex-col justify-between h-full rounded-xl overflow-hidden border border-gray-100 bg-white hover:shadow-md transition-all"
                   >
-                    <div className="aspect-[4/3] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={otherCol.cover}
-                        alt={otherTitle}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
-                      />
+                    <div className="bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 overflow-hidden flex-1 flex items-center justify-center min-h-[180px]">
+                      {otherCol.cover ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={otherCol.cover}
+                          alt={otherTitle}
+                          className="w-full h-auto block group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full min-h-[180px] flex items-center justify-center text-gray-400 text-sm font-medium">
+                          {otherTitle}
+                        </div>
+                      )}
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 mt-auto bg-white border-t border-gray-50">
                       <h3 className="text-base font-medium text-[#111]">{otherTitle}</h3>
                     </div>
                   </Link>

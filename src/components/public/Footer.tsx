@@ -46,11 +46,11 @@ function IconX() {
 }
 
 const SOCIAL = [
-  { key: "socialFacebook",  Icon: IconFacebook,  label: "Facebook" },
-  { key: "socialInstagram", Icon: IconInstagram, label: "Instagram" },
-  { key: "socialLinkedin",  Icon: IconLinkedin,  label: "LinkedIn" },
-  { key: "socialYoutube",   Icon: IconYoutube,   label: "YouTube" },
-  { key: "socialTwitter",   Icon: IconX,         label: "X (Twitter)" },
+  { key: "socialFacebook",  Icon: IconFacebook,  label: "Facebook",    defaultUrl: "https://facebook.com" },
+  { key: "socialInstagram", Icon: IconInstagram, label: "Instagram",   defaultUrl: "https://instagram.com" },
+  { key: "socialLinkedin",  Icon: IconLinkedin,  label: "LinkedIn",    defaultUrl: "https://linkedin.com" },
+  { key: "socialYoutube",   Icon: IconYoutube,   label: "YouTube",     defaultUrl: "https://www.youtube.com/@i8studio" },
+  { key: "socialTwitter",   Icon: IconX,         label: "X (Twitter)", defaultUrl: "https://x.com/i8studio_3d" },
 ];
 
 // ─── CHỈNH KÍCH THƯỚC LOGO TẠI ĐÂY (px) ──────────────────────────
@@ -117,21 +117,17 @@ export default function Footer({ settings }: FooterProps) {
 
             {/* Social icons */}
             <div className="flex gap-2.5 mb-4">
-              {SOCIAL.map(({ key, Icon, label }) => {
-                const raw = settings[key];
+              {SOCIAL.map(({ key, Icon, label, defaultUrl }) => {
+                const raw = settings[key] || defaultUrl;
                 const url = raw && !raw.startsWith("http") ? `https://${raw}` : raw;
                 return (
                   <a
                     key={key}
-                    href={url || "#"}
-                    target={url ? "_blank" : undefined}
+                    href={url}
+                    target="_blank"
                     rel="noopener noreferrer"
                     aria-label={label}
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
-                      url
-                        ? "bg-gray-100 hover:bg-gray-200 text-black shadow-sm hover:scale-105"
-                        : "bg-gray-50 text-black/40 cursor-default"
-                    }`}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all bg-gray-100 hover:bg-gray-200 text-black shadow-sm hover:scale-105"
                   >
                     <Icon />
                   </a>

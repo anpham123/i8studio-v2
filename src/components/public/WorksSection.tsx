@@ -80,7 +80,7 @@ export default function WorksSection({ works, locale }: WorksSectionProps) {
                   <FadeIn key={work.id} delay={i * 0.06}>
                     <button
                       onClick={() => setLightbox({ image: work.image || work.videoUrl, title })}
-                      className="group block w-full text-left relative rounded-xl overflow-hidden bg-gray-100 aspect-[4/3]"
+                      className="group block w-full text-left relative rounded-xl overflow-hidden bg-gray-100 aspect-[16/9]"
                     >
                       {work.image ? (
                         /* eslint-disable-next-line @next/next/no-img-element */

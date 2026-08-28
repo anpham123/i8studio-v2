@@ -58,11 +58,22 @@ export default async function WorksPage() {
     featured: w.featured,
   }));
 
+  // Preload top 9 images for instant rendering without layout shift
+  const topImageUrls = serializedWorks
+    .slice(0, 9)
+    .map((w) => w.image)
+    .filter(Boolean) as string[];
+
   return (
-    <WorksContent
-      initialWorks={serializedWorks}
-      settings={settingsMap}
-      collections={collections}
-    />
+    <>
+      {topImageUrls.map((url, i) => (
+        <link key={i} rel="preload" as="image" href={url} fetchPriority="high" />
+      ))}
+      <WorksContent
+        initialWorks={serializedWorks}
+        settings={settingsMap}
+        collections={collections}
+      />
+    </>
   );
 }

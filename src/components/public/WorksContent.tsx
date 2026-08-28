@@ -355,12 +355,17 @@ function WorkCardItem({
     }
   }, [isHovered, hasHoverVideo]);
 
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+
   return (
-    <div
+    <motion.div
       data-flip-id={work.id}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.3), ease: "easeOut" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="work-card break-inside-avoid w-full group inline-block will-change-transform"
+      className="work-card break-inside-avoid w-full group inline-block will-change-transform mb-6"
     >
       {isCompositeSlider ? (
         <div className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] shadow-xs will-change-transform">
@@ -375,28 +380,35 @@ function WorkCardItem({
       ) : (
         <div
           onClick={onClick}
-          className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer"
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
+          className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs min-h-[180px]"
         >
           {/* Shimmer skeleton until loaded */}
           {!isLoaded && (
             <div className="absolute inset-0 bg-gradient-to-r from-[#eae7e1] via-[#f4f1eb] to-[#eae7e1] animate-pulse pointer-events-none" />
           )}
 
-          {/* Static thumbnail image with cinematic slow zoom / pan motion */}
+          {/* Static thumbnail image with cinematic slow zoom / pan motion (True Natural Masonry: Vertical stays Vertical, Horizontal stays Horizontal) */}
           {work.image ? (
             <img
               src={work.image}
               alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
               loading={index < 9 ? "eager" : "lazy"}
               fetchPriority={index < 9 ? "high" : "auto"}
-              decoding="async"
-              onLoad={() => setIsLoaded(true)}
-              className={`w-full h-full object-cover block will-change-transform transition-opacity duration-500 ${isLoaded || index < 6 ? "opacity-100" : "opacity-0"}`}
+              decoding={index < 9 ? "sync" : "async"}
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth && img.naturalHeight) {
+                  setAspectRatio(img.naturalWidth / img.naturalHeight);
+                }
+                setIsLoaded(true);
+              }}
+              className={`w-full h-auto block will-change-transform transition-opacity duration-400 ${isLoaded ? "opacity-100" : "opacity-0"}`}
               style={{
                 transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
                 transition: isHovered
-                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.5s ease"
-                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease",
+                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.4s ease"
+                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease",
               }}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
@@ -404,7 +416,7 @@ function WorkCardItem({
             />
           ) : (
             <div
-              className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="w-full h-[240px] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               style={{ backgroundColor: work.bg }}
             />
           )}
@@ -442,7 +454,7 @@ function WorkCardItem({
           </span>
         </h3>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -895,6 +907,11 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                   <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.35 29 29 0 0 0-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" />
                 </svg>
               </a>
+              <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-600 transition-colors" aria-label="X (Twitter)">
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </a>
             </div>
           </div>
         </aside>
@@ -1105,6 +1122,11 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                   <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="YouTube">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                       <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.35 29 29 0 0 0-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" />
+                    </svg>
+                  </a>
+                  <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="X (Twitter)">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                     </svg>
                   </a>
                 </div>

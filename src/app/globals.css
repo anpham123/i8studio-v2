@@ -258,6 +258,7 @@ main {
 }
 
 @media (max-width: 768px) {
+
   .paragraph-image-gallery,
   .blog-img-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -266,6 +267,7 @@ main {
 }
 
 @media (max-width: 640px) {
+
   .paragraph-image-gallery,
   .blog-img-grid {
     grid-template-columns: 1fr !important;
@@ -795,9 +797,11 @@ mark,
   align-items: stretch !important;
   background-color: #ffffff !important;
   border: 1px solid #e5e7eb !important;
-  border-radius: 0.75rem !important; /* 12px bo tròn */
+  border-radius: 0.75rem !important;
+  /* 12px bo tròn */
   overflow: hidden !important;
-  padding: 0 !important; /* Không có bất kỳ khoảng trống hay viền trong nào */
+  padding: 0 !important;
+  /* Không có bất kỳ khoảng trống hay viền trong nào */
   margin: 0.5rem 0.75rem 0.5rem 0 !important;
   vertical-align: top !important;
   max-width: 100% !important;
@@ -813,8 +817,8 @@ mark,
 }
 
 /* Reset all inner elements inside figure */
-.blog-content figure.blog-image-figure > *,
-.blog-figure > * {
+.blog-content figure.blog-image-figure>*,
+.blog-figure>* {
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -825,7 +829,8 @@ mark,
   width: 100% !important;
   height: auto !important;
   max-height: 380px !important;
-  border-radius: 0 !important; /* Khớp khít 100% không để lại khoảng trống */
+  border-radius: 0 !important;
+  /* Khớp khít 100% không để lại khoảng trống */
   object-fit: cover !important;
   display: block !important;
   margin: 0 !important;
@@ -837,12 +842,14 @@ mark,
 .blog-content figure.blog-image-figure figcaption,
 .blog-figure figcaption {
   width: 100% !important;
-  font-size: 0.8125rem !important; /* 13px */
+  font-size: 0.8125rem !important;
+  /* 13px */
   color: #4b5563 !important;
   font-style: italic !important;
   font-weight: 500 !important;
   margin: 0 !important;
-  padding: 0.35rem 0.5rem !important; /* Thu hẹp padding chú thích để cực kỳ gọn gàng */
+  padding: 0.35rem 0.5rem !important;
+  /* Thu hẹp padding chú thích để cực kỳ gọn gàng */
   border-top: 1px solid #f1f5f9 !important;
   background-color: #fafaf9 !important;
   text-align: center !important;
