@@ -229,10 +229,10 @@ function MilestoneDotItem({
   index: number;
   total: number;
 }) {
-  // Vị trí ngưỡng của mốc `index` dọc theo trục cuộn timeline
-  const threshold = (index + 0.35) / total;
-  const dotScale = useTransform(progress, [threshold - 0.08, threshold], [0, 1], { clamp: true });
-  const dotOpacity = useTransform(progress, [threshold - 0.08, threshold], [0, 1], { clamp: true });
+  // Threshold: Dot reveals smoothly as the line reaches each milestone index
+  const threshold = index === 0 ? 0.05 : (index + 0.25) / total;
+  const dotScale = useTransform(progress, [threshold - 0.06, threshold], [0, 1], { clamp: true });
+  const dotOpacity = useTransform(progress, [threshold - 0.06, threshold], [0, 1], { clamp: true });
 
   return (
     <div className="absolute left-6 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
@@ -240,10 +240,13 @@ function MilestoneDotItem({
         style={{ scale: dotScale, opacity: dotOpacity }}
         className="relative flex items-center justify-center"
       >
-        {/* Soft Tan Outer Halo */}
-        <div className="w-7 h-7 rounded-full bg-[#d6c4a5]/45 flex items-center justify-center">
-          {/* Black Inner Dot with White Border */}
-          <div className="w-3.5 h-3.5 rounded-full bg-[#111] border-2 border-white shadow-sm" />
+        {/* Soft Golden Outer Halo */}
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#c5a666]/30 flex items-center justify-center">
+          {/* Gold Core Ring */}
+          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#b8935a] border-2 border-white shadow-[0_0_12px_rgba(184,147,90,0.85)] flex items-center justify-center">
+            {/* White Core Dot */}
+            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+          </div>
         </div>
       </motion.div>
     </div>
@@ -451,31 +454,11 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           </motion.div>
 
           <div ref={timelineRef} className="relative">
-            {/* Scroll-Linked Dynamic Vertical Timeline Line (Chỉ giữ 1 đường duy nhất chạy theo cuộn chuột) */}
+            {/* Scroll-Linked Dynamic Vertical Timeline Line (Đường chỉ vàng mở rộng chạy theo cuộn chuột) */}
             <motion.div
               style={{ height: travelingDotTop }}
-              className="absolute left-6 md:left-1/2 top-0 w-[2px] bg-gradient-to-b from-[#c5a666]/30 via-[#c5a666] to-[#c5a666] -translate-x-1/2 z-10 origin-top pointer-events-none"
+              className="absolute left-6 md:left-1/2 top-0 w-[2px] bg-gradient-to-b from-[#c5a666]/40 via-[#b8935a] to-[#b8935a] -translate-x-1/2 z-10 origin-top pointer-events-none"
             />
-
-            {/* Scroll-Linked Moving Active Dot (Dấu chấm vàng phát sáng chạy theo cuộn chuột) */}
-            <motion.div
-              style={{ top: travelingDotTop }}
-              className="absolute left-6 md:left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex items-center justify-center"
-            >
-              <div className="relative flex items-center justify-center">
-                {/* Soft Glowing Outer Aura (Vầng hào quang vàng tỏa rộng) */}
-                <motion.div
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.25, 0.6] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute w-12 h-12 rounded-full bg-[#c5a666]/30"
-                />
-                {/* Middle Golden Ring */}
-                <div className="w-5 h-5 rounded-full bg-[#c5a666] border-2 border-white shadow-[0_0_14px_rgba(197,166,102,0.9)] flex items-center justify-center">
-                  {/* Inner White Core Dot */}
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                </div>
-              </div>
-            </motion.div>
 
             <div className="space-y-16">
               {MILESTONES.map((ms, i) => {

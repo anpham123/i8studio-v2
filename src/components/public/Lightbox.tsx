@@ -6,17 +6,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, X } from "lucide-react";
 import dynamic from "next/dynamic";
 
-const Panorama360Viewer = dynamic(() => import("./Panorama360Viewer"), { ssr: false });
+import Panorama360Viewer from "./Panorama360Viewer";
+import BeforeAfterSlider from "./BeforeAfterSlider";
 
 interface LightboxProps {
   src: string;
+  beforeImage?: string;
   alt: string;
   isVideo?: boolean;
   type?: string;
+  title?: string;
   onClose: () => void;
 }
 
-export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxProps) {
+export default function Lightbox({ src, beforeImage, alt, isVideo, type, title, onClose }: LightboxProps) {
   const [mounted, setMounted] = useState(false);
 
   // Guard for SSR — document is undefined on the server
@@ -36,6 +39,7 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
   }, [onClose]);
 
   const is360 = type?.toLowerCase() === "vr360" || type?.toLowerCase() === "vr";
+  const isComposite = (type?.toLowerCase() === "composite" || Boolean(beforeImage)) && Boolean(beforeImage);
 
   // Don't render on server or before mount
   if (!mounted) return null;
@@ -103,7 +107,24 @@ export default function Lightbox({ src, alt, isVideo, type, onClose }: LightboxP
           onClick={(e) => e.stopPropagation()}
           style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
-          {is360 ? (
+          {isComposite && beforeImage ? (
+            <div className="relative flex flex-col items-center justify-center max-w-[94vw] max-h-[92vh]">
+              <div className="w-[90vw] max-w-[1300px] max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl border border-white/15 bg-black">
+                <BeforeAfterSlider
+                  beforeImage={beforeImage}
+                  afterImage={src}
+                  beforeLabel="Before"
+                  afterLabel="After"
+                  autoAspect={true}
+                />
+              </div>
+              {title && (
+                <div className="text-white/80 text-[15px] font-medium mt-3 text-center tracking-wide drop-shadow-md">
+                  {title}
+                </div>
+              )}
+            </div>
+          ) : is360 ? (
             <div className="w-[85vw] h-[75vh] max-w-[1200px] rounded-xl overflow-hidden relative">
               <Panorama360Viewer src={src} />
             </div>

@@ -62,21 +62,22 @@ export default function CollectionDetailContent({
     <div className="min-h-screen bg-white">
       {/* ── Gallery Section (Bỏ Hero section cồng kềnh, vào thẳng nội dung) ──────────── */}
       <section className="max-w-6xl mx-auto px-6 pt-8 md:pt-12 pb-16 md:pb-24">
-        {/* Compact Back Link & Title Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-          <div>
-            <Link href={basePath} className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors mb-1.5">
-              ← {isJa ? "コレクション一覧" : "All Collections"}
-            </Link>
-            <h1
-              className="text-2xl md:text-3xl font-light text-[#111]"
-              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-            >
-              {title}
-            </h1>
-          </div>
+        {/* Back Link & Centered Large Title Header */}
+        <div className="mb-10 text-center flex flex-col items-center justify-center">
+          <Link
+            href={basePath}
+            className="inline-flex items-center gap-1.5 text-[14px] sm:text-[16px] md:text-[17px] font-semibold text-gray-500 hover:text-black transition-colors mb-3.5 tracking-wide group"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform duration-200">←</span> {isJa ? "コレクション一覧" : "All Collections"}
+          </Link>
+          <h1
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-light text-[#111] tracking-tight leading-tight"
+            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), 'Playfair Display', serif" }}
+          >
+            {title}
+          </h1>
           {desc && (
-            <p className="text-gray-500 text-xs sm:text-sm max-w-md sm:text-right leading-relaxed">
+            <p className="text-gray-500 text-sm sm:text-base max-w-2xl text-center mx-auto mt-3.5 leading-relaxed">
               {desc}
             </p>
           )}
@@ -181,8 +182,8 @@ export default function CollectionDetailContent({
               })}
             </div>
             <div className="text-center mt-10">
-              <Link href={basePath} className="text-sm font-medium text-gray-400 hover:text-[#111] transition-colors">
-                ← {isJa ? "コレクション一覧に戻る" : "Back to All Collections"}
+              <Link href={basePath} className="inline-flex items-center gap-1.5 text-[14px] sm:text-[16px] md:text-[17px] font-semibold text-gray-500 hover:text-black transition-colors tracking-wide group">
+                <span className="group-hover:-translate-x-1 transition-transform duration-200">←</span> {isJa ? "コレクション一覧に戻る" : "Back to All Collections"}
               </Link>
             </div>
           </div>

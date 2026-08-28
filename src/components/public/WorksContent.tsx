@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import Link from "next/link";
 import Lightbox from "@/components/public/Lightbox";
+import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
@@ -36,6 +37,7 @@ interface DBWork {
   type?: string;
   buildingCategory?: string;
   image: string;
+  beforeImage?: string;
   videoUrl: string;
   hoverVideo?: string;
   vrUrl?: string;
@@ -52,6 +54,7 @@ interface Work {
   bg: string;
   span: "wide" | "narrow";
   image?: string;
+  beforeImage?: string;
   hoverVideo?: string;
   videoUrl?: string;
   vrUrl?: string;
@@ -276,6 +279,7 @@ function WorkCardItem({
 
   const hoverVideoSrc = work.hoverVideo || (isVideoFile(work.videoUrl) ? work.videoUrl : undefined);
   const hasHoverVideo = Boolean(hoverVideoSrc);
+  const isCompositeSlider = (work.type === "composite" || Boolean(work.beforeImage)) && Boolean(work.beforeImage) && Boolean(work.image);
 
   // Cinematic Camera Motion Mode for static images:
   // 0: Zoom chậm từ xa lại gần (Slow Push-in / Dolly-in)
@@ -354,67 +358,84 @@ function WorkCardItem({
   return (
     <div
       data-flip-id={work.id}
-      onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
+      className="work-card break-inside-avoid w-full group inline-block will-change-transform"
     >
-      <div className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1] rounded-[3px] will-change-transform transition-all">
-        {/* Shimmer skeleton until loaded */}
-        {!isLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-r from-[#eae7e1] via-[#f4f1eb] to-[#eae7e1] animate-pulse pointer-events-none" />
-        )}
-
-        {/* Static thumbnail image with cinematic slow zoom / pan motion */}
-        {work.image ? (
-          <img
-            src={work.image}
-            alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
-            loading={index < 9 ? "eager" : "lazy"}
-            fetchPriority={index < 9 ? "high" : "auto"}
-            decoding="async"
-            onLoad={() => setIsLoaded(true)}
-            className={`w-full h-full object-cover block will-change-transform transition-opacity duration-500 ${isLoaded || index < 6 ? "opacity-100" : "opacity-0"}`}
-            style={{
-              transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
-              transition: isHovered
-                ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.5s ease"
-                : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease",
-            }}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
+      {isCompositeSlider ? (
+        <div className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] shadow-xs will-change-transform">
+          <BeforeAfterSlider
+            beforeImage={work.beforeImage!}
+            afterImage={work.image!}
+            beforeLabel="Before"
+            afterLabel="After"
+            autoAspect={true}
           />
-        ) : (
-          <div
-            className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-            style={{ backgroundColor: work.bg }}
-          />
-        )}
+        </div>
+      ) : (
+        <div
+          onClick={onClick}
+          className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer"
+        >
+          {/* Shimmer skeleton until loaded */}
+          {!isLoaded && (
+            <div className="absolute inset-0 bg-gradient-to-r from-[#eae7e1] via-[#f4f1eb] to-[#eae7e1] animate-pulse pointer-events-none" />
+          )}
 
-        {/* Hover Video Preview (when video is available) */}
-        {hasHoverVideo && hoverVideoSrc && (
-          <video
-            ref={videoRef}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
-              }`}
-          >
-            {hoverVideoSrc.endsWith(".webm") && (
-              <source src={hoverVideoSrc} type="video/webm" />
-            )}
-            <source src={hoverVideoSrc} type="video/mp4" />
-          </video>
-        )}
+          {/* Static thumbnail image with cinematic slow zoom / pan motion */}
+          {work.image ? (
+            <img
+              src={work.image}
+              alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
+              loading={index < 9 ? "eager" : "lazy"}
+              fetchPriority={index < 9 ? "high" : "auto"}
+              decoding="async"
+              onLoad={() => setIsLoaded(true)}
+              className={`w-full h-full object-cover block will-change-transform transition-opacity duration-500 ${isLoaded || index < 6 ? "opacity-100" : "opacity-0"}`}
+              style={{
+                transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
+                transition: isHovered
+                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.5s ease"
+                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease",
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            <div
+              className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              style={{ backgroundColor: work.bg }}
+            />
+          )}
 
-        {/* Subtle cinematic gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      </div>
+          {/* Hover Video Preview (when video is available) */}
+          {hasHoverVideo && hoverVideoSrc && (
+            <video
+              ref={videoRef}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
+                }`}
+            >
+              {hoverVideoSrc.endsWith(".webm") && (
+                <source src={hoverVideoSrc} type="video/webm" />
+              )}
+              <source src={hoverVideoSrc} type="video/mp4" />
+            </video>
+          )}
 
-      <div className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+          {/* Subtle cinematic gradient overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        </div>
+      )}
+
+      <div
+        onClick={onClick}
+        className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer"
+      >
         <h3 className="text-[17px] sm:text-[18px] font-semibold text-black tracking-[0.01em] leading-snug">
           <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
             {work.title}
@@ -445,7 +466,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
   const [activeType, setActiveType] = useState<WorkType | "all">("all");
   const [activeCat, setActiveCat] = useState<WorkCategory | "all">("all");
 
-  const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean; type?: string } | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; beforeImage?: string; alt: string; isVideo?: boolean; type?: string; title?: string } | null>(null);
   const [vrModal, setVrModal] = useState<{ url: string; title: string } | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -572,6 +593,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
         type,
         category,
         image: w.image,
+        beforeImage: w.beforeImage || undefined,
         videoUrl: w.videoUrl,
         hoverVideo: w.hoverVideo || (isVideoFile(w.videoUrl) ? w.videoUrl : undefined),
         vrUrl: w.vrUrl,
@@ -908,9 +930,17 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                     if (work.vrUrl) {
                       setVrModal({ url: work.vrUrl, title: work.title });
                     } else if (work.videoUrl) {
-                      setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type });
+                      setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type, title: work.title });
+                    } else if (work.type === "composite" || work.beforeImage) {
+                      setLightbox({
+                        src: work.image || "",
+                        beforeImage: work.beforeImage || "",
+                        alt: altText,
+                        type: "composite",
+                        title: work.titleJa ? `${work.title} (${work.titleJa})` : work.title,
+                      });
                     } else if (work.image) {
-                      setLightbox({ src: work.image, alt: altText, type: work.type });
+                      setLightbox({ src: work.image, alt: altText, type: work.type, title: work.title });
                     }
                   }}
                 />
@@ -1087,9 +1117,11 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
       {lightbox && (
         <Lightbox
           src={lightbox.src}
+          beforeImage={lightbox.beforeImage}
           alt={lightbox.alt}
           isVideo={lightbox.isVideo}
           type={lightbox.type}
+          title={lightbox.title}
           onClose={() => setLightbox(null)}
         />
       )}

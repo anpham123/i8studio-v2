@@ -62,7 +62,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           const isHeroImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
           const mediaUrl = data.mediaEmbedUrl || "";
           const isMediaVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl);
-          
+
           const useVideo = heroVideoUrl
             || (isHeroImageVideo ? heroSrc : null)
             || (!heroSrc && isMediaVideo ? mediaUrl : null);
@@ -216,58 +216,58 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             >
               {/* Visual — full width */}
               {hasMedia && (
-              <div className="w-full rounded-2xl overflow-hidden">
-                {isDirectVideo ? (
-                  <div className="aspect-video rounded-2xl overflow-hidden">
-                    <video
-                      src={feat.mediaEmbedUrl}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      controls
-                      className="w-full h-full object-cover bg-black"
-                    />
-                  </div>
-                ) : embedUrl ? (
-                  <div className="aspect-video rounded-2xl overflow-hidden">
-                    <iframe
-                      src={embedUrl}
-                      className="w-full h-full border-0"
-                      allowFullScreen
-                      allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
-                      title={ftTitle}
-                    />
-                  </div>
-                ) : isBeforeAfter ? (
-                  <div className="w-full rounded-2xl overflow-hidden">
-                    <BeforeAfterSlider
-                      beforeImage={feat.imageBefore}
-                      afterImage={feat.imageAfter}
-                      beforeLabel="Before"
-                      afterLabel="After"
-                      autoAspect={true}
-                    />
-                  </div>
-                ) : feat.image ? (
-                  <div className="w-full">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={feat.image}
-                      alt={ftTitle}
-                      className="w-full h-auto rounded-2xl"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        target.style.display = "none";
-                        const parent = target.parentElement;
-                        if (parent) {
-                          parent.style.display = "none";
-                        }
-                      }}
-                    />
-                  </div>
-                ) : null}
-              </div>
+                <div className="w-full rounded-2xl overflow-hidden">
+                  {isDirectVideo ? (
+                    <div className="aspect-video rounded-2xl overflow-hidden">
+                      <video
+                        src={feat.mediaEmbedUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        controls
+                        className="w-full h-full object-cover bg-black"
+                      />
+                    </div>
+                  ) : embedUrl ? (
+                    <div className="aspect-video rounded-2xl overflow-hidden">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                        title={ftTitle}
+                      />
+                    </div>
+                  ) : isBeforeAfter ? (
+                    <div className="w-full rounded-2xl overflow-hidden">
+                      <BeforeAfterSlider
+                        beforeImage={feat.imageBefore}
+                        afterImage={feat.imageAfter}
+                        beforeLabel="Before"
+                        afterLabel="After"
+                        autoAspect={true}
+                      />
+                    </div>
+                  ) : feat.image ? (
+                    <div className="w-full">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={feat.image}
+                        alt={ftTitle}
+                        className="w-full h-auto rounded-2xl"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = "none";
+                          const parent = target.parentElement;
+                          if (parent) {
+                            parent.style.display = "none";
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               )}
               {/* Text — below media (spans full width matching media above) */}
               <div className="w-full">
@@ -337,7 +337,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
+            <p className="text-[18px] sm:text-[20px] md:text-[21px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
               {isJa ? "制作工程" : "PROCESS"}
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
@@ -349,65 +349,65 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             {data.process
               .filter((step) => step.titleJa || step.titleEn || step.descJa || step.descEn)
               .map((step, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative"
-              >
-                {/* Step number */}
-                <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-[15px] sm:text-base font-bold mb-5 font-roboto">
-                  {String(i + 1).padStart(2, "0")}
-                </div>
-                <h3 className="text-[18px] sm:text-[20px] font-semibold text-[#111] mb-3">
-                  {isJa ? step.titleJa : step.titleEn}
-                </h3>
-                {(() => {
-                  const rawDesc = (isJa ? step.descJa : step.descEn) || "";
-                  let items = rawDesc
-                    .split(/\r?\n/)
-                    .map((s) => s.trim())
-                    .filter(Boolean);
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative"
+                >
+                  {/* Step number */}
+                  <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-[15px] sm:text-base font-bold mb-5 font-roboto">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <h3 className="text-[18px] sm:text-[20px] font-semibold text-[#111] mb-3">
+                    {isJa ? step.titleJa : step.titleEn}
+                  </h3>
+                  {(() => {
+                    const rawDesc = (isJa ? step.descJa : step.descEn) || "";
+                    let items = rawDesc
+                      .split(/\r?\n/)
+                      .map((s) => s.trim())
+                      .filter(Boolean);
 
-                  if (items.length === 0 && rawDesc.trim()) {
-                    items = [rawDesc.trim()];
-                  }
+                    if (items.length === 0 && rawDesc.trim()) {
+                      items = [rawDesc.trim()];
+                    }
 
-                  if (items.length > 0) {
-                    return (
-                      <ul className="space-y-2.5">
-                        {items.map((item, idx) => {
-                          const cleanItem = item.replace(/^[-•・*]\s*/, "");
-                          return (
-                            <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black leading-relaxed [text-wrap:pretty]">
-                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
-                              <span className="flex-1">{cleanItem}</span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    );
-                  }
+                    if (items.length > 0) {
+                      return (
+                        <ul className="space-y-2.5">
+                          {items.map((item, idx) => {
+                            const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                            return (
+                              <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black leading-relaxed [text-wrap:pretty]">
+                                <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
+                                <span className="flex-1">{cleanItem}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      );
+                    }
 
-                  return null;
-                })()}
-              </motion.div>
-            ))}
+                    return null;
+                  })()}
+                </motion.div>
+              ))}
           </div>
         </div>
       </section>
 
-      {/* ── Pricing Block (dark) ──────────────────────────── */}
-      <section className="bg-[#111]">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[16px] sm:text-[17px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
+      {/* ── Pricing Block (Insight warm cream-gold theme) ──────────────────────────── */}
+      <section className="bg-[#fbf6ec] border-y border-[#ebd9be]">
+        <div className="max-w-6xl mx-auto px-6 py-12 sm:py-14 md:py-16">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10 sm:mb-12">
+            <p className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-2.5">
               {isJa ? "料金プラン" : "SERVICE PLANS"}
             </p>
-            <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-white leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-3xl sm:text-4xl md:text-[38px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "サービスプラン" : "Service Plans"}
             </h2>
           </motion.div>
@@ -423,11 +423,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   whileInView="visible"
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className={`rounded-2xl p-8 transition-all flex flex-col justify-between relative ${
-                    isHighlight
-                      ? "bg-gradient-to-b from-[#282116] via-[#1c1811] to-[#13110e] border-2 border-[#b8935a] shadow-[0_0_40px_rgba(184,147,90,0.28)] ring-1 ring-[#b8935a]/40 scale-[1.03] md:scale-[1.05] z-10"
-                      : "bg-[#161616] border border-white/10"
-                  }`}
+                  className={`rounded-2xl p-8 transition-all flex flex-col justify-between relative ${isHighlight
+                      ? "bg-gradient-to-b from-[#1f1b17] via-[#161412] to-[#0f0e0c] border-2 border-[#b8935a] shadow-[0_20px_50px_rgba(0,0,0,0.25)] ring-4 ring-[#b8935a]/30 scale-[1.03] md:scale-[1.06] z-10 text-white"
+                      : "bg-white border border-[#ebd9be]/90 shadow-sm hover:shadow-md text-[#111]"
+                    }`}
                 >
                   <div>
                     {isHighlight ? (
@@ -437,21 +436,21 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     ) : (
                       <div className="h-[29px] mb-3.5" />
                     )}
-                    <h3 className={`text-[20px] sm:text-[22px] font-semibold mb-4 ${isHighlight ? "text-white font-bold" : "text-white"}`}>
+                    <h3 className={`text-[20px] sm:text-[22px] font-bold mb-4 ${isHighlight ? "text-white" : "text-[#111]"}`}>
                       {isJa
                         ? (plan.name === "Standard" ? "スタンダード" : plan.name === "High Quality" ? "ハイクオリティ" : plan.name === "Full Custom" ? "フルカスタム" : plan.name)
                         : plan.name}
                     </h3>
-                    <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#f7e4b2]" : "text-white"}`}>
+                    <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#f5d78e]" : "text-[#111]"}`}>
                       {plan.price === "ASK" ? (
-                        <span className="text-xl font-medium">{isJa ? "お問い合わせ" : "Contact Us"}</span>
+                        <span className="text-xl font-semibold">{isJa ? "お問い合わせ" : "Contact Us"}</span>
                       ) : (
                         plan.price
                       )}
                     </div>
                     <ul className="space-y-3 mb-8">
                       {plan.features.map((f, fi) => (
-                        <li key={fi} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-white/90 leading-relaxed">
+                        <li key={fi} className={`flex items-start gap-2.5 text-[15px] sm:text-[16px] leading-relaxed ${isHighlight ? "text-gray-200" : "text-gray-700"}`}>
                           <span className="text-[#b8935a] font-bold mt-0.5 select-none">✓</span>
                           <span>{f}</span>
                         </li>
@@ -460,11 +459,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   </div>
                   <Link
                     href={`/${locale}/contact`}
-                    className={`block text-center py-3.5 px-6 rounded-full text-[15px] font-bold transition-all ${
-                      isHighlight
-                        ? "bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black hover:brightness-110 shadow-xl shadow-[#b8935a]/25"
-                        : "bg-[#282828] text-white hover:bg-[#353535] border border-white/10"
-                    }`}
+                    className={`block text-center py-3.5 px-6 rounded-full text-[15px] font-bold transition-all ${isHighlight
+                        ? "bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black hover:brightness-110 shadow-xl shadow-[#b8935a]/30"
+                        : "bg-[#111] text-white hover:bg-[#333] shadow-xs"
+                      }`}
                   >
                     {plan.price === "ASK"
                       ? (isJa ? "お見積もりを依頼" : "Request Quote")

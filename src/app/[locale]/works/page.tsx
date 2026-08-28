@@ -51,6 +51,7 @@ export default async function WorksPage() {
     type: w.type,
     buildingCategory: w.buildingCategory,
     image: w.image,
+    beforeImage: w.beforeImage,
     videoUrl: w.videoUrl,
     vrUrl: w.vrUrl,
     order: w.order,

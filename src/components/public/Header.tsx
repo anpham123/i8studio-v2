@@ -282,15 +282,15 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                     if (link.children) handleMouseLeave();
                   }}
                 >
-                  {/* Top Gold Bar Indicator (Chạy mở rộng từ trái sang phải với tốc độ êm ái hơn) */}
+                  {/* Bottom Logo Green Indicator (Chạy mở rộng phía dưới theo màu xanh logo) */}
                   {showBar && (
                     <motion.div
                       initial={isItemHovered && !isItemActive ? { scaleX: 0, opacity: 1 } : false}
                       animate={{ scaleX: 1, opacity: 1 }}
                       exit={{ scaleX: 0, opacity: 0 }}
                       style={{ transformOrigin: "left" }}
-                      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                      className={`absolute top-0 ${barPositionCls} h-[5px] bg-[#c5a666] z-30 transition-[left,right] duration-200 origin-left`}
+                      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                      className={`absolute bottom-0 ${barPositionCls} h-[6px] bg-[#70b13d] rounded-full z-30 transition-[left,right] duration-200 origin-left`}
                     />
                   )}
 
@@ -336,20 +336,20 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                             </div>
 
                             {/* 4-col Grid */}
-                            <div className="grid grid-cols-4 gap-8">
+                            <div className="grid grid-cols-4 gap-5 sm:gap-6">
                               {link.children.map((child) => (
                                 <Link
                                   key={child.href}
                                   href={child.href}
                                   onClick={() => setOpenDesktopMenu(null)}
-                                  className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-200/80 bg-gray-950"
+                                  className="group relative block aspect-[16/9] rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-200/80 bg-gray-950"
                                 >
                                   {child.thumbnail ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                       src={child.thumbnail}
                                       alt={child.label}
-                                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-75 group-hover:scale-110 transition-all duration-700 ease-out"
+                                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-75 group-hover:scale-108 transition-all duration-700 ease-out"
                                       onError={(e) => {
                                         const target = e.currentTarget;
                                         target.style.display = "none";
@@ -363,16 +363,16 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent group-hover:bg-black/65 transition-all duration-400 pointer-events-none" />
 
                                   {/* Label & Details: Smoothly moves from bottom to CENTER on hover (Strictly 1 single line, no truncation) */}
-                                  <div className="absolute inset-0 flex flex-col items-center justify-end group-hover:justify-center p-2.5 sm:p-3.5 text-center z-10 transition-all duration-500 ease-out pointer-events-none w-full">
+                                  <div className="absolute inset-0 flex flex-col items-center justify-end group-hover:justify-center p-2 sm:p-3 text-center z-10 transition-all duration-500 ease-out pointer-events-none w-full">
                                     <span
-                                      className="w-full text-white text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[17px] font-black uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] group-hover:scale-105 group-hover:text-white transition-all duration-500 leading-none whitespace-nowrap px-1 block"
+                                      className="w-full text-white text-[13px] sm:text-[14px] md:text-[15px] lg:text-[15.5px] xl:text-[16.5px] font-black uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] group-hover:scale-105 group-hover:text-white transition-all duration-500 leading-none whitespace-nowrap px-1 block"
                                       style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
                                     >
                                       {child.label}
                                     </span>
 
                                     {/* Subtitle appearing beneath the centered title */}
-                                    <span className="text-[11px] sm:text-[12px] font-medium text-white/95 tracking-wider flex items-center justify-center gap-1 opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-8 group-hover:mt-2 transition-all duration-400 ease-out drop-shadow-md whitespace-nowrap">
+                                    <span className="text-[11px] sm:text-[12px] font-medium text-white/95 tracking-wider flex items-center justify-center gap-1 opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-8 group-hover:mt-1.5 transition-all duration-400 ease-out drop-shadow-md whitespace-nowrap">
                                       {locale === "ja" ? "詳しくはこちら ›" : "View Details →"}
                                     </span>
                                   </div>
