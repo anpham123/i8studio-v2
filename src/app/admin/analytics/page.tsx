@@ -133,14 +133,16 @@ function CampaignLinkBuilder() {
   const [campaign, setCampaign] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://i8studio.vn";
+  const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const baseUrl = isLocalhost ? "https://i8studio.vn" : (typeof window !== "undefined" ? window.location.origin : "https://i8studio.vn");
   
   const fullUrl = useMemo(() => {
     let url = `${baseUrl}${targetPage}`;
     const params = new URLSearchParams();
     if (platform) params.set("utm_source", platform);
-    params.set("utm_medium", platform === "youtube" ? "video_desc" : platform === "instagram" ? "bio" : "social");
-    if (campaign.trim()) params.set("utm_campaign", campaign.trim().toLowerCase().replace(/\s+/g, "_"));
+    params.set("utm_medium", platform === "youtube" ? "video_desc" : platform === "instagram" ? "social" : "social");
+    const campaignVal = campaign.trim() ? campaign.trim().toLowerCase().replace(/\s+/g, "_") : (platform === "instagram" ? "bio_link" : "general");
+    params.set("utm_campaign", campaignVal);
     return `${url}?${params.toString()}`;
   }, [baseUrl, targetPage, platform, campaign]);
 
@@ -157,7 +159,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://www.youtube.com/@i8studio",
       icon: "▶️",
       placement: "Dán vào Mô tả Video / Thông tin Kênh",
-      trackingUrl: `${baseUrl}/?utm_source=youtube&utm_medium=video_desc`,
+      trackingUrl: `${baseUrl}/?utm_source=youtube&utm_medium=social&utm_campaign=channel_bio`,
     },
     {
       key: "ig",
@@ -165,7 +167,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://www.instagram.com/i8studio_cg/",
       icon: "📸",
       placement: "Dán vào Link Bio / Tin Story Instagram",
-      trackingUrl: `${baseUrl}/?utm_source=instagram&utm_medium=bio`,
+      trackingUrl: `${baseUrl}/?utm_source=instagram&utm_medium=social&utm_campaign=bio_link`,
     },
     {
       key: "fb",
@@ -173,7 +175,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://www.facebook.com/i8studio.vn/",
       icon: "📘",
       placement: "Dán vào Fanpage / Bài đăng Facebook",
-      trackingUrl: `${baseUrl}/?utm_source=facebook&utm_medium=social`,
+      trackingUrl: `${baseUrl}/?utm_source=facebook&utm_medium=social&utm_campaign=fanpage_bio`,
     },
     {
       key: "li",
@@ -181,7 +183,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://www.linkedin.com/in/i8-studio/",
       icon: "💼",
       placement: "Dán vào Profile / Bài viết LinkedIn",
-      trackingUrl: `${baseUrl}/?utm_source=linkedin&utm_medium=social`,
+      trackingUrl: `${baseUrl}/?utm_source=linkedin&utm_medium=social&utm_campaign=company_bio`,
     },
     {
       key: "x",
@@ -189,7 +191,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://x.com/i8studio_3d",
       icon: "✖️",
       placement: "Dán vào Tiểu sử Bio / Bài đăng trên X",
-      trackingUrl: `${baseUrl}/?utm_source=x&utm_medium=social`,
+      trackingUrl: `${baseUrl}/?utm_source=x&utm_medium=social&utm_campaign=profile_bio`,
     },
   ];
 
@@ -284,7 +286,9 @@ function CampaignLinkBuilder() {
               className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-400"
             >
               <option value="/" className="text-gray-900">Trang chủ (Home)</option>
+              <option value="/ja" className="text-gray-900">Trang chủ tiếng Nhật (/ja)</option>
               <option value="/about-us/workflow" className="text-gray-900">Quy trình (Workflow)</option>
+              <option value="/ja/about-us/workflow" className="text-gray-900">Quy trình tiếng Nhật (/ja/workflow)</option>
               <option value="/about-us/portfolio" className="text-gray-900">Portfolio</option>
               <option value="/works" className="text-gray-900">Dự án (Works)</option>
               <option value="/contact" className="text-gray-900">Liên hệ (Contact)</option>
