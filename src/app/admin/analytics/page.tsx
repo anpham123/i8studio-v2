@@ -167,7 +167,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://www.instagram.com/i8studio_cg/",
       icon: "📸",
       placement: "Dán vào Link Bio / Tin Story Instagram",
-      trackingUrl: `${baseUrl}/?utm_source=instagram&utm_medium=social&utm_campaign=bio_link`,
+      trackingUrl: `${baseUrl}/ja?utm_source=instagram&utm_medium=social&utm_campaign=bio_link`,
     },
     {
       key: "fb",
@@ -191,7 +191,7 @@ function CampaignLinkBuilder() {
       accountUrl: "https://x.com/i8studio_3d",
       icon: "✖️",
       placement: "Dán vào Tiểu sử Bio / Bài đăng trên X",
-      trackingUrl: `${baseUrl}/?utm_source=x&utm_medium=social&utm_campaign=profile_bio`,
+      trackingUrl: `${baseUrl}/ja?utm_source=x&utm_medium=social&utm_campaign=profile_bio`,
     },
   ];
 
