@@ -24,6 +24,8 @@ export default function CompanyContentPage() {
 
   // Overview
   const [overview, setOverview] = useState({
+    heroImage: "",
+    teamImage: "",
     introJa: "", introEn: "",
     staffCount: "80", yearsExperience: "6", clientCount: "200", projectCount: "3000",
   });
@@ -98,7 +100,11 @@ export default function CompanyContentPage() {
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${activeTab === t.key ? "bg-white border border-b-white border-gray-200 -mb-px text-blue-600" : "text-gray-500 hover:text-gray-700"}`}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              activeTab === t.key
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
           >
             {t.label}
           </button>
@@ -109,6 +115,29 @@ export default function CompanyContentPage() {
         {/* ── Overview Tab ── */}
         {activeTab === "overview" && (
           <div className="space-y-5">
+            {/* Hero & Team Images */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Hình ảnh Hero Section & Đội ngũ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Ảnh nền Hero Section (Company Overview)</label>
+                  <p className="text-xs text-gray-500 mb-2">Ảnh hiển thị toàn màn hình ở đầu trang Company Overview.</p>
+                  <ImageUpload
+                    value={overview.heroImage || ""}
+                    onChange={(url) => setOverview((o) => ({ ...o, heroImage: url }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Ảnh tập thể Đội ngũ (Team Section)</label>
+                  <p className="text-xs text-gray-500 mb-2">Ảnh hiển thị tại mục giới thiệu Team / Nhân sự.</p>
+                  <ImageUpload
+                    value={overview.teamImage || ""}
+                    onChange={(url) => setOverview((o) => ({ ...o, teamImage: url }))}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Giới thiệu</h3>
               <div>

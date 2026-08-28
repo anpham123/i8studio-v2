@@ -60,30 +60,28 @@ export default function CollectionDetailContent({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero ──────────────── */}
-      <section className="bg-[#fafaf8] section-noise border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-28 text-center">
-          <Link href={basePath} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-6">
-            ← {isJa ? "コレクション一覧" : "All Collections"}
-          </Link>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-5xl font-light text-[#111] mb-4"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-          >
-            {title}
-          </motion.h1>
+      {/* ── Gallery Section (Bỏ Hero section cồng kềnh, vào thẳng nội dung) ──────────── */}
+      <section className="max-w-6xl mx-auto px-6 pt-8 md:pt-12 pb-16 md:pb-24">
+        {/* Compact Back Link & Title Header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <Link href={basePath} className="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-400 hover:text-gray-900 transition-colors mb-1.5">
+              ← {isJa ? "コレクション一覧" : "All Collections"}
+            </Link>
+            <h1
+              className="text-2xl md:text-3xl font-light text-[#111]"
+              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            >
+              {title}
+            </h1>
+          </div>
           {desc && (
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-gray-500 text-base max-w-2xl mx-auto">
+            <p className="text-gray-500 text-xs sm:text-sm max-w-md sm:text-right leading-relaxed">
               {desc}
-            </motion.p>
+            </p>
           )}
         </div>
-      </section>
 
-      {/* ── Gallery ──────────── */}
-      <section className="max-w-6xl mx-auto px-6 py-16 md:py-24">
         {/* Cover */}
         {col.coverImage && (
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-8">

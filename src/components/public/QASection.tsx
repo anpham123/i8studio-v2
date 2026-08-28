@@ -30,35 +30,42 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
   return (
     <section id="qa" className="section-noise py-20 lg:py-28 bg-[#f8f9fa] border-t border-gray-200/70">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <FadeIn className="text-center mb-12">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+        <FadeIn className="text-center mb-14">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#111] tracking-tight uppercase font-sans">
             FAQ
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
-            {t("title")}
           </h2>
+          <p className="text-[21px] sm:text-[23px] text-gray-800 font-semibold tracking-wide mt-2.5">
+            {locale === "ja" ? "よくある質問" : "Frequently Asked Questions"}
+          </p>
         </FadeIn>
 
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {displayed.map((item, i) => {
             const question = locale === "ja" ? item.questionJa || item.question : item.question;
             const answer = locale === "ja" ? item.answerJa || item.answer : item.answer;
             const isOpen = openId === item.id;
 
             return (
-              <FadeIn key={item.id} delay={i * 0.05}>
-                <div className="border border-gray-200/80 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow transition-shadow">
+              <FadeIn key={item.id} delay={i * 0.04}>
+                <div
+                  onMouseEnter={() => setOpenId(item.id)}
+                  className={`border rounded-2xl overflow-hidden bg-white transition-all duration-300 ${
+                    isOpen
+                      ? "border-[#b8935a]/50 shadow-lg ring-2 ring-[#b8935a]/10"
+                      : "border-gray-200/80 shadow-sm hover:border-gray-300"
+                  }`}
+                >
                   <button
                     onClick={() => setOpenId(isOpen ? null : item.id)}
-                    className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                    className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left cursor-pointer"
                   >
-                    <span className={`font-medium text-sm sm:text-base transition-colors ${isOpen ? "text-gray-900" : "text-gray-700"}`}>
+                    <span className={`font-semibold text-sm sm:text-base transition-colors ${isOpen ? "text-[#111]" : "text-gray-700"}`}>
                       {question}
                     </span>
-                    <span className={`shrink-0 w-6 h-6 rounded-full border flex items-center justify-center transition-all ${isOpen ? "border-gray-900 bg-gray-900" : "border-gray-200 bg-white"}`}>
+                    <span className={`shrink-0 w-7 h-7 rounded-full border flex items-center justify-center transition-all ${isOpen ? "border-[#111] bg-[#111]" : "border-gray-200 bg-gray-50"}`}>
                       {isOpen
-                        ? <Minus size={12} className="text-white" />
-                        : <Plus size={12} className="text-gray-400" />
+                        ? <Minus size={13} className="text-white" />
+                        : <Plus size={13} className="text-gray-500" />
                       }
                     </span>
                   </button>
@@ -69,9 +76,9 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                       >
-                        <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                        <div className="px-5 sm:px-6 pb-6 text-sm sm:text-[15px] text-gray-600 leading-relaxed border-t border-gray-100 pt-4 font-normal">
                           {answer}
                         </div>
                       </motion.div>

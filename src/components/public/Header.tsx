@@ -179,18 +179,23 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
     router.push(newPath);
   };
 
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+
   const isActive = (href: string) => {
     const cleanHref = href.split("?")[0].split("#")[0];
-    return pathname === cleanHref || pathname.startsWith(cleanHref + "/");
+    if (pathname === cleanHref) return true;
+    if (cleanHref !== `/${locale}` && pathname.startsWith(cleanHref + "/")) return true;
+    return false;
   };
 
-  const linkCls = (href: string, hasChildren?: boolean) =>
-    `px-3 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-all duration-300 relative group inline-flex items-center gap-1 ${isActive(href) ? "text-[#111]" : "text-gray-500 hover:text-[#111]"
-    }${hasChildren ? " cursor-default" : ""}`;
+  const activeIndex = navLinks.findIndex((link) => isActive(link.href));
+  const hoveredIndex = hoveredNav ? navLinks.findIndex((link) => link.href === hoveredNav) : -1;
+  const isAdjacent = activeIndex !== -1 && hoveredIndex !== -1 && Math.abs(activeIndex - hoveredIndex) === 1;
 
-  const underlineCls = (href: string) =>
-    `absolute bottom-0 left-3 right-3 h-[1.5px] bg-[#111] transition-transform duration-200 origin-left ${isActive(href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-    }`;
+  const linkCls = (href: string, hasChildren?: boolean) =>
+    `px-4 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-colors duration-200 relative inline-flex items-center gap-1 ${
+      isActive(href) || hoveredNav === href ? "text-[#111]" : "text-gray-600 hover:text-[#111]"
+    }${hasChildren ? " cursor-default" : ""}`;
 
   /* ---- Desktop dropdown hover handlers ---- */
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -245,36 +250,71 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
             )}
           </Link>
 
-          {/* ============ Desktop Nav ============ */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <div
-                key={link.href}
-                className="relative"
-                onMouseEnter={link.children ? () => handleMouseEnter(link.href) : undefined}
-                onMouseLeave={link.children ? handleMouseLeave : undefined}
-              >
-                {/* Top-level link */}
-                {link.children ? (
-                  <button
-                    type="button"
-                    className={linkCls(link.href, true)}
-                    onClick={() => setOpenDesktopMenu((prev) => (prev === link.href ? null : link.href))}
-                  >
-                    {link.label}
-                    <ChevronDown
-                      size={13}
-                      className={`transition-transform duration-200 ${openDesktopMenu === link.href ? "rotate-180" : ""
-                        }`}
+          {/* ============ Desktop Nav with Dynamic Top Bar Indicator ============ */}
+          <nav
+            className="hidden lg:flex items-center gap-0 h-full relative"
+            onMouseLeave={() => setHoveredNav(null)}
+          >
+            {navLinks.map((link, idx) => {
+              const isItemActive = idx === activeIndex;
+              const isItemHovered = idx === hoveredIndex;
+              const showBar = isItemActive || isItemHovered;
+
+              let barPositionCls = "left-2 right-2";
+              if (isAdjacent) {
+                const minIdx = Math.min(activeIndex, hoveredIndex);
+                const maxIdx = Math.max(activeIndex, hoveredIndex);
+                if (idx === minIdx) {
+                  barPositionCls = "left-2 right-0";
+                } else if (idx === maxIdx) {
+                  barPositionCls = "left-0 right-2";
+                }
+              }
+
+              return (
+                <div
+                  key={link.href}
+                  className="relative h-full flex items-center"
+                  onMouseEnter={() => {
+                    setHoveredNav(link.href);
+                    if (link.children) handleMouseEnter(link.href);
+                  }}
+                  onMouseLeave={() => {
+                    if (link.children) handleMouseLeave();
+                  }}
+                >
+                  {/* Top Gold Bar Indicator (Chạy mở rộng từ trái sang phải với tốc độ êm ái hơn) */}
+                  {showBar && (
+                    <motion.div
+                      initial={isItemHovered && !isItemActive ? { scaleX: 0, opacity: 1 } : false}
+                      animate={{ scaleX: 1, opacity: 1 }}
+                      exit={{ scaleX: 0, opacity: 0 }}
+                      style={{ transformOrigin: "left" }}
+                      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                      className={`absolute top-0 ${barPositionCls} h-[5px] bg-[#c5a666] z-30 transition-[left,right] duration-200 origin-left`}
                     />
-                    <span className={underlineCls(link.href)} />
-                  </button>
-                ) : (
-                  <Link href={link.href} className={linkCls(link.href)}>
-                    {link.label}
-                    <span className={underlineCls(link.href)} />
-                  </Link>
-                )}
+                  )}
+
+                  {/* Top-level link */}
+                  {link.children ? (
+                    <button
+                      type="button"
+                      className={linkCls(link.href, true)}
+                      onClick={() => setOpenDesktopMenu((prev) => (prev === link.href ? null : link.href))}
+                    >
+                      {link.label}
+                      <ChevronDown
+                        size={13}
+                        className={`transition-transform duration-200 ${
+                          openDesktopMenu === link.href ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  ) : (
+                    <Link href={link.href} className={linkCls(link.href)}>
+                      {link.label}
+                    </Link>
+                  )}
 
                 {/* ---- Mega-menu (SERVICE panel) ---- */}
                 <AnimatePresence>
@@ -353,8 +393,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                           key={child.href}
                           href={child.href}
                           className={`block px-5 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${isActive(child.href)
-                              ? "text-[#111] bg-gray-50"
-                              : "text-gray-500 hover:text-[#111] hover:bg-gray-50/70"
+                            ? "text-[#111] bg-gray-50"
+                            : "text-gray-500 hover:text-[#111] hover:bg-gray-50/70"
                             }`}
                         >
                           {child.label}
@@ -364,8 +404,9 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                   )}
                 </AnimatePresence>
               </div>
-            ))}
-          </nav>
+            );
+          })}
+        </nav>
 
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-3">
@@ -419,8 +460,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                         type="button"
                         onClick={() => toggleMobileSubmenu(link.href)}
                         className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.href)
-                            ? "bg-gray-50 text-gray-900"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          ? "bg-gray-50 text-gray-900"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                           }`}
                       >
                         {link.label}
@@ -479,8 +520,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
                                     className={`flex items-center px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors ${isActive(child.href)
-                                        ? "text-gray-900 bg-gray-50"
-                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                      ? "text-gray-900 bg-gray-50"
+                                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                       }`}
                                   >
                                     {child.label}
@@ -497,8 +538,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.href)
-                          ? "bg-gray-50 text-gray-900"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        ? "bg-gray-50 text-gray-900"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         }`}
                     >
                       {link.label}

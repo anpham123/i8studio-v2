@@ -74,7 +74,6 @@ export default function Footer({ settings }: FooterProps) {
     { label: navT("aboutSub.companyOverview"), href: `/${locale}/about-us` },
     { label: navT("aboutSub.portfolio"),       href: `/${locale}/about-us/portfolio` },
     { label: navT("aboutSub.workflow"),        href: `/${locale}/about-us/workflow` },
-    { label: navT("aboutSub.collection"),      href: `/${locale}/about-us/collection` },
   ];
 
   const blogLinks = [
@@ -111,7 +110,9 @@ export default function Footer({ settings }: FooterProps) {
             </div>
 
             <p className="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal whitespace-pre-line">
-              {t("tagline")}
+              {locale === "ja"
+                ? (settings.footerTaglineJa || t("tagline")).replace("、高品質", "\n高品質").replace("伝える高品質", "伝える\n高品質")
+                : (settings.footerTaglineEn || t("tagline"))}
             </p>
 
             {/* Social icons */}
@@ -160,9 +161,19 @@ export default function Footer({ settings }: FooterProps) {
                   : (settings.address || "Da Nang, Vietnam")}
               </li>
               <li>
-                {locale === "ja"
-                  ? (settings.workingHoursJa || settings.workingHours || t("workingHours"))
-                  : (settings.workingHours || "Mon - Fri 7:30 - 16:30 VN")}
+                {(() => {
+                  if (locale === "ja") {
+                    if (settings.workingHoursJa && settings.workingHoursJa.trim()) {
+                      return settings.workingHoursJa;
+                    }
+                    const raw = settings.workingHours || t("workingHours");
+                    return raw
+                      .replace(/Mon\s*-\s*Fri/gi, "月〜金")
+                      .replace(/\bVN\b/gi, "(ベトナム時間)")
+                      .replace(/Vietnam\s*Time/gi, "(ベトナム時間)");
+                  }
+                  return settings.workingHours || "Mon - Fri 7:30 - 16:30 VN";
+                })()}
               </li>
             </ul>
           </div>

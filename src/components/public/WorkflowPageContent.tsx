@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion, type Variants } from "framer-motion";
-import { MessageSquare } from "lucide-react";
 
 const easeCurve = [0.16, 1, 0.3, 1] as const;
 
@@ -112,8 +111,8 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero: Full-Width Day/Night Split Background with Centered Semi-Transparent WORKFLOW ────────── */}
-      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex items-center justify-center bg-gray-950">
+      {/* ── Hero: Full-Width Day/Night Split Background with Upper Semi-Transparent WORKFLOW ────────── */}
+      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex items-start justify-center bg-gray-950">
 
         {/* Full-width Background Image (Clean, Sharp & Clear) */}
         <div className="absolute inset-0 w-full h-full z-0">
@@ -125,12 +124,12 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
           />
         </div>
 
-        {/* Centered Oversized Semi-Transparent "WORKFLOW" Typography Split at Day/Night Divider */}
-        <div className="absolute inset-0 z-10 pointer-events-none flex items-center w-full">
+        {/* Oversized Semi-Transparent "WORKFLOW" Typography Split at Day/Night Divider - Positioned high in the sky area */}
+        <div className="absolute inset-0 z-10 pointer-events-none flex items-start pt-1 sm:pt-2 md:pt-3 lg:pt-4 w-full">
           {/* Left 50% (Bright Side): WORK */}
-          <div className="w-1/2 flex justify-end pr-2.5 sm:pr-3.5 lg:pr-5">
+          <div className="w-1/2 flex justify-end pr-2 sm:pr-3 lg:pr-4">
             <h1
-              style={{ fontSize: "clamp(2.8rem, 12.8vw, 15rem)" }}
+              style={{ fontSize: "clamp(3.2rem, 14vw, 12rem)" }}
               className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/60 sm:text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-right"
             >
               WORK
@@ -138,41 +137,14 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
           </div>
 
           {/* Right 50% (Dark Side): FLOW */}
-          <div className="w-1/2 flex justify-start pl-2.5 sm:pl-3.5 lg:pl-5">
+          <div className="w-1/2 flex justify-start pl-5 sm:pl-8 md:pl-10 lg:pl-12">
             <div
-              style={{ fontSize: "clamp(2.8rem, 12.8vw, 15rem)" }}
+              style={{ fontSize: "clamp(3.2rem, 14vw, 12rem)" }}
               className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/60 sm:text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-left"
             >
               FLOW
             </div>
           </div>
-        </div>
-
-        {/* Top-Left: Eyebrow */}
-        <div className="absolute top-8 left-6 sm:top-10 sm:left-10 lg:top-12 lg:left-14 z-20 pointer-events-none">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.26em] text-white/95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-            {isJa ? "建築CG制作工程" : "ARCHITECTURAL WORKFLOW"}
-          </p>
-        </div>
-
-        {/* Bottom-Left: Narrative Description */}
-        <div className="absolute bottom-8 left-6 sm:bottom-10 sm:left-10 lg:bottom-12 lg:left-14 z-20 pointer-events-none max-w-sm sm:max-w-md">
-          <p className="text-xs sm:text-[13px] text-white/85 font-normal leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-sans">
-            {isJa
-              ? "お客様のビジョンを最高品質のビジュアルへと変換する、プロフェッショナルなステップ。モデリングからライティング、高品質レンダリングまで一贯してサポートします。"
-              : "Professional steps to transform your vision into the highest quality visuals. From initial 3D modeling and lighting to photorealistic rendering and post-production."}
-          </p>
-        </div>
-
-        {/* Bottom-Right: Get Quote Button */}
-        <div className="absolute bottom-8 right-6 sm:bottom-10 sm:right-10 lg:bottom-12 lg:right-14 z-20 pointer-events-auto">
-          <Link
-            href={`/${locale}/contact`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black/85 hover:bg-black text-white text-xs font-medium backdrop-blur-md border border-white/20 shadow-2xl transition-all hover:scale-105"
-          >
-            <MessageSquare size={14} className="text-white/90" />
-            <span>{isJa ? "見積もり依頼" : "Get Quote"}</span>
-          </Link>
         </div>
       </section>
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useSpring } from "framer-motion";
 import { sanitizeHtml } from "@/lib/sanitize";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
@@ -220,6 +220,36 @@ interface MilestoneItem {
   image?: string;
 }
 
+function MilestoneDotItem({
+  progress,
+  index,
+  total,
+}: {
+  progress: ReturnType<typeof useSpring>;
+  index: number;
+  total: number;
+}) {
+  // Vị trí ngưỡng của mốc `index` dọc theo trục cuộn timeline
+  const threshold = (index + 0.35) / total;
+  const dotScale = useTransform(progress, [threshold - 0.08, threshold], [0, 1], { clamp: true });
+  const dotOpacity = useTransform(progress, [threshold - 0.08, threshold], [0, 1], { clamp: true });
+
+  return (
+    <div className="absolute left-6 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
+      <motion.div
+        style={{ scale: dotScale, opacity: dotOpacity }}
+        className="relative flex items-center justify-center"
+      >
+        {/* Soft Tan Outer Halo */}
+        <div className="w-7 h-7 rounded-full bg-[#d6c4a5]/45 flex items-center justify-center">
+          {/* Black Inner Dot with White Border */}
+          <div className="w-3.5 h-3.5 rounded-full bg-[#111] border-2 border-white shadow-sm" />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 interface Props {
   settings: Record<string, string>;
   milestones?: MilestoneItem[];
@@ -233,8 +263,15 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
   // Use DB milestones if available, otherwise fallback to hardcoded defaults
   const MILESTONES = milestones && milestones.length > 0 ? milestones : DEFAULT_MILESTONES;
 
-  const heroBgImage = settings.aboutHeroImage || "";
-  const teamImage = settings.aboutImageTeam || "";
+  const heroBgImage = overview?.heroImage || settings.aboutHeroImage || "";
+  const teamImage = overview?.teamImage || settings.aboutImageTeam || "";
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: timelineRef,
+    offset: ["start 70%", "end 75%"],
+  });
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 25, restDelta: 0.001 });
+  const travelingDotTop = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
 
   return (
     <div className="min-h-screen bg-white selection:bg-[#111] selection:text-white">
@@ -269,7 +306,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-[11px] uppercase tracking-[0.35em] text-white/70 mb-6 font-semibold"
+            className="text-[22px] sm:text-[28px] uppercase tracking-[0.3em] text-white/70 mb-6 font-medium"
           >
             {isJa ? "私たちについて" : "ABOUT US"}
           </motion.p>
@@ -343,8 +380,8 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-8 h-px bg-[#b8935a]" />
-            <p className="text-[11px] uppercase tracking-[0.25em] text-[#b8935a] font-semibold">
+            <span className="w-10 h-[1.5px] bg-[#b8935a]" />
+            <p className="text-[17px] sm:text-[18px] uppercase tracking-[0.22em] text-[#b8935a] font-bold">
               {isJa ? "私たちのストーリー" : "OUR STORY"}
             </p>
           </div>
@@ -406,7 +443,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
             transition={{ duration: 0.7 }}
             className="text-center mb-16"
           >
-            <p className="text-[11px] uppercase tracking-[0.25em] text-[#b8935a] font-semibold mb-3">
+            <p className="text-[17px] sm:text-[18px] uppercase tracking-[0.22em] text-[#b8935a] font-bold mb-3">
               {isJa ? "歩みと沿革" : "OUR JOURNEY"}
             </p>
             <h2 className="text-2xl md:text-4xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
@@ -414,9 +451,32 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
             </h2>
           </motion.div>
 
-          <div className="relative">
-            {/* Vertical line with gradient glow */}
-            <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent -translate-x-1/2" />
+          <div ref={timelineRef} className="relative">
+            {/* Scroll-Linked Dynamic Vertical Timeline Line (Chỉ giữ 1 đường duy nhất chạy theo cuộn chuột) */}
+            <motion.div
+              style={{ height: travelingDotTop }}
+              className="absolute left-6 md:left-1/2 top-0 w-[2px] bg-gradient-to-b from-[#c5a666]/30 via-[#c5a666] to-[#c5a666] -translate-x-1/2 z-10 origin-top pointer-events-none"
+            />
+
+            {/* Scroll-Linked Moving Active Dot (Dấu chấm vàng phát sáng chạy theo cuộn chuột) */}
+            <motion.div
+              style={{ top: travelingDotTop }}
+              className="absolute left-6 md:left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex items-center justify-center"
+            >
+              <div className="relative flex items-center justify-center">
+                {/* Soft Glowing Outer Aura (Vầng hào quang vàng tỏa rộng) */}
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.25, 0.6] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute w-12 h-12 rounded-full bg-[#c5a666]/30"
+                />
+                {/* Middle Golden Ring */}
+                <div className="w-5 h-5 rounded-full bg-[#c5a666] border-2 border-white shadow-[0_0_14px_rgba(197,166,102,0.9)] flex items-center justify-center">
+                  {/* Inner White Core Dot */}
+                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                </div>
+              </div>
+            </motion.div>
 
             <div className="space-y-16">
               {MILESTONES.map((ms, i) => {
@@ -430,23 +490,19 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                     transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                     className={`relative flex flex-col md:flex-row items-stretch gap-6 md:gap-0 ${!isEven ? "md:flex-row-reverse" : ""}`}
                   >
-                    {/* Pulsing Central Dot (Centered exactly on vertical line) */}
-                    <div className="absolute left-6 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none">
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
-                        className="w-4 h-4 rounded-full bg-[#111] border-2 border-white shadow-md ring-4 ring-[#b8935a]/20"
-                      />
-                    </div>
+                    {/* Milestone Central Dot (Ẩn hoàn toàn, chỉ xuất hiện khi đường line và con trỏ cuộn chạm tới) */}
+                    <MilestoneDotItem
+                      progress={smoothProgress}
+                      index={i}
+                      total={MILESTONES.length}
+                    />
 
                     {/* Content (Text Card) with Left/Right Entrance Motion */}
                     <motion.div
-                      initial={{ opacity: 0, x: isEven ? -30 : 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, amount: 0.3 }}
-                      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                      initial={{ opacity: 0, x: isEven ? -35 : 35, y: 15 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: 0.75, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isEven ? "md:pr-4" : "md:pl-4"} flex flex-col`}
                     >
                       <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-500 h-full flex flex-col justify-center group">
@@ -560,7 +616,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           transition={{ duration: 0.7 }}
           className="text-center mb-12"
         >
-          <p className="text-[11px] uppercase tracking-[0.25em] text-[#b8935a] font-semibold mb-3">
+          <p className="text-[17px] sm:text-[18px] uppercase tracking-[0.22em] text-[#b8935a] font-bold mb-3">
             {isJa ? "チーム紹介" : "OUR TEAM"}
           </p>
           <h2 className="text-2xl md:text-4xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
