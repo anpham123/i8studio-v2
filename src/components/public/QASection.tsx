@@ -59,13 +59,13 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
                     onClick={() => setOpenId(isOpen ? null : item.id)}
                     className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left cursor-pointer"
                   >
-                    <span className={`font-semibold text-sm sm:text-base transition-colors ${isOpen ? "text-[#111]" : "text-gray-700"}`}>
+                    <span className={`font-semibold text-sm sm:text-base transition-colors ${isOpen ? "text-[#111]" : "text-black"}`}>
                       {question}
                     </span>
                     <span className={`shrink-0 w-7 h-7 rounded-full border flex items-center justify-center transition-all ${isOpen ? "border-[#111] bg-[#111]" : "border-gray-200 bg-gray-50"}`}>
                       {isOpen
                         ? <Minus size={13} className="text-white" />
-                        : <Plus size={13} className="text-gray-500" />
+                        : <Plus size={13} className="text-black" />
                       }
                     </span>
                   </button>
@@ -78,7 +78,7 @@ export default function QASection({ items, locale, preview = true }: QASectionPr
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
                       >
-                        <div className="px-5 sm:px-6 pb-6 text-sm sm:text-[15px] text-gray-600 leading-relaxed border-t border-gray-100 pt-4 font-normal">
+                        <div className="px-5 sm:px-6 pb-6 text-sm sm:text-[15px] text-black leading-relaxed border-t border-gray-100 pt-4 font-normal">
                           {answer}
                         </div>
                       </motion.div>

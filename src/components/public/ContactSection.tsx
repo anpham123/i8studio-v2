@@ -110,7 +110,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
     <section id="contact" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+          <div className="text-[14px] sm:text-[15px] font-bold text-black uppercase tracking-[0.18em] mb-3">
             {isJa ? "お問い合わせ" : "Contact"}
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 font-serif">
@@ -246,7 +246,7 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
                     )}
                   </button>
 
-                  <div className="flex items-center gap-4 text-gray-400 text-xs">
+                  <div className="flex items-center gap-4 text-black text-xs font-semibold">
                     <div className="flex items-center gap-1.5">
                       <Clock size={12} />
                       {t("responseTime")}
@@ -306,19 +306,19 @@ export default function ContactSection({ settings, serviceNames }: ContactSectio
               ].map((item) => (
                 <div key={item.label} className="flex items-start gap-4">
                   <div className="shrink-0 w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center">
-                    <item.icon size={18} className="text-gray-500" />
+                    <item.icon size={18} className="text-black" />
                   </div>
                   <div>
-                    <div className="text-gray-400 text-xs mb-0.5">{item.label}</div>
+                    <div className="text-black font-bold text-xs mb-0.5">{item.label}</div>
                     {item.href ? (
                       <a
                         href={item.href}
-                        className="text-gray-700 hover:text-gray-900 transition-colors text-sm"
+                        className="text-black font-medium hover:underline transition-colors text-sm"
                       >
                         {item.value}
                       </a>
                     ) : (
-                      <div className="text-gray-700 text-sm">{item.value}</div>
+                      <div className="text-black font-medium text-sm">{item.value}</div>
                     )}
                   </div>
                 </div>

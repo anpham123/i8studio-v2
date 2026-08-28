@@ -15,40 +15,171 @@ import {
   Table as TableIcon, Plus, Trash2, X, Sparkles, Highlighter,
 } from "lucide-react";
 
-// Interactive Image NodeView with delete 'X' button
-function ImageNodeView({ node, deleteNode }: NodeViewProps) {
+// Interactive Image NodeView with delete 'X' button & per-image editable caption (Seamless Single Card)
+function ImageNodeView({ node, deleteNode, updateAttributes }: NodeViewProps) {
   const src = node.attrs.src;
   const alt = node.attrs.alt;
+  const caption = node.attrs.caption || node.attrs.title || node.attrs.alt || "";
 
   return (
-    <NodeViewWrapper className="paragraph-editor-image-wrapper inline-block relative my-2 mr-3 align-top">
-      <div className="relative inline-block rounded-xl border border-gray-200 bg-[#f8fafc] p-1 shadow-xs overflow-hidden hover:border-blue-400 hover:shadow-md transition-all group">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt || "Paragraph image"}
-          className="h-[180px] w-auto max-w-[280px] object-cover rounded-lg block select-none pointer-events-none"
-        />
-        {/* Nút dấu X màu đỏ để xóa ảnh */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            deleteNode();
-          }}
-          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 active:scale-95 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer z-30"
-          title="Xóa ảnh này khỏi paragraph"
-        >
-          <X size={13} className="stroke-[3]" />
-        </button>
+    <NodeViewWrapper className="paragraph-editor-image-wrapper inline-flex flex-col items-stretch relative my-2 mr-4 align-top max-w-full">
+      <div className="flex flex-col items-stretch bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs hover:border-blue-400 hover:shadow-md transition-all group max-w-[320px]">
+        <div className="relative overflow-hidden bg-gray-100 flex items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={alt || caption || "Paragraph image"}
+            className="h-[180px] w-full object-cover block select-none pointer-events-none"
+          />
+          {/* Nút dấu X màu đỏ để xóa ảnh */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              deleteNode();
+            }}
+            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 active:scale-95 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer z-30"
+            title="Xóa ảnh này khỏi paragraph"
+          >
+            <X size={13} className="stroke-[3]" />
+          </button>
+        </div>
+
+        {/* Input ghi chú / caption nằm liền mạch trong cùng 1 khung với ảnh */}
+        <div className="p-2 border-t border-gray-100 bg-[#fafafa]">
+          <input
+            type="text"
+            value={caption}
+            placeholder="📝 Ghi chú ảnh (vd: 外観パース)..."
+            onChange={(e) => {
+              const val = e.target.value;
+              updateAttributes({ caption: val, title: val, alt: val });
+            }}
+            className="w-full text-center text-[12px] text-black font-medium bg-white hover:bg-gray-50 focus:bg-white border border-gray-200 focus:border-blue-500 rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-gray-400 italic"
+          />
+        </div>
       </div>
     </NodeViewWrapper>
   );
 }
 
-// Custom TipTap Image extension with interactive NodeView
+// Custom TipTap Image extension with interactive NodeView & seamless figure/figcaption card
 const CustomImage = Image.extend({
+  name: "image",
+
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      src: {
+        default: null,
+      },
+      alt: {
+        default: null,
+      },
+      title: {
+        default: null,
+      },
+      caption: {
+        default: "",
+        parseHTML: (element) =>
+          element.getAttribute("data-caption") ||
+          element.getAttribute("title") ||
+          element.getAttribute("alt") ||
+          "",
+        renderHTML: (attributes) => {
+          if (!attributes.caption && !attributes.title) {
+            return {};
+          }
+          return {
+            "data-caption": attributes.caption || attributes.title,
+            title: attributes.caption || attributes.title,
+          };
+        },
+      },
+    };
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const caption =
+      HTMLAttributes["data-caption"] || HTMLAttributes.title || HTMLAttributes.alt;
+    const { "data-caption": _, ...imgAttrs } = HTMLAttributes;
+
+    if (caption && caption.trim()) {
+      return [
+        "figure",
+        {
+          class:
+            "blog-image-figure inline-flex flex-col items-stretch bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs my-3 mr-4 align-top max-w-full text-center hover:shadow-md transition-all",
+        },
+        [
+          "img",
+          mergeAttributes(this.options.HTMLAttributes, imgAttrs, {
+            class: "w-full h-auto max-h-[420px] object-cover block m-0 p-0 border-0 rounded-none",
+          }),
+        ],
+        [
+          "figcaption",
+          {
+            class:
+              "w-full text-center text-[13px] text-gray-700 italic font-medium p-2.5 border-t border-gray-100 bg-[#fafaf9] leading-relaxed block",
+          },
+          caption.trim(),
+        ],
+      ];
+    }
+
+    return [
+      "img",
+      mergeAttributes(this.options.HTMLAttributes, imgAttrs, {
+        class: "rounded-xl border border-gray-200 my-2 inline-block max-h-[380px] w-auto max-w-full object-cover shadow-xs mr-3",
+      }),
+    ];
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "figure.blog-image-figure",
+        getAttrs: (node) => {
+          if (typeof node === "string") return false;
+          const img = (node as HTMLElement).querySelector("img");
+          const figcaption = (node as HTMLElement).querySelector("figcaption");
+          if (!img) return false;
+          const cap =
+            figcaption?.textContent ||
+            img.getAttribute("title") ||
+            img.getAttribute("alt") ||
+            "";
+          return {
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt") || cap,
+            title: img.getAttribute("title") || cap,
+            caption: cap,
+          };
+        },
+      },
+      {
+        tag: "img[src]",
+        getAttrs: (node) => {
+          if (typeof node === "string") return false;
+          const el = node as HTMLElement;
+          const cap =
+            el.getAttribute("data-caption") ||
+            el.getAttribute("title") ||
+            el.getAttribute("alt") ||
+            "";
+          return {
+            src: el.getAttribute("src"),
+            alt: el.getAttribute("alt"),
+            title: el.getAttribute("title") || cap,
+            caption: cap,
+          };
+        },
+      },
+    ];
+  },
+
   addNodeView() {
     return ReactNodeViewRenderer(ImageNodeView);
   },

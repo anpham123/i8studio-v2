@@ -785,3 +785,67 @@ mark,
   border-top: 1px solid #e5e7eb !important;
   margin: 1.5rem 0 !important;
 }
+
+/* ── Blog Content Image Figure Card with Seamless Inner Caption ── */
+.blog-content figure.blog-image-figure,
+.blog-content .blog-image-figure,
+.blog-figure {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important; /* 12px bo tròn */
+  overflow: hidden !important;
+  padding: 0 !important; /* Không có bất kỳ khoảng trống hay viền trong nào */
+  margin: 0.5rem 0.75rem 0.5rem 0 !important;
+  vertical-align: top !important;
+  max-width: 100% !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  line-height: 0 !important;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+.blog-content figure.blog-image-figure:hover,
+.blog-figure:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Reset all inner elements inside figure */
+.blog-content figure.blog-image-figure > *,
+.blog-figure > * {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.blog-content figure.blog-image-figure img,
+.blog-figure img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 380px !important;
+  border-radius: 0 !important; /* Khớp khít 100% không để lại khoảng trống */
+  object-fit: cover !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.blog-content figure.blog-image-figure figcaption,
+.blog-figure figcaption {
+  width: 100% !important;
+  font-size: 0.8125rem !important; /* 13px */
+  color: #4b5563 !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+  padding: 0.35rem 0.5rem !important; /* Thu hẹp padding chú thích để cực kỳ gọn gàng */
+  border-top: 1px solid #f1f5f9 !important;
+  background-color: #fafaf9 !important;
+  text-align: center !important;
+  line-height: 1.4 !important;
+  display: block !important;
+}

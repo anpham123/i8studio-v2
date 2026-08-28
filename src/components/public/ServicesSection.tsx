@@ -49,7 +49,7 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
     <section id="services" className="section-noise py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn className="text-center mb-16">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+          <div className="text-[14px] sm:text-[15px] font-bold text-black uppercase tracking-[0.18em] mb-3">
             {t("subtitle")}
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-serif">

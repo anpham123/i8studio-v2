@@ -416,7 +416,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             </motion.h1>
 
             <motion.p
-              className="font-serif text-[14px] sm:text-[16px] md:text-[18px] font-light text-white/85 tracking-[0.08em] mb-3 drop-shadow-md"
+              className="font-serif text-[17px] sm:text-[20px] md:text-[22px] font-medium text-white/95 tracking-[0.08em] mb-3 drop-shadow-md"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -425,7 +425,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             </motion.p>
 
             <motion.p
-              className="text-[11px] sm:text-[12px] text-white/65 leading-[1.6] max-w-[560px] whitespace-pre-line drop-shadow-sm"
+              className="text-[15px] sm:text-[16px] md:text-[17px] text-white/90 leading-[1.8] max-w-[720px] whitespace-pre-line drop-shadow-sm font-normal"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}

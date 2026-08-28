@@ -193,8 +193,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   const isAdjacent = activeIndex !== -1 && hoveredIndex !== -1 && Math.abs(activeIndex - hoveredIndex) === 1;
 
   const linkCls = (href: string, hasChildren?: boolean) =>
-    `px-4 py-2 text-[15px] font-medium uppercase tracking-[0.06em] transition-colors duration-200 relative inline-flex items-center gap-1 ${
-      isActive(href) || hoveredNav === href ? "text-[#111]" : "text-gray-600 hover:text-[#111]"
+    `px-4 py-2 text-[16px] sm:text-[17px] font-semibold uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1 ${
+      isActive(href) || hoveredNav === href ? "text-[#000]" : "text-[#111] hover:text-[#000]"
     }${hasChildren ? " cursor-default" : ""}`;
 
   /* ---- Desktop dropdown hover handlers ---- */
@@ -343,14 +343,14 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                className="group relative block aspect-[16/10] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200/80 bg-gray-900"
+                                className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200/80 bg-gray-900"
                               >
                                 {child.thumbnail ? (
                                   /* eslint-disable-next-line @next/next/no-img-element */
                                   <img
                                     src={child.thumbnail}
                                     alt={child.label}
-                                    className="absolute inset-0 w-full h-full object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                                    className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                                     onError={(e) => {
                                       const target = e.currentTarget;
                                       target.style.display = "none";
@@ -360,12 +360,15 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                   <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] via-[#1a1c22] to-[#111]" />
                                 )}
 
-                                {/* Dark overlay for text legibility */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-black/20 group-hover:from-black/60 group-hover:via-black/25 group-hover:to-transparent transition-colors duration-300" />
+                                {/* Bottom gradient overlay so image center/top is clear and bottom text is crisp */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent group-hover:from-black/95 transition-colors duration-300 pointer-events-none" />
 
-                                {/* Label overlaid on image */}
-                                <div className="absolute inset-0 flex items-center justify-center p-4 text-center z-10">
-                                  <span className="text-white font-medium text-[13px] tracking-wide drop-shadow-md group-hover:scale-105 transition-transform duration-300 leading-snug">
+                                {/* Label placed at BOTTOM on a single clean line */}
+                                <div className="absolute inset-0 flex items-end justify-center pb-3.5 sm:pb-4 px-2 text-center z-10 overflow-hidden">
+                                  <span
+                                    className="text-white text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] font-bold uppercase tracking-[0.04em] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] group-hover:scale-105 transition-transform duration-300 leading-none truncate max-w-full"
+                                    style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
+                                  >
                                     {child.label}
                                   </span>
                                 </div>
@@ -392,9 +395,9 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                         <Link
                           key={child.href}
                           href={child.href}
-                          className={`block px-5 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${isActive(child.href)
-                            ? "text-[#111] bg-gray-50"
-                            : "text-gray-500 hover:text-[#111] hover:bg-gray-50/70"
+                          className={`block px-5 py-2.5 text-[14px] font-medium tracking-wide transition-colors ${isActive(child.href)
+                            ? "text-black font-semibold bg-gray-100/70"
+                            : "text-[#222] hover:text-black hover:bg-gray-50"
                             }`}
                         >
                           {child.label}
@@ -412,7 +415,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
           <div className="hidden lg:flex items-center gap-3">
             <button
               onClick={toggleLocale}
-              className="text-sm font-medium transition-all duration-300 px-2 py-1 text-gray-400 hover:text-gray-900"
+              className="text-[15px] sm:text-[16px] font-bold transition-all duration-300 px-2.5 py-1 text-black hover:opacity-75"
             >
               {t("lang")}
             </button>
@@ -421,7 +424,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className={`lg:hidden p-2 transition-colors ${transparent ? "text-white/80 hover:text-white" : "text-gray-600 hover:text-gray-900"
+            className={`lg:hidden p-2 transition-colors ${transparent ? "text-white/80 hover:text-white" : "text-black"
               }`}
             aria-label="Menu"
           >
@@ -491,21 +494,24 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                       key={child.href}
                                       href={child.href}
                                       onClick={() => setMobileOpen(false)}
-                                      className="group relative block aspect-[16/10] rounded-lg overflow-hidden shadow-sm bg-gray-900 border border-gray-200"
+                                      className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm bg-gray-900 border border-gray-200"
                                     >
                                       {child.thumbnail ? (
                                         /* eslint-disable-next-line @next/next/no-img-element */
                                         <img
                                           src={child.thumbnail}
                                           alt=""
-                                          className="absolute inset-0 w-full h-full object-cover opacity-85"
+                                          className="absolute inset-0 w-full h-full object-cover opacity-90"
                                           onError={(e) => { e.currentTarget.style.display = "none"; }}
                                         />
                                       ) : (
                                         <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] to-[#111]" />
                                       )}
-                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-2 text-center">
-                                        <span className="text-white font-medium text-[12px] leading-tight drop-shadow">
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent flex items-end justify-center p-2 pb-2.5 text-center overflow-hidden">
+                                        <span
+                                          className="text-white font-bold text-[13px] sm:text-[15px] leading-none uppercase tracking-wider whitespace-nowrap drop-shadow-md truncate max-w-full"
+                                          style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
+                                        >
                                           {child.label}
                                         </span>
                                       </div>

@@ -268,6 +268,7 @@ function WorkCardItem({
   typeLabel: string;
   index?: number;
 }) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -358,7 +359,12 @@ function WorkCardItem({
       onMouseLeave={() => setIsHovered(false)}
       className="work-card break-inside-avoid w-full group cursor-pointer inline-block will-change-transform"
     >
-      <div className="work-card-media relative overflow-hidden w-full bg-[#eae7e1]/80 rounded-[3px] will-change-transform transition-all">
+      <div className="work-card-media relative overflow-hidden w-full aspect-[4/3] bg-[#eae7e1] rounded-[3px] will-change-transform transition-all">
+        {/* Shimmer skeleton until loaded */}
+        {!isLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-[#eae7e1] via-[#f4f1eb] to-[#eae7e1] animate-pulse pointer-events-none" />
+        )}
+
         {/* Static thumbnail image with cinematic slow zoom / pan motion */}
         {work.image ? (
           <img
@@ -366,12 +372,14 @@ function WorkCardItem({
             alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
             loading={index < 9 ? "eager" : "lazy"}
             fetchPriority={index < 9 ? "high" : "auto"}
-            className="w-full h-auto block will-change-transform"
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            className={`w-full h-full object-cover block will-change-transform transition-opacity duration-500 ${isLoaded || index < 6 ? "opacity-100" : "opacity-0"}`}
             style={{
               transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
               transition: isHovered
-                ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1)"
-                : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1)",
+                ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.5s ease"
+                : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease",
             }}
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -379,7 +387,7 @@ function WorkCardItem({
           />
         ) : (
           <div
-            className="w-full aspect-[4/3] transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            className="w-full h-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             style={{ backgroundColor: work.bg }}
           />
         )}
@@ -406,15 +414,12 @@ function WorkCardItem({
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       </div>
 
-      <div className="work-card-info mt-3.5 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-        <h3 className="text-[15px] font-normal text-[#111] tracking-[0.03em] leading-tight mb-1">
-          <span className="bg-left-bottom bg-gradient-to-r from-gray-900 to-gray-900 bg-[length:0%_1px] bg-no-repeat group-hover:bg-[length:100%_1px] transition-[background-size] duration-500 pb-0.5">
+      <div className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+        <h3 className="text-[17px] sm:text-[18px] font-semibold text-black tracking-[0.01em] leading-snug">
+          <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
             {work.title}
           </span>
         </h3>
-        <p className="text-[12px] text-[#777] font-light tracking-[0.05em] uppercase">
-          {work.clientName || typeLabel}
-        </p>
       </div>
     </div>
   );
@@ -748,20 +753,20 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
         >
           <div>
             {/* Page title */}
-            <h1 className="text-[32px] font-normal text-[#111] tracking-[0.03em] font-serif mb-6">{t("title")}</h1>
+            <h1 className="text-[34px] font-normal text-[#111] tracking-[0.03em] font-serif mb-6">{t("title")}</h1>
 
             {/* Filter heading */}
-            <div className="text-[15px] font-bold text-[#000] tracking-[0.08em] uppercase mb-1">{t("filter")}</div>
+            <div className="text-[17px] font-bold text-[#000] tracking-[0.08em] uppercase mb-1">{t("filter")}</div>
             <div className="border-b-[0.5px] border-[#e5e5e5] mb-5" />
 
             {/* TYPE group */}
-            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
+            <div className="text-[14px] sm:text-[15px] font-bold uppercase tracking-[0.12em] text-[#000] mb-3">
               {t("typeLabel")}
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleFilterChange("all", undefined)}
-                className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
+                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
                   ? "text-[#000] font-bold border-[#000]"
                   : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
@@ -772,7 +777,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(key, undefined)}
-                  className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
+                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
                     ? "text-[#000] font-bold border-[#000]"
                     : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
@@ -785,13 +790,13 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
 
             {/* CATEGORY group */}
-            <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
+            <div className="text-[14px] sm:text-[15px] font-bold uppercase tracking-[0.12em] text-[#000] mb-3">
               {t("categoryLabel")}
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleFilterChange(undefined, "all")}
-                className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
+                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
                   ? "text-[#000] font-bold border-[#000]"
                   : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
@@ -802,7 +807,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(undefined, key)}
-                  className={`text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
+                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
                     ? "text-[#000] font-bold border-[#000]"
                     : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
@@ -816,15 +821,15 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             {collections.length > 0 && (
               <>
                 <div className="border-b-[0.5px] border-[#e5e5e5] my-5" />
-                <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#000] mb-2.5">
+                <div className="text-[14px] sm:text-[15px] font-bold uppercase tracking-[0.12em] text-[#000] mb-3">
                   {locale === "ja" ? "コレクション" : "COLLECTION"}
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {collections.map((col) => (
                     <Link
                       key={col.slug}
                       href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
-                      className="text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
+                      className="text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     >
                       {locale === "ja" ? col.titleJa : col.titleEn}
                     </Link>
@@ -836,34 +841,34 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
 
           {/* CTA & Social Links */}
           <div className="pt-6 border-t border-[#e5e5e5] mt-6">
-            <p className="text-[14px] font-semibold text-[#111] tracking-wide mb-2.5 leading-snug">
+            <p className="text-[16px] sm:text-[17px] font-semibold text-[#111] tracking-wide mb-2.5 leading-snug">
               {ctaTitle}
             </p>
             <a
               href="/contact"
-              className="text-[12px] font-semibold tracking-wider uppercase text-black hover:text-neutral-600 transition-colors border-b border-black pb-0.5 inline-block"
+              className="text-[13px] sm:text-[14px] font-bold tracking-wider uppercase text-black hover:text-neutral-600 transition-colors border-b-2 border-black pb-0.5 inline-block"
             >
               {ctaBtn}
             </a>
 
             {/* Socials */}
-            <div className="flex gap-4 mt-6 text-[#999]">
-              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Facebook">
+            <div className="flex gap-4 mt-6 text-black">
+              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-600 transition-colors" aria-label="Facebook">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
-              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="Instagram">
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-600 transition-colors" aria-label="Instagram">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                 </svg>
               </a>
-              <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="LinkedIn">
+              <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-600 transition-colors" aria-label="LinkedIn">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
                 </svg>
               </a>
-              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors" aria-label="YouTube">
+              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-neutral-600 transition-colors" aria-label="YouTube">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.35 29 29 0 0 0-.46-5.33zM9.75 15.02V8.48l5.75 3.27-5.75 3.27z" />
                 </svg>
@@ -886,7 +891,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
           </div>
 
           {filtered.length === 0 ? (
-            <p className="text-[14px] text-[#999] mt-8">{t("emptyState")}</p>
+            <p className="text-[14px] text-black mt-8">{t("emptyState")}</p>
           ) : (
             <div
               ref={gridRef}

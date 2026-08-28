@@ -262,7 +262,7 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
                           return (
                             <li
                               key={idx}
-                              className="flex items-start gap-2.5 text-gray-600 text-[15px] sm:text-base leading-relaxed"
+                              className="flex items-start gap-2.5 text-black text-[16px] sm:text-[17px] leading-relaxed font-normal"
                             >
                               <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">
                                 •
@@ -282,7 +282,7 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
                     {tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[11px] font-medium uppercase tracking-wider text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100"
+                        className="text-[13px] sm:text-[14px] font-semibold uppercase tracking-wider text-black bg-gray-100 px-3.5 py-1.5 rounded-full border border-gray-200"
                       >
                         {tag}
                       </span>

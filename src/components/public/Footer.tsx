@@ -109,7 +109,7 @@ export default function Footer({ settings }: FooterProps) {
               </Link>
             </div>
 
-            <p className="text-gray-700 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal whitespace-pre-line">
+            <p className="text-black text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal whitespace-pre-line">
               {locale === "ja"
                 ? (settings.footerTaglineJa || t("tagline")).replace("、高品質", "\n高品質").replace("伝える高品質", "伝える\n高品質")
                 : (settings.footerTaglineEn || t("tagline"))}
@@ -129,8 +129,8 @@ export default function Footer({ settings }: FooterProps) {
                     aria-label={label}
                     className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
                       url
-                        ? "bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 shadow-sm hover:scale-105"
-                        : "bg-gray-50 text-gray-300 cursor-default"
+                        ? "bg-gray-100 hover:bg-gray-200 text-black shadow-sm hover:scale-105"
+                        : "bg-gray-50 text-black/40 cursor-default"
                     }`}
                   >
                     <Icon />
@@ -140,17 +140,17 @@ export default function Footer({ settings }: FooterProps) {
             </div>
 
             {/* Contact Details (Liền mạch và gọn gàng) */}
-            <ul className="space-y-2 text-[14px] sm:text-[15px] text-gray-600">
+            <ul className="space-y-2 text-[14px] sm:text-[15px] text-black font-medium">
               {settings.email && (
                 <li>
-                  <a href={`mailto:${settings.email}`} className="hover:text-gray-900 transition-colors">
+                  <a href={`mailto:${settings.email}`} className="hover:underline transition-colors">
                     {settings.email}
                   </a>
                 </li>
               )}
               {settings.phone && (
                 <li>
-                  <a href={`tel:${settings.phone}`} className="hover:text-gray-900 transition-colors">
+                  <a href={`tel:${settings.phone}`} className="hover:underline transition-colors">
                     {settings.phone}
                   </a>
                 </li>
@@ -183,7 +183,7 @@ export default function Footer({ settings }: FooterProps) {
 
             {/* Col 2: NAVIGATION */}
             <div className="flex flex-col">
-              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+              <h4 className="text-black font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
                 {t("navigation")}
               </h4>
               <ul className="space-y-3">
@@ -191,7 +191,7 @@ export default function Footer({ settings }: FooterProps) {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                      className="text-black hover:text-neutral-600 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
                     >
                       {link.label}
                     </Link>
@@ -202,7 +202,7 @@ export default function Footer({ settings }: FooterProps) {
 
             {/* Col 3: ABOUT US */}
             <div className="flex flex-col">
-              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+              <h4 className="text-black font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
                 {navT("aboutUs")}
               </h4>
               <ul className="space-y-3">
@@ -210,7 +210,7 @@ export default function Footer({ settings }: FooterProps) {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                      className="text-black hover:text-neutral-600 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
                     >
                       {link.label}
                     </Link>
@@ -221,7 +221,7 @@ export default function Footer({ settings }: FooterProps) {
 
             {/* Col 4: BLOGS */}
             <div className="flex flex-col">
-              <h4 className="text-gray-900 font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
+              <h4 className="text-black font-bold text-[16px] sm:text-[17px] mb-4 uppercase tracking-wider">
                 {navT("blogs")}
               </h4>
               <ul className="space-y-3">
@@ -229,7 +229,7 @@ export default function Footer({ settings }: FooterProps) {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-600 hover:text-gray-900 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
+                      className="text-black hover:text-neutral-600 text-[15px] sm:text-[16px] transition-colors font-medium hover:translate-x-1 inline-block transform duration-200"
                     >
                       {link.label}
                     </Link>
@@ -246,9 +246,9 @@ export default function Footer({ settings }: FooterProps) {
       {/* Bottom bar */}
       <div className="border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-[14px] sm:text-[15px]">{t("rights")}</p>
+          <p className="text-black font-medium text-[14px] sm:text-[15px]">{t("rights")}</p>
           <div className="flex items-center gap-4">
-            <p className="text-gray-400 text-[14px] sm:text-[15px]">{t("trust")}</p>
+            <p className="text-black font-medium text-[14px] sm:text-[15px]">{t("trust")}</p>
             <ScrollToTopButton />
           </div>
         </div>

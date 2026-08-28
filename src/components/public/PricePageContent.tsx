@@ -189,7 +189,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-[11px] uppercase tracking-[0.3em] text-[var(--accent)] mb-4"
+            className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3"
           >
             {isJa ? "料金表" : "PRICE LIST"}
           </motion.p>
@@ -205,7 +205,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-[var(--ink-light)] text-[14px] sm:text-[15px] leading-[1.9] max-w-[1400px]"
+            className="text-black text-[16px] sm:text-[17px] md:text-[18px] leading-[1.8] max-w-[1400px] font-normal"
           >
             {isJa
               ? "建築ビジュアライゼーションの各サービスにおける標準的な価格目安です。プロジェクトの規模、詳細度、納期に応じて最適なプランをご提案いたします。"
@@ -265,10 +265,10 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
                   {/* Bottom: Features + Price + CTA */}
                   <div>
                     {/* Features */}
-                    <ul className="space-y-2 mb-6">
+                    <ul className="space-y-2.5 mb-6">
                       {features.slice(0, 5).map((f, fi) => (
-                        <li key={fi} className="flex items-start gap-2.5 text-[13px] sm:text-[14px] text-white/85 leading-[1.6]">
-                          <span className="text-[var(--accent)] mt-[1px] shrink-0 text-[13px]">◎</span>
+                        <li key={fi} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-white/95 font-medium leading-[1.6]">
+                          <span className="text-[#c5a666] mt-[1px] shrink-0 text-[14px]">◎</span>
                           {f}
                         </li>
                       ))}
@@ -282,7 +282,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
                             <span className="font-roboto text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
                               ASK
                             </span>
-                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1 font-sans">
+                            <p className="text-[13px] sm:text-[14px] text-white/80 uppercase tracking-wider mt-1 font-sans font-medium">
                               {isJa ? "お見積り" : "Get a quote"}
                             </p>
                           </>
@@ -291,7 +291,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
                             <span className="font-roboto text-[28px] sm:text-[32px] font-bold text-white tracking-tight leading-none">
                               {card.price}
                             </span>
-                            <p className="text-[11px] text-white/50 uppercase tracking-wider mt-1 font-sans">
+                            <p className="text-[13px] sm:text-[14px] text-white/80 uppercase tracking-wider mt-1 font-sans font-medium">
                               {priceLabel}
                             </p>
                           </>
@@ -301,14 +301,14 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
                       {card.slug ? (
                         <Link
                           href={`/${locale}/solution/${card.slug}`}
-                          className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                          className="text-[#c5a666] text-[14px] sm:text-[15px] font-semibold hover:underline shrink-0"
                         >
                           {isJa ? "詳細を見る →" : "View details →"}
                         </Link>
                       ) : (
                         <Link
                           href={`/${locale}/contact`}
-                          className="text-[var(--accent)] text-[13px] font-medium hover:underline shrink-0"
+                          className="text-[#c5a666] text-[14px] sm:text-[15px] font-semibold hover:underline shrink-0"
                         >
                           {isJa ? "お問い合わせ →" : "Contact us →"}
                         </Link>

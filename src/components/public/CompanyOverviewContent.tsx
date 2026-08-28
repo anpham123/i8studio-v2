@@ -276,7 +276,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
   return (
     <div className="min-h-screen bg-white selection:bg-[#111] selection:text-white">
       {/* ── Hero (full-viewport with dynamic Hero Image background & entrance motion) ────────── */}
-      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#111] overflow-hidden flex items-center justify-center">
+      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#111] overflow-hidden flex flex-col justify-end items-center pb-16 sm:pb-20 pt-24">
         {/* Background Hero Image if uploaded with subtle cinematic motion */}
         {heroBgImage ? (
           <div className="absolute inset-0 overflow-hidden">
@@ -293,9 +293,8 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                 t.style.display = "none";
               }}
             />
-            {/* Light clean overlay without blur */}
-            <div className="absolute inset-0 bg-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+            {/* Clean bottom gradient overlay for crystal clear text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
           </div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-[#111] via-[#161616] to-[#111]" />
@@ -305,16 +304,16 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-[22px] sm:text-[28px] uppercase tracking-[0.3em] text-white/70 mb-6 font-medium"
+            transition={{ duration: 0.7 }}
+            className="text-[14px] sm:text-[16px] md:text-[17px] uppercase tracking-[0.28em] text-[#c5a666] mb-3 font-bold drop-shadow-sm"
           >
             {isJa ? "私たちについて" : "ABOUT US"}
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl md:text-5xl lg:text-6xl font-light text-white leading-[1.25] mb-6 drop-shadow-sm"
+            transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-normal text-white leading-tight mb-4 drop-shadow-md md:whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {isJa
@@ -324,8 +323,8 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-light"
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-2xl mx-auto leading-relaxed font-normal drop-shadow-sm mb-4"
           >
             {isJa
               ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
@@ -335,16 +334,16 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
 
         {/* Scroll indicator */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.8 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 cursor-pointer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
         >
-          <div className="w-6 h-10 rounded-full border-2 border-white/40 flex justify-center pt-2 backdrop-blur-[2px]">
+          <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
             <motion.div
-              animate={{ y: [0, 8, 0], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1.5 h-1.5 rounded-full bg-white"
+              animate={{ y: [0, 5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-1 h-1 rounded-full bg-white/70"
             />
           </div>
         </motion.div>
@@ -362,7 +361,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                 <div className="text-4xl md:text-5xl font-bold text-[#111] mb-2 font-roboto tracking-tight tabular-nums">
                   <AnimatedCounter value={isJa ? stat.numJa : stat.numEn} delay={i * 0.12} />
                 </div>
-                <div className="text-sm text-gray-400 font-medium uppercase tracking-wide transition-colors group-hover:text-gray-600">
+                <div className="text-[15px] sm:text-[16px] text-black font-bold uppercase tracking-wide transition-colors">
                   {isJa ? stat.labelJa : stat.labelEn}
                 </div>
               </div>
@@ -385,7 +384,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
               {isJa ? "私たちのストーリー" : "OUR STORY"}
             </p>
           </div>
-          <div className="blog-content text-gray-700 text-base md:text-lg leading-[1.9] space-y-6">
+          <div className="blog-content text-black text-[17px] md:text-[19px] leading-[1.9] space-y-6 font-normal">
             {(() => {
               const customIntro = isJa ? overview?.introJa : overview?.introEn;
               if (customIntro && customIntro.trim().length > 0) {
@@ -506,10 +505,10 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                       className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isEven ? "md:pr-4" : "md:pl-4"} flex flex-col`}
                     >
                       <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-500 h-full flex flex-col justify-center group">
-                        <span className="text-[12px] uppercase tracking-[0.15em] text-[#b8935a] font-bold font-roboto">
+                        <span className="text-[16px] sm:text-[18px] md:text-[19px] tracking-[0.06em] text-[#b8935a] font-bold font-roboto">
                           {isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}
                         </span>
-                        <h3 className="text-lg md:text-xl font-medium text-[#111] mt-2 mb-3 group-hover:text-[#b8935a] transition-colors">
+                        <h3 className="text-[20px] sm:text-[22px] md:text-[24px] font-semibold text-[#111] mt-2 mb-3.5 group-hover:text-[#b8935a] transition-colors leading-snug">
                           {isJa ? ms.titleJa : ms.titleEn}
                         </h3>
                         {(() => {
@@ -539,8 +538,8 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                                 {items.map((item, idx) => {
                                   const cleanItem = item.replace(/^[-•・*]\s*/, "");
                                   return (
-                                    <li key={idx} className="flex items-start gap-2.5 text-sm text-gray-600 leading-relaxed">
-                                      <span className="text-[#b8935a] font-bold text-sm leading-[1.6] select-none shrink-0">•</span>
+                                    <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black font-medium leading-relaxed">
+                                      <span className="text-[#b8935a] font-bold text-[15px] leading-[1.6] select-none shrink-0">•</span>
                                       <span>{cleanItem}</span>
                                     </li>
                                   );
@@ -550,7 +549,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                           }
 
                           return (
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-[15px] sm:text-[16px] text-black font-medium leading-relaxed">
                               {rawDesc}
                             </p>
                           );
@@ -583,7 +582,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                               if (p) {
                                 p.classList.add("flex", "items-center", "justify-center");
                                 const s = document.createElement("span");
-                                s.className = "text-gray-400 text-sm font-medium";
+                                s.className = "text-black text-sm font-medium";
                                 s.textContent = isJa ? (ms.yearJa || ms.year || "") : (ms.yearEn || ms.year || "");
                                 p.appendChild(s);
                               }
@@ -591,7 +590,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                           />
                         ) : (
                           <div className="w-full h-full min-h-[200px] flex items-center justify-center bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3]">
-                            <span className="text-gray-400 text-sm font-medium">
+                            <span className="text-black text-sm font-medium">
                               {isJa ? (ms.yearJa || ms.year || "i8 STUDIO") : (ms.yearEn || ms.year || "i8 STUDIO")}
                             </span>
                           </div>
@@ -643,7 +642,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
               />
             </div>
           ) : null}
-          <p className="text-center text-gray-600 text-lg md:text-[22px] mt-8 max-w-4xl mx-auto leading-[1.85] font-normal">
+          <p className="text-center text-black text-lg md:text-[22px] mt-8 max-w-4xl mx-auto leading-[1.85] font-normal">
             {isJa
               ? "3Dアーティスト、アニメーター、VR/ARエンジニア、プロジェクトマネージャーなど、多彩な専門家が在籍。日本語対応の専任ディレクターがスムーズなコミュニケーションをサポートします。"
               : "Our diverse team includes 3D artists, animators, VR/AR engineers, and project managers. Dedicated Japanese-speaking directors ensure smooth communication."}

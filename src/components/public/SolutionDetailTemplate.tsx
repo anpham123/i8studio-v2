@@ -28,8 +28,8 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero (full-viewport) ──────────────────────────── */}
-      <section className="relative h-screen min-h-[600px] max-h-[1200px] overflow-hidden flex items-center justify-center">
+      {/* ── Hero (full-viewport with bottom-aligned content to showcase product) ── */}
+      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] overflow-hidden flex flex-col justify-end pb-14 sm:pb-16 md:pb-20">
         {/* Background: video or image */}
         {(() => {
           // Priority: heroVideo > heroImage (if video) > mediaEmbedUrl (if video) > heroImage (as image)
@@ -66,44 +66,48 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
               )}
-              {/* Dark gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70" />
+              {/* Subtle top and bottom gradients so product in center is completely clear */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent pointer-events-none" />
             </>
           );
         })()}
 
-        {/* Content overlay */}
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        {/* Content overlay (Gọn gàng, hạ xuống phía dưới để không che ảnh sản phẩm) */}
+        <div className="relative z-10 text-center px-6 max-w-5xl md:max-w-6xl mx-auto mb-2">
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[22px] sm:text-[28px] uppercase tracking-[0.3em] text-white/70 font-medium mb-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="text-base sm:text-lg md:text-xl uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-3 drop-shadow-sm"
           >
             {title}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-7xl font-light text-white leading-tight mb-6"
+            transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-tight mb-4 drop-shadow-md md:whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {heroTagline}
           </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/60 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed"
-          >
-            {heroDesc}
-          </motion.p>
+          {heroDesc && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="text-white/85 text-xs sm:text-sm md:text-base max-w-2xl mx-auto mb-6 leading-relaxed font-light drop-shadow-sm"
+            >
+              {heroDesc}
+            </motion.p>
+          )}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
               href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-sm font-semibold rounded-full hover:bg-white/90 transition-colors shadow-lg"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-lg"
             >
-              {isJa ? "無料相談する" : "Free Consultation"}
+              <span>{isJa ? "無料相談する" : "Free Consultation"}</span>
             </Link>
           </motion.div>
         </div>
@@ -113,13 +117,13 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
         >
-          <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
+          <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
             <motion.div
-              animate={{ y: [0, 8, 0] }}
+              animate={{ y: [0, 5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1.5 h-1.5 rounded-full bg-white/60"
+              className="w-1 h-1 rounded-full bg-white/70"
             />
           </div>
         </motion.div>
@@ -277,7 +281,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2.5 text-gray-500 text-base leading-relaxed">
+                            <li key={idx} className="flex items-start gap-2.5 text-black text-base leading-relaxed">
                               <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
                               <span>{cleanItem}</span>
                             </li>
@@ -299,7 +303,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-gray-400 mb-3">
+            <p className="text-[12px] uppercase tracking-[0.25em] text-black font-bold mb-3">
               {isJa ? "制作工程" : "PROCESS"}
             </p>
             <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
@@ -344,7 +348,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-500 leading-relaxed [text-wrap:pretty]">
+                            <li key={idx} className="flex items-start gap-2 text-sm text-black leading-relaxed [text-wrap:pretty]">
                               <span className="text-[#b8935a] font-bold text-sm leading-[1.6] select-none shrink-0">•</span>
                               <span className="flex-1">{cleanItem}</span>
                             </li>
@@ -438,7 +442,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-6 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
             {isJa ? "i8 studioと共にプロジェクトを形にしましょう" : "Let's bring your project to life with i8 studio"}
           </h2>
-          <p className="text-gray-500 mb-10 max-w-lg mx-auto">
+          <p className="text-black mb-10 max-w-lg mx-auto font-normal">
             {isJa ? "まずはお気軽にご相談ください。プロジェクトの規模に関わらず、最適なソリューションをご提案いたします。" : "Feel free to contact us. We'll propose the optimal solution regardless of project scale."}
           </p>
           <Link
