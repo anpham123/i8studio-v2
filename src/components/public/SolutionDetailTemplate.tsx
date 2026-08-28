@@ -130,7 +130,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       </section>
 
       {/* ── Service-level Media Embed (VR360 / Video / 3D) ── */}
-      {data.mediaEmbedUrl && (
+      {data.mediaEmbedUrl && data.slug !== "cg-video" && (
         <section className="bg-[#fafaf8]">
           <div className="max-w-5xl mx-auto px-6 py-16 md:py-24">
             <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
