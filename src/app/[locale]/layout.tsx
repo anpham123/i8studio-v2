@@ -79,6 +79,9 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: `/api/favicon?v=${faviconKey}`,
     },
+    verification: {
+      google: "M2yi6RIMJiVIW2Ijao6mABwtiEQG-OSWAx0PInw6tS8",
+    },
   };
 }
 
@@ -106,6 +109,7 @@ export default async function LocaleLayout({
   return (
     <html lang={params.locale}>
       <head>
+        <meta name="google-site-verification" content="M2yi6RIMJiVIW2Ijao6mABwtiEQG-OSWAx0PInw6tS8" />
         {/* Google tag (gtag.js) - Google Analytics 4 */}
         <Script
           strategy="afterInteractive"
