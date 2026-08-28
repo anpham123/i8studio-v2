@@ -193,8 +193,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   const isAdjacent = activeIndex !== -1 && hoveredIndex !== -1 && Math.abs(activeIndex - hoveredIndex) === 1;
 
   const linkCls = (href: string, hasChildren?: boolean) =>
-    `px-4 py-2 text-[16px] sm:text-[17px] font-semibold uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1 ${
-      isActive(href) || hoveredNav === href ? "text-[#000]" : "text-[#111] hover:text-[#000]"
+    `px-4 py-2 text-[16px] sm:text-[17px] font-semibold uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1 ${isActive(href) || hoveredNav === href ? "text-[#000]" : "text-[#111] hover:text-[#000]"
     }${hasChildren ? " cursor-default" : ""}`;
 
   /* ---- Desktop dropdown hover handlers ---- */
@@ -305,9 +304,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                       {link.label}
                       <ChevronDown
                         size={13}
-                        className={`transition-transform duration-200 ${
-                          openDesktopMenu === link.href ? "rotate-180" : ""
-                        }`}
+                        className={`transition-transform duration-200 ${openDesktopMenu === link.href ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
                   ) : (
@@ -316,100 +314,106 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                     </Link>
                   )}
 
-                {/* ---- Mega-menu (SERVICE panel) ---- */}
-                <AnimatePresence>
-                  {link.megaMenu && link.children && openDesktopMenu === link.href && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="fixed left-0 right-0 top-full mt-0 z-50"
-                      style={{ top: headerHeight }}
-                    >
-                      <div className="bg-white border-t border-gray-200 shadow-xl">
-                        <div className="max-w-7xl mx-auto px-8 py-10">
-                          {/* Header */}
-                          <div className="flex items-center gap-3 mb-8">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
-                              {locale === "ja" ? "ソリューション" : "SERVICE"}
-                            </span>
-                            <span className="flex-1 h-px bg-gray-200" />
-                          </div>
+                  {/* ---- Mega-menu (SERVICE panel) ---- */}
+                  <AnimatePresence>
+                    {link.megaMenu && link.children && openDesktopMenu === link.href && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="fixed left-0 right-0 top-full mt-0 z-50"
+                        style={{ top: headerHeight }}
+                      >
+                        <div className="bg-white border-t border-gray-200 shadow-xl">
+                          <div className="max-w-7xl mx-auto px-8 py-10">
+                            {/* Header */}
+                            <div className="flex items-center gap-3 mb-8">
+                              <span className="text-[14px] sm:text-[15px] font-bold uppercase tracking-[0.2em] text-[#b8935a]">
+                                {locale === "ja" ? "ソリューション" : "SERVICE"}
+                              </span>
+                              <span className="flex-1 h-px bg-gray-200" />
+                            </div>
 
-                          {/* 4-col Grid */}
-                          <div className="grid grid-cols-4 gap-8">
-                            {link.children.map((child) => (
-                              <Link
-                                key={child.href}
-                                href={child.href}
-                                className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-200/80 bg-gray-900"
-                              >
-                                {child.thumbnail ? (
-                                  /* eslint-disable-next-line @next/next/no-img-element */
-                                  <img
-                                    src={child.thumbnail}
-                                    alt={child.label}
-                                    className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
-                                    onError={(e) => {
-                                      const target = e.currentTarget;
-                                      target.style.display = "none";
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] via-[#1a1c22] to-[#111]" />
-                                )}
+                            {/* 4-col Grid */}
+                            <div className="grid grid-cols-4 gap-8">
+                              {link.children.map((child) => (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  onClick={() => setOpenDesktopMenu(null)}
+                                  className="group relative block aspect-[4/3] rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-200/80 bg-gray-950"
+                                >
+                                  {child.thumbnail ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img
+                                      src={child.thumbnail}
+                                      alt={child.label}
+                                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-75 group-hover:scale-110 transition-all duration-700 ease-out"
+                                      onError={(e) => {
+                                        const target = e.currentTarget;
+                                        target.style.display = "none";
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] via-[#1a1c22] to-[#111]" />
+                                  )}
 
-                                {/* Bottom gradient overlay so image center/top is clear and bottom text is crisp */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent group-hover:from-black/95 transition-colors duration-300 pointer-events-none" />
+                                  {/* Dynamic Backdrop Overlay (Darkens on hover) */}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent group-hover:bg-black/65 transition-all duration-400 pointer-events-none" />
 
-                                {/* Label placed at BOTTOM on a single clean line */}
-                                <div className="absolute inset-0 flex items-end justify-center pb-3.5 sm:pb-4 px-2 text-center z-10 overflow-hidden">
-                                  <span
-                                    className="text-white text-[15px] sm:text-[17px] md:text-[19px] lg:text-[21px] font-bold uppercase tracking-[0.04em] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] group-hover:scale-105 transition-transform duration-300 leading-none truncate max-w-full"
-                                    style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
-                                  >
-                                    {child.label}
-                                  </span>
-                                </div>
-                              </Link>
-                            ))}
+                                  {/* Label & Details: Smoothly moves from bottom to CENTER on hover (Strictly 1 single line, no truncation) */}
+                                  <div className="absolute inset-0 flex flex-col items-center justify-end group-hover:justify-center p-2.5 sm:p-3.5 text-center z-10 transition-all duration-500 ease-out pointer-events-none w-full">
+                                    <span
+                                      className="w-full text-white text-[13px] sm:text-[14px] md:text-[15px] lg:text-[16px] xl:text-[17px] font-black uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] group-hover:scale-105 group-hover:text-white transition-all duration-500 leading-none whitespace-nowrap px-1 block"
+                                      style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
+                                    >
+                                      {child.label}
+                                    </span>
+
+                                    {/* Subtitle appearing beneath the centered title */}
+                                    <span className="text-[11px] sm:text-[12px] font-medium text-white/95 tracking-wider flex items-center justify-center gap-1 opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-8 group-hover:mt-2 transition-all duration-400 ease-out drop-shadow-md whitespace-nowrap">
+                                      {locale === "ja" ? "詳しくはこちら ›" : "View Details →"}
+                                    </span>
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                {/* ---- Regular dropdown ---- */}
-                <AnimatePresence>
-                  {!link.megaMenu && link.children && openDesktopMenu === link.href && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute top-full left-0 mt-1 min-w-[220px] bg-white rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50"
-                    >
-                      {link.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          className={`block px-5 py-2.5 text-[14px] font-medium tracking-wide transition-colors ${isActive(child.href)
-                            ? "text-black font-semibold bg-gray-100/70"
-                            : "text-[#222] hover:text-black hover:bg-gray-50"
-                            }`}
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </nav>
+                  {/* ---- Regular dropdown ---- */}
+                  <AnimatePresence>
+                    {!link.megaMenu && link.children && openDesktopMenu === link.href && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute top-full left-0 mt-1 min-w-[220px] bg-white rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50"
+                      >
+                        {link.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            className={`block px-5 py-2.5 text-[14px] font-medium tracking-wide transition-colors ${isActive(child.href)
+                              ? "text-black font-semibold bg-gray-100/70"
+                              : "text-[#222] hover:text-black hover:bg-gray-50"
+                              }`}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </nav>
 
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-3">

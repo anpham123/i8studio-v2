@@ -9,6 +9,30 @@ import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
+const listContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.28,
+      delayChildren: 0.15,
+    },
+  },
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -22, y: 8 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: {
+      duration: 0.85,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  },
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function PlaceholderImage({ alt, className }: { alt: string; className?: string }) {
   return (
@@ -130,7 +154,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       </section>
 
       {/* ── Service-level Media Embed (VR360 / Video / 3D) ── */}
-      {data.mediaEmbedUrl && data.slug !== "cg-video" && (
+      {data.mediaEmbedUrl && data.slug !== "cg-video" && data.slug !== "vr360" && data.slug !== "vr-360" && (
         <section className="bg-[#fafaf8]">
           <div className="max-w-5xl mx-auto px-6 py-16 md:py-24">
             <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10">
@@ -245,9 +269,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 ) : null}
               </div>
               )}
-              {/* Text — below media */}
+              {/* Text — below media (spans full width matching media above) */}
               <div className="w-full">
-                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-3 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {ftTitle}
                 </h2>
                 {(() => {
@@ -277,17 +301,27 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
 
                   if (items.length > 0) {
                     return (
-                      <ul className="space-y-2.5 mb-2">
+                      <motion.ul
+                        variants={listContainerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.15 }}
+                        className="w-full space-y-3 mb-2"
+                      >
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2.5 text-black text-base leading-relaxed">
-                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
-                              <span>{cleanItem}</span>
-                            </li>
+                            <motion.li
+                              key={idx}
+                              variants={listItemVariants}
+                              className="w-full flex items-start gap-3 text-black text-[16px] sm:text-[17px] md:text-[18px] leading-[1.85] font-normal"
+                            >
+                              <span className="text-[#b8935a] font-bold text-[18px] leading-[1.65] select-none shrink-0">•</span>
+                              <span className="flex-1 min-w-0 text-justify [text-align-last:left] [text-justify:inter-word]">{cleanItem}</span>
+                            </motion.li>
                           );
                         })}
-                      </ul>
+                      </motion.ul>
                     );
                   }
 
@@ -303,10 +337,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[12px] uppercase tracking-[0.25em] text-black font-bold mb-3">
+            <p className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
               {isJa ? "制作工程" : "PROCESS"}
             </p>
-            <h2 className="text-2xl md:text-3xl font-light text-[#111]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "プロフェッショナルな制作工程" : "Professional Production Process"}
             </h2>
           </motion.div>
@@ -325,10 +359,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 className="relative"
               >
                 {/* Step number */}
-                <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-sm font-bold mb-5 font-roboto">
+                <div className="w-12 h-12 rounded-full bg-[#111] text-white flex items-center justify-center text-[15px] sm:text-base font-bold mb-5 font-roboto">
                   {String(i + 1).padStart(2, "0")}
                 </div>
-                <h3 className="text-base font-semibold text-[#111] mb-3">
+                <h3 className="text-[18px] sm:text-[20px] font-semibold text-[#111] mb-3">
                   {isJa ? step.titleJa : step.titleEn}
                 </h3>
                 {(() => {
@@ -348,8 +382,8 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                         {items.map((item, idx) => {
                           const cleanItem = item.replace(/^[-•・*]\s*/, "");
                           return (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-black leading-relaxed [text-wrap:pretty]">
-                              <span className="text-[#b8935a] font-bold text-sm leading-[1.6] select-none shrink-0">•</span>
+                            <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black leading-relaxed [text-wrap:pretty]">
+                              <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
                               <span className="flex-1">{cleanItem}</span>
                             </li>
                           );
@@ -370,68 +404,75 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#111]">
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-3">
+            <p className="text-[16px] sm:text-[17px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
               {isJa ? "料金プラン" : "SERVICE PLANS"}
             </p>
-            <h2 className="text-2xl md:text-3xl font-light text-white" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-white leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "サービスプラン" : "Service Plans"}
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {data.plans.map((plan, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`rounded-2xl p-8 border transition-all ${
-                  plan.highlighted
-                    ? "bg-white/10 border-white/20 scale-[1.02]"
-                    : "bg-white/5 border-white/10"
-                }`}
-              >
-                {plan.highlighted && (
-                  <span className="inline-block text-[10px] uppercase tracking-[0.2em] text-[#b8935a] font-semibold mb-3">
-                    {isJa ? "おすすめ" : "Recommended"}
-                  </span>
-                )}
-                <h3 className="text-xl font-medium text-white mb-4">
-                  {isJa
-                    ? (plan.name === "Standard" ? "スタンダード" : plan.name === "High Quality" ? "ハイクオリティ" : plan.name === "Full Custom" ? "フルカスタム" : plan.name)
-                    : plan.name}
-                </h3>
-                <div className="text-3xl font-bold text-white mb-6 font-roboto tracking-tight">
-                  {plan.price === "ASK" ? (
-                    <span className="text-lg font-normal">{isJa ? "お問い合わせ" : "Contact Us"}</span>
-                  ) : (
-                    plan.price
-                  )}
-                </div>
-                <ul className="space-y-2.5 mb-8">
-                  {plan.features.map((f, fi) => (
-                    <li key={fi} className="flex items-start gap-2 text-sm text-white/60">
-                      <span className="text-[#b8935a] mt-0.5">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={`/${locale}/contact`}
-                  className={`block text-center text-sm font-semibold py-3 rounded-full transition-colors ${
-                    plan.highlighted
-                      ? "bg-white text-[#111] hover:bg-white/90"
-                      : "bg-white/10 text-white hover:bg-white/20"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            {data.plans.map((plan, i) => {
+              const isHighlight = plan.highlighted || (!data.plans.some((p) => p.highlighted) && i === 1);
+              return (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`rounded-2xl p-8 transition-all flex flex-col justify-between relative ${
+                    isHighlight
+                      ? "bg-gradient-to-b from-[#282116] via-[#1c1811] to-[#13110e] border-2 border-[#b8935a] shadow-[0_0_40px_rgba(184,147,90,0.28)] ring-1 ring-[#b8935a]/40 scale-[1.03] md:scale-[1.05] z-10"
+                      : "bg-[#161616] border border-white/10"
                   }`}
                 >
-                  {plan.price === "ASK"
-                    ? (isJa ? "お見積もりを依頼" : "Request Quote")
-                    : (isJa ? "お問い合わせ" : "Contact Us")}
-                </Link>
-              </motion.div>
-            ))}
+                  <div>
+                    {isHighlight ? (
+                      <span className="inline-block bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black text-[12px] sm:text-[13px] uppercase tracking-[0.2em] font-extrabold px-4 py-1 rounded-full mb-3.5 shadow-lg">
+                        {isJa ? "★ おすすめ" : "★ RECOMMENDED"}
+                      </span>
+                    ) : (
+                      <div className="h-[29px] mb-3.5" />
+                    )}
+                    <h3 className={`text-[20px] sm:text-[22px] font-semibold mb-4 ${isHighlight ? "text-white font-bold" : "text-white"}`}>
+                      {isJa
+                        ? (plan.name === "Standard" ? "スタンダード" : plan.name === "High Quality" ? "ハイクオリティ" : plan.name === "Full Custom" ? "フルカスタム" : plan.name)
+                        : plan.name}
+                    </h3>
+                    <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#f7e4b2]" : "text-white"}`}>
+                      {plan.price === "ASK" ? (
+                        <span className="text-xl font-medium">{isJa ? "お問い合わせ" : "Contact Us"}</span>
+                      ) : (
+                        plan.price
+                      )}
+                    </div>
+                    <ul className="space-y-3 mb-8">
+                      {plan.features.map((f, fi) => (
+                        <li key={fi} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-white/90 leading-relaxed">
+                          <span className="text-[#b8935a] font-bold mt-0.5 select-none">✓</span>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <Link
+                    href={`/${locale}/contact`}
+                    className={`block text-center py-3.5 px-6 rounded-full text-[15px] font-bold transition-all ${
+                      isHighlight
+                        ? "bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black hover:brightness-110 shadow-xl shadow-[#b8935a]/25"
+                        : "bg-[#282828] text-white hover:bg-[#353535] border border-white/10"
+                    }`}
+                  >
+                    {plan.price === "ASK"
+                      ? (isJa ? "お見積もりを依頼" : "Request Quote")
+                      : (isJa ? "お問い合わせ" : "Contact Us")}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
