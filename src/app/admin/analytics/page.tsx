@@ -584,7 +584,7 @@ export default function AnalyticsPage() {
                   <span>Lượng Truy Cập Theo Nền Tảng (Traffic Attribution by Social Channels)</span>
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Đo lường số lượng click từ YouTube, Facebook, Instagram, LinkedIn, Google và các nguồn khác
+                  Đo lường số lượng click từ Facebook, Instagram, LinkedIn, Twitter (X), YouTube, Google và các nguồn khác
                 </p>
               </div>
               <div className="px-3.5 py-1.5 rounded-full bg-gray-900 text-white text-xs font-semibold">
@@ -592,7 +592,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
               {channels.map((ch) => {
                 let cardBg = "bg-gray-50 border-gray-200 text-gray-900";
                 let badgeStyle = "bg-gray-200 text-gray-700";
@@ -606,6 +606,9 @@ export default function AnalyticsPage() {
                 } else if (ch.key === "linkedin") {
                   cardBg = "bg-sky-50/70 border-sky-100 text-sky-900";
                   badgeStyle = "bg-sky-100 text-sky-700";
+                } else if (ch.key === "twitter") {
+                  cardBg = "bg-neutral-50 border-neutral-200 text-neutral-900";
+                  badgeStyle = "bg-neutral-200 text-neutral-800";
                 } else if (ch.key === "youtube") {
                   cardBg = "bg-red-50/70 border-red-100 text-red-900";
                   badgeStyle = "bg-red-100 text-red-700";

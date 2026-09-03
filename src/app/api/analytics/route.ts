@@ -96,6 +96,7 @@ export async function GET(req: NextRequest) {
       facebook: 0,
       instagram: 0,
       linkedin: 0,
+      twitter: 0,
       youtube: 0,
       google: 0,
       direct: 0,
@@ -108,12 +109,15 @@ export async function GET(req: NextRequest) {
         if (e.metadata) {
           const meta = typeof e.metadata === "string" ? JSON.parse(e.metadata) : e.metadata;
           if (meta.channel) {
-            ch = meta.channel.toLowerCase();
+            const cName = meta.channel.toLowerCase();
+            if (cName === "x" || cName === "twitter" || cName === "t.co") ch = "twitter";
+            else ch = cName;
           } else if (meta.referrer) {
             const r = meta.referrer.toLowerCase();
             if (r.includes("facebook") || r.includes("fb.me")) ch = "facebook";
             else if (r.includes("instagram")) ch = "instagram";
             else if (r.includes("linkedin") || r.includes("lnkd.in")) ch = "linkedin";
+            else if (r.includes("twitter") || r.includes("t.co") || r.includes("x.com")) ch = "twitter";
             else if (r.includes("youtube") || r.includes("youtu.be")) ch = "youtube";
             else if (r.includes("google") || r.includes("bing") || r.includes("yahoo")) ch = "google";
             else ch = "other";
@@ -135,6 +139,7 @@ export async function GET(req: NextRequest) {
       { key: "facebook", name: "Facebook", icon: "📘", count: channelCounts.facebook, pct: total ? Math.round((channelCounts.facebook / total) * 100) : 0 },
       { key: "instagram", name: "Instagram", icon: "📸", count: channelCounts.instagram, pct: total ? Math.round((channelCounts.instagram / total) * 100) : 0 },
       { key: "linkedin", name: "LinkedIn", icon: "💼", count: channelCounts.linkedin, pct: total ? Math.round((channelCounts.linkedin / total) * 100) : 0 },
+      { key: "twitter", name: "Twitter", icon: "𝕏", count: channelCounts.twitter, pct: total ? Math.round((channelCounts.twitter / total) * 100) : 0 },
       { key: "youtube", name: "YouTube", icon: "▶️", count: channelCounts.youtube, pct: total ? Math.round((channelCounts.youtube / total) * 100) : 0 },
       { key: "google", name: "Google / Search", icon: "🔍", count: channelCounts.google, pct: total ? Math.round((channelCounts.google / total) * 100) : 0 },
       { key: "direct", name: "Trực tiếp / Direct", icon: "🌐", count: channelCounts.direct, pct: total ? Math.round((channelCounts.direct / total) * 100) : 0 },

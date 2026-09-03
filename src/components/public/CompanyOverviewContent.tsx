@@ -390,11 +390,23 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0, duration: 0.8 }}
-            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-2xl mx-auto leading-relaxed font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] mb-4"
+            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-5xl mx-auto leading-relaxed font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] mb-4 space-y-1.5"
           >
-            {isJa
-              ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
-              : (settings.aboutHeroDescEn || "Founded in 2019 in Da Nang, Vietnam. A high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators.")}
+            {(() => {
+              const raw = isJa
+                ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。\n日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
+                : (settings.aboutHeroDescEn || "Founded in 2019 in Da Nang, Vietnam.\nA high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators.");
+              
+              const formatted = isJa
+                ? raw.replace(/。\s*(?!$)/g, "。\n")
+                : raw.replace(/\.\s+(?=[A-Z])/g, ".\n");
+
+              return formatted.split("\n").filter(Boolean).map((line, idx) => (
+                <span key={idx} className="block md:whitespace-nowrap">
+                  {line}
+                </span>
+              ));
+            })()}
           </motion.p>
         </div>
 

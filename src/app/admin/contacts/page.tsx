@@ -44,6 +44,9 @@ function ChannelBadge({ channel, referrer }: { channel?: string; referrer?: stri
   } else if (ch.includes("linkedin")) {
     color = "bg-sky-50 text-sky-700 border-sky-200";
     icon = "💼";
+  } else if (ch.includes("twitter") || ch.includes("tweet") || ch === "x" || ch.includes("x (")) {
+    color = "bg-neutral-100 text-neutral-800 border-neutral-300";
+    icon = "𝕏";
   } else if (ch.includes("youtube")) {
     color = "bg-red-50 text-red-700 border-red-200";
     icon = "▶️";
@@ -425,11 +428,12 @@ export default function ContactsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
           {[
             { name: "Facebook", icon: "📘", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("facebook")).length, bg: "bg-blue-50/70 border-blue-100 text-blue-900", badge: "bg-blue-100 text-blue-700" },
             { name: "Instagram", icon: "📸", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("instagram")).length, bg: "bg-pink-50/70 border-pink-100 text-pink-900", badge: "bg-pink-100 text-pink-700" },
             { name: "LinkedIn", icon: "💼", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("linkedin")).length, bg: "bg-sky-50/70 border-sky-100 text-sky-900", badge: "bg-sky-100 text-sky-700" },
+            { name: "Twitter", icon: "𝕏", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("twitter") || (c.hearAboutUs || "").toLowerCase().includes("tweet") || (c.hearAboutUs || "").toLowerCase() === "x" || (c.hearAboutUs || "").toLowerCase().includes("x (")).length, bg: "bg-neutral-50 border-neutral-200 text-neutral-900", badge: "bg-neutral-200 text-neutral-800" },
             { name: "YouTube", icon: "▶️", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("youtube")).length, bg: "bg-red-50/70 border-red-100 text-red-900", badge: "bg-red-100 text-red-700" },
             { name: "Google / Web", icon: "🔍", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("google") || (c.hearAboutUs || "").toLowerCase().includes("search")).length, bg: "bg-emerald-50/70 border-emerald-100 text-emerald-900", badge: "bg-emerald-100 text-emerald-700" },
             { name: "Giới thiệu", icon: "🤝", count: timeFilteredData.filter(c => (c.hearAboutUs || "").toLowerCase().includes("referral") || (c.hearAboutUs || "").toLowerCase().includes("giới thiệu") || (c.hearAboutUs || "").toLowerCase().includes("紹介")).length, bg: "bg-amber-50/70 border-amber-100 text-amber-900", badge: "bg-amber-100 text-amber-700" },

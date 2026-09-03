@@ -42,6 +42,47 @@ function PlaceholderImage({ alt, className }: { alt: string; className?: string 
   );
 }
 
+const FEATURE_TRANSLATIONS: Record<string, string> = {
+  "1カット": "1 Cut / View",
+  "複数カット": "Multiple Cuts / Views",
+  "2Kレンダリング": "2K Rendering",
+  "4Kレンダリング": "4K Rendering",
+  "8Kレンダリング": "8K Rendering",
+  "2回修正": "2 Revisions",
+  "3回修正": "3 Revisions",
+  "無制限修正": "Unlimited Revisions",
+  "家具コーディネート": "Furniture Styling",
+  "アニメーション対応": "Animation Included",
+  "30秒": "30 sec",
+  "60秒": "60 sec",
+  "Full HD": "Full HD",
+  "4K": "4K",
+  "4K+": "4K+",
+  "BGMなし": "No BGM",
+  "BGM付き": "With BGM",
+  "カラーグレーディング": "Color Grading",
+  "自由尺": "Custom Duration",
+  "ナレーション対応": "Narration Included",
+};
+
+function getPlanName(name: string, isJa: boolean): string {
+  if (!isJa) {
+    if (name === "スタンダード") return "Standard";
+    if (name === "ハイクオリティ") return "High Quality";
+    if (name === "フルカスタム") return "Full Custom";
+    return name;
+  }
+  if (name === "Standard") return "スタンダード";
+  if (name === "High Quality") return "ハイクオリティ";
+  if (name === "Full Custom") return "フルカスタム";
+  return name;
+}
+
+function getPlanFeature(f: string, isJa: boolean): string {
+  if (isJa) return f;
+  return FEATURE_TRANSLATIONS[f] || f;
+}
+
 export default function SolutionDetailTemplate({ data }: { data: SolutionService }) {
   const locale = useLocale();
   const isJa = locale === "ja";
@@ -422,10 +463,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         <div className="max-w-6xl mx-auto px-6 py-16 sm:py-20 md:py-24">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12 sm:mb-16">
             <p className="text-[14px] sm:text-[15px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
-              PRICE
+              {isJa ? "料金プラン" : "PRICE"}
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-[44px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-cormorant), var(--font-noto-serif), serif" }}>
-              Service Plans
+              {isJa ? "料金プラン" : "Service Plans"}
             </h2>
           </motion.div>
 
@@ -448,17 +489,17 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   <div>
                     {isHighlight ? (
                       <span className="inline-block bg-[#caa258] text-[#111] text-[11px] sm:text-[12px] uppercase tracking-wider font-extrabold px-3.5 py-1 rounded-full mb-3.5 shadow-sm">
-                        ★ RECOMMENDED
+                        {isJa ? "★ おすすめ" : "★ RECOMMENDED"}
                       </span>
                     ) : (
                       <div className="h-[29px] mb-3.5" />
                     )}
                     <h3 className={`text-[20px] sm:text-[22px] font-bold mb-3 ${isHighlight ? "text-white" : "text-[#111]"}`}>
-                      {plan.name}
+                      {getPlanName(plan.name, isJa)}
                     </h3>
                     <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#caa258]" : "text-[#111]"}`}>
                       {plan.price === "ASK" ? (
-                        <span className="text-xl sm:text-2xl font-bold">{isJa ? "Contact Us" : "Contact Us"}</span>
+                        <span className="text-xl sm:text-2xl font-bold">{isJa ? "要お問い合わせ" : "Contact Us"}</span>
                       ) : (
                         plan.price
                       )}
@@ -467,7 +508,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                       {plan.features.map((f, fi) => (
                         <li key={fi} className={`flex items-start gap-2.5 text-[14.5px] sm:text-[15.5px] leading-relaxed ${isHighlight ? "text-gray-200" : "text-gray-700"}`}>
                           <span className="text-[#b8935a] font-bold mt-0.5 select-none">✓</span>
-                          <span>{f}</span>
+                          <span>{getPlanFeature(f, isJa)}</span>
                         </li>
                       ))}
                     </ul>
@@ -479,9 +520,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                       : "bg-[#111] text-white hover:bg-black shadow-xs"
                       }`}
                   >
-                    {plan.name === "Full Custom" || plan.price === "ASK"
-                      ? "Request Quote"
-                      : "Contact Us"}
+                    {plan.name === "Full Custom" || plan.name === "フルカスタム" || plan.price === "ASK"
+                      ? (isJa ? "お見積り依頼" : "Request Quote")
+                      : (isJa ? "お問い合わせ" : "Contact Us")}
                   </Link>
                 </motion.div>
               );
