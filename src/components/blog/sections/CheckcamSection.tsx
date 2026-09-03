@@ -103,7 +103,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
   const bodyParagraphs = Array.isArray(data?.body) ? data.body : (data?.body ? [data.body] : []);
 
   return (
-    <section className="bg-[var(--surface)] py-[45px] sm:py-[60px] border-b border-gray-100/60 last:border-b-0">
+    <section className="bg-[var(--surface)] py-[24px] sm:py-[32px]">
       <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
         
         {/* 1. Header */}
@@ -182,7 +182,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
 
         {/* 5. Tags */}
         {data.tags && (
-          <div className="mt-8 space-y-4 pt-6 border-t border-gray-100">
+          <div className="mt-8 space-y-4 pt-4">
             {data.tags.ok && data.tags.ok.length > 0 && (
               <div>
                 <span className="text-gray-600 text-[11.5px] uppercase tracking-[0.16em] font-bold block mb-2.5">
@@ -222,7 +222,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
 
         {/* 6. Additional images */}
         {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-gray-100">
+          <div className="mt-8 pt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
               {data.additionalImages.map((item, i) => {
                 const imgSrc = typeof item === "string" ? item : item.image;

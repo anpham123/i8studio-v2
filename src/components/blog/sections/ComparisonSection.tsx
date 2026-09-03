@@ -39,7 +39,7 @@ export default function ComparisonSection({
   if (!hasImages && !data?.title && bodyParagraphs.length === 0) return null;
 
   return (
-    <section className="bg-[var(--surface)] py-[45px] sm:py-[60px]">
+    <section className="bg-[var(--surface)] py-[24px] sm:py-[32px]">
       <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
         {/* Optional Header from Section Data */}
         {data && (data.title || data.num || data.eyebrow) && (

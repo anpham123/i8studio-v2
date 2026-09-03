@@ -345,6 +345,67 @@ main {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   STAGE SECTION PARAGRAPH IMAGES (Full Width 100% Matching Section Frame)
+   Applies ONLY to Stage Section body paragraph images
+   ───────────────────────────────────────────────────────────────────────────── */
+.stage-paragraph-container .paragraph-image-gallery,
+.stage-paragraph-container .blog-img-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 2rem !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 1.75rem !important;
+}
+
+.stage-paragraph-container .paragraph-image-gallery .gallery-item,
+.stage-paragraph-container .blog-img-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(229, 231, 235, 0.9) !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.stage-paragraph-container .paragraph-image-gallery .img-wrapper,
+.stage-paragraph-container .blog-img-card .img-wrapper {
+  height: auto !important;
+  max-height: 600px !important;
+  width: 100% !important;
+  padding: 0 !important;
+  background-color: #ffffff !important;
+  border-radius: 0 !important;
+}
+
+.stage-paragraph-container .paragraph-image-gallery .img-wrapper img,
+.stage-paragraph-container .blog-img-card .img-wrapper img {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 600px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.stage-paragraph-container img:not(.img-wrapper img) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 600px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border: 1px solid rgba(229, 231, 235, 0.9) !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 1.75rem 0 !important;
+}
 
 :lang(ja),
 [lang="ja"],

@@ -159,7 +159,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* Insight block */}
       {(post.insightHeading || post.insightBody) && (
-        <section className="bg-[#fbf6ec] border-y border-[#ebd9be] py-[55px] sm:py-[75px]">
+        <section className="bg-[#fbf6ec] py-[28px] sm:py-[36px]">
           <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
             {post.insightHeading && (
               <h3

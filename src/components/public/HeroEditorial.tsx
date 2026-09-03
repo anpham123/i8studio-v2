@@ -424,14 +424,20 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
               {t("hero.subtitle")}
             </motion.p>
 
-            <motion.p
-              className="text-[15px] sm:text-[16px] md:text-[17px] text-white/90 leading-[1.8] max-w-[720px] whitespace-pre-line drop-shadow-sm font-normal"
+            <motion.div
+              className="text-[15px] sm:text-[16px] md:text-[17px] text-white/90 leading-[1.8] max-w-5xl drop-shadow-sm font-normal flex flex-col items-center"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
-              {t("hero.description")}
-            </motion.p>
+              {t("hero.description")
+                .split("\n")
+                .map((line, idx) => (
+                  <span key={idx} className="block md:whitespace-nowrap">
+                    {line}
+                  </span>
+                ))}
+            </motion.div>
           </motion.div>
 
           {/* Scroll indicator */}

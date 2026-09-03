@@ -4,7 +4,7 @@ import type { SectionData } from "./CheckcamSection";
 export default function InsightSection({ data }: { data: SectionData }) {
   const bodyParagraphs = Array.isArray(data?.body) ? data.body : (data?.body ? [data.body] : []);
   return (
-    <section className="bg-[#fbf6ec] border-y border-[#ebd9be] py-[50px] sm:py-[65px]">
+    <section className="bg-[#fbf6ec] py-[28px] sm:py-[36px]">
       <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
         <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-8">
           {data?.num && (

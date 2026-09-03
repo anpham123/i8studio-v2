@@ -398,7 +398,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
       <section className="bg-[#fafaf8] section-noise">
         <div className="max-w-6xl mx-auto px-6 py-10 sm:py-12 md:py-16">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-8 sm:mb-10">
-            <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-[#b8935a] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2 className="text-3xl sm:text-4xl md:text-[40px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
               {isJa ? "プロフェッショナルな制作工程" : "Professional Production Process"}
             </h2>
           </motion.div>
