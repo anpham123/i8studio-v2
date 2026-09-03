@@ -202,7 +202,7 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.6 }}
-          className="absolute inset-0 z-30 pointer-events-none flex items-start pt-1 sm:pt-2 md:pt-3 lg:pt-4 w-full"
+          className="absolute inset-0 z-30 pointer-events-none flex items-start pt-8 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-7 w-full"
         >
           {/* Left 50% (Bright Side): WORK */}
           <div className="w-1/2 flex justify-end pr-2 sm:pr-3 lg:pr-4">

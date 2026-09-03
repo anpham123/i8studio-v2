@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { buildMetadata, articleJsonLd, getSiteUrl } from "@/lib/seo";
 import BlogHero from "@/components/blog/BlogHero";
 import BlogIntro from "@/components/blog/BlogIntro";
-import BlogFooter from "@/components/blog/BlogFooter";
 import ComparisonSection from "@/components/blog/sections/ComparisonSection";
 import CheckcamSection from "@/components/blog/sections/CheckcamSection";
 import StageSection from "@/components/blog/sections/StageSection";
@@ -177,9 +176,6 @@ export default async function BlogDetailPage({ params }: Props) {
           </div>
         </section>
       )}
-
-      {/* Footer */}
-      <BlogFooter locale={locale} />
     </article>
   );
 }
