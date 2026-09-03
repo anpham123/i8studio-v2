@@ -7,6 +7,7 @@ import { buildMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import PortfolioFlipbooks from "@/components/public/PortfolioFlipbooks";
+import PortfolioHeroBanner from "@/components/public/PortfolioHeroBanner";
 
 export async function generateMetadata({
   params,
@@ -77,70 +78,12 @@ export default async function AboutPortfolioPage({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero: Split Editorial Portfolio Banner (Matching User Reference) ── */}
-      <section className="bg-white border-b border-gray-100 overflow-hidden">
-        <div className="w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[950px] grid grid-cols-1 lg:grid-cols-2 items-stretch">
-          
-          {/* Left Column: White Editorial Layout */}
-          <div className="bg-white p-8 sm:p-12 md:p-14 lg:p-16 xl:p-20 flex flex-col justify-between items-start z-10">
-            {/* Top Eyebrow */}
-            <div className="w-full">
-              <p className="text-[17px] sm:text-[18px] font-extrabold tracking-[0.22em] text-[#111] uppercase font-sans">
-                {isJa ? "建築CG制作" : "ARCHITECTURAL"}
-              </p>
-              <p className="text-sm sm:text-[15px] font-medium tracking-[0.28em] text-gray-500 uppercase font-sans mt-1">
-                {isJa ? "ビジュアライゼーション" : "VISUALIZATION"}
-              </p>
-            </div>
-
-            {/* Center Typographic Statement & Narrative */}
-            <div className="my-auto py-8 sm:py-10 md:py-12 w-full">
-              {isJa ? (
-                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-light text-[#111] tracking-[0.1em] sm:tracking-[0.16em] select-none leading-[1.2]" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
-                  ポートフォリオ
-                </h1>
-              ) : (
-                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-[#111] tracking-[0.22em] sm:tracking-[0.28em] uppercase select-none leading-[1.18] font-roboto">
-                  <span className="block">P O R T -</span>
-                  <span className="block mt-1 sm:mt-2">F O L I O</span>
-                </h1>
-              )}
-            </div>
-
-            {/* Bottom Credits & Action Link */}
-            <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between gap-6 pt-6 border-t border-gray-100">
-              <div>
-                <p className="text-lg sm:text-xl text-gray-900 font-bold tracking-wide">
-                  i8 STUDIO
-                </p>
-                <p className="text-sm sm:text-[15px] text-gray-600 font-medium mt-1">
-                  {isJa ? "建築CGパース・VR・アニメーション制作スタジオ" : "Architectural 3DCG & VR Studio"}
-                </p>
-              </div>
-
-              <Link
-                href={`/${params.locale}/works`}
-                className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-[#111] hover:bg-[#333] text-white text-sm font-semibold shadow-md transition-all hover:scale-105 group"
-              >
-                <span>{isJa ? "プロジェクト一覧" : "Selected works"}</span>
-                <span className="text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all">→</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Right Column: Architectural Forest Pavilion Render (Building centered) */}
-          <div className="relative w-full h-[420px] sm:h-[520px] lg:h-auto min-h-full overflow-hidden bg-gray-900 group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={heroImage}
-              alt="Architectural Visualization Portfolio — i8 STUDIO"
-              className="w-full h-full object-cover object-[75%_35%] sm:object-[76%_32%] lg:object-[78%_30%] group-hover:scale-105 transition-transform duration-1000 ease-out"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-          </div>
-
-        </div>
-      </section>
+      {/* ── Hero: Split Editorial Portfolio Banner with 3D Wireframe to Photoreal Laser Scan Effect ── */}
+      <PortfolioHeroBanner
+        heroImage={heroImage}
+        isJa={isJa}
+        locale={params.locale}
+      />
 
       {/* Portfolio Grid with Homepage-style Cinematic Hover Zoom */}
       {portfolios.length > 0 && (

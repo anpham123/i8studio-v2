@@ -163,29 +163,15 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
   const activeCol = collections[activeIndex] || collections[0];
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] flex flex-col justify-between overflow-hidden">
-      {/* ── Top Header ────────────────────────────────────────────── */}
-      <header className="pt-8 sm:pt-12 pb-2 text-center px-6 z-30">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-[#b8935a] font-semibold mb-2">
-          {isJa ? "コレクション" : "SPACE COLLECTION"}
-        </p>
-        <h1
-          className="text-2xl sm:text-3xl lg:text-4xl font-light text-[#111] leading-tight"
-          style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-        >
-          {isJa ? "空間を彩る、視覚の物語" : "Visual Stories that Color Spaces"}
-        </h1>
-      </header>
-
-      {/* ── Main Interactive Showcase Stage (100% Center Aligned with Peeking Neighbors) ─── */}
+    <div className="min-h-[calc(100vh-var(--header-h,76px))] bg-[#fafaf8] flex items-center justify-center overflow-hidden select-none">
+      {/* ── Main Interactive Showcase Stage (100% Center Aligned) ─── */}
       <div
         ref={stageRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="relative flex-1 w-full flex items-center justify-center overflow-hidden px-6 lg:px-16 xl:px-24 py-4 select-none"
-        style={{ minHeight: "calc(100vh - 160px)" }}
+        className="w-full max-w-[1560px] px-6 lg:px-16 xl:px-24 py-8 sm:py-12"
       >
-        <div className="w-full max-w-[1560px] grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
 
           {/* ── Left Column: Synchronized Dynamic Typography ────────── */}
           <div className="lg:col-span-5 flex flex-col justify-center select-none z-20">
@@ -228,7 +214,7 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
             </AnimatePresence>
 
             {/* Bottom Mini Category List Indicator */}
-            <div className="hidden lg:flex flex-wrap gap-x-4 gap-y-1.5 pt-10 text-[11px] uppercase tracking-wider text-gray-300 font-mono">
+            <div className="hidden lg:flex flex-wrap gap-x-4 gap-y-1.5 pt-10 text-[11px] uppercase tracking-wider text-gray-400 font-mono">
               {collections.slice(0, 7).map((c, i) => (
                 <span
                   key={c.slug}
@@ -243,92 +229,42 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
             </div>
           </div>
 
-          {/* ── Right Column: Vertical Reel with Visible Top & Bottom Peeking Cards ──── */}
-          <div className="lg:col-span-7 relative h-[720px] sm:h-[780px] lg:h-[840px] flex items-center justify-center overflow-hidden">
-            {/* Top & Bottom Subtle Edge Softeners */}
-            <div className="absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-[#fafaf8] to-transparent z-30 pointer-events-none" />
-            <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-[#fafaf8] to-transparent z-30 pointer-events-none" />
-
-            {/* Filmstrip Reel centered at Y = -activeIndex * CARD_STEP */}
-            <motion.div
-              animate={{ y: -activeIndex * CARD_STEP }}
-              transition={{ type: "spring", stiffness: 200, damping: 26, mass: 0.8 }}
-              className="flex flex-col items-center gap-7 absolute w-full max-w-[760px] xl:max-w-[850px] 2xl:max-w-[920px]"
-              style={{
-                top: "50%",
-                marginTop: `-${CARD_HEIGHT / 2}px`,
-              }}
-            >
-              {collections.map((col, idx) => {
-                const isCurrent = idx === activeIndex;
-                const distance = Math.abs(idx - activeIndex);
-
-                let targetScale = 0.65;
-                let targetOpacity = 0.35;
-
-                if (isCurrent) {
-                  targetScale = 1.0;
-                  targetOpacity = 1.0;
-                } else if (distance === 1) {
-                  targetScale = 0.78;
-                  targetOpacity = 0.65; // Clearly visible top & bottom preview cards
-                }
-
-                return (
-                  <motion.div
-                    key={col.slug}
-                    animate={{
-                      scale: targetScale,
-                      opacity: targetOpacity,
+          {/* ── Right Column: Clean Centered Single Active Image ──── */}
+          <div className="lg:col-span-7 relative w-full flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeCol.slug}
+                initial={{ opacity: 0, scale: 0.96, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -16 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full flex items-center justify-center"
+              >
+                <Link
+                  href={`${basePath}/${encodeURIComponent(activeCol.slug)}`}
+                  className="w-full relative group flex items-center justify-center"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={activeCol.cover}
+                    alt={isJa ? activeCol.titleJa : activeCol.titleEn}
+                    className="w-full max-h-[500px] sm:max-h-[560px] lg:max-h-[620px] xl:max-h-[680px] object-contain rounded-2xl sm:rounded-3xl shadow-2xl transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    onError={(e) => {
+                      const t = e.currentTarget;
+                      t.style.display = "none";
+                      const p = t.parentElement;
+                      if (p) {
+                        p.classList.add("flex", "items-center", "justify-center", "bg-neutral-100", "rounded-2xl", "min-h-[350px]");
+                        const s = document.createElement("span");
+                        s.className = "text-gray-400 text-lg font-medium";
+                        s.textContent = isJa ? activeCol.titleJa : activeCol.titleEn;
+                        p.appendChild(s);
+                      }
                     }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    onClick={() => {
-                      if (!isCurrent) setActiveIndex(idx);
-                    }}
-                    style={{ height: `${CARD_HEIGHT}px` }}
-                    className={`relative w-full overflow-visible cursor-pointer shrink-0 bg-transparent flex items-center justify-center ${isCurrent
-                      ? "z-20"
-                      : "hover:opacity-85 z-10"
-                      }`}
-                  >
-                    <Link
-                      href={isCurrent ? `${basePath}/${encodeURIComponent(col.slug)}` : "#"}
-                      onClick={(e) => {
-                        if (!isCurrent) {
-                          e.preventDefault();
-                          setActiveIndex(idx);
-                        }
-                      }}
-                      className="w-full h-full relative group bg-transparent flex items-center justify-center"
-                    >
-                      {/* Image floats seamlessly with natural rounded borders and shadow */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={col.cover}
-                        alt={isJa ? col.titleJa : col.titleEn}
-                        className={`max-w-full max-h-full object-contain rounded-2xl sm:rounded-3xl transition-all duration-700 ease-out group-hover:scale-[1.02] ${
-                          isCurrent
-                            ? "shadow-2xl ring-1 ring-black/5"
-                            : "shadow-lg opacity-90"
-                        }`}
-                        onError={(e) => {
-                          const t = e.currentTarget;
-                          t.style.display = "none";
-                          const p = t.parentElement;
-                          if (p) {
-                            p.classList.add("flex", "items-center", "justify-center", "bg-neutral-100", "rounded-2xl");
-                            const s = document.createElement("span");
-                            s.className = "text-gray-400 text-lg font-medium";
-                            s.textContent = isJa ? col.titleJa : col.titleEn;
-                            p.appendChild(s);
-                          }
-                        }}
-                      />
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
+                  />
+                </Link>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
         </div>

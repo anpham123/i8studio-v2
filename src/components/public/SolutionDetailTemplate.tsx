@@ -116,16 +116,36 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           >
             {heroTagline}
           </motion.h1>
-          {heroDesc && (
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-              className="text-white/85 text-xs sm:text-sm md:text-base max-w-2xl mx-auto mb-6 leading-relaxed font-light drop-shadow-sm"
-            >
-              {heroDesc}
-            </motion.p>
-          )}
+          {(() => {
+            if (!heroDesc) return null;
+
+            // Split into 2 distinct sentences/lines (by newline, Japanese 。 or English .)
+            let lines: string[] = [];
+            if (heroDesc.includes("\n") || /<br\s*\/?>/i.test(heroDesc)) {
+              lines = heroDesc.split(/\r?\n|<br\s*\/?>/gi).map((s) => s.trim()).filter(Boolean);
+            } else if (isJa && heroDesc.includes("。")) {
+              lines = heroDesc.split(/(?<=。)/).map((s) => s.trim()).filter(Boolean);
+            } else if (!isJa && heroDesc.includes(". ")) {
+              lines = heroDesc.split(/(?<=\.\s+)/).map((s) => s.trim()).filter(Boolean);
+            } else {
+              lines = [heroDesc.trim()];
+            }
+
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-white/85 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-6 leading-relaxed font-light drop-shadow-sm space-y-1"
+              >
+                {lines.map((line, idx) => (
+                  <span key={idx} className="block whitespace-normal md:whitespace-nowrap">
+                    {line}
+                  </span>
+                ))}
+              </motion.div>
+            );
+          })()}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
               href={`/${locale}/contact`}
@@ -271,7 +291,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               )}
               {/* Text — below media (spans full width matching media above) */}
               <div className="w-full">
-                <h2 className="text-2xl md:text-3xl font-light text-[#111] mb-4 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+                <h2 className="text-xl sm:text-2xl md:text-[30px] font-bold text-[#111] mb-4 leading-snug" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
                   {ftTitle}
                 </h2>
                 {(() => {
@@ -397,19 +417,19 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         </div>
       </section>
 
-      {/* ── Pricing Block (Insight warm cream-gold theme) ──────────────────────────── */}
-      <section className="bg-[#fbf6ec] border-y border-[#ebd9be]">
-        <div className="max-w-6xl mx-auto px-6 py-12 sm:py-14 md:py-16">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-10 sm:mb-12">
-            <p className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-2.5">
-              {isJa ? "料金プラン" : "SERVICE PLANS"}
+      {/* ── Pricing Block (Insight warm cream-gold theme matching Image 2) ──────────────────────────── */}
+      <section className="bg-[#fcf8f2] border-y border-[#ede4d4]">
+        <div className="max-w-6xl mx-auto px-6 py-16 sm:py-20 md:py-24">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-12 sm:mb-16">
+            <p className="text-[14px] sm:text-[15px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3">
+              PRICE
             </p>
-            <h2 className="text-3xl sm:text-4xl md:text-[38px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
-              {isJa ? "サービスプラン" : "Service Plans"}
+            <h2 className="text-3xl sm:text-4xl md:text-[44px] font-light text-[#111] leading-tight" style={{ fontFamily: "var(--font-cormorant), var(--font-noto-serif), serif" }}>
+              Service Plans
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
             {data.plans.map((plan, i) => {
               const isHighlight = plan.highlighted || (!data.plans.some((p) => p.highlighted) && i === 1);
               return (
@@ -420,34 +440,32 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   whileInView="visible"
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className={`rounded-2xl p-8 transition-all flex flex-col justify-between relative ${isHighlight
-                      ? "bg-gradient-to-b from-[#1f1b17] via-[#161412] to-[#0f0e0c] border-2 border-[#b8935a] shadow-[0_20px_50px_rgba(0,0,0,0.25)] ring-4 ring-[#b8935a]/30 scale-[1.03] md:scale-[1.06] z-10 text-white"
-                      : "bg-white border border-[#ebd9be]/90 shadow-sm hover:shadow-md text-[#111]"
+                  className={`rounded-2xl p-8 sm:p-9 transition-all flex flex-col justify-between relative ${isHighlight
+                    ? "bg-[#141210] border-2 border-[#b8935a] shadow-[0_16px_40px_rgba(0,0,0,0.3)] z-10 text-white"
+                    : "bg-white border border-gray-100 shadow-sm hover:shadow-md text-[#111]"
                     }`}
                 >
                   <div>
                     {isHighlight ? (
-                      <span className="inline-block bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black text-[12px] sm:text-[13px] uppercase tracking-[0.2em] font-extrabold px-4 py-1 rounded-full mb-3.5 shadow-lg">
-                        {isJa ? "★ おすすめ" : "★ RECOMMENDED"}
+                      <span className="inline-block bg-[#caa258] text-[#111] text-[11px] sm:text-[12px] uppercase tracking-wider font-extrabold px-3.5 py-1 rounded-full mb-3.5 shadow-sm">
+                        ★ RECOMMENDED
                       </span>
                     ) : (
                       <div className="h-[29px] mb-3.5" />
                     )}
-                    <h3 className={`text-[20px] sm:text-[22px] font-bold mb-4 ${isHighlight ? "text-white" : "text-[#111]"}`}>
-                      {isJa
-                        ? (plan.name === "Standard" ? "スタンダード" : plan.name === "High Quality" ? "ハイクオリティ" : plan.name === "Full Custom" ? "フルカスタム" : plan.name)
-                        : plan.name}
+                    <h3 className={`text-[20px] sm:text-[22px] font-bold mb-3 ${isHighlight ? "text-white" : "text-[#111]"}`}>
+                      {plan.name}
                     </h3>
-                    <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#f5d78e]" : "text-[#111]"}`}>
+                    <div className={`text-3xl sm:text-[34px] font-bold mb-6 font-roboto tracking-tight ${isHighlight ? "text-[#caa258]" : "text-[#111]"}`}>
                       {plan.price === "ASK" ? (
-                        <span className="text-xl font-semibold">{isJa ? "お問い合わせ" : "Contact Us"}</span>
+                        <span className="text-xl sm:text-2xl font-bold">{isJa ? "Contact Us" : "Contact Us"}</span>
                       ) : (
                         plan.price
                       )}
                     </div>
                     <ul className="space-y-3 mb-8">
                       {plan.features.map((f, fi) => (
-                        <li key={fi} className={`flex items-start gap-2.5 text-[15px] sm:text-[16px] leading-relaxed ${isHighlight ? "text-gray-200" : "text-gray-700"}`}>
+                        <li key={fi} className={`flex items-start gap-2.5 text-[14.5px] sm:text-[15.5px] leading-relaxed ${isHighlight ? "text-gray-200" : "text-gray-700"}`}>
                           <span className="text-[#b8935a] font-bold mt-0.5 select-none">✓</span>
                           <span>{f}</span>
                         </li>
@@ -456,14 +474,14 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                   </div>
                   <Link
                     href={`/${locale}/contact`}
-                    className={`block text-center py-3.5 px-6 rounded-full text-[15px] font-bold transition-all ${isHighlight
-                        ? "bg-gradient-to-r from-[#b8935a] to-[#d8b467] text-black hover:brightness-110 shadow-xl shadow-[#b8935a]/30"
-                        : "bg-[#111] text-white hover:bg-[#333] shadow-xs"
+                    className={`block text-center py-3.5 px-6 rounded-full text-[15px] font-semibold transition-all ${isHighlight
+                      ? "bg-[#caa258] hover:bg-[#b8935a] text-[#111] font-bold shadow-md hover:brightness-105"
+                      : "bg-[#111] text-white hover:bg-black shadow-xs"
                       }`}
                   >
-                    {plan.price === "ASK"
-                      ? (isJa ? "お見積もりを依頼" : "Request Quote")
-                      : (isJa ? "お問い合わせ" : "Contact Us")}
+                    {plan.name === "Full Custom" || plan.price === "ASK"
+                      ? "Request Quote"
+                      : "Contact Us"}
                   </Link>
                 </motion.div>
               );

@@ -196,7 +196,7 @@ const SOLUTIONS: SolutionSeed[] = [
   {
     slug: "vr-walkthrough",
     name: "VR Walkthrough",
-    nameJa: "VR Walkthrough",
+    nameJa: "VRウォークスルー",
     icon: "PersonStanding",
     image: "/uploads/service-vr-walkthrough.jpg",
     heroImage: "",

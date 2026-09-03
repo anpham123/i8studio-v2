@@ -7,45 +7,56 @@ import { motion, type Variants } from "framer-motion";
 const easeCurve = [0.16, 1, 0.3, 1] as const;
 
 /* ------------------------------------------------------------------ */
-/*  Diagonal Wipe Reveal Animation Variants                           */
+/*  Scroll Reveal & Text Color Sweep Animation Variants               */
 /* ------------------------------------------------------------------ */
-const diagonalCurtainVariants: Variants = {
+const stepRowVariants: Variants = {
   hidden: {
-    clipPath: "polygon(0 0, 160% 0, 100% 100%, -40% 100%)",
+    opacity: 0.4,
+    transition: { duration: 0.5, ease: "easeOut" },
   },
   visible: {
-    clipPath: "polygon(160% 0, 160% 0, 160% 100%, 160% 100%)",
-    transition: {
-      duration: 2.4,
-      ease: easeCurve,
-    },
-  },
-};
-
-const diagonalTextCurtainVariants: Variants = {
-  hidden: {
-    clipPath: "polygon(0 0, 160% 0, 100% 100%, -40% 100%)",
-  },
-  visible: {
-    clipPath: "polygon(160% 0, 160% 0, 160% 100%, 160% 100%)",
-    transition: {
-      duration: 2.4,
-      delay: 0.15,
-      ease: easeCurve,
-    },
-  },
-};
-
-const imageInnerVariants: Variants = {
-  hidden: { scale: 1.18, opacity: 0.7 },
-  visible: {
-    scale: 1,
     opacity: 1,
     transition: {
-      duration: 2.8,
-      ease: easeCurve,
+      duration: 0.7,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
+};
+
+const imageVariants: Variants = {
+  hidden: {
+    opacity: 0.5,
+    scale: 0.97,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+const textSweepVariants: Variants = {
+  hidden: {
+    backgroundPosition: "100% 0%",
+    opacity: 0.4,
+    transition: {
+      duration: 0.45,
+      ease: "easeInOut",
+    },
+  },
+  visible: (custom: number = 0) => ({
+    backgroundPosition: "0% 0%",
+    opacity: 1,
+    transition: {
+      duration: 1.15,
+      delay: custom * 0.12,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  }),
 };
 
 interface WorkflowStep {
@@ -111,21 +122,88 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero: Full-Width Day/Night Split Background with Upper Semi-Transparent WORKFLOW ────────── */}
-      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex items-start justify-center bg-gray-950">
+      {/* ── Hero: 3D Wireframe to Photoreal Laser Scan Reveal with WORKFLOW Split Typography ── */}
+      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex items-start justify-center bg-[#0c0b0a] select-none">
 
-        {/* Full-width Background Image (Clean, Sharp & Clear) */}
-        <div className="absolute inset-0 w-full h-full z-0">
+        {/* ── 1. Under-Layer: 3D Technical Wireframe / Blueprint Mesh ── */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          {/* Subtle architectural 3D coordinate grid */}
+          <div
+            className="absolute inset-0 opacity-25"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.2) 1px, transparent 1px)`,
+              backgroundSize: "44px 44px",
+            }}
+          />
+          {/* Wireframe Contour Image overlay */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            src={heroImage || "/uploads/1787802610927-upscalemedia-transformed.webp"}
+            alt="3D Wireframe Mesh"
+            className="w-full h-full object-cover object-center opacity-20 filter grayscale invert contrast-200"
+          />
+          {/* Subtle 3D Depth Vignette */}
+          <div className="absolute inset-0 bg-radial from-transparent via-[#0c0b0a]/70 to-[#0c0b0a]" />
+
+          {/* Technical HUD Overlay Indicators */}
+          <motion.div
+            initial={{ opacity: 0.9 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 1.2, delay: 2.8 }}
+            className="absolute inset-0 p-6 sm:p-10 flex flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
+          >
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#c5a666] animate-ping" />
+                [ 3D WORKFLOW PIPELINE SCAN ]
+              </span>
+              <span>FOV: 45° | SAMPLES: 4096</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>ENGINE: 3DS MAX / V-RAY / CORONA</span>
+              <span>RENDER: PHOTOREAL 100%</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── 2. Top-Layer: Photorealistic Architectural Render (Revealed via Laser Scan) ── */}
+        <motion.div
+          initial={{ clipPath: "inset(0 100% 0 0)" }}
+          animate={{ clipPath: "inset(0 0% 0 0)" }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          className="absolute inset-0 z-1 overflow-hidden pointer-events-none"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <motion.img
+            initial={{ scale: 1.06 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
             src={heroImage || "/uploads/1787802610927-upscalemedia-transformed.webp"}
             alt="Architectural Visualization Workflow — i8 STUDIO"
             className="w-full h-full object-cover object-center"
           />
-        </div>
+        </motion.div>
 
-        {/* Oversized Semi-Transparent "WORKFLOW" Typography Split at Day/Night Divider - Positioned high in the sky area */}
-        <div className="absolute inset-0 z-10 pointer-events-none flex items-start pt-1 sm:pt-2 md:pt-3 lg:pt-4 w-full">
+        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep ── */}
+        <motion.div
+          initial={{ left: "-5%", opacity: 0 }}
+          animate={{ left: "105%", opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          className="absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none flex items-center justify-center"
+        >
+          {/* Intense vertical laser beam core */}
+          <div className="w-[2.5px] h-full bg-gradient-to-b from-transparent via-[#fff5d0] to-transparent shadow-[0_0_25px_8px_rgba(224,185,110,0.85)]" />
+          {/* Trailing soft gold light wash */}
+          <div className="absolute inset-y-0 -left-10 w-20 bg-gradient-to-r from-transparent via-[#c5a666]/30 to-transparent blur-md" />
+        </motion.div>
+
+        {/* ── 4. Oversized Semi-Transparent "WORKFLOW" Typography Split at Day/Night Divider ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.6 }}
+          className="absolute inset-0 z-30 pointer-events-none flex items-start pt-1 sm:pt-2 md:pt-3 lg:pt-4 w-full"
+        >
           {/* Left 50% (Bright Side): WORK */}
           <div className="w-1/2 flex justify-end pr-2 sm:pr-3 lg:pr-4">
             <h1
@@ -145,11 +223,11 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
               FLOW
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* ── Steps (Diagonal Wipe Reveal on WHOLE SECTION: Image + Text) ───────── */}
-      <section className="max-w-7xl mx-auto px-6 py-20 md:py-28 space-y-24 md:space-y-32">
+      {/* ── Steps (Scroll Reveal: Bottom-Up Slide + Text Color Sweep) ───────── */}
+      <section className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 py-20 md:py-28 space-y-24 md:space-y-32">
         {displaySteps.map((step, i) => {
           const reverse = i % 2 === 1;
           const num = String(step.stepNumber).padStart(2, "0");
@@ -162,65 +240,58 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
           return (
             <motion.div
               key={num + "-" + i}
+              variants={stepRowVariants}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false, amount: 0.2 }}
+              viewport={{ once: false, margin: "-40px 0px -40px 0px", amount: 0.2 }}
               className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"
-                } gap-8 md:gap-12 lg:gap-16 items-center`}
+                } gap-10 md:gap-14 lg:gap-16 items-center`}
             >
-              {/* Image with Diagonal Wipe Reveal Shutter */}
-              <div className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm">
-                {/* Diagonal Wipe Shutter Curtain */}
-                <motion.div
-                  variants={diagonalCurtainVariants}
-                  className="absolute inset-0 z-10 bg-white pointer-events-none"
-                />
+              {/* Image with Smooth Fade + Slide */}
+              <motion.div
+                variants={imageVariants}
+                className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm"
+              >
+                {step.image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={step.image}
+                    alt={title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const t = e.currentTarget;
+                      t.style.display = "none";
+                      const p = t.parentElement;
+                      if (p) {
+                        p.classList.add("flex", "items-center", "justify-center");
+                        const s = document.createElement("span");
+                        s.className = "text-gray-400 text-sm font-medium";
+                        s.textContent = title;
+                        p.appendChild(s);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#f4f2ee]">
+                    <span className="text-gray-400 text-sm font-medium">{title}</span>
+                  </div>
+                )}
+              </motion.div>
 
-                {/* Inner Image with slow zoom out */}
-                <motion.div
-                  variants={imageInnerVariants}
-                  className="w-full h-full"
-                >
-                  {step.image ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={step.image}
-                      alt={title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const t = e.currentTarget;
-                        t.style.display = "none";
-                        const p = t.parentElement;
-                        if (p) {
-                          p.classList.add("flex", "items-center", "justify-center");
-                          const s = document.createElement("span");
-                          s.className = "text-gray-400 text-sm font-medium";
-                          s.textContent = title;
-                          p.appendChild(s);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#f4f2ee]">
-                      <span className="text-gray-400 text-sm font-medium">{title}</span>
-                    </div>
-                  )}
-                </motion.div>
-              </div>
-
-              {/* Text Block with matching Diagonal Wipe Reveal Shutter */}
-              <div className="relative w-full md:w-[58%] lg:w-[60%] flex-1 min-w-0 overflow-hidden">
-                {/* Diagonal Wipe Shutter Curtain on Text */}
-                <motion.div
-                  variants={diagonalTextCurtainVariants}
-                  className="absolute inset-0 z-10 bg-white pointer-events-none"
-                />
-
-                <span className="text-5xl md:text-7xl font-bold text-[#111] block mb-2 font-roboto tracking-tight">
+              {/* Text Block with Gold Number and Color-Sweep Text */}
+              <div className="relative w-full md:w-[58%] lg:w-[60%] flex-1 min-w-0">
+                {/* Step Number in Gold / Yellow */}
+                <span className="text-5xl md:text-7xl font-bold text-[#b8935a] block mb-2 font-roboto tracking-tight select-none">
                   {num}
                 </span>
-                <h2
-                  className="text-2xl md:text-3xl font-semibold md:font-bold text-[#111] mb-4"
+
+                {/* Step Title in Gold */}
+                <motion.h2
+                  variants={{
+                    hidden: { opacity: 0.4 },
+                    visible: { opacity: 1, transition: { duration: 0.7, ease: "easeOut" } },
+                  }}
+                  className="text-2xl md:text-3xl font-semibold md:font-bold mb-4 text-[#b8935a]"
                   style={{
                     fontFamily: isJa
                       ? "var(--font-noto-serif), serif"
@@ -228,7 +299,8 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
                   }}
                 >
                   {title}
-                </h2>
+                </motion.h2>
+
                 {(() => {
                   const rawDesc = desc || "";
                   let items = rawDesc
@@ -262,12 +334,26 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
                           return (
                             <li
                               key={idx}
-                              className="flex items-start gap-2.5 text-black text-[16px] sm:text-[17px] leading-relaxed font-normal"
+                              className="flex items-start gap-2.5 leading-relaxed font-normal"
                             >
                               <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">
                                 •
                               </span>
-                              <span className="flex-1 min-w-0">{cleanItem}</span>
+                              <motion.span
+                                variants={textSweepVariants}
+                                custom={idx + 1}
+                                className="flex-1 min-w-0 text-[15px] sm:text-[15.5px] lg:text-[16px] leading-[1.8] font-normal tracking-[-0.01em]"
+                                style={{
+                                  background: "linear-gradient(90deg, #111111 0%, #111111 50%, #cbd5e1 50%, #cbd5e1 100%)",
+                                  backgroundSize: "200% 100%",
+                                  WebkitBackgroundClip: "text",
+                                  WebkitTextFillColor: "transparent",
+                                  wordBreak: "normal",
+                                  lineBreak: "strict",
+                                }}
+                              >
+                                {cleanItem}
+                              </motion.span>
                             </li>
                           );
                         })}

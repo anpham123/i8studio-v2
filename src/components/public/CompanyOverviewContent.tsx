@@ -278,16 +278,65 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
 
   return (
     <div className="min-h-screen bg-white selection:bg-[#111] selection:text-white">
-      {/* ── Hero (full-viewport with dynamic Hero Image background & entrance motion) ────────── */}
-      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#111] overflow-hidden flex flex-col justify-end items-center pb-16 sm:pb-20 pt-24">
-        {/* Background Hero Image if uploaded with subtle cinematic motion */}
+      {/* ── Hero (3D Wireframe to Photoreal Render Laser Scan Reveal) ────────── */}
+      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#0c0b0a] overflow-hidden flex flex-col justify-end items-center pb-16 sm:pb-20 pt-24 select-none">
+        
+        {/* ── 1. Under-Layer: 3D Technical Wireframe / Blueprint Mesh ── */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          {/* Subtle architectural 3D coordinate grid */}
+          <div
+            className="absolute inset-0 opacity-25"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.2) 1px, transparent 1px)`,
+              backgroundSize: "44px 44px",
+            }}
+          />
+          {/* Wireframe Contour Image overlay */}
+          {heroBgImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={heroBgImage}
+              alt="3D Mesh"
+              className="w-full h-full object-cover opacity-20 filter grayscale invert contrast-200"
+            />
+          )}
+          {/* Subtle 3D Depth Vignette */}
+          <div className="absolute inset-0 bg-radial from-transparent via-[#0c0b0a]/70 to-[#0c0b0a]" />
+
+          {/* Technical HUD Overlay Indicators (fade out gently after scan finishes) */}
+          <motion.div
+            initial={{ opacity: 0.9 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 1.2, delay: 2.8 }}
+            className="absolute inset-0 p-6 sm:p-10 flex flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
+          >
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#c5a666] animate-ping" />
+                [ 3D WIREFRAME MESH SCAN ]
+              </span>
+              <span>FOV: 45° | SAMPLES: 4096</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>RAYTRACING ACCELERATION: OPTIX</span>
+              <span>RENDER: PHOTOREAL 100%</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── 2. Top-Layer: Photorealistic Architectural Render (Revealed via Laser Scan) ── */}
         {heroBgImage ? (
-          <div className="absolute inset-0 overflow-hidden">
+          <motion.div
+            initial={{ clipPath: "inset(0 100% 0 0)" }}
+            animate={{ clipPath: "inset(0 0% 0 0)" }}
+            transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            className="absolute inset-0 z-1 overflow-hidden pointer-events-none"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <motion.img
               initial={{ scale: 1.08 }}
               animate={{ scale: 1 }}
-              transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
               src={heroBgImage}
               alt="i8 STUDIO About Us"
               className="w-full h-full object-cover"
@@ -296,27 +345,41 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
                 t.style.display = "none";
               }}
             />
-            {/* Clean bottom gradient overlay for crystal clear text readability */}
+            {/* Gradient shadow overlay for crisp readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
-          </div>
+          </motion.div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-[#111] via-[#161616] to-[#111]" />
         )}
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep ── */}
+        <motion.div
+          initial={{ left: "-5%", opacity: 0 }}
+          animate={{ left: "105%", opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          className="absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none flex items-center justify-center"
+        >
+          {/* Intense vertical laser beam core */}
+          <div className="w-[2.5px] h-full bg-gradient-to-b from-transparent via-[#fff5d0] to-transparent shadow-[0_0_25px_8px_rgba(224,185,110,0.85)]" />
+          {/* Trailing soft gold light wash */}
+          <div className="absolute inset-y-0 -left-10 w-20 bg-gradient-to-r from-transparent via-[#c5a666]/30 to-transparent blur-md" />
+        </motion.div>
+
+        {/* ── 4. Floating Hero Typography ── */}
+        <div className="relative z-30 max-w-4xl mx-auto px-6 text-center">
           <motion.p
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-[14px] sm:text-[16px] md:text-[17px] uppercase tracking-[0.28em] text-[#c5a666] mb-3 font-bold drop-shadow-sm"
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-[14px] sm:text-[16px] md:text-[17px] uppercase tracking-[0.28em] text-[#c5a666] mb-3 font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
           >
             {isJa ? "私たちについて" : "ABOUT US"}
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-normal text-white leading-tight mb-4 drop-shadow-md md:whitespace-nowrap"
+            transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-normal text-white leading-tight mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] md:whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {isJa
@@ -326,8 +389,8 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-2xl mx-auto leading-relaxed font-normal drop-shadow-sm mb-4"
+            transition={{ delay: 1.0, duration: 0.8 }}
+            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-2xl mx-auto leading-relaxed font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] mb-4"
           >
             {isJa
               ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
@@ -335,12 +398,12 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           </motion.p>
         </div>
 
-        {/* Scroll indicator */}
+        {/* ── 5. Scroll Indicator ── */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+          transition={{ delay: 1.4 }}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
         >
           <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
             <motion.div
@@ -625,10 +688,26 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
               />
             </div>
           ) : null}
-          <p className="text-center text-black text-lg md:text-[22px] mt-8 max-w-4xl mx-auto leading-[1.85] font-normal">
-            {isJa
-              ? "3Dアーティスト、アニメーター、VR/ARエンジニア、プロジェクトマネージャーなど、多彩な専門家が在籍。日本語対応の専任ディレクターがスムーズなコミュニケーションをサポートします。"
-              : "Our diverse team includes 3D artists, animators, VR/AR engineers, and project managers. Dedicated Japanese-speaking directors ensure smooth communication."}
+          <p className="text-center text-black text-[16px] sm:text-[18px] md:text-[19px] lg:text-[20px] mt-8 max-w-5xl mx-auto leading-[1.85] font-normal">
+            {isJa ? (
+              <>
+                <span className="block">
+                  3Dアーティスト、アニメーター、VR/ARエンジニア、プロジェクトマネージャーなど、多彩な専門家が在籍。
+                </span>
+                <span className="block">
+                  日本語対応の専任ディレクターがスムーズなコミュニケーションをサポートします。
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block">
+                  Our diverse team includes 3D artists, animators, VR/AR engineers, and project managers.
+                </span>
+                <span className="block">
+                  Dedicated Japanese-speaking directors ensure smooth communication.
+                </span>
+              </>
+            )}
           </p>
         </motion.div>
       </section>

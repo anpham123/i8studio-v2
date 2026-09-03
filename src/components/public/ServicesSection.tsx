@@ -24,6 +24,8 @@ const iconMap: Record<string, React.ElementType> = {
   Cuboid,
 };
 
+import { getServiceName } from "@/lib/solution-data";
+
 interface Service {
   id: string;
   name: string;
@@ -63,7 +65,7 @@ export default function ServicesSection({ services, locale }: ServicesSectionPro
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, i) => {
             const Icon = iconMap[service.icon] || Box;
-            const name = locale === "ja" ? service.nameJa || service.name : service.name;
+            const name = getServiceName(service, locale === "ja");
             const desc = locale === "ja" ? service.descriptionJa || service.description : service.description;
             const price = locale === "ja" ? service.priceHintJa || service.priceHint : service.priceHint;
 

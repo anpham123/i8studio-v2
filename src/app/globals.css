@@ -346,14 +346,18 @@ main {
 
 :lang(ja),
 [lang="ja"],
+body,
+p,
+li,
+span,
+div,
 .blog-content,
 .prose,
 .tiptap,
 .ProseMirror {
   line-break: strict;
-  word-break: auto-phrase;
+  word-break: normal;
   overflow-wrap: break-word;
-  text-wrap: pretty;
 }
 
 h1,
@@ -365,7 +369,6 @@ h6,
 .blog-title,
 .section-title {
   line-break: strict;
-  word-break: auto-phrase;
   text-wrap: balance;
 }
 
@@ -375,8 +378,8 @@ h6,
 .prose p,
 .prose li {
   line-break: strict;
-  word-break: auto-phrase;
-  text-wrap: pretty;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 /* Gold accent text from Tiptap color */

@@ -38,6 +38,55 @@ export interface SolutionService {
   }[];
 }
 
+export const JAPANESE_SERVICE_NAMES: Record<string, string> = {
+  "cg-perspective": "CGパース",
+  "cg-video": "CG動画",
+  "photo-composite": "写真合成",
+  "virtual-staging": "バーチャルステージング",
+  "vr360": "VR360",
+  "vr-walkthrough": "VRウォークスルー",
+  "digital-model": "デジタル模型",
+  "ar": "AR",
+  "exe-content": "EXEコンテンツ",
+  "bim-services": "BIMサービス",
+  "pachinko-slot-cg": "パチンコ・スロットCG",
+  "anime-illustration": "アニメ・イラスト",
+};
+
+export const ENGLISH_SERVICE_NAMES: Record<string, string> = {
+  "cg-perspective": "CG Perspective",
+  "cg-video": "CG Video",
+  "photo-composite": "Photo Compositing",
+  "virtual-staging": "Virtual Staging",
+  "vr360": "VR360",
+  "vr-walkthrough": "VR Walkthrough",
+  "digital-model": "Digital Model",
+  "ar": "AR",
+  "exe-content": "EXE Content",
+  "bim-services": "BIM Services",
+  "pachinko-slot-cg": "Pachinko & Slot CG",
+  "anime-illustration": "Anime & Illustration",
+};
+
+export function getServiceName(
+  svc: { slug: string; name?: string; nameJa?: string | null },
+  isJa: boolean
+): string {
+  const normalizedSlug = (svc.slug || "").toLowerCase().trim().replace(/_/g, "-");
+  if (isJa) {
+    if (JAPANESE_SERVICE_NAMES[normalizedSlug]) {
+      return JAPANESE_SERVICE_NAMES[normalizedSlug];
+    }
+    const ja = (svc.nameJa || "").trim();
+    const looksJapanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(ja);
+    return looksJapanese ? ja : (svc.nameJa || svc.name || "");
+  }
+  if (ENGLISH_SERVICE_NAMES[normalizedSlug]) {
+    return ENGLISH_SERVICE_NAMES[normalizedSlug];
+  }
+  return svc.name || svc.nameJa || "";
+}
+
 /** Convert a Prisma Service row to SolutionService */
 export function dbServiceToSolution(db: Record<string, unknown>): SolutionService {
   let features: SolutionService["features"] = [];
@@ -82,10 +131,14 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     if (Array.isArray(parsed)) plans = parsed;
   } catch { /* empty */ }
 
+  const slug = db.slug as string;
+  const rawNameJa = (db.nameJa as string) || "";
+  const rawName = (db.name as string) || "";
+
   return {
-    slug: db.slug as string,
-    titleJa: (db.nameJa as string) || "",
-    titleEn: (db.name as string) || "",
+    slug,
+    titleJa: getServiceName({ slug, name: rawName, nameJa: rawNameJa }, true),
+    titleEn: getServiceName({ slug, name: rawName, nameJa: rawNameJa }, false),
     heroImage: (db.heroImage as string) || "",
     heroVideo: (db.heroVideo as string) || "",
     heroTaglineJa: (db.heroTaglineJa as string) || "",

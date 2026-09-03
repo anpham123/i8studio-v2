@@ -11,6 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
+import { getServiceName } from "@/lib/solution-data";
+
 interface NavChild {
   label: string;
   href: string;
@@ -144,7 +146,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
       href: `/${locale}/solution`,
       megaMenu: true,
       children: services.map((svc) => ({
-        label: locale === "ja" && svc.nameJa ? svc.nameJa : svc.name,
+        label: getServiceName(svc, locale === "ja"),
         href: `/${locale}/solution/${svc.slug}`,
         thumbnail: svc.image || undefined,
       })),
@@ -192,9 +194,14 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   const hoveredIndex = hoveredNav ? navLinks.findIndex((link) => link.href === hoveredNav) : -1;
   const isAdjacent = activeIndex !== -1 && hoveredIndex !== -1 && Math.abs(activeIndex - hoveredIndex) === 1;
 
-  const linkCls = (href: string, hasChildren?: boolean) =>
-    `px-4 py-2 text-[16px] sm:text-[17px] font-semibold uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1 ${isActive(href) || hoveredNav === href ? "text-[#000]" : "text-[#111] hover:text-[#000]"
-    }${hasChildren ? " cursor-default" : ""}`;
+  const linkCls = (href: string, hasChildren?: boolean) => {
+    const active = isActive(href);
+    return `px-4 py-2 text-[16px] sm:text-[17px] ${
+      active ? "font-bold text-[#000]" : "font-normal text-[#111] hover:text-[#000]"
+    } uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1${
+      hasChildren ? " cursor-default" : ""
+    }`;
+  };
 
   /* ---- Desktop dropdown hover handlers ---- */
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -359,20 +366,25 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#2a2d34] via-[#1a1c22] to-[#111]" />
                                   )}
 
-                                  {/* Dynamic Backdrop Overlay (Darkens on hover) */}
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent group-hover:bg-black/65 transition-all duration-400 pointer-events-none" />
+                                  {/* Base bottom gradient for readability when not hovered */}
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
 
-                                  {/* Label & Details: Smoothly moves from bottom to CENTER on hover (Strictly 1 single line, no truncation) */}
-                                  <div className="absolute inset-0 flex flex-col items-center justify-end group-hover:justify-center p-2 sm:p-3 text-center z-10 transition-all duration-500 ease-out pointer-events-none w-full">
+                                  {/* Black Backdrop smoothly sliding UP from bottom on hover */}
+                                  <div className="absolute inset-0 bg-black/65 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.16,1,0.3,1] pointer-events-none" />
+
+                                  {/* Title: At bottom normally, slides up to center on hover along with rising black overlay */}
+                                  <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3 text-center z-10 pointer-events-none w-full">
                                     <span
-                                      className="w-full text-white text-[13px] sm:text-[14px] md:text-[15px] lg:text-[15.5px] xl:text-[16.5px] font-black uppercase tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] group-hover:scale-105 group-hover:text-white transition-all duration-500 leading-none whitespace-nowrap px-1 block"
+                                      className="w-full text-white text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] font-black uppercase tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] translate-y-[32px] sm:translate-y-[36px] md:translate-y-[40px] group-hover:translate-y-0 transition-transform duration-700 ease-[0.16,1,0.3,1] leading-none whitespace-nowrap px-1 block"
                                       style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
                                     >
                                       {child.label}
                                     </span>
+                                  </div>
 
-                                    {/* Subtitle appearing beneath the centered title */}
-                                    <span className="text-[11px] sm:text-[12px] font-medium text-white/95 tracking-wider flex items-center justify-center gap-1 opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-8 group-hover:mt-1.5 transition-all duration-400 ease-out drop-shadow-md whitespace-nowrap">
+                                  {/* View Details / 詳しくはこちら anchored at the bottom (Like Image 2) */}
+                                  <div className="absolute bottom-2.5 sm:bottom-3.5 left-0 right-0 z-10 text-center pointer-events-none opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-700 ease-[0.16,1,0.3,1] delay-75">
+                                    <span className="text-[11px] sm:text-[12px] font-medium text-white/95 tracking-wider inline-flex items-center justify-center gap-1 drop-shadow-md whitespace-nowrap">
                                       {locale === "ja" ? "詳しくはこちら ›" : "View Details →"}
                                     </span>
                                   </div>

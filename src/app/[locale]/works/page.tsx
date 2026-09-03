@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 export const revalidate = 60;
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
+import { getImageAspectRatio } from "@/lib/image-meta";
 import WorksContent from "@/components/public/WorksContent";
 
 export async function generateMetadata({
@@ -41,22 +42,29 @@ export default async function WorksPage() {
     return acc;
   }, {} as Record<string, string>);
 
-  // Clean serialization for client components
-  const serializedWorks = works.map((w) => ({
-    id: w.id,
-    title: w.title,
-    titleJa: w.titleJa,
-    subtitle: w.subtitle,
-    category: w.category,
-    type: w.type,
-    buildingCategory: w.buildingCategory,
-    image: w.image,
-    beforeImage: w.beforeImage,
-    videoUrl: w.videoUrl,
-    vrUrl: w.vrUrl,
-    order: w.order,
-    featured: w.featured,
-  }));
+  // Clean serialization with server-computed aspect ratios for instant zero-CLS rendering
+  const serializedWorks = await Promise.all(
+    works.map(async (w) => {
+      const aspectRatio = await getImageAspectRatio(w.image);
+      const beforeAspectRatio = w.beforeImage ? await getImageAspectRatio(w.beforeImage) : undefined;
+      return {
+        id: w.id,
+        title: w.title,
+        titleJa: w.titleJa,
+        subtitle: w.subtitle,
+        category: w.category,
+        type: w.type,
+        buildingCategory: w.buildingCategory,
+        image: w.image,
+        beforeImage: w.beforeImage,
+        aspectRatio: aspectRatio || beforeAspectRatio,
+        videoUrl: w.videoUrl,
+        vrUrl: w.vrUrl,
+        order: w.order,
+        featured: w.featured,
+      };
+    })
+  );
 
   // Preload top 9 images for instant rendering without layout shift
   const topImageUrls = serializedWorks

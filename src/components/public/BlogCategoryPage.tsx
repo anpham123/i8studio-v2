@@ -30,7 +30,7 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
           <p className="text-[#b8935a] text-[15px] sm:text-[16px] uppercase tracking-[0.24em] font-bold mb-4">
-            {isJa ? "ブログ" : "BLOG"}
+            BLOG
           </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-normal text-[#111] leading-[1.2] mb-4">
             {isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog")}

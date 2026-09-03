@@ -45,7 +45,7 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const featured = !activeCategory ? posts.find((p) => p.isFeatured) : undefined;
   const rest = posts.filter((p) => p.id !== featured?.id);
 
-  const heroEyebrow = activeCategory ? (isJa ? "ブログ" : "BLOG") : "i8 STUDIO";
+  const heroEyebrow = activeCategory ? "BLOG" : "i8 STUDIO";
   const heroTitle = activeCategory
     ? (isJa ? (catDef?.nameJa || "ブログ") : (catDef?.nameEn || "Blog"))
     : (isJa ? "ブログ" : "Blog");

@@ -38,6 +38,7 @@ interface DBWork {
   buildingCategory?: string;
   image: string;
   beforeImage?: string;
+  aspectRatio?: number;
   videoUrl: string;
   hoverVideo?: string;
   vrUrl?: string;
@@ -55,6 +56,7 @@ interface Work {
   span: "wide" | "narrow";
   image?: string;
   beforeImage?: string;
+  aspectRatio?: number;
   hoverVideo?: string;
   videoUrl?: string;
   vrUrl?: string;
@@ -355,7 +357,7 @@ function WorkCardItem({
     }
   }, [isHovered, hasHoverVideo]);
 
-  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<number | null>(work.aspectRatio || null);
 
   return (
     <motion.div
@@ -368,7 +370,10 @@ function WorkCardItem({
       className="work-card break-inside-avoid w-full group inline-block will-change-transform mb-6"
     >
       {isCompositeSlider ? (
-        <div className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] shadow-xs will-change-transform">
+        <div
+          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
+          className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] shadow-xs will-change-transform"
+        >
           <BeforeAfterSlider
             beforeImage={work.beforeImage!}
             afterImage={work.image!}
@@ -381,7 +386,9 @@ function WorkCardItem({
         <div
           onClick={onClick}
           style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
-          className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs min-h-[180px]"
+          className={`work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs ${
+            !aspectRatio ? "min-h-[180px]" : ""
+          }`}
         >
           {/* Shimmer skeleton until loaded */}
           {!isLoaded && (
@@ -398,17 +405,18 @@ function WorkCardItem({
               decoding={index < 9 ? "sync" : "async"}
               onLoad={(e) => {
                 const img = e.currentTarget;
-                if (img.naturalWidth && img.naturalHeight) {
+                if (img.naturalWidth && img.naturalHeight && !aspectRatio) {
                   setAspectRatio(img.naturalWidth / img.naturalHeight);
                 }
                 setIsLoaded(true);
               }}
-              className={`w-full h-auto block will-change-transform transition-opacity duration-400 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`w-full h-auto block will-change-transform transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
               style={{
+                aspectRatio: aspectRatio ? `${aspectRatio}` : undefined,
                 transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
                 transition: isHovered
-                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.4s ease"
-                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease",
+                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.3s ease"
+                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease",
               }}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
@@ -606,6 +614,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
         category,
         image: w.image,
         beforeImage: w.beforeImage || undefined,
+        aspectRatio: w.aspectRatio,
         videoUrl: w.videoUrl,
         hoverVideo: w.hoverVideo || (isVideoFile(w.videoUrl) ? w.videoUrl : undefined),
         vrUrl: w.vrUrl,
@@ -783,7 +792,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
         {/* ========== DESKTOP SIDEBAR ========== */}
         <aside
           ref={sidebarRef}
-          className="w-[240px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin"
+          className="w-[260px] lg:w-[280px] shrink-0 hidden md:flex flex-col justify-between sticky top-[100px] h-[calc(100vh-140px)] overflow-y-auto pr-4 scrollbar-thin"
         >
           <div>
             {/* Page title */}
@@ -800,7 +809,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleFilterChange("all", undefined)}
-                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === "all"
+                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 whitespace-nowrap ${activeType === "all"
                   ? "text-[#000] font-bold border-[#000]"
                   : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
@@ -811,7 +820,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(key, undefined)}
-                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeType === key
+                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 whitespace-nowrap ${activeType === key
                     ? "text-[#000] font-bold border-[#000]"
                     : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
@@ -830,7 +839,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleFilterChange(undefined, "all")}
-                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === "all"
+                className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 whitespace-nowrap ${activeCat === "all"
                   ? "text-[#000] font-bold border-[#000]"
                   : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                   }`}
@@ -841,7 +850,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                 <button
                   key={key}
                   onClick={() => handleFilterChange(undefined, key)}
-                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 ${activeCat === key
+                  className={`text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 whitespace-nowrap ${activeCat === key
                     ? "text-[#000] font-bold border-[#000]"
                     : "text-[#111] hover:text-[#000] hover:font-medium border-transparent"
                     }`}
@@ -863,7 +872,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                     <Link
                       key={col.slug}
                       href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
-                      className="text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
+                      className="text-left text-[16px] sm:text-[17px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent whitespace-nowrap"
                     >
                       {locale === "ja" ? col.titleJa : col.titleEn}
                     </Link>
@@ -1079,7 +1088,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                         <Link
                           key={col.slug}
                           href={`/${locale}/about-us/collection/${encodeURIComponent(col.slug)}`}
-                          className="text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent"
+                          className="text-left text-[15px] py-1 transition-colors font-sans tracking-wide block w-full border-l-2 pl-3 text-[#111] hover:text-[#000] hover:font-medium border-transparent whitespace-nowrap"
                           onClick={() => setIsFilterOpen(false)}
                         >
                           {locale === "ja" ? col.titleJa : col.titleEn}

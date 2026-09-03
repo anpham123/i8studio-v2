@@ -10,11 +10,11 @@ function formatJapanesePhrases(html: string): string {
     if (tag) return tag;
     if (!text) return "";
 
-    // 1. Keep Japanese quoted phrases 「...」 (up to 40 chars) unified on the same line
-    let formatted = text.replace(/「([^」\n]{1,40})」/g, '<span class="inline-block whitespace-nowrap">「$1」</span>');
+    // 1. Keep Japanese quoted phrases 「...」 with trailing punctuation unified on the same line
+    let formatted = text.replace(/「([^」\n]{1,40})」([、。，．！？）」』】〕〉》・]*)/g, '<span class="inline-block whitespace-nowrap">「$1」$2</span>');
 
-    // 2. Keep long Katakana compound words (>= 4 chars like ビジュアライゼーション) unified
-    formatted = formatted.replace(/([\u30A1-\u30F6\u30FC]{4,})/g, '<span class="inline-block">$1</span>');
+    // 2. Keep long Katakana compound words (>= 4 chars) with trailing punctuation unified
+    formatted = formatted.replace(/([\u30A1-\u30F6\u30FC]{4,}[、。，．！？）」』】〕〉》・]*)/g, '<span class="inline-block">$1</span>');
 
     return formatted;
   });

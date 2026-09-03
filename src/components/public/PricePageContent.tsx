@@ -191,7 +191,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
             animate={{ opacity: 1 }}
             className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3"
           >
-            {isJa ? "料金表" : "PRICE LIST"}
+            PRICE
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
