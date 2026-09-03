@@ -37,10 +37,10 @@ export default function BlogIntro({
 
   return (
     <section className="bg-[var(--surface)] pt-2 pb-3 sm:pb-5">
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
+      <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
         {/* Lead paragraph with large styled dropcap */}
         {hasDropcap && (
-          <div className="text-[14px] sm:text-[15px] leading-[2] text-[#111] mb-5 clearfix max-w-[1000px]">
+          <div className="text-[15px] sm:text-[16px] leading-[2] text-[#111] mb-5 clearfix w-full">
             {firstChar && (
               <span className="font-serif text-[48px] sm:text-[56px] leading-[0.8] float-left mr-3.5 mt-1 font-normal text-[#b8935a] select-none">
                 {firstChar}

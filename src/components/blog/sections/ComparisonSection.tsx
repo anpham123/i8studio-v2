@@ -40,7 +40,7 @@ export default function ComparisonSection({
 
   return (
     <section className="bg-[var(--surface)] py-[45px] sm:py-[60px]">
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
+      <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
         {/* Optional Header from Section Data */}
         {data && (data.title || data.num || data.eyebrow) && (
           <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 mb-8 sm:mb-12">
@@ -96,7 +96,7 @@ export default function ComparisonSection({
               {before && (
                 <div className="relative">
                   {before !== after && (
-                    <span className="absolute top-3 left-3 bg-black/60 text-white text-[10px] uppercase tracking-wider px-3 py-1 rounded-sm z-10">
+                    <span className="absolute top-3 left-3 bg-black/60 text-white text-[10px] uppercase tracking-wider px-3 py-1 rounded-none z-10">
                       Before
                     </span>
                   )}
@@ -105,10 +105,10 @@ export default function ComparisonSection({
                     <img
                       src={before}
                       alt="Before"
-                      className="w-full aspect-[4/3] object-cover rounded-sm shadow-sm"
+                      className="w-full aspect-[4/3] object-cover rounded-none shadow-xs"
                     />
                   ) : (
-                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm flex items-center justify-center p-8">
+                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
                       <p className="text-[var(--ink-light)] text-sm leading-relaxed">{before}</p>
                     </div>
                   )}
@@ -116,7 +116,7 @@ export default function ComparisonSection({
               )}
               {after && before !== after && (
                 <div className="relative">
-                  <span className="absolute top-3 left-3 bg-[var(--accent)] text-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-sm z-10">
+                  <span className="absolute top-3 left-3 bg-[var(--accent)] text-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-none z-10">
                     After
                   </span>
                   {after.startsWith("/") || after.startsWith("http") ? (
@@ -124,10 +124,10 @@ export default function ComparisonSection({
                     <img
                       src={after}
                       alt="After"
-                      className="w-full aspect-[4/3] object-cover rounded-sm shadow-sm"
+                      className="w-full aspect-[4/3] object-cover rounded-none shadow-xs"
                     />
                   ) : (
-                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-sm flex items-center justify-center p-8">
+                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
                       <p className="text-[var(--ink-light)] text-sm leading-relaxed">{after}</p>
                     </div>
                   )}
@@ -146,13 +146,13 @@ export default function ComparisonSection({
                 const imgCap = typeof item === "string" ? (remainingCaptions?.[i] || "") : (item.caption || "");
 
                 return (
-                  <div key={i} className="flex flex-col bg-white rounded-xl border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
+                  <div key={i} className="flex flex-col bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
                     <div className="h-[180px] sm:h-[200px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-1.5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imgSrc}
                         alt={imgCap || `${data?.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="w-full h-full object-cover rounded-lg hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
+                        className="w-full h-full object-cover rounded-none hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
                       />
                     </div>
                     {imgCap && (
