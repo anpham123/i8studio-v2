@@ -21,7 +21,11 @@ function formatJapanesePhrases(html: string): string {
 }
 
 /**
- * Detect consecutive images in blog content and group them into a dedicated 3-column gallery <div>
+ * Detect consecutive images in blog content and group them into a dedicated gallery <div>
+ * Auto-detects count:
+ * - 1 image -> full width
+ * - 2 images -> 2 columns split
+ * - 3 images -> 3 columns split
  */
 function formatBlogImages(html: string): string {
   if (!html || !html.includes("<img")) return html;
@@ -36,15 +40,22 @@ function formatBlogImages(html: string): string {
   const withPlaceholders = cleaned.replace(imgBlockRegex, (match, p1) => {
     const imgTag = p1 || match;
     const index = cards.length;
-    cards.push(`<div class="gallery-item"><div class="img-wrapper">${imgTag}</div></div>`);
+    cards.push(imgTag);
     return `___IMG_CARD_${index}___`;
   });
 
-  // 3. Group consecutive placeholders into a single <div class="paragraph-image-gallery">
+  // 3. Group consecutive placeholders into a single gallery div with dynamic columns count
   const grouped = withPlaceholders.replace(/(?:\s*___IMG_CARD_\d+___\s*)+/gi, (group) => {
     const cardIndexes = group.match(/\d+/g) || [];
-    const groupCards = cardIndexes.map((i) => cards[parseInt(i, 10)]).join("\n");
-    return `\n<div class="paragraph-image-gallery">\n${groupCards}\n</div>\n`;
+    const count = cardIndexes.length;
+    const groupCards = cardIndexes
+      .map((i) => {
+        const rawImg = cards[parseInt(i, 10)];
+        return `<div class="blog-img-item">${rawImg}</div>`;
+      })
+      .join("\n");
+
+    return `\n<div class="blog-paragraph-gallery gallery-cols-${count}">\n${groupCards}\n</div>\n`;
   });
 
   return grouped.trim();

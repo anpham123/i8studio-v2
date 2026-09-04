@@ -55,13 +55,6 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
         ? "制作プロセス、技術的インサイト、建築CG業界のトレンド"
         : "Production process, technical insights, and architectural CG trends.");
 
-  const getCategoryName = (cat: string) => {
-    if (!cat) return isJa ? "ブログ" : "Blog";
-    if (!isJa) return cat;
-    const found = BLOG_CATEGORIES.find((c) => c.slug.toLowerCase() === cat.toLowerCase() || c.aliases?.some((a) => a.toLowerCase() === cat.toLowerCase()) || c.nameEn.toLowerCase() === cat.toLowerCase());
-    return found?.nameJa || cat;
-  };
-
   return (
     <div className="min-h-screen bg-[var(--surface)]">
       {/* Hero header */}
@@ -103,27 +96,26 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
                 )}
               </div>
               {/* Text */}
-              <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                    {getCategoryName(featured.category)}
-                  </span>
-                  <span className="text-[var(--ink-muted)] text-[11px]">
+              <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-between">
+                <div>
+                  <h2
+                    className="font-serif text-[22px] sm:text-[26px] font-light text-[var(--ink)] leading-[1.4] mb-4"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(featured.title) }}
+                  />
+                  {featured.excerpt && (
+                    <p className="text-[14px] text-[var(--ink-light)] leading-[1.8] line-clamp-3 mb-6">
+                      {featured.excerpt}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-[var(--line)]/40 mt-auto">
+                  <span className="text-[var(--ink-muted)] text-[12px]">
                     {formatDate(featured.publishedAt)}
                   </span>
+                  <span className="text-[var(--accent)] text-[13px] font-medium tracking-wider uppercase group-hover:underline">
+                    {isJa ? "続きを読む →" : "Read more →"}
+                  </span>
                 </div>
-                <h2
-                  className="font-serif text-[22px] sm:text-[26px] font-light text-[var(--ink)] leading-[1.4] mb-4"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(featured.title) }}
-                />
-                {featured.excerpt && (
-                  <p className="text-[14px] text-[var(--ink-light)] leading-[1.8] line-clamp-3 mb-6">
-                    {featured.excerpt}
-                  </p>
-                )}
-                <span className="text-[var(--accent)] text-[13px] font-medium tracking-wider uppercase group-hover:underline">
-                  {isJa ? "続きを読む →" : "Read more →"}
-                </span>
               </div>
             </div>
           </Link>
@@ -136,10 +128,10 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
               <Link
                 key={post.id}
                 href={`/${locale}/blogs/${post.slug}`}
-                className="group block bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-md transition-all duration-300"
+                className="group flex flex-col bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-md transition-all duration-300"
               >
                 {/* Cover image */}
-                <div className="aspect-[4/3] overflow-hidden">
+                <div className="aspect-[4/3] overflow-hidden shrink-0">
                   {(post.coverImage || post.heroImage) ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -152,28 +144,26 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
                   )}
                 </div>
                 {/* Content */}
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                      {getCategoryName(post.category)}
-                    </span>
-                    <span className="text-[var(--ink-muted)] text-[11px]">·</span>
+                <div className="p-5 sm:p-6 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3
+                      className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.title) }}
+                    />
+                    {post.excerpt && (
+                      <p className="text-[14px] text-[var(--ink-light)] leading-[1.7] line-clamp-3 mb-4">
+                        {post.excerpt}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between pt-3 mt-auto">
                     <span className="text-[var(--ink-muted)] text-[11px]">
                       {formatDate(post.publishedAt)}
                     </span>
+                    <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
+                      {isJa ? "続きを読む →" : "Read more →"}
+                    </span>
                   </div>
-                  <h3
-                    className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.title) }}
-                  />
-                  {post.excerpt && (
-                    <p className="text-[14px] text-[var(--ink-light)] leading-[1.7] line-clamp-3 mb-4">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
-                    {isJa ? "続きを読む →" : "Read more →"}
-                  </span>
                 </div>
               </Link>
             ))}

@@ -76,23 +76,18 @@ export default function BlogHero({
       {/* Title section BELOW image */}
       <div className="bg-[var(--surface)] pt-10 sm:pt-14 pb-2 sm:pb-4">
         <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
-          {/* Title - Single line on desktop */}
+          {/* Title - Supports <br> from admin */}
           <h1
-            className="font-serif text-[clamp(22px,3.2vw,40px)] font-semibold leading-[1.3] tracking-tight text-[#111] mb-4 max-w-full [&>br]:hidden md:[&>br]:inline"
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(title.replace(/<br\s*\/?>/gi, " ")) }}
+            className="font-serif text-[clamp(22px,2.5vw,34px)] font-bold leading-[1.4] tracking-tight text-[#111] mb-3 max-w-full"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(title) }}
           />
 
-          {/* Subtitle - Single line on desktop */}
+          {/* Subtitle - Supports <br> from admin */}
           {subtitle && (
             <p
-              className="font-serif text-[16px] sm:text-[18px] lg:text-[20px] text-[#444] font-medium leading-[1.65] max-w-full mb-4 tracking-normal [&>br]:hidden md:[&>br]:inline"
+              className="font-serif text-[14.5px] sm:text-[15.5px] md:text-[16.5px] text-[#555] font-normal leading-[1.65] max-w-full mb-4 tracking-normal"
               dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(
-                  subtitle
-                    .replace(/<br\s*\/?>/gi, " ")
-                    .replace(/\r?\n+/g, " ")
-                    .trim()
-                ),
+                __html: sanitizeHtml(subtitle),
               }}
             />
           )}

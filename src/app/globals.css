@@ -240,171 +240,78 @@ main {
   margin-bottom: 0.85rem;
 }
 
-/* Paragraph Image Gallery — Horizontal 3-column Grid for paragraph images */
-.paragraph-image-gallery,
-.blog-img-grid {
+/* Paragraph Image Gallery — Dynamic Responsive Layout (1 image = full width, 2 images = 50-50, 3 images = 33-33-33) */
+.blog-paragraph-gallery,
+.paragraph-image-gallery {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 1.25rem !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 1.5rem !important;
   width: 100% !important;
+  gap: 1.25rem !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 1.75rem !important;
   clear: both;
 }
 
-.paragraph-image-gallery:has(> :only-child),
-.blog-img-grid:has(> :only-child) {
-  grid-template-columns: minmax(0, 360px) !important;
+/* 1 ảnh: Tràn toàn bộ chiều rộng (100%), hiển thị full ảnh nguyên bản */
+.blog-paragraph-gallery.gallery-cols-1,
+.paragraph-image-gallery:has(> :only-child) {
+  grid-template-columns: 1fr !important;
 }
 
-@media (max-width: 768px) {
+/* 2 ảnh: Chia đôi 50% - 50% */
+.blog-paragraph-gallery.gallery-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
 
-  .paragraph-image-gallery,
-  .blog-img-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+/* 3 ảnh: Chia ba 33.3% - 33.3% - 33.3% */
+.blog-paragraph-gallery.gallery-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+/* 4 ảnh trở lên */
+.blog-paragraph-gallery:not(.gallery-cols-1):not(.gallery-cols-2):not(.gallery-cols-3) {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+}
+
+@media (max-width: 640px) {
+  .blog-paragraph-gallery.gallery-cols-2,
+  .blog-paragraph-gallery.gallery-cols-3 {
+    grid-template-columns: 1fr !important;
     gap: 0.875rem !important;
   }
 }
 
-@media (max-width: 640px) {
-
-  .paragraph-image-gallery,
-  .blog-img-grid {
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
-  }
-}
-
-.paragraph-image-gallery .gallery-item,
-.blog-img-card {
-  display: flex !important;
-  flex-direction: column !important;
-  background-color: #ffffff !important;
-  border: 1px solid rgba(229, 231, 235, 0.8) !important;
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-}
-
-.paragraph-image-gallery .gallery-item:hover,
-.blog-img-card:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
-}
-
-.paragraph-image-gallery .img-wrapper,
-.blog-img-card .img-wrapper {
-  height: 200px !important;
+.blog-paragraph-gallery .blog-img-item,
+.paragraph-image-gallery .gallery-item {
   width: 100% !important;
-  background-color: #f8fafc !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0.375rem !important;
+  display: block !important;
   overflow: hidden !important;
   border-radius: 0 !important;
-}
-
-.paragraph-image-gallery .img-wrapper img,
-.blog-img-card .img-wrapper img {
-  width: 100% !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  max-width: 100% !important;
-  object-fit: cover !important;
-  border-radius: 0 !important;
+  background-color: transparent !important;
   border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  background: transparent !important;
   box-shadow: none !important;
-  transition: transform 0.3s ease !important;
-}
-
-.paragraph-image-gallery .gallery-item:hover .img-wrapper img,
-.blog-img-card:hover .img-wrapper img {
-  transform: scale(1.04) !important;
-}
-
-/* Rich editor inline styling */
-.prose img:not(.img-wrapper img),
-.tiptap img:not(.img-wrapper img),
-.ProseMirror img:not(.img-wrapper img),
-.blog-content img {
-  display: inline-block;
-  vertical-align: top;
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-  background-color: #f8fafc;
-  border: 1px solid rgba(229, 231, 235, 0.8);
-  border-radius: 0 !important;
-  padding: 0.25rem;
-  margin: 0.375rem 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   STAGE SECTION PARAGRAPH IMAGES (Full Width 100% Matching Section Frame)
-   Applies ONLY to Stage Section body paragraph images
-   ───────────────────────────────────────────────────────────────────────────── */
-.stage-paragraph-container .paragraph-image-gallery,
-.stage-paragraph-container .blog-img-grid {
-  display: flex !important;
-  flex-direction: column !important;
-  width: 100% !important;
-  gap: 2rem !important;
-  margin-top: 1.75rem !important;
-  margin-bottom: 1.75rem !important;
-}
-
-.stage-paragraph-container .paragraph-image-gallery .gallery-item,
-.stage-paragraph-container .blog-img-card {
-  width: 100% !important;
-  max-width: 100% !important;
-  background-color: #ffffff !important;
-  border: 1px solid rgba(229, 231, 235, 0.9) !important;
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
-
-.stage-paragraph-container .paragraph-image-gallery .img-wrapper,
-.stage-paragraph-container .blog-img-card .img-wrapper {
-  height: auto !important;
-  max-height: 600px !important;
-  width: 100% !important;
   padding: 0 !important;
-  background-color: #ffffff !important;
-  border-radius: 0 !important;
-}
-
-.stage-paragraph-container .paragraph-image-gallery .img-wrapper img,
-.stage-paragraph-container .blog-img-card .img-wrapper img {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: auto !important;
-  max-height: 600px !important;
-  object-fit: cover !important;
-  display: block !important;
-  border-radius: 0 !important;
-  border: none !important;
   margin: 0 !important;
-  padding: 0 !important;
 }
 
-.stage-paragraph-container img:not(.img-wrapper img) {
+.blog-paragraph-gallery .blog-img-item img,
+.paragraph-image-gallery img,
+.blog-content p img,
+.blog-content img,
+.prose img,
+.tiptap img,
+.ProseMirror img,
+.stage-paragraph-container img {
   width: 100% !important;
-  max-width: 100% !important;
   height: auto !important;
-  max-height: 600px !important;
-  object-fit: cover !important;
+  max-width: 100% !important;
   display: block !important;
-  border: 1px solid rgba(229, 231, 235, 0.9) !important;
   border-radius: 0 !important;
+  object-fit: cover !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   padding: 0 !important;
-  margin: 1.75rem 0 !important;
+  margin: 0 !important;
 }
 
 :lang(ja),

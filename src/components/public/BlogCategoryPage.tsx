@@ -29,9 +29,6 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
       {/* Hero header */}
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">
-          <p className="text-[#b8935a] text-[15px] sm:text-[16px] uppercase tracking-[0.24em] font-bold mb-4">
-            BLOG
-          </p>
           <h1 className="font-serif text-[clamp(36px,5vw,64px)] font-normal text-[#111] leading-[1.2] mb-4">
             {isJa ? (catDef?.nameJa || "Blog") : (catDef?.nameEn || "Blog")}
           </h1>
@@ -41,8 +38,6 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
         </div>
       </section>
 
-
-
       {/* Posts Grid */}
       <div className="max-w-[1200px] mx-auto px-6 sm:px-10 pb-20">
         {posts.length > 0 ? (
@@ -51,9 +46,9 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
               <Link
                 key={post.id}
                 href={`/${locale}/blogs/${post.slug}`}
-                className="group block bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-md transition-all duration-300"
+                className="group flex flex-col bg-white border border-[var(--line)] rounded-sm overflow-hidden hover:shadow-md transition-all duration-300"
               >
-                <div className="aspect-[4/3] overflow-hidden">
+                <div className="aspect-[4/3] overflow-hidden shrink-0">
                   {(post.coverImage || post.heroImage) ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
@@ -65,28 +60,26 @@ export default async function BlogCategoryPage({ locale, categorySlug, categoryK
                     <div className="w-full h-full bg-gradient-to-br from-[#1e1b14] to-[#2a2318]" />
                   )}
                 </div>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[var(--accent)] text-[11px] uppercase tracking-[0.16em] font-medium">
-                      {isJa ? (catDef?.nameJa || post.category) : (catDef?.nameEn || post.category)}
-                    </span>
-                    <span className="text-[var(--ink-muted)] text-[11px]">·</span>
+                <div className="p-5 sm:p-6 flex flex-col justify-between flex-1">
+                  <div>
+                    <h3
+                      className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.title) }}
+                    />
+                    {post.excerpt && (
+                      <p className="text-[14px] text-[var(--ink-light)] leading-[1.7] line-clamp-3 mb-4">
+                        {post.excerpt}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between pt-3 mt-auto">
                     <span className="text-[var(--ink-muted)] text-[11px]">
                       {post.publishedAt ? formatDate(post.publishedAt) : ""}
                     </span>
+                    <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
+                      {isJa ? "続きを読む →" : "Read more →"}
+                    </span>
                   </div>
-                  <h3
-                    className="font-serif text-[18px] sm:text-[20px] font-normal text-[var(--ink)] leading-[1.4] mb-3"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.title) }}
-                  />
-                  {post.excerpt && (
-                    <p className="text-[14px] text-[var(--ink-light)] leading-[1.7] line-clamp-3 mb-4">
-                      {post.excerpt}
-                    </p>
-                  )}
-                  <span className="text-[var(--accent)] text-[12px] font-medium tracking-wider uppercase group-hover:underline">
-                    {isJa ? "続きを読む →" : "Read more →"}
-                  </span>
                 </div>
               </Link>
             ))}

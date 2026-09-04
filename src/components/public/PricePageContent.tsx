@@ -186,13 +186,7 @@ export default function PricePageContent({ locale: localeProp, dbItems, dbServic
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="border-b border-[var(--line)]">
         <div className="max-w-[1600px] mx-auto px-6 sm:px-10 pt-4 sm:pt-6 pb-4 sm:pb-6">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[15px] sm:text-[16px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-3"
-          >
-            PRICE
-          </motion.p>
+          {/*  */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

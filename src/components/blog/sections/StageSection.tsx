@@ -129,7 +129,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
               <img
                 src={data.image}
                 alt={data?.title ? data.title.replace(/<[^>]*>/g, "") : "Section image"}
-                className="w-full h-auto max-h-[600px] object-cover block rounded-none"
+                className="w-full h-auto object-cover block rounded-none"
               />
               {data.caption && (
                 <p

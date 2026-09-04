@@ -141,7 +141,7 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
         {data.image && (!data.grid || data.grid.length === 0) && (
           <div className="w-full bg-white rounded-none overflow-hidden border border-gray-200/90 shadow-xs flex flex-col mb-8 hover:shadow-md transition-shadow">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} className="w-full h-auto max-h-[580px] object-cover block rounded-none" />
+            <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} className="w-full h-auto object-cover block rounded-none" />
             {data.caption && (
               <p
                 className="w-full text-[13px] text-gray-600 italic py-2.5 px-4 border-t border-gray-100 bg-[#fafaf8] text-center leading-relaxed font-serif"
