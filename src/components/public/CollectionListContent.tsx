@@ -25,6 +25,64 @@ interface CollectionItemData {
   cover: string;
 }
 
+function renderTitleWithBreak(title: string) {
+  if (!title) return null;
+
+  // 1. Split on " - " or " – "
+  if (title.includes(" - ") || title.includes(" – ")) {
+    const separator = title.includes(" – ") ? " – " : " - ";
+    const parts = title.split(separator).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-2 opacity-50 font-light">-</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  // 2. Split on Japanese middle dot "・"
+  if (title.includes("・")) {
+    const parts = title.split("・").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-1 opacity-50 font-light">・</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  // 3. Split on " / "
+  if (title.includes(" / ")) {
+    const parts = title.split(" / ").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-2 opacity-50 font-light">/</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  return <span className="inline-block">{title}</span>;
+}
+
 export default function CollectionListContent({ dbCollections }: { dbCollections?: DbCol[] }) {
   const locale = useLocale();
   const pathname = usePathname();
@@ -187,10 +245,16 @@ export default function CollectionListContent({ dbCollections }: { dbCollections
 
                 {/* Main Large Title */}
                 <h2
-                  className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-[#111] font-light leading-[1.12] tracking-tight"
+                  className={`font-serif text-[#111] font-light leading-[1.15] tracking-tight ${
+                    (isJa ? activeCol.titleJa : activeCol.titleEn).length > 12 ||
+                    (isJa ? activeCol.titleJa : activeCol.titleEn).includes(" - ") ||
+                    (isJa ? activeCol.titleJa : activeCol.titleEn).includes("・")
+                      ? "text-2xl sm:text-3xl lg:text-4xl xl:text-[44px]"
+                      : "text-3xl sm:text-4xl lg:text-5xl xl:text-6xl"
+                  }`}
                   style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                 >
-                  {isJa ? activeCol.titleJa : activeCol.titleEn}
+                  {renderTitleWithBreak(isJa ? activeCol.titleJa : activeCol.titleEn)}
                 </h2>
 
                 {/* Description */}

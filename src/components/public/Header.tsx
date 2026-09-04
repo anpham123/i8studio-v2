@@ -24,6 +24,8 @@ interface NavItem {
   href: string;
   children?: NavChild[];
   megaMenu?: boolean;   // if true → dark panel mega-menu style
+  megaTitle?: string;
+  gridCols?: string;
 }
 
 interface ServiceItem {
@@ -145,6 +147,8 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
       label: t("solution"),
       href: `/${locale}/solution`,
       megaMenu: true,
+      megaTitle: locale === "ja" ? "ソリューション" : "SERVICE",
+      gridCols: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
       children: services.map((svc) => ({
         label: getServiceName(svc, locale === "ja"),
         href: `/${locale}/solution/${svc.slug}`,
@@ -155,22 +159,60 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
     {
       label: t("aboutUs"),
       href: `/${locale}/about-us`,
+      megaMenu: true,
+      megaTitle: locale === "ja" ? "私たちについて" : "ABOUT US",
+      gridCols: "grid-cols-1 sm:grid-cols-3 max-w-5xl mx-auto",
       children: [
-        { label: t("aboutSub.companyOverview"), href: `/${locale}/about-us` },
-        { label: t("aboutSub.portfolio"), href: `/${locale}/about-us/portfolio` },
-        { label: t("aboutSub.workflow"), href: `/${locale}/about-us/workflow` },
+        {
+          label: t("aboutSub.companyOverview"),
+          href: `/${locale}/about-us`,
+          thumbnail: "/uploads/1781662116949-House_in_forest__Summer_.webp",
+        },
+        {
+          label: t("aboutSub.portfolio"),
+          href: `/${locale}/about-us/portfolio`,
+          thumbnail: "/uploads/1782359708167-Skyline_Tower.webp",
+        },
+        {
+          label: t("aboutSub.workflow"),
+          href: `/${locale}/about-us/workflow`,
+          thumbnail: "/uploads/1787802610927-upscalemedia-transformed.webp",
+        },
       ],
     },
     { label: t("contact"), href: `/${locale}/contact` },
     {
       label: t("blogs"),
       href: `/${locale}/blogs`,
+      megaMenu: true,
+      megaTitle: locale === "ja" ? "ブログ・コラム" : "BLOGS & ARTICLES",
+      gridCols: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
       children: [
-        { label: t("blogSub.caseStudy"), href: `/${locale}/blogs/case-study` },
-        { label: t("blogSub.techniqueSharing"), href: `/${locale}/blogs/tips` },
-        { label: t("blogSub.knowledge"), href: `/${locale}/blogs/knowledge` },
-        { label: t("blogSub.ai"), href: `/${locale}/blogs/ai-feature` },
-        { label: t("blogSub.lifeGallery"), href: `/${locale}/blogs/life-gallery` },
+        {
+          label: t("blogSub.caseStudy"),
+          href: `/${locale}/blogs/case-study`,
+          thumbnail: "/uploads/1781164288528-260402_Cover_01.webp",
+        },
+        {
+          label: t("blogSub.techniqueSharing"),
+          href: `/${locale}/blogs/tips`,
+          thumbnail: "/uploads/1782700167114-1722_Study.webp",
+        },
+        {
+          label: t("blogSub.knowledge"),
+          href: `/${locale}/blogs/knowledge`,
+          thumbnail: "/uploads/1782282467636-wood_sauna_at_ziedlejas_wellness_resort_Sauna.webp",
+        },
+        {
+          label: t("blogSub.ai"),
+          href: `/${locale}/blogs/ai-feature`,
+          thumbnail: "/uploads/1781165121094-1722_vr01-2.webp",
+        },
+        {
+          label: t("blogSub.lifeGallery"),
+          href: `/${locale}/blogs/life-gallery`,
+          thumbnail: "/uploads/1781661627502-615196287_122209779764576056_3698202373077728542_n.webp",
+        },
       ],
     },
   ];
@@ -321,7 +363,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                     </Link>
                   )}
 
-                  {/* ---- Mega-menu (SERVICE panel) ---- */}
+                  {/* ---- Mega-menu panel ---- */}
                   <AnimatePresence>
                     {link.megaMenu && link.children && openDesktopMenu === link.href && (
                       <motion.div
@@ -337,13 +379,13 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                             {/* Header */}
                             <div className="flex items-center gap-3 mb-8">
                               <span className="text-[14px] sm:text-[15px] font-bold uppercase tracking-[0.2em] text-[#b8935a]">
-                                {locale === "ja" ? "ソリューション" : "SERVICE"}
+                                {link.megaTitle || (locale === "ja" ? "ソリューション" : "SERVICE")}
                               </span>
                               <span className="flex-1 h-px bg-gray-200" />
                             </div>
 
-                            {/* 4-col Grid */}
-                            <div className="grid grid-cols-4 gap-5 sm:gap-6">
+                            {/* Grid */}
+                            <div className={`grid ${link.gridCols || "grid-cols-4"} gap-5 sm:gap-6`}>
                               {link.children.map((child) => (
                                 <Link
                                   key={child.href}
@@ -376,7 +418,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                                   <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3 text-center z-10 pointer-events-none w-full">
                                     <span
                                       className="w-full text-white text-[14px] sm:text-[15px] md:text-[16px] lg:text-[17px] xl:text-[18px] font-black uppercase tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] translate-y-[32px] sm:translate-y-[36px] md:translate-y-[40px] group-hover:translate-y-0 transition-transform duration-700 ease-[0.16,1,0.3,1] leading-none whitespace-nowrap px-1 block"
-                                      style={{ fontFamily: "var(--font-bebas), var(--font-anton), 'Bebas Neue', 'Impact', sans-serif" }}
+                                      style={{ fontFamily: "var(--font-bebas), var(--font-anton), var(--font-noto-serif-jp), 'Bebas Neue', 'Impact', sans-serif" }}
                                     >
                                       {child.label}
                                     </span>

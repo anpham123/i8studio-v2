@@ -6,6 +6,7 @@ export const revalidate = 30;
 
 import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";
+import ScrollSequenceHero from "@/components/public/ScrollSequenceHero";
 
 export async function generateMetadata({
   params,
@@ -59,7 +60,13 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
       />
 
-      {/* Hero with unlimited images */}
+      {/* 1. Scroll-driven 3D Walkthrough Hero */}
+      <ScrollSequenceHero
+        fallbackVideo="/uploads/anhherrosection/1.mp4"
+        totalFrames={242}
+      />
+
+      {/* 2. Masonry Editorial Gallery below */}
       <HeroEditorial images={heroImages} />
     </>
   );

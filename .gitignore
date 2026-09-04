@@ -44,6 +44,7 @@ next-env.d.ts
 
 # uploads
 /public/uploads/
+/public/video/
 
 # env
 .env

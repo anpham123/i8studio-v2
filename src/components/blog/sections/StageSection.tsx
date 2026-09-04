@@ -89,7 +89,7 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
   return (
     <section className="bg-[var(--surface)] py-[24px] sm:py-[32px]">
       <div className="w-full max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-0">
-        
+
         {/* 1. Header (Number + Eyebrow + Title) */}
         <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
           {data?.num && (

@@ -22,6 +22,61 @@ interface OtherCol {
   coverImage: string;
 }
 
+function renderTitleWithBreak(title: string) {
+  if (!title) return null;
+
+  if (title.includes(" - ") || title.includes(" – ")) {
+    const separator = title.includes(" – ") ? " – " : " - ";
+    const parts = title.split(separator).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-2 opacity-50 font-light">-</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  if (title.includes("・")) {
+    const parts = title.split("・").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-1 opacity-50 font-light">・</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  if (title.includes(" / ")) {
+    const parts = title.split(" / ").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return (
+        <span className="inline-flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1">
+          {parts.map((part, idx) => (
+            <span key={idx} className="inline-block whitespace-nowrap">
+              {idx > 0 && <span className="mr-2 opacity-50 font-light">/</span>}
+              {part}
+            </span>
+          ))}
+        </span>
+      );
+    }
+  }
+
+  return <span className="inline-block">{title}</span>;
+}
+
 export default function CollectionDetailContent({
   data,
   dbCollection,
@@ -68,7 +123,7 @@ export default function CollectionDetailContent({
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] font-light text-[#111] tracking-tight leading-[1.15]"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), 'Playfair Display', serif" }}
           >
-            {title}
+            {renderTitleWithBreak(title)}
           </h1>
           {desc && (
             <p className="text-gray-600 text-sm sm:text-base md:text-[17px] max-w-2xl text-center mx-auto mt-4 leading-relaxed font-normal">

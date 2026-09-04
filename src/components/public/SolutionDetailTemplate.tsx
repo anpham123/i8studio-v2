@@ -83,6 +83,20 @@ function getPlanFeature(f: string, isJa: boolean): string {
   return FEATURE_TRANSLATIONS[f] || f;
 }
 
+function renderNoOrphanText(text: string) {
+  if (!text || text.length < 4) return text;
+  // Keep only the last 2-3 characters (e.g. "です。") together to avoid single-char orphans while allowing line 1 to stretch 100% of the image width
+  const lastChunkSize = 3;
+  const mainPart = text.slice(0, -lastChunkSize);
+  const endPart = text.slice(-lastChunkSize);
+  return (
+    <>
+      {mainPart}
+      <span className="inline-block">{endPart}</span>
+    </>
+  );
+}
+
 export default function SolutionDetailTemplate({ data }: { data: SolutionService }) {
   const locale = useLocale();
   const isJa = locale === "ja";
@@ -375,10 +389,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                             <motion.li
                               key={idx}
                               variants={listItemVariants}
-                              className="w-full flex items-start gap-3 text-black text-[16px] sm:text-[17px] md:text-[18px] leading-[1.85] font-normal"
+                              className="w-full flex items-start gap-3 text-black text-[15px] sm:text-[16.5px] md:text-[17px] leading-[1.85] font-normal tracking-[-0.01em]"
                             >
                               <span className="text-[#b8935a] font-bold text-[18px] leading-[1.65] select-none shrink-0">•</span>
-                              <span className="flex-1 min-w-0 text-justify [text-align-last:left] [text-justify:inter-word]">{cleanItem}</span>
+                              <span className="flex-1 w-full min-w-0 [text-wrap:pretty] [line-break:strict] break-words">{renderNoOrphanText(cleanItem)}</span>
                             </motion.li>
                           );
                         })}
@@ -440,9 +454,9 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                           {items.map((item, idx) => {
                             const cleanItem = item.replace(/^[-•・*]\s*/, "");
                             return (
-                              <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black leading-relaxed [text-wrap:pretty]">
+                              <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black leading-relaxed [text-wrap:pretty] [line-break:strict] break-words">
                                 <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
-                                <span className="flex-1">{cleanItem}</span>
+                                <span className="flex-1">{renderNoOrphanText(cleanItem)}</span>
                               </li>
                             );
                           })}

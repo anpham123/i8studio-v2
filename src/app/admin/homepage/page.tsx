@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import AdminShell from "@/components/admin/AdminShell";
 import { useToast } from "@/components/admin/Toast";
+import AdminHeroSequenceManager from "@/components/admin/AdminHeroSequenceManager";
 import {
   Plus, X, ChevronUp, ChevronDown, RefreshCw, Eye, GripVertical,
   Pencil, Trash2, Play, Upload, Save, Maximize2, ChevronLeft,
@@ -318,6 +319,9 @@ export default function HomepagePage() {
         </div>
       }
     >
+      {/* Hero 3D Video Walkthrough Manager */}
+      <AdminHeroSequenceManager />
+
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
