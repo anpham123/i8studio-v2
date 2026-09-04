@@ -20,8 +20,13 @@ function formatJapanesePhrases(html: string): string {
   });
 }
 
+interface ImageCardData {
+  imgTag: string;
+  captionHtml?: string;
+}
+
 /**
- * Detect consecutive images in blog content and group them into a dedicated gallery <div>
+ * Detect consecutive images (with or without captions) in blog content and group them into a dedicated gallery <div>
  * Auto-detects count:
  * - 1 image -> full width
  * - 2 images -> 2 columns split
@@ -33,14 +38,40 @@ function formatBlogImages(html: string): string {
   // 1. Remove empty <p></p> or <p><br></p> tags that TipTap leaves between elements
   const cleaned = html.replace(/<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "");
 
-  // 2. Match any block that contains an img (e.g. <p><img.../></p> or standalone <img.../>)
-  const imgBlockRegex = /(?:<p[^>]*>\s*(?:<a\b[^>]*>)?\s*(<img\b[^>]+>)\s*(?:<\/a>)?\s*<\/p>|<img\b[^>]+>)/gi;
+  // 2. Match any image unit (with optional caption right below it)
+  const imageUnits: ImageCardData[] = [];
 
-  const cards: string[] = [];
-  const withPlaceholders = cleaned.replace(imgBlockRegex, (match, p1) => {
-    const imgTag = p1 || match;
-    const index = cards.length;
-    cards.push(imgTag);
+  const imgWithCaptionRegex = /(?:<figure[^>]*>[\s\S]*?<img\b[^>]+>[\s\S]*?<\/figure>|<p[^>]*>\s*(?:<a\b[^>]*>)?\s*<img\b[^>]+>\s*(?:<\/a>)?\s*(?:<br\s*\/?>[\s\S]*?)?<\/p>(?:\s*<p[^>]*>(?:(?!<img|<h\d|<table|<ul|<ol)[\s\S]){1,120}?<\/p>)?|<img\b[^>]+>(?:\s*<p[^>]*>(?:(?!<img|<h\d|<table|<ul|<ol)[\s\S]){1,120}?<\/p>)?)/gi;
+
+  const withPlaceholders = cleaned.replace(imgWithCaptionRegex, (match: string) => {
+    // 2.1 Extract img tag
+    const imgMatch = match.match(/<img\b[^>]+>/i);
+    if (!imgMatch) return match;
+    const imgTag = imgMatch[0];
+
+    // 2.2 Extract caption if present
+    let rawCaption = "";
+    const figCapMatch = match.match(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/i);
+    if (figCapMatch && typeof figCapMatch[1] === "string") {
+      rawCaption = figCapMatch[1];
+    } else {
+      const trailingPMatch = match.match(/<\/p>\s*<p[^>]*>([\s\S]*?)<\/p>$/i);
+      if (trailingPMatch && typeof trailingPMatch[1] === "string") {
+        rawCaption = trailingPMatch[1];
+      } else {
+        const brMatch = match.match(/<br\s*\/?>\s*([^<]+)<\/p>$/i);
+        if (brMatch && typeof brMatch[1] === "string") {
+          rawCaption = brMatch[1];
+        }
+      }
+    }
+
+    const captionHtml = typeof rawCaption === "string"
+      ? rawCaption.trim().replace(/^<br\s*\/?>|<br\s*\/?>$/gi, "").trim()
+      : "";
+
+    const index = imageUnits.length;
+    imageUnits.push({ imgTag, captionHtml: captionHtml || undefined });
     return `___IMG_CARD_${index}___`;
   });
 
@@ -50,9 +81,15 @@ function formatBlogImages(html: string): string {
     const count = cardIndexes.length;
     const groupCards = cardIndexes
       .map((i) => {
-        const rawImg = cards[parseInt(i, 10)];
-        return `<div class="blog-img-item">${rawImg}</div>`;
+        const item = imageUnits[parseInt(i, 10)];
+        if (!item) return "";
+        const hasCap = Boolean(item.captionHtml);
+        const capEl = hasCap
+          ? `<p class="img-caption">${item.captionHtml}</p>`
+          : "";
+        return `<div class="blog-img-item${hasCap ? " has-caption" : ""}">${item.imgTag}${capEl}</div>`;
       })
+      .filter(Boolean)
       .join("\n");
 
     return `\n<div class="blog-paragraph-gallery gallery-cols-${count}">\n${groupCards}\n</div>\n`;
