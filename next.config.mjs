@@ -14,6 +14,20 @@ const nextConfig = {
       bodySizeLimit: "100mb",
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/:locale(ja|en)/service/www.linkedin.com/:path*",
+        destination: "https://www.linkedin.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/service/www.linkedin.com/:path*",
+        destination: "https://www.linkedin.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
