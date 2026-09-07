@@ -80,16 +80,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Extract optimized frames (1280px width, quality 5, ~2.25fps for ~200-260 frames)
-    const framePattern = path.join(OUTPUT_DIR, "frame_%04d.jpg");
-    const cmd = `"${ffmpegPath}" -y -i "${videoFilePath}" -vf "fps=2.25,scale=1280:-1" -q:v 5 "${framePattern}"`;
+    // 4. Extract high-res WebP frames (1920px Full HD, quality 88, ~2.25fps)
+    const framePattern = path.join(OUTPUT_DIR, "frame_%04d.webp");
+    const cmd = `"${ffmpegPath}" -y -i "${videoFilePath}" -vf "fps=2.25,scale=1920:-2" -c:v libwebp -quality 88 -preset drawing "${framePattern}"`;
 
     await execAsync(cmd);
 
     // 5. Count extracted frames
     const newFiles = fs
       .readdirSync(OUTPUT_DIR)
-      .filter((f) => f.startsWith("frame_") && f.endsWith(".jpg"));
+      .filter((f) => f.startsWith("frame_") && (f.endsWith(".webp") || f.endsWith(".jpg")));
     const totalFrames = newFiles.length;
 
     if (totalFrames === 0) {
@@ -99,6 +99,9 @@ export async function POST(req: NextRequest) {
     // 6. Write new metadata
     const meta = {
       totalFrames,
+      format: "webp",
+      width: 1920,
+      quality: 88,
       videoUrl: videoPublicUrl,
       updatedAt: new Date().toISOString(),
     };

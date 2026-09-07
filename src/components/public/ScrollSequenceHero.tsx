@@ -14,7 +14,7 @@ interface ScrollSequenceHeroProps {
 
 export default function ScrollSequenceHero({
   totalFrames = 242,
-  framePattern = (i) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.jpg`,
+  framePattern = (i) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.webp`,
   fallbackVideo = "/video/video 1.mp4",
   heroTexts = {},
 }: ScrollSequenceHeroProps) {
@@ -167,6 +167,8 @@ export default function ScrollSequenceHero({
         offsetY = 0;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
     },
     [activeFramesCount]
@@ -330,9 +332,8 @@ export default function ScrollSequenceHero({
           />
         )}
 
-        {/* Cinematic Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/40 pointer-events-none" />
-        <div className="absolute inset-0 bg-radial-[circle_at_center,transparent_40%,rgba(0,0,0,0.6)_100%] pointer-events-none" />
+        {/* Crisp & Bright: Subtle bottom tint only for text readability without dimming the 3D scene */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
 
         {/* ── Story Beat 1: Intro (0% - 25%) ── */}
         <motion.div
