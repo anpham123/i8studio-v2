@@ -190,8 +190,8 @@ export default function ScrollSequenceHero({
         if (count >= Math.min(10, activeFramesCount)) {
           setIsReady(true);
         }
-        if (i === 1) {
-          renderFrame(1);
+        if (i === 6 || (i === 1 && !imagesRef.current[5])) {
+          renderFrame(6);
         }
       };
       img.onerror = () => {
@@ -223,28 +223,31 @@ export default function ScrollSequenceHero({
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       lastDrawnFrameRef.current = -1;
-      renderFrame(1);
+      renderFrame(6);
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [renderFrame, totalFrames]);
+  }, [renderFrame, activeFramesCount]);
 
   // On-demand rendering when smooth scroll updates
   useEffect(() => {
     if (useFallback) return;
 
+    const startFrame = 6;
+    const endFrame = Math.max(startFrame, activeFramesCount - 4);
+
     let rafId: number | null = null;
     const unsubscribe = smoothProgress.on("change", (latest) => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        // Map 0% -> 88% scroll progress to complete 100% of video frames,
-        // leaving 88% -> 100% as a comfortable view buffer for the final scene
+        // Map 0% -> 88% scroll progress cleanly across the illuminated scene,
+        // holding the final illuminated frame steadily at the end (88% -> 100%)
         const clampedProgress = Math.min(1, Math.max(0, latest / 0.88));
         const targetFrame = Math.min(
-          totalFrames,
-          Math.max(1, Math.round(1 + clampedProgress * (totalFrames - 1)))
+          endFrame,
+          Math.max(startFrame, Math.round(startFrame + clampedProgress * (endFrame - startFrame)))
         );
         renderFrame(targetFrame);
       });
@@ -254,7 +257,7 @@ export default function ScrollSequenceHero({
       unsubscribe();
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [smoothProgress, totalFrames, renderFrame, useFallback]);
+  }, [smoothProgress, activeFramesCount, renderFrame, useFallback]);
 
   // Fallback video scrubbing
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -264,7 +267,9 @@ export default function ScrollSequenceHero({
       const video = videoRef.current;
       if (video && video.duration) {
         const clampedProgress = Math.min(1, Math.max(0, progress / 0.88));
-        video.currentTime = clampedProgress * video.duration;
+        const startTime = 0.025 * video.duration;
+        const endTime = 0.975 * video.duration;
+        video.currentTime = startTime + clampedProgress * (endTime - startTime);
       }
     });
     return () => unsubscribe();
@@ -331,9 +336,6 @@ export default function ScrollSequenceHero({
             className="w-full h-full object-cover select-none pointer-events-none"
           />
         )}
-
-        {/* Crisp & Bright: Subtle bottom tint only for text readability without dimming the 3D scene */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
 
         {/* ── Story Beat 1: Intro (0% - 25%) ── */}
         <motion.div
