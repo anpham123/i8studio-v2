@@ -73,7 +73,7 @@ const menuGroups: MenuGroup[] = [
     title: "HỆ THỐNG",
     items: [
       { href: "/admin/media", label: "Media", icon: Folder },
-      { href: "/admin/settings/branding", label: "Thương hiệu", icon: Brush },
+      { href: "/admin/settings/branding", label: "Thương hiệu & Menu Header", icon: Brush },
       { href: "/admin/settings/seo-rename", label: "Đổi tên SEO", icon: FileSpreadsheet },
       { href: "/admin/settings", label: "Cài đặt", icon: Settings, exact: true },
     ],

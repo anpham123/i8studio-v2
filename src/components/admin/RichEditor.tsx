@@ -110,19 +110,19 @@ const CustomImage = Image.extend({
         "figure",
         {
           class:
-            "blog-image-figure inline-flex flex-col items-stretch bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs my-3 mr-4 align-top max-w-full text-center hover:shadow-md transition-all",
+            "blog-image-figure w-full my-4 flex flex-col bg-white border border-gray-200/90 overflow-hidden shadow-xs hover:shadow-md transition-all text-center",
         },
         [
           "img",
           mergeAttributes(this.options.HTMLAttributes, imgAttrs, {
-            class: "w-full h-auto max-h-[420px] object-cover block m-0 p-0 border-0 rounded-none",
+            class: "w-full h-auto block m-0 p-0 border-0 rounded-none",
           }),
         ],
         [
           "figcaption",
           {
             class:
-              "w-full text-center text-[13px] text-gray-700 italic font-medium p-2.5 border-t border-gray-100 bg-[#fafaf9] leading-relaxed block",
+              "w-full text-center text-[13px] text-gray-600 italic font-medium p-2.5 border-t border-gray-100 bg-[#fafaf8] leading-relaxed block font-serif",
           },
           caption.trim(),
         ],
@@ -132,7 +132,7 @@ const CustomImage = Image.extend({
     return [
       "img",
       mergeAttributes(this.options.HTMLAttributes, imgAttrs, {
-        class: "rounded-xl border border-gray-200 my-2 inline-block max-h-[380px] w-auto max-w-full object-cover shadow-xs mr-3",
+        class: "w-full h-auto my-3 block border-0 shadow-xs",
       }),
     ];
   },

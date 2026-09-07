@@ -386,9 +386,8 @@ function WorkCardItem({
         <div
           onClick={onClick}
           style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
-          className={`work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs ${
-            !aspectRatio ? "min-h-[180px]" : ""
-          }`}
+          className={`work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs ${!aspectRatio ? "min-h-[180px]" : ""
+            }`}
         >
           {/* Shimmer skeleton until loaded */}
           {!isLoaded && (
@@ -692,57 +691,24 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
     return () => ctx.revert();
   }, [mounted]);
 
-  // Handle filter change: smooth slide-out followed by row-by-row push-up reveal on scroll
+  // Handle filter change: instant tab switch followed by row reveal
   const handleFilterChange = (newType?: WorkType | "all", newCat?: WorkCategory | "all") => {
-    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion || !gridRef.current) {
-      if (newType !== undefined) setActiveType(newType);
-      if (newCat !== undefined) setActiveCat(newCat);
-      setVisibleCount(INITIAL_BATCH);
-      prevRenderedCountRef.current = INITIAL_BATCH;
-      return;
-    }
+    // 1. Immediately update active state so tabs and items respond instantly with 0ms delay
+    if (newType !== undefined) setActiveType(newType);
+    if (newCat !== undefined) setActiveCat(newCat);
+    setVisibleCount(INITIAL_BATCH);
+    prevRenderedCountRef.current = INITIAL_BATCH;
 
-    // Kill any running timeline to prevent overlapping states
+    // 2. Clear any running timeline to prevent lagging
     if (activeTimelineRef.current) {
       activeTimelineRef.current.kill();
       activeTimelineRef.current = null;
-      if (gridRef.current) {
-        gsap.set(gridRef.current.querySelectorAll(".work-card"), { clearProps: "all" });
-      }
     }
-
-    const cards = gridRef.current.querySelectorAll<HTMLElement>(".work-card");
-    if (!cards || cards.length === 0) {
-      if (newType !== undefined) setActiveType(newType);
-      if (newCat !== undefined) setActiveCat(newCat);
-      setVisibleCount(INITIAL_BATCH);
-      prevRenderedCountRef.current = INITIAL_BATCH;
-      return;
+    if (gridRef.current) {
+      gsap.set(gridRef.current.querySelectorAll(".work-card"), { clearProps: "all" });
     }
 
     isFilteringRef.current = true;
-
-    // Slide out current cards upward slightly before swapping data
-    const tl = gsap.timeline({
-      onComplete: () => {
-        // Switch to new filter data in React immediately and reset count
-        if (newType !== undefined) setActiveType(newType);
-        if (newCat !== undefined) setActiveCat(newCat);
-        setVisibleCount(INITIAL_BATCH);
-        prevRenderedCountRef.current = INITIAL_BATCH;
-      },
-    });
-
-    activeTimelineRef.current = tl;
-
-    tl.to(cards, {
-      opacity: 0,
-      y: -20,
-      duration: 0.16,
-      ease: "power2.in",
-      stagger: 0.01,
-    });
   };
 
   // Push-up Reveal Animation on filter update

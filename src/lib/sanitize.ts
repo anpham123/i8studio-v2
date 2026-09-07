@@ -47,7 +47,14 @@ function formatBlogImages(html: string): string {
     // 2.1 Extract img tag
     const imgMatch = match.match(/<img\b[^>]+>/i);
     if (!imgMatch) return match;
-    const imgTag = imgMatch[0];
+    const rawImgTag = imgMatch[0];
+    // Clean any hardcoded max-height, object-cover or inline styles that might crop the image
+    const imgTag = rawImgTag
+      .replace(/\bmax-h-\[[^\]]+\]/g, "")
+      .replace(/\bmax-h-\d+\b/g, "")
+      .replace(/\bobject-cover\b/g, "")
+      .replace(/style="[^"]*max-height:[^"]*"/gi, "")
+      .replace(/style="[^"]*height:[^"]*"/gi, "");
 
     // 2.2 Extract caption if present
     let rawCaption = "";

@@ -48,48 +48,48 @@ function IconYoutube() {
 }
 
 const SOCIAL = [
-  { key: "socialFacebook",  Icon: IconFacebook,  label: "Facebook",    defaultUrl: "https://www.facebook.com/i8studio.vn/" },
-  { key: "socialInstagram", Icon: IconInstagram, label: "Instagram",   defaultUrl: "https://www.instagram.com/i8studio_cg/" },
-  { key: "socialLinkedin",  Icon: IconLinkedIn,  label: "LinkedIn",    defaultUrl: "https://www.linkedin.com/in/i8-studio/" },
-  { key: "socialTwitter",   Icon: IconX,         label: "Twitter",     defaultUrl: "https://x.com/i8studio_3d" },
-  { key: "socialYoutube",   Icon: IconYoutube,   label: "YouTube",     defaultUrl: "https://www.youtube.com/@i8studio" },
+  { key: "socialFacebook", Icon: IconFacebook, label: "Facebook", defaultUrl: "https://www.facebook.com/i8studio.vn/" },
+  { key: "socialInstagram", Icon: IconInstagram, label: "Instagram", defaultUrl: "https://www.instagram.com/i8studio_cg/" },
+  { key: "socialLinkedin", Icon: IconLinkedIn, label: "LinkedIn", defaultUrl: "https://www.linkedin.com/in/i8-studio/" },
+  { key: "socialTwitter", Icon: IconX, label: "Twitter", defaultUrl: "https://x.com/i8studio_3d" },
+  { key: "socialYoutube", Icon: IconYoutube, label: "YouTube", defaultUrl: "https://www.youtube.com/@i8studio" },
 ];
 
 // ─── CHỈNH KÍCH THƯỚC LOGO TẠI ĐÂY (px) ──────────────────────────
 const FOOTER_LOGO_HEIGHT = 75; // Kích cỡ logo sau khi cắt sạch khoảng trắng (Rất to & sắc nét)
 
 export default function Footer({ settings }: FooterProps) {
-  const t     = useTranslations("footer");
-  const navT  = useTranslations("nav");
+  const t = useTranslations("footer");
+  const navT = useTranslations("nav");
   const locale = useLocale();
 
   const navLinks = [
-    { label: navT("work"),     href: `/${locale}/works` },
+    { label: navT("work"), href: `/${locale}/works` },
     { label: navT("solution"), href: `/${locale}/solution` },
-    { label: navT("price"),    href: `/${locale}/price` },
-    { label: navT("aboutUs"),  href: `/${locale}/about-us` },
-    { label: navT("contact"),  href: `/${locale}/contact` },
-    { label: navT("blogs"),    href: `/${locale}/blogs` },
+    { label: navT("price"), href: `/${locale}/price` },
+    { label: navT("aboutUs"), href: `/${locale}/about-us` },
+    { label: navT("contact"), href: `/${locale}/contact` },
+    { label: navT("blogs"), href: `/${locale}/blogs` },
   ];
 
   const aboutLinks = [
     { label: navT("aboutSub.companyOverview"), href: `/${locale}/about-us` },
-    { label: navT("aboutSub.portfolio"),       href: `/${locale}/about-us/portfolio` },
-    { label: navT("aboutSub.workflow"),        href: `/${locale}/about-us/workflow` },
+    { label: navT("aboutSub.portfolio"), href: `/${locale}/about-us/portfolio` },
+    { label: navT("aboutSub.workflow"), href: `/${locale}/about-us/workflow` },
   ];
 
   const blogLinks = [
-    { label: navT("blogSub.caseStudy"),        href: `/${locale}/blogs/case-study` },
+    { label: navT("blogSub.caseStudy"), href: `/${locale}/blogs/case-study` },
     { label: navT("blogSub.techniqueSharing"), href: `/${locale}/blogs/tips` },
-    { label: navT("blogSub.knowledge"),        href: `/${locale}/blogs/knowledge` },
-    { label: navT("blogSub.ai"),               href: `/${locale}/blogs/ai-feature` },
-    { label: navT("blogSub.lifeGallery"),      href: `/${locale}/blogs/life-gallery` },
+    { label: navT("blogSub.knowledge"), href: `/${locale}/blogs/knowledge` },
+    { label: navT("blogSub.ai"), href: `/${locale}/blogs/ai-feature` },
+    { label: navT("blogSub.lifeGallery"), href: `/${locale}/blogs/life-gallery` },
   ];
 
   return (
     <footer className="bg-[#fafafa] border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
+
         {/* ── BỐ CỤC FOOTER ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
 
@@ -114,14 +114,14 @@ export default function Footer({ settings }: FooterProps) {
             <p className="text-black text-[14px] sm:text-[15px] leading-relaxed mb-4 font-normal whitespace-pre-line">
               {locale === "ja"
                 ? (settings.footerTaglineJa || t("tagline"))
-                    .replace("、高品質", "、\n高品質")
-                    .replace("伝える高品質", "伝える、\n高品質")
-                    .replace("伝える\n高品質", "伝える、\n高品質")
+                  .replace("、高品質", "、\n高品質")
+                  .replace("伝える高品質", "伝える、\n高品質")
+                  .replace("伝える\n高品質", "伝える、\n高品質")
                 : (settings.footerTaglineEn || t("tagline"))
-                    .replace("to life high", "to life, high")
-                    .replace("to life\n", "to life,\n")
-                    .replace("to life ", "to life, ")
-                    .replace("to life,,", "to life,")}
+                  .replace("to life high", "to life, high")
+                  .replace("to life\n", "to life,\n")
+                  .replace("to life ", "to life, ")
+                  .replace("to life,,", "to life,")}
             </p>
 
             {/* Social icons */}

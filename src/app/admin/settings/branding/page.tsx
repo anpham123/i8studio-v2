@@ -19,7 +19,27 @@ interface BrandingSettings {
   cursorImage: string;
   cursorEnabled: string;
   cursorSize: string;
+  // Mega Menu thumbnails
+  menuImgAboutCompany: string;
+  menuImgAboutPortfolio: string;
+  menuImgAboutWorkflow: string;
+  menuImgBlogCaseStudy: string;
+  menuImgBlogTips: string;
+  menuImgBlogKnowledge: string;
+  menuImgBlogAi: string;
+  menuImgBlogLifeGallery: string;
 }
+
+const DEFAULT_MENU_IMAGES = {
+  menuImgAboutCompany: "/uploads/1781662116949-House_in_forest__Summer_.webp",
+  menuImgAboutPortfolio: "/uploads/1782359708167-Skyline_Tower.webp",
+  menuImgAboutWorkflow: "/uploads/1787802610927-upscalemedia-transformed.webp",
+  menuImgBlogCaseStudy: "/uploads/1781164288528-260402_Cover_01.webp",
+  menuImgBlogTips: "/uploads/1782700167114-1722_Study.webp",
+  menuImgBlogKnowledge: "/uploads/1782282467636-wood_sauna_at_ziedlejas_wellness_resort_Sauna.webp",
+  menuImgBlogAi: "/uploads/1781165121094-1722_vr01-2.webp",
+  menuImgBlogLifeGallery: "/uploads/1781661627502-615196287_122209779764576056_3698202373077728542_n.webp",
+};
 
 const HEIGHT_PRESETS = [32, 40, 48, 56, 64, 80, 100];
 const DEFAULT_HEIGHT = 48;
@@ -36,6 +56,16 @@ async function saveToAPI(patch: Partial<BrandingSettings>): Promise<boolean> {
   });
   if (!res.ok) return false;
   const data = await res.json();
+  // Trigger revalidation
+  try {
+    await fetch("/api/revalidate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: "/" }),
+    });
+  } catch {
+    // ignore
+  }
   return data.success === true;
 }
 
@@ -53,6 +83,14 @@ export default function BrandingSettingsPage() {
     cursorImage: "",
     cursorEnabled: "false",
     cursorSize: String(DEFAULT_CURSOR_SIZE),
+    menuImgAboutCompany: "",
+    menuImgAboutPortfolio: "",
+    menuImgAboutWorkflow: "",
+    menuImgBlogCaseStudy: "",
+    menuImgBlogTips: "",
+    menuImgBlogKnowledge: "",
+    menuImgBlogAi: "",
+    menuImgBlogLifeGallery: "",
   });
   const [loading, setLoading] = useState(true);
   const [savingHeight, setSavingHeight] = useState(false);
@@ -76,11 +114,26 @@ export default function BrandingSettingsPage() {
       cursorImage: m.cursorImage || "",
       cursorEnabled: m.cursorEnabled || "false",
       cursorSize: m.cursorSize || String(DEFAULT_CURSOR_SIZE),
+      menuImgAboutCompany: m.menuImgAboutCompany || "",
+      menuImgAboutPortfolio: m.menuImgAboutPortfolio || "",
+      menuImgAboutWorkflow: m.menuImgAboutWorkflow || "",
+      menuImgBlogCaseStudy: m.menuImgBlogCaseStudy || "",
+      menuImgBlogTips: m.menuImgBlogTips || "",
+      menuImgBlogKnowledge: m.menuImgBlogKnowledge || "",
+      menuImgBlogAi: m.menuImgBlogAi || "",
+      menuImgBlogLifeGallery: m.menuImgBlogLifeGallery || "",
     });
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
+
+  const handleMenuImageChange = useCallback(async (key: keyof BrandingSettings, labelName: string, url: string) => {
+    setValues((v) => ({ ...v, [key]: url }));
+    const ok = await saveToAPI({ [key]: url });
+    if (ok) toast(url ? `Đã lưu ảnh cho ${labelName}` : `Đã xóa ảnh tùy chỉnh của ${labelName} (quay về mặc định)`, "success");
+    else toast("Không thể lưu — vui lòng thử lại", "error");
+  }, [toast]);
 
   const handleLogoChange = useCallback(async (url: string) => {
     setValues((v) => ({ ...v, logoImage: url }));
@@ -185,6 +238,14 @@ export default function BrandingSettingsPage() {
       cursorImage: "",
       cursorEnabled: "false",
       cursorSize: String(DEFAULT_CURSOR_SIZE),
+      menuImgAboutCompany: "",
+      menuImgAboutPortfolio: "",
+      menuImgAboutWorkflow: "",
+      menuImgBlogCaseStudy: "",
+      menuImgBlogTips: "",
+      menuImgBlogKnowledge: "",
+      menuImgBlogAi: "",
+      menuImgBlogLifeGallery: "",
     };
     setValues(defaults);
     const ok = await saveToAPI(defaults);
@@ -504,10 +565,328 @@ export default function BrandingSettingsPage() {
           </div>
         </div>
 
+        {/* === Mega Menu Navigation Images (About Us & Blogs) === */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-8">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Globe2 size={16} className="text-blue-600" />
+              <h3 className="font-semibold text-gray-800">Ảnh Menu Điều Hướng Header (Mega Menu)</h3>
+            </div>
+            <p className="text-sm text-gray-500">
+              Tùy chỉnh hình ảnh thumbnail xuất hiện trong menu thả xuống (Mega Menu) khi rê chuột/chọn <strong>ABOUT US</strong> và <strong>BLOGS</strong>.
+            </p>
+          </div>
+
+          {/* 1. About Us Section */}
+          <div className="border border-gray-100 rounded-xl p-5 bg-gray-50/50 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
+              <div>
+                <h4 className="font-semibold text-gray-800 text-sm">1. Mục ABOUT US (3 danh mục)</h4>
+                <p className="text-xs text-gray-500">Hiển thị khi mở menu About Us trên Header</p>
+              </div>
+              <span className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 font-medium rounded-full">
+                3 Khung ảnh
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+              {/* Item 1: Company Overview */}
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Company Overview</span>
+                  {values.menuImgAboutCompany && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgAboutCompany", "Company Overview", "")}
+                      className="text-[11px] text-red-500 hover:underline"
+                    >
+                      Dùng mặc định
+                    </button>
+                  )}
+                </div>
+                {/* Live Preview Card */}
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200 group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgAboutCompany || DEFAULT_MENU_IMAGES.menuImgAboutCompany}
+                    alt="Company Overview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-2 text-center">
+                    <span className="text-xs font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Company Overview
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgAboutCompany}
+                  onChange={(url) => handleMenuImageChange("menuImgAboutCompany", "Company Overview", url)}
+                  label="Đổi ảnh Company Overview"
+                />
+              </div>
+
+              {/* Item 2: Portfolio */}
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Portfolio</span>
+                  {values.menuImgAboutPortfolio && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgAboutPortfolio", "Portfolio", "")}
+                      className="text-[11px] text-red-500 hover:underline"
+                    >
+                      Dùng mặc định
+                    </button>
+                  )}
+                </div>
+                {/* Live Preview Card */}
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200 group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgAboutPortfolio || DEFAULT_MENU_IMAGES.menuImgAboutPortfolio}
+                    alt="Portfolio"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-2 text-center">
+                    <span className="text-xs font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Portfolio
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgAboutPortfolio}
+                  onChange={(url) => handleMenuImageChange("menuImgAboutPortfolio", "Portfolio", url)}
+                  label="Đổi ảnh Portfolio"
+                />
+              </div>
+
+              {/* Item 3: Workflow */}
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Workflow</span>
+                  {values.menuImgAboutWorkflow && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgAboutWorkflow", "Workflow", "")}
+                      className="text-[11px] text-red-500 hover:underline"
+                    >
+                      Dùng mặc định
+                    </button>
+                  )}
+                </div>
+                {/* Live Preview Card */}
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200 group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgAboutWorkflow || DEFAULT_MENU_IMAGES.menuImgAboutWorkflow}
+                    alt="Workflow"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-2 text-center">
+                    <span className="text-xs font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Workflow
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgAboutWorkflow}
+                  onChange={(url) => handleMenuImageChange("menuImgAboutWorkflow", "Workflow", url)}
+                  label="Đổi ảnh Workflow"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Blogs & Articles Section */}
+          <div className="border border-gray-100 rounded-xl p-5 bg-gray-50/50 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200/60 pb-3">
+              <div>
+                <h4 className="font-semibold text-gray-800 text-sm">2. Mục BLOGS & ARTICLES (5 danh mục)</h4>
+                <p className="text-xs text-gray-500">Hiển thị khi mở menu Blogs trên Header</p>
+              </div>
+              <span className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-medium rounded-full">
+                5 Khung ảnh
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pt-2">
+              {/* Item 1: Case Study */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">Case Study</span>
+                  {values.menuImgBlogCaseStudy && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgBlogCaseStudy", "Case Study", "")}
+                      className="text-[10px] text-red-500 hover:underline"
+                    >
+                      Mặc định
+                    </button>
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgBlogCaseStudy || DEFAULT_MENU_IMAGES.menuImgBlogCaseStudy}
+                    alt="Case Study"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-1 text-center">
+                    <span className="text-[11px] font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Case Study
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgBlogCaseStudy}
+                  onChange={(url) => handleMenuImageChange("menuImgBlogCaseStudy", "Case Study", url)}
+                  label="Đổi ảnh"
+                />
+              </div>
+
+              {/* Item 2: Technique Sharing */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">Technique</span>
+                  {values.menuImgBlogTips && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgBlogTips", "Technique Sharing", "")}
+                      className="text-[10px] text-red-500 hover:underline"
+                    >
+                      Mặc định
+                    </button>
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgBlogTips || DEFAULT_MENU_IMAGES.menuImgBlogTips}
+                    alt="Technique Sharing"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-1 text-center">
+                    <span className="text-[11px] font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Technique Sharing
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgBlogTips}
+                  onChange={(url) => handleMenuImageChange("menuImgBlogTips", "Technique Sharing", url)}
+                  label="Đổi ảnh"
+                />
+              </div>
+
+              {/* Item 3: Knowledge */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">Knowledge</span>
+                  {values.menuImgBlogKnowledge && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgBlogKnowledge", "Knowledge", "")}
+                      className="text-[10px] text-red-500 hover:underline"
+                    >
+                      Mặc định
+                    </button>
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgBlogKnowledge || DEFAULT_MENU_IMAGES.menuImgBlogKnowledge}
+                    alt="Knowledge"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-1 text-center">
+                    <span className="text-[11px] font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Knowledge
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgBlogKnowledge}
+                  onChange={(url) => handleMenuImageChange("menuImgBlogKnowledge", "Knowledge", url)}
+                  label="Đổi ảnh"
+                />
+              </div>
+
+              {/* Item 4: AI Column */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">AI Column</span>
+                  {values.menuImgBlogAi && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgBlogAi", "AI Column", "")}
+                      className="text-[10px] text-red-500 hover:underline"
+                    >
+                      Mặc định
+                    </button>
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgBlogAi || DEFAULT_MENU_IMAGES.menuImgBlogAi}
+                    alt="AI Column"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-1 text-center">
+                    <span className="text-[11px] font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      AI Column
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgBlogAi}
+                  onChange={(url) => handleMenuImageChange("menuImgBlogAi", "AI Column", url)}
+                  label="Đổi ảnh"
+                />
+              </div>
+
+              {/* Item 5: i8 Life Gallery */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-700 truncate">Life Gallery</span>
+                  {values.menuImgBlogLifeGallery && (
+                    <button
+                      type="button"
+                      onClick={() => handleMenuImageChange("menuImgBlogLifeGallery", "Life Gallery", "")}
+                      className="text-[10px] text-red-500 hover:underline"
+                    >
+                      Mặc định
+                    </button>
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-neutral-900 border border-gray-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.menuImgBlogLifeGallery || DEFAULT_MENU_IMAGES.menuImgBlogLifeGallery}
+                    alt="i8 Life Gallery"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20 flex items-center justify-center p-1 text-center">
+                    <span className="text-[11px] font-bold text-white tracking-wider uppercase drop-shadow-md">
+                      Life Gallery
+                    </span>
+                  </div>
+                </div>
+                <ImageUpload
+                  value={values.menuImgBlogLifeGallery}
+                  onChange={(url) => handleMenuImageChange("menuImgBlogLifeGallery", "Life Gallery", url)}
+                  label="Đổi ảnh"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* === About Us Images === */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-6">
           <div>
-            <h3 className="font-semibold text-gray-800">Hình ảnh Giới thiệu (About Us)</h3>
+            <h3 className="font-semibold text-gray-800">Hình ảnh Giới thiệu (About Us Content)</h3>
             <p className="text-sm text-gray-500 mt-1">
               Tải lên hình ảnh thực tế cho phần giới thiệu (Our Team, Văn phòng Đà Nẵng, Chất lượng hàng đầu).
             </p>
@@ -535,7 +914,7 @@ export default function BrandingSettingsPage() {
 
         {/* === Info === */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-          <strong>Lưu ý:</strong> Ảnh upload tự động lưu ngay. Kích thước logo cần nhấn{" "}
+          <strong>Lưu ý:</strong> Ảnh upload tự động lưu ngay và làm mới trang. Kích thước logo cần nhấn{" "}
           <strong>Lưu kích thước</strong>. Tải lại trang public để thấy thay đổi.
         </div>
 

@@ -27,26 +27,31 @@ export default async function HomePage() {
   const orgJsonLd = organizationJsonLd();
   const siteJsonLd = websiteJsonLd();
 
-  // Fetch homepage media (standalone, not linked to Works) — Unlimited
+  // Fetch settings for dynamic hero texts & homepage media
+  let heroTexts: Record<string, string> = {};
   let heroImages: { url: string; alt: string; videoUrl?: string }[] = [];
   try {
+    const [settings, media] = await Promise.all([
+      prisma.setting.findMany(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (prisma as any)?.homeMedia?.findMany
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (prisma as any).homeMedia.findMany({
+            where: { active: true },
+            orderBy: { order: "asc" },
+          })
+        : [],
+    ]);
+
+    heroTexts = Object.fromEntries(settings.map((s) => [s.key, s.value]));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((prisma as any)?.homeMedia?.findMany) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const media = await (prisma as any).homeMedia.findMany({
-        where: { active: true },
-        orderBy: { order: "asc" },
-      });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      heroImages = media.map((m: any) => ({
-        url: m.image,
-        alt: m.title,
-        videoUrl: m.videoUrl || undefined,
-      }));
-    }
+    heroImages = (media || []).map((m: any) => ({
+      url: m.image,
+      alt: m.title,
+      videoUrl: m.videoUrl || undefined,
+    }));
   } catch (err) {
-    console.error("Error loading home media:", err);
-    heroImages = [];
+    console.error("Error loading home data:", err);
   }
 
   return (
@@ -64,6 +69,7 @@ export default async function HomePage() {
       <ScrollSequenceHero
         fallbackVideo="/uploads/anhherrosection/1.mp4"
         totalFrames={242}
+        heroTexts={heroTexts}
       />
 
       {/* 2. Masonry Editorial Gallery below */}

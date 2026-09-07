@@ -40,13 +40,14 @@ interface HeaderProps {
   logoHeight?: number;
   headerHeight?: number;
   services?: ServiceItem[];
+  menuImages?: Record<string, string>;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, services = [] }: HeaderProps) {
+export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, services = [], menuImages = {} }: HeaderProps) {
   const [, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null);
@@ -166,17 +167,17 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
         {
           label: t("aboutSub.companyOverview"),
           href: `/${locale}/about-us`,
-          thumbnail: "/uploads/1781662116949-House_in_forest__Summer_.webp",
+          thumbnail: menuImages.menuImgAboutCompany || "/uploads/1781662116949-House_in_forest__Summer_.webp",
         },
         {
           label: t("aboutSub.portfolio"),
           href: `/${locale}/about-us/portfolio`,
-          thumbnail: "/uploads/1782359708167-Skyline_Tower.webp",
+          thumbnail: menuImages.menuImgAboutPortfolio || "/uploads/1782359708167-Skyline_Tower.webp",
         },
         {
           label: t("aboutSub.workflow"),
           href: `/${locale}/about-us/workflow`,
-          thumbnail: "/uploads/1787802610927-upscalemedia-transformed.webp",
+          thumbnail: menuImages.menuImgAboutWorkflow || "/uploads/1787802610927-upscalemedia-transformed.webp",
         },
       ],
     },
@@ -191,27 +192,27 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
         {
           label: t("blogSub.caseStudy"),
           href: `/${locale}/blogs/case-study`,
-          thumbnail: "/uploads/1781164288528-260402_Cover_01.webp",
+          thumbnail: menuImages.menuImgBlogCaseStudy || "/uploads/1781164288528-260402_Cover_01.webp",
         },
         {
           label: t("blogSub.techniqueSharing"),
           href: `/${locale}/blogs/tips`,
-          thumbnail: "/uploads/1782700167114-1722_Study.webp",
+          thumbnail: menuImages.menuImgBlogTips || "/uploads/1782700167114-1722_Study.webp",
         },
         {
           label: t("blogSub.knowledge"),
           href: `/${locale}/blogs/knowledge`,
-          thumbnail: "/uploads/1782282467636-wood_sauna_at_ziedlejas_wellness_resort_Sauna.webp",
+          thumbnail: menuImages.menuImgBlogKnowledge || "/uploads/1782282467636-wood_sauna_at_ziedlejas_wellness_resort_Sauna.webp",
         },
         {
           label: t("blogSub.ai"),
           href: `/${locale}/blogs/ai-feature`,
-          thumbnail: "/uploads/1781165121094-1722_vr01-2.webp",
+          thumbnail: menuImages.menuImgBlogAi || "/uploads/1781165121094-1722_vr01-2.webp",
         },
         {
           label: t("blogSub.lifeGallery"),
           href: `/${locale}/blogs/life-gallery`,
-          thumbnail: "/uploads/1781661627502-615196287_122209779764576056_3698202373077728542_n.webp",
+          thumbnail: menuImages.menuImgBlogLifeGallery || "/uploads/1781661627502-615196287_122209779764576056_3698202373077728542_n.webp",
         },
       ],
     },
@@ -238,11 +239,9 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
 
   const linkCls = (href: string, hasChildren?: boolean) => {
     const active = isActive(href);
-    return `px-4 py-2 text-[16px] sm:text-[17px] ${
-      active ? "font-bold text-[#000]" : "font-normal text-[#111] hover:text-[#000]"
-    } uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1${
-      hasChildren ? " cursor-default" : ""
-    }`;
+    return `px-4 py-2 text-[16px] sm:text-[17px] ${active ? "font-bold text-[#000]" : "font-normal text-[#111] hover:text-[#000]"
+      } uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1${hasChildren ? " cursor-default" : ""
+      }`;
   };
 
   /* ---- Desktop dropdown hover handlers ---- */

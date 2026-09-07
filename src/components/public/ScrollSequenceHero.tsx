@@ -9,15 +9,75 @@ interface ScrollSequenceHeroProps {
   totalFrames?: number;
   framePattern?: (index: number) => string;
   fallbackVideo?: string;
+  heroTexts?: Record<string, string>;
 }
 
 export default function ScrollSequenceHero({
   totalFrames = 242,
   framePattern = (i) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.jpg`,
   fallbackVideo = "/video/video 1.mp4",
+  heroTexts = {},
 }: ScrollSequenceHeroProps) {
   const locale = useLocale();
   const isJa = locale === "ja";
+
+  // Story Beat 1: Intro
+  const introEyebrow = isJa
+    ? (heroTexts.heroIntroEyebrowJa || "i8 STUDIO · 3DCG 建築ビジュアライゼーション")
+    : (heroTexts.heroIntroEyebrowEn || "i8 STUDIO · 3DCG ARCHITECTURAL VISUALIZATION");
+
+  const introTitle = isJa
+    ? (heroTexts.heroIntroTitleJa || "建築の美を、映画のような臨場感で")
+    : (heroTexts.heroIntroTitleEn || "Cinematic Architectural Journey");
+
+  const introDesc = isJa
+    ? (heroTexts.heroIntroDescJa || "スクロールして空間の奥行きと光の表情をご体験ください")
+    : (heroTexts.heroIntroDescEn || "Scroll to explore spatial depth, light, and architectural harmony");
+
+  // Story Beat 2: Living & Light (01)
+  const beat1Tag = isJa
+    ? (heroTexts.heroBeat1TagJa || "01 · 空間の調和")
+    : (heroTexts.heroBeat1TagEn || "01 · SPATIAL HARMONY");
+
+  const beat1Title = isJa
+    ? (heroTexts.heroBeat1TitleJa || "光と影が織りなすリビング空間")
+    : (heroTexts.heroBeat1TitleEn || "Harmonious Living & Natural Light");
+
+  const beat1Desc = isJa
+    ? (heroTexts.heroBeat1DescJa || "厳密な光学計算に基づき、時間帯による自然光の移ろいと木・石・ファブリックの質感を極限まで再現。")
+    : (heroTexts.heroBeat1DescEn || "Physically-based rendering reproduces true-to-life sunlight, wood textures, and refined interior tones.");
+
+  // Story Beat 3: Private Sanctuary (02)
+  const beat2Tag = isJa
+    ? (heroTexts.heroBeat2TagJa || "02 · プライベート空間")
+    : (heroTexts.heroBeat2TagEn || "02 · PRIVATE SANCTUARY");
+
+  const beat2Title = isJa
+    ? (heroTexts.heroBeat2TitleJa || "心地よさを追求したプライベート空間")
+    : (heroTexts.heroBeat2TitleEn || "Private Retreat & Materiality");
+
+  const beat2Desc = isJa
+    ? (heroTexts.heroBeat2DescJa || "間接照明と視線の抜けを考慮したアングル設計。施主様が暮らす未来の情景を鮮やかに伝えます。")
+    : (heroTexts.heroBeat2DescEn || "Atmospheric ambient lighting and seamless indoor-outdoor sightlines create captivating visual storytelling.");
+
+  // Story Beat 4: Rooftop & CTA (03)
+  const beat3Tag = isJa
+    ? (heroTexts.heroBeat3TagJa || "03 · パノラマ＆スカイ空間")
+    : (heroTexts.heroBeat3TagEn || "03 · PANORAMA & SKY RETREAT");
+
+  const beat3Title = isJa
+    ? (heroTexts.heroBeat3TitleJa || "プロジェクトに、圧倒的な説得力を。")
+    : (heroTexts.heroBeat3TitleEn || "Elevate Your Architecture with i8 STUDIO");
+
+  const beat3Desc = isJa
+    ? (heroTexts.heroBeat3DescJa || "最高峰の3DCGビジュアライゼーションで、未だ見ぬ建築の価値を余すことなく表現します。")
+    : (heroTexts.heroBeat3DescEn || "High-end 3D architectural rendering and animation trusted by leading firms.");
+
+  const beat3Cta = isJa
+    ? (heroTexts.heroBeat3CtaJa || "無料相談・お見積り")
+    : (heroTexts.heroBeat3CtaEn || "Request Free Quote");
+
+  const beat3CtaLink = heroTexts.heroBeat3CtaLink || `/${locale}/contact`;
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -277,26 +337,26 @@ export default function ScrollSequenceHero({
         {/* ── Story Beat 1: Intro (0% - 25%) ── */}
         <motion.div
           style={{ opacity: story1Opacity, y: story1Y }}
-          className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pointer-events-none z-20"
+          className="absolute inset-x-0 bottom-0 pb-8 sm:pb-12 md:pb-14 flex flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
         >
-          <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-4 drop-shadow-md">
-            i8 STUDIO · 3DCG ARCHITECTURAL VISUALIZATION
-          </span>
-          <h1
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white leading-tight max-w-4xl drop-shadow-lg mb-5"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-          >
-            {isJa ? "建築の美を、映画のような臨場感で" : "Cinematic Architectural Journey"}
-          </h1>
-          <p className="text-white/80 text-sm sm:text-base max-w-xl font-light drop-shadow-md">
-            {isJa
-              ? "スクロールして空間の奥行きと光の表情をご体験ください"
-              : "Scroll to explore spatial depth, light, and architectural harmony"}
-          </p>
+          <div className="flex flex-col items-center max-w-4xl mb-4 sm:mb-5">
+            <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-md whitespace-nowrap">
+              {introEyebrow}
+            </span>
+            <h1
+              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg mb-2.5 whitespace-nowrap"
+              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            >
+              {introTitle}
+            </h1>
+            <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl font-light drop-shadow-md">
+              {introDesc}
+            </p>
+          </div>
 
           {/* Scroll Cue */}
-          <div className="absolute bottom-10 flex flex-col items-center gap-2">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+          <div className="flex flex-col items-center gap-1.5 mt-1">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-white/50 whitespace-nowrap">
               {isJa ? "スクロールして探索" : "Scroll to explore"}
             </span>
             <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
@@ -312,47 +372,39 @@ export default function ScrollSequenceHero({
         {/* ── Story Beat 2: Living & Light (30% - 60%) ── */}
         <motion.div
           style={{ opacity: story2Opacity, y: story2Y }}
-          className="absolute inset-0 flex flex-col justify-center items-start max-w-6xl mx-auto px-8 pointer-events-none z-20"
+          className="absolute bottom-8 sm:bottom-12 md:bottom-14 left-6 sm:left-10 md:left-14 flex flex-col items-start pointer-events-none z-20"
         >
-          <div className="max-w-xl bg-black/40 backdrop-blur-md p-8 sm:p-10 rounded-2xl border border-white/10 shadow-2xl">
-            <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-3 block">
-              01 · SPATIAL HARMONY
-            </span>
-            <h2
-              className="text-2xl sm:text-4xl font-light text-white leading-snug mb-4"
-              style={{ fontFamily: "var(--font-noto-serif), serif" }}
-            >
-              {isJa ? "光と影が織りなすリビング空間" : "Harmonious Living & Natural Light"}
-            </h2>
-            <p className="text-white/80 text-sm sm:text-base leading-relaxed font-light">
-              {isJa
-                ? "厳密な光学計算に基づき、時間帯による自然光の移ろいと木・石・ファブリックの質感を極限まで再現。"
-                : "Physically-based rendering reproduces true-to-life sunlight, wood textures, and refined interior tones."}
-            </p>
-          </div>
+          <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] whitespace-nowrap">
+            {beat1Tag}
+          </span>
+          <h2
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug mb-2.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            style={{ fontFamily: "var(--font-noto-serif), serif" }}
+          >
+            {beat1Title}
+          </h2>
+          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-lg">
+            {beat1Desc}
+          </p>
         </motion.div>
 
         {/* ── Story Beat 3: Private Sanctuary (65% - 88%) ── */}
         <motion.div
           style={{ opacity: story3Opacity, y: story3Y }}
-          className="absolute inset-0 flex flex-col justify-center items-end max-w-6xl mx-auto px-8 pointer-events-none z-20"
+          className="absolute bottom-24 sm:bottom-28 md:bottom-32 right-6 sm:right-10 md:right-14 flex flex-col items-end text-right pointer-events-none z-20"
         >
-          <div className="max-w-xl bg-black/40 backdrop-blur-md p-8 sm:p-10 rounded-2xl border border-white/10 shadow-2xl text-right">
-            <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-3 block">
-              02 · PRIVATE SANCTUARY
-            </span>
-            <h2
-              className="text-2xl sm:text-4xl font-light text-white leading-snug mb-4"
-              style={{ fontFamily: "var(--font-noto-serif), serif" }}
-            >
-              {isJa ? "心地よさを追求したプライベート空間" : "Private Retreat & Materiality"}
-            </h2>
-            <p className="text-white/80 text-sm sm:text-base leading-relaxed font-light">
-              {isJa
-                ? "間接照明と視線の抜けを考慮したアングル設計。施主様が暮らす未来の情景を鮮やかに伝えます。"
-                : "Atmospheric ambient lighting and seamless indoor-outdoor sightlines create captivating visual storytelling."}
-            </p>
-          </div>
+          <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] whitespace-nowrap">
+            {beat2Tag}
+          </span>
+          <h2
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug mb-2.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            style={{ fontFamily: "var(--font-noto-serif), serif" }}
+          >
+            {beat2Title}
+          </h2>
+          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-lg">
+            {beat2Desc}
+          </p>
         </motion.div>
 
         {/* ── Story Beat 4: Rooftop & CTA (92% - 100%) ── */}
@@ -360,26 +412,24 @@ export default function ScrollSequenceHero({
           style={{ opacity: story4Opacity, y: story4Y }}
           className="absolute inset-x-0 bottom-0 pb-14 sm:pb-20 flex flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
         >
-          <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-3 drop-shadow-md">
-            03 · PANORAMA & SKY RETREAT
+          <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-md whitespace-nowrap">
+            {beat3Tag}
           </span>
           <h2
-            className="text-2xl sm:text-4xl md:text-5xl font-light text-white leading-tight max-w-3xl drop-shadow-lg mb-3"
+            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg mb-3 whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
-            {isJa ? "プロジェクトに、圧倒的な説得力を。" : "Elevate Your Architecture with i8 STUDIO"}
+            {beat3Title}
           </h2>
           <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-lg mb-6 font-light drop-shadow-md">
-            {isJa
-              ? "最高峰の3DCGビジュアライゼーションで、未だ見ぬ建築の価値を余すことなく表現します。"
-              : "High-end 3D architectural rendering and animation trusted by leading firms."}
+            {beat3Desc}
           </p>
           <div className="flex items-center justify-center pointer-events-auto">
             <Link
-              href={`/${locale}/contact`}
+              href={beat3CtaLink}
               className="px-8 py-3.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-xs sm:text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
             >
-              {isJa ? "無料相談・お見積り" : "Request Free Quote"}
+              {beat3Cta}
             </Link>
           </div>
         </motion.div>
