@@ -341,16 +341,16 @@ export default function ScrollSequenceHero({
           className="absolute inset-x-0 bottom-0 pb-8 sm:pb-12 md:pb-14 flex flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
         >
           <div className="flex flex-col items-center max-w-4xl mb-4 sm:mb-5">
-            <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-md whitespace-nowrap">
+            <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
               {introEyebrow}
             </span>
             <h1
-              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg mb-2.5 whitespace-nowrap"
+              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 whitespace-nowrap"
               style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
             >
               {introTitle}
             </h1>
-            <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl font-light drop-shadow-md">
+            <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
               {introDesc}
             </p>
           </div>
@@ -375,16 +375,16 @@ export default function ScrollSequenceHero({
           style={{ opacity: story2Opacity, y: story2Y }}
           className="absolute bottom-8 sm:bottom-12 md:bottom-14 left-6 sm:left-10 md:left-14 flex flex-col items-start pointer-events-none z-20"
         >
-          <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] whitespace-nowrap">
+          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
             {beat1Tag}
           </span>
           <h2
-            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug mb-2.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] whitespace-nowrap"
-            style={{ fontFamily: "var(--font-noto-serif), serif" }}
+            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat1Title}
           </h2>
-          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-lg">
+          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-xl">
             {beat1Desc}
           </p>
         </motion.div>
@@ -394,16 +394,16 @@ export default function ScrollSequenceHero({
           style={{ opacity: story3Opacity, y: story3Y }}
           className="absolute bottom-24 sm:bottom-28 md:bottom-32 right-6 sm:right-10 md:right-14 flex flex-col items-end text-right pointer-events-none z-20"
         >
-          <span className="text-xs uppercase tracking-[0.3em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] whitespace-nowrap">
+          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
             {beat2Tag}
           </span>
           <h2
-            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug mb-2.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] whitespace-nowrap"
-            style={{ fontFamily: "var(--font-noto-serif), serif" }}
+            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat2Title}
           </h2>
-          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-lg">
+          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-xl">
             {beat2Desc}
           </p>
         </motion.div>
@@ -413,16 +413,16 @@ export default function ScrollSequenceHero({
           style={{ opacity: story4Opacity, y: story4Y }}
           className="absolute inset-x-0 bottom-0 pb-14 sm:pb-20 flex flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
         >
-          <span className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-md whitespace-nowrap">
+          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
             {beat3Tag}
           </span>
           <h2
-            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-lg mb-3 whitespace-nowrap"
+            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat3Title}
           </h2>
-          <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-lg mb-6 font-light drop-shadow-md">
+          <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl mb-6 font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
             {beat3Desc}
           </p>
           <div className="flex items-center justify-center pointer-events-auto">
