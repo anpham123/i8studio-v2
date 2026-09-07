@@ -5,7 +5,7 @@ import AdminShell from "@/components/admin/AdminShell";
 import ImageUpload from "@/components/admin/ImageUpload";
 import RichEditor from "@/components/admin/RichEditor";
 import { useToast } from "@/components/admin/Toast";
-import { Save, Loader2, Plus, X } from "lucide-react";
+import { Save, Loader2, Plus, X, Trash2, RefreshCw } from "lucide-react";
 
 const tabs = [
   { key: "overview", label: "Overview" },
@@ -14,7 +14,16 @@ const tabs = [
 ] as const;
 
 interface Milestone { year?: string; yearJa: string; yearEn: string; titleJa: string; titleEn: string; descJa: string; descEn: string; image?: string; }
-interface WorkflowStep { stepNumber: number; titleJa: string; titleEn: string; descJa: string; descEn: string; image: string; tags: string; }
+interface WorkflowStep {
+  stepNumber: number;
+  titleJa: string;
+  titleEn: string;
+  descJa: string;
+  descEn: string;
+  image: string;
+  images?: string[];
+  tags: string;
+}
 
 export default function CompanyContentPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "milestones" | "workflow">("overview");
@@ -49,9 +58,20 @@ export default function CompanyContentPage() {
         if (sec.section === "milestones") setMilestones(Array.isArray(content) ? content : []);
         if (sec.section === "workflow") {
           if (Array.isArray(content)) {
-            setWorkflow(content);
+            setWorkflow(
+              content.map((s: any) => ({
+                ...s,
+                images: Array.isArray(s.images) && s.images.length > 0 ? s.images : s.image ? [s.image] : [],
+              }))
+            );
           } else if (content && typeof content === "object") {
-            setWorkflow(Array.isArray(content.steps) ? content.steps : []);
+            const rawSteps = Array.isArray(content.steps) ? content.steps : [];
+            setWorkflow(
+              rawSteps.map((s: any) => ({
+                ...s,
+                images: Array.isArray(s.images) && s.images.length > 0 ? s.images : s.image ? [s.image] : [],
+              }))
+            );
             if (content.heroImage) setWorkflowHeroImage(content.heroImage);
           }
         }
@@ -100,11 +120,10 @@ export default function CompanyContentPage() {
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === t.key
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${activeTab === t.key
                 ? "border-blue-600 text-blue-600"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
+              }`}
           >
             {t.label}
           </button>
@@ -281,9 +300,114 @@ export default function CompanyContentPage() {
                       <textarea value={step.descEn} onChange={(e) => { const n = [...workflow]; n[i] = { ...n[i], descEn: e.target.value }; setWorkflow(n); }} placeholder="Description in English..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-gray-500 mb-1">🖼️ Ảnh minh hoạ</label>
-                    <ImageUpload label="Ảnh bước" value={step.image} onChange={(url) => { const n = [...workflow]; n[i] = { ...n[i], image: url }; setWorkflow(n); }} />
+                  {/* Multi-image section with Change Photo & Delete & Add Photo */}
+                  <div className="bg-white p-4 rounded-xl border border-gray-200/90 shadow-2xs space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide">
+                          🖼️ Thư viện ảnh bước này ({step.images?.length || (step.image ? 1 : 0)} ảnh)
+                        </label>
+                        <p className="text-[11px] text-gray-500 mt-0.5">
+                          Tải lên 2-3 ảnh để chạy hiệu ứng tự động đổi ảnh mỗi 3s trên trang người dùng
+                        </p>
+                      </div>
+                      <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">
+                        ⏱️ Tự động chuyển ảnh 3s
+                      </span>
+                    </div>
+
+                    {/* Existing images list */}
+                    {step.images && step.images.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
+                        {step.images.map((imgUrl, imgIdx) => (
+                          <div
+                            key={imgIdx}
+                            className="relative bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex flex-col shadow-xs"
+                          >
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-3 py-1.5 bg-gray-100/80 border-b border-gray-200">
+                              <span className="text-[11px] font-bold text-gray-700">
+                                Ảnh {imgIdx + 1} {imgIdx === 0 && <span className="text-blue-600 font-normal">(Ảnh chính)</span>}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const n = [...workflow];
+                                  const curImgs = n[i].images || [];
+                                  const updatedImgs = curImgs.filter((_, idx) => idx !== imgIdx);
+                                  n[i] = {
+                                    ...n[i],
+                                    images: updatedImgs,
+                                    image: updatedImgs[0] || "",
+                                  };
+                                  setWorkflow(n);
+                                }}
+                                className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                title="Xóa ảnh này"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+
+                            {/* Thumbnail Preview */}
+                            <div className="relative aspect-[4/3] bg-black/5 overflow-hidden flex items-center justify-center p-1">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={imgUrl}
+                                alt=""
+                                className="w-full h-full object-contain rounded"
+                              />
+                            </div>
+
+                            {/* Change Photo Button */}
+                            <div className="p-2 border-t border-gray-100 bg-white">
+                              <ImageUpload
+                                label="🔄 Đổi ảnh này"
+                                value=""
+                                onChange={(newUrl) => {
+                                  if (!newUrl) return;
+                                  const n = [...workflow];
+                                  const curImgs = [...(n[i].images || [])];
+                                  curImgs[imgIdx] = newUrl;
+                                  n[i] = {
+                                    ...n[i],
+                                    images: curImgs,
+                                    image: curImgs[0] || "",
+                                  };
+                                  setWorkflow(n);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add new photo if fewer than 5 images */}
+                    {(step.images?.length || 0) < 5 && (
+                      <div className="pt-2">
+                        <ImageUpload
+                          label={
+                            (step.images?.length || 0) === 0
+                              ? "Tải lên ảnh bước (Ảnh 1)"
+                              : `+ Thêm ảnh khác cho bước ${step.stepNumber} (Ảnh ${(step.images?.length || 0) + 1})`
+                          }
+                          value=""
+                          onChange={(url) => {
+                            if (!url) return;
+                            const n = [...workflow];
+                            const curImgs = n[i].images || (n[i].image ? [n[i].image] : []);
+                            const updatedImgs = [...curImgs, url];
+                            n[i] = {
+                              ...n[i],
+                              images: updatedImgs,
+                              image: updatedImgs[0] || "",
+                            };
+                            setWorkflow(n);
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-gray-500 mb-1">🏷️ Tags (phân cách bằng dấu phẩy)</label>

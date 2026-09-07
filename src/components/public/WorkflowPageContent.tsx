@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion, type Variants } from "framer-motion";
@@ -25,9 +26,9 @@ const stepRowVariants: Variants = {
 
 const imageVariants: Variants = {
   hidden: {
-    opacity: 0.5,
-    scale: 0.97,
-    transition: { duration: 0.5, ease: "easeOut" },
+    opacity: 0.6,
+    scale: 0.98,
+    transition: { duration: 0.6, ease: "easeOut" },
   },
   visible: {
     opacity: 1,
@@ -66,7 +67,90 @@ interface WorkflowStep {
   descJa: string;
   descEn: string;
   image: string;
+  images?: string[];
   tags: string;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Step Image Slideshow Component (3s Auto-transition + Full Image)  */
+/* ------------------------------------------------------------------ */
+function StepImageSlideshow({
+  images,
+  fallbackImage,
+  title,
+}: {
+  images?: string[];
+  fallbackImage?: string;
+  title: string;
+}) {
+  const validImages =
+    Array.isArray(images) && images.length > 0
+      ? images.filter(Boolean)
+      : fallbackImage
+      ? [fallbackImage]
+      : [];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % validImages.length);
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [validImages.length]);
+
+  if (validImages.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#f4f2ee]">
+        <span className="text-gray-400 text-sm font-medium">{title}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full overflow-hidden bg-gray-100">
+      {validImages.map((src, idx) => (
+        <motion.div
+          key={src + "-" + idx}
+          initial={false}
+          animate={{
+            opacity: idx === currentIndex ? 1 : 0,
+          }}
+          transition={{
+            opacity: { duration: 0.5, ease: "easeInOut" },
+          }}
+          className="absolute inset-0 w-full h-full"
+          style={{ zIndex: idx === currentIndex ? 2 : 1 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={`${title} - ${idx + 1}`}
+            className="w-full h-full object-cover select-none"
+          />
+        </motion.div>
+      ))}
+
+      {/* Modern subtle slide indicator if 2+ images */}
+      {validImages.length > 1 && (
+        <div className="absolute bottom-3.5 right-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 pointer-events-none shadow-sm">
+          {validImages.map((_, dotIdx) => (
+            <div
+              key={dotIdx}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                dotIdx === currentIndex
+                  ? "w-4 bg-[#c5a666]"
+                  : "w-1.5 bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Fallback hardcoded steps (only used when DB has no data)
@@ -247,35 +331,16 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
               className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"
                 } gap-10 md:gap-14 lg:gap-16 items-center`}
             >
-              {/* Image with Smooth Fade + Slide */}
+              {/* Image with Smooth Fade + Slide & 3s Auto-transition */}
               <motion.div
                 variants={imageVariants}
-                className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm"
+                className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm border border-gray-200/60"
               >
-                {step.image ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={step.image}
-                    alt={title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const t = e.currentTarget;
-                      t.style.display = "none";
-                      const p = t.parentElement;
-                      if (p) {
-                        p.classList.add("flex", "items-center", "justify-center");
-                        const s = document.createElement("span");
-                        s.className = "text-gray-400 text-sm font-medium";
-                        s.textContent = title;
-                        p.appendChild(s);
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#f4f2ee]">
-                    <span className="text-gray-400 text-sm font-medium">{title}</span>
-                  </div>
-                )}
+                <StepImageSlideshow
+                  images={step.images}
+                  fallbackImage={step.image}
+                  title={title}
+                />
               </motion.div>
 
               {/* Text Block with Gold Number and Color-Sweep Text */}

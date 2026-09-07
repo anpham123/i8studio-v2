@@ -39,11 +39,25 @@ export default async function WorkflowPage() {
   if (row?.contentJson) {
     try {
       const parsed = JSON.parse(row.contentJson);
-      if (Array.isArray(parsed)) {
-        steps = parsed;
-      } else if (parsed && typeof parsed === "object") {
-        steps = Array.isArray(parsed.steps) ? parsed.steps : [];
-        heroImage = parsed.heroImage || "";
+      const rawSteps = Array.isArray(parsed)
+        ? parsed
+        : parsed && typeof parsed === "object" && Array.isArray(parsed.steps)
+        ? parsed.steps
+        : [];
+
+      steps = rawSteps.map((s: any) => ({
+        stepNumber: s.stepNumber || 0,
+        titleJa: s.titleJa || "",
+        titleEn: s.titleEn || "",
+        descJa: s.descJa || "",
+        descEn: s.descEn || "",
+        image: s.image || (Array.isArray(s.images) && s.images[0]) || "",
+        images: Array.isArray(s.images) && s.images.length > 0 ? s.images : s.image ? [s.image] : [],
+        tags: s.tags || "",
+      }));
+
+      if (parsed && typeof parsed === "object" && parsed.heroImage) {
+        heroImage = parsed.heroImage;
       }
     } catch {
       // ignore parse errors
