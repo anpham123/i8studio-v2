@@ -110,7 +110,7 @@ function GridTile({
       if (playPromise !== undefined) {
         playPromise
           .then(() => setIsVideoPlaying(true))
-          .catch(() => {});
+          .catch(() => { });
       }
     }
   };
@@ -139,11 +139,10 @@ function GridTile({
         onClick={onClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${
-          isFullScreenHeroType
+        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
             ? "hover:opacity-95"
             : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
-        }`}
+          }`}
         style={{
           transformOrigin: "center center",
         }}
@@ -172,9 +171,8 @@ function GridTile({
           <video
             ref={videoRef}
             src={image!.videoUrl}
-            className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${
-              isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
+              }`}
             muted
             loop
             playsInline
@@ -351,7 +349,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
               heroVideoRef.current.currentTime = 0;
               const playPromise = heroVideoRef.current.play();
               if (playPromise !== undefined) {
-                playPromise.then(() => setHeroVideoPlaying(true)).catch(() => {});
+                playPromise.then(() => setHeroVideoPlaying(true)).catch(() => { });
               }
             }
           }}
@@ -384,9 +382,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             <video
               ref={heroVideoRef}
               src={heroImage.videoUrl}
-              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none ${
-                heroHovered && heroVideoPlaying ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none ${heroHovered && heroVideoPlaying ? "opacity-100" : "opacity-0"
+                }`}
               muted
               loop
               playsInline
@@ -477,10 +474,10 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
                     item.targetCols === 4
                       ? "w-[calc((100%-3*0.75rem)/4)] sm:w-[calc((100%-3*1rem)/4)] flex-[0_0_calc((100%-3*0.75rem)/4)] sm:flex-[0_0_calc((100%-3*1rem)/4)]"
                       : item.targetCols === 3
-                      ? "w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*1rem)/3)] flex-[0_0_calc((100%-2*0.75rem)/3)] sm:flex-[0_0_calc((100%-2*1rem)/3)]"
-                      : item.targetCols === 2
-                      ? "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] flex-[0_0_calc((100%-0.75rem)/2)] sm:flex-[0_0_calc((100%-1rem)/2)]"
-                      : "w-full flex-[0_0_100%]";
+                        ? "w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*1rem)/3)] flex-[0_0_calc((100%-2*0.75rem)/3)] sm:flex-[0_0_calc((100%-2*1rem)/3)]"
+                        : item.targetCols === 2
+                          ? "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] flex-[0_0_calc((100%-0.75rem)/2)] sm:flex-[0_0_calc((100%-1rem)/2)]"
+                          : "w-full flex-[0_0_100%]";
 
                   return (
                     <div

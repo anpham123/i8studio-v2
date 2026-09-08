@@ -28,18 +28,18 @@ function isVideoFile(url?: string) {
 
 /**
  * Masonry layout mapping (HeroEditorial):
- * - Position 1 (idx 0): Full-screen Hero (any ratio, displayed as object-cover)
- * - Remaining positions map to masonry grid:
- *   - Vị trí 2-5 (Ảnh 3): 4 ảnh dọc 3:5 (600×1000px)
- *   - Vị trí 6 (Ảnh 4): 1 banner lớn 16:9
- *   - Vị trí 7+ (Ảnh 1 & 2): Các hàng 2 ảnh/dòng 16:9 (1920×1080px)
+ * - Vị trí 1 (Hero 3D Walkthrough): Quản lý ở khung bên trên
+ * - Vị trí 2 (idx 0): Hero Full màn hình (100vh)
+ * - Vị trí 3-6 (idx 1-4): 4 ảnh dọc 3:5 (600×1000px)
+ * - Vị trí 7 (idx 5): 1 banner lớn 16:9
+ * - Vị trí 8+ (idx 6+): Các hàng 2 ảnh/dòng 16:9 (1920×1080px)
  */
 function getPositionRatio(idx: number): { ratio: string; label: string; color: string } {
-  if (idx === 0) return { ratio: "Full", label: "Hero full màn hình", color: "bg-amber-100 text-amber-800 border-amber-300" };
+  if (idx === 0) return { ratio: "Full", label: "Hero full màn hình (Vị trí #2)", color: "bg-amber-100 text-amber-800 border-amber-300" };
   const masonryIdx = (idx - 1) % 13;
-  if (masonryIdx <= 3) return { ratio: "3:5", label: "Dọc 4 ảnh/hàng (600×1000)", color: "bg-violet-100 text-violet-700 border-violet-200" };
-  if (masonryIdx === 4) return { ratio: "16:9", label: "Banner lớn 1 ảnh/hàng", color: "bg-orange-100 text-orange-700 border-orange-200" };
-  return { ratio: "16:9", label: "Ngang 2 ảnh/hàng (1920×1080)", color: "bg-cyan-100 text-cyan-700 border-cyan-200" };
+  if (masonryIdx <= 3) return { ratio: "3:5", label: `Dọc 4 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-violet-100 text-violet-700 border-violet-200" };
+  if (masonryIdx === 4) return { ratio: "16:9", label: `Banner lớn (Vị trí #${idx + 2})`, color: "bg-orange-100 text-orange-700 border-orange-200" };
+  return { ratio: "16:9", label: `Ngang 2 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-cyan-100 text-cyan-700 border-cyan-200" };
 }
 
 export default function HomepagePage() {
@@ -327,34 +327,40 @@ export default function HomepagePage() {
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          <strong>Hướng dẫn:</strong> Upload ảnh/video hiển thị trên trang chủ. Vị trí 1 = hero full màn hình.
-          Kéo thả để sắp xếp. Bật/tắt để ẩn/hiện.
+          <strong>Hướng dẫn:</strong> <strong>Vị trí 1</strong> là Hero 3D Video Walkthrough (quản lý ở khung trên).
+          Danh sách bên dưới quản lý từ <strong>Vị trí 2</strong> (Hero Full màn hình), <strong>Vị trí 3 - 6</strong> (4 ảnh dọc), <strong>Vị trí 7</strong> (Banner lớn) và <strong>Vị trí 8+</strong> (ảnh ngang 2 ảnh/hàng).
+          Kéo thả để sắp xếp vị trí. Bật/tắt để ẩn/hiện.
         </p>
       </div>
 
       {/* Aspect Ratio Guide */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-        <p className="text-sm font-semibold text-amber-800 mb-2">📐 Tỷ lệ khung hình trang chủ</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-amber-700">
+        <p className="text-sm font-semibold text-amber-800 mb-2">📐 Bản đồ vị trí & Tỷ lệ khung hình trang chủ</p>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-amber-700">
+          <div className="bg-stone-900 text-white rounded-lg p-2 border border-[#c5a666]/40">
+            <div className="font-bold text-[#c5a666]">🎬 Vị trí 1</div>
+            <div>Hero 3D Walkthrough</div>
+            <div className="text-stone-400 text-[10px]">Video/Chuỗi ảnh cuộn 3D</div>
+          </div>
           <div className="bg-amber-100 rounded-lg p-2 border border-amber-200">
-            <div className="font-bold text-amber-900">🎬 Vị trí 1</div>
+            <div className="font-bold text-amber-900">🖼️ Vị trí 2</div>
             <div>Hero <span className="font-mono font-bold">Full</span> màn hình</div>
-            <div className="text-amber-500">Tỷ lệ tự do, video/ảnh</div>
+            <div className="text-amber-600 text-[10px]">Tỷ lệ tự do, video/ảnh 100vh</div>
           </div>
           <div className="bg-white rounded-lg p-2 border border-violet-200">
-            <div className="font-bold text-violet-900">Vị trí 2-5 (Ảnh 3)</div>
+            <div className="font-bold text-violet-900">📱 Vị trí 3 - 6 (Ảnh 3)</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">3:5</span> (dọc 4 ảnh/hàng)</div>
-            <div className="text-violet-500">VD: 600×1000px</div>
+            <div className="text-violet-500 text-[10px]">VD: 600×1000px</div>
           </div>
           <div className="bg-white rounded-lg p-2 border border-orange-200">
-            <div className="font-bold text-orange-900">Vị trí 6 (Ảnh 4)</div>
+            <div className="font-bold text-orange-900">🖥️ Vị trí 7 (Ảnh 4)</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">16:9</span> (banner lớn)</div>
-            <div className="text-orange-500">VD: 1920×1080px</div>
+            <div className="text-orange-500 text-[10px]">VD: 1920×1080px</div>
           </div>
           <div className="bg-white rounded-lg p-2 border border-cyan-200">
-            <div className="font-bold text-cyan-900">Vị trí 7+ (Ảnh 1 & 2)</div>
+            <div className="font-bold text-cyan-900">🔲 Vị trí 8+ (Ảnh 1 & 2)</div>
             <div>Tỷ lệ: <span className="font-mono font-bold">16:9</span> (ngang 2 ảnh/hàng)</div>
-            <div className="text-cyan-500">VD: 1920×1080px</div>
+            <div className="text-cyan-500 text-[10px]">VD: 1920×1080px</div>
           </div>
         </div>
       </div>
@@ -376,7 +382,7 @@ export default function HomepagePage() {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
             <div className="absolute bottom-6 left-6 text-white">
-              <p className="text-xs text-white/60 mb-1">HERO — Vị trí #1</p>
+              <p className="text-xs text-white/60 mb-1">HERO — Vị trí #2</p>
               <h3 className="text-xl font-semibold drop-shadow-lg">{heroItem.title || "Chưa có tiêu đề"}</h3>
             </div>
           </div>
@@ -403,19 +409,27 @@ export default function HomepagePage() {
               onDragOver={(e) => { e.preventDefault(); setDragOverIdx(idx); }}
               onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
               onDrop={() => handleDrop(idx)}
-              className={`flex items-center gap-3 bg-white rounded-xl border p-3 transition-all hover:shadow-md cursor-grab active:cursor-grabbing ${
-                !item.active ? "opacity-50" : ""
-              } ${idx === 0 && item.active ? "border-amber-300 bg-amber-50/50 ring-1 ring-amber-200" : "border-gray-200"
-              } ${dragOverIdx === idx && dragIdx !== idx ? "border-blue-400 ring-2 ring-blue-200 bg-blue-50/50" : ""
-              } ${dragIdx === idx ? "opacity-40 scale-[0.98]" : ""}`}
+              className={`flex items-center gap-3 bg-white rounded-xl border p-3 transition-all hover:shadow-md cursor-grab active:cursor-grabbing ${!item.active ? "opacity-50" : ""
+                } ${idx === 0 && item.active ? "border-amber-300 bg-amber-50/50 ring-1 ring-amber-200" : "border-gray-200"
+                } ${dragOverIdx === idx && dragIdx !== idx ? "border-blue-400 ring-2 ring-blue-200 bg-blue-50/50" : ""
+                } ${dragIdx === idx ? "opacity-40 scale-[0.98]" : ""}`}
             >
               {/* Drag handle */}
               <div className="text-gray-300 hover:text-gray-500 shrink-0"><GripVertical size={18} /></div>
 
               {/* Position */}
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                idx === 0 && item.active ? "bg-amber-500 text-white" : "bg-gray-100 text-gray-500"
-              }`}>{idx + 1}</div>
+              <div
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                  idx === 0 && item.active
+                    ? "bg-amber-500 text-white shadow-sm"
+                    : item.active
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+                title={`Vị trí #${idx + 2} trên trang chủ`}
+              >
+                {idx + 2}
+              </div>
 
               {/* Thumbnail */}
               <div className="relative w-20 h-14 shrink-0 cursor-pointer group" onClick={() => setLightbox({ item, idx })}>

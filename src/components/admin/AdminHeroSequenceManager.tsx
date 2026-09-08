@@ -182,9 +182,14 @@ export default function AdminHeroSequenceManager() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c5a666]/20 border border-[#c5a666]/30 text-[#c5a666] text-xs font-mono font-bold tracking-wider uppercase mb-2">
-            <Sparkles size={13} />
-            <span>HERO SECTION CONTROLLER</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-6 h-6 rounded-lg bg-[#c5a666] text-black font-black flex items-center justify-center text-xs shadow-md shrink-0">
+              1
+            </span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c5a666]/20 border border-[#c5a666]/30 text-[#c5a666] text-xs font-mono font-bold tracking-wider uppercase">
+              <Sparkles size={13} />
+              <span>VỊ TRÍ #1: HERO SECTION (VIDEO CUỘN 3D)</span>
+            </div>
           </div>
           <h2 className="text-xl sm:text-2xl font-light text-white tracking-tight">
             Quản lý Hero Section Trang Chủ
