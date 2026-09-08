@@ -311,7 +311,7 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
       </section>
 
       {/* ── Steps (Scroll Reveal: Bottom-Up Slide + Text Color Sweep) ───────── */}
-      <section className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 py-20 md:py-28 space-y-24 md:space-y-32">
+      <section className="w-full py-20 md:py-28 space-y-24 md:space-y-36 overflow-hidden">
         {displaySteps.map((step, i) => {
           const reverse = i % 2 === 1;
           const num = String(step.stepNumber).padStart(2, "0");
@@ -328,13 +328,18 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: false, margin: "-40px 0px -40px 0px", amount: 0.2 }}
-              className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"
-                } gap-10 md:gap-14 lg:gap-16 items-center`}
+              className={`w-full flex flex-col ${
+                reverse ? "md:flex-row-reverse" : "md:flex-row"
+              } gap-8 md:gap-12 lg:gap-16 items-center px-4 sm:px-6 md:px-0`}
             >
-              {/* Image with Smooth Fade + Slide & 3s Auto-transition */}
+              {/* Image with Smooth Fade + Slide & 3s Auto-transition (Full-bleed 1 bên) */}
               <motion.div
                 variants={imageVariants}
-                className="relative w-full md:w-[42%] lg:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-sm border border-gray-200/60"
+                className={`relative w-full md:w-1/2 h-[340px] sm:h-[420px] md:h-[460px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-md border border-gray-200/60 ${
+                  reverse
+                    ? "md:rounded-l-3xl md:rounded-r-none rounded-2xl"
+                    : "md:rounded-r-3xl md:rounded-l-none rounded-2xl"
+                }`}
               >
                 <StepImageSlideshow
                   images={step.images}
@@ -344,7 +349,13 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
               </motion.div>
 
               {/* Text Block with Gold Number and Color-Sweep Text */}
-              <div className="relative w-full md:w-[58%] lg:w-[60%] flex-1 min-w-0">
+              <div
+                className={`relative w-full md:w-1/2 flex-1 min-w-0 px-4 sm:px-6 md:px-8 ${
+                  reverse
+                    ? "md:pl-12 lg:pl-20 md:pr-8 lg:pr-16"
+                    : "md:pr-12 lg:pr-20 md:pl-8 lg:pl-16"
+                }`}
+              >
                 {/* Step Number in Gold / Yellow */}
                 <span className="text-5xl md:text-7xl font-bold text-[#b8935a] block mb-2 font-roboto tracking-tight select-none">
                   {num}

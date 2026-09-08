@@ -37,10 +37,10 @@ const PLACEHOLDER_COLORS = [
 ];
 
 /*
- * Masonry block pattern (17 items per repeating cycle):
- * Row 1: 4 vertical cards (3:5)
- * Row 2: 1 full-screen cinematic banner (16:9)
- * Row 3-6: 3 widescreen cards per row (16:9)
+ * Masonry block pattern:
+ * - Row 1: 4 vertical cards (3:5) [Ảnh 3: Giữ nguyên]
+ * - Row 2: 1 full-screen cinematic banner (16:9) [Ảnh 4: Giữ nguyên]
+ * - Row 3-6: 2 widescreen cards per row (16:9) [Ảnh 1 & 2: Chỉnh 2 ảnh/dòng]
  */
 const MASONRY_BLOCK = [
   [
@@ -53,24 +53,20 @@ const MASONRY_BLOCK = [
     { targetCols: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
   ],
   [
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
   ],
   [
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
   ],
   [
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
   ],
   [
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
-    { targetCols: 3, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
   ],
 ];
 
@@ -482,6 +478,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
                       ? "w-[calc((100%-3*0.75rem)/4)] sm:w-[calc((100%-3*1rem)/4)] flex-[0_0_calc((100%-3*0.75rem)/4)] sm:flex-[0_0_calc((100%-3*1rem)/4)]"
                       : item.targetCols === 3
                       ? "w-[calc((100%-2*0.75rem)/3)] sm:w-[calc((100%-2*1rem)/3)] flex-[0_0_calc((100%-2*0.75rem)/3)] sm:flex-[0_0_calc((100%-2*1rem)/3)]"
+                      : item.targetCols === 2
+                      ? "w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1rem)/2)] flex-[0_0_calc((100%-0.75rem)/2)] sm:flex-[0_0_calc((100%-1rem)/2)]"
                       : "w-full flex-[0_0_100%]";
 
                   return (
