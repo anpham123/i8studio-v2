@@ -1,14 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const META_PATH = path.join(process.cwd(), "public", "sequences", "hero", "meta.json");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "sequences", "hero");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "hero-sequence");
+
+function getFfmpegPath(): string {
+  const binaryName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
+
+  // 1. Direct path in node_modules/ffmpeg-static
+  const directPath = path.join(process.cwd(), "node_modules", "ffmpeg-static", binaryName);
+  if (fs.existsSync(directPath)) return directPath;
+
+  // 2. Try require('ffmpeg-static')
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const ffmpegStatic = require("ffmpeg-static");
+    if (typeof ffmpegStatic === "string" && fs.existsSync(ffmpegStatic)) {
+      return ffmpegStatic;
+    }
+  } catch {}
+
+  // 3. Common Linux paths (Docker container)
+  if (fs.existsSync("/usr/bin/ffmpeg")) return "/usr/bin/ffmpeg";
+  if (fs.existsSync("/usr/local/bin/ffmpeg")) return "/usr/local/bin/ffmpeg";
+
+  // 4. Fallback to system PATH
+  return "ffmpeg";
+}
+
+async function getVideoDuration(ffmpegPath: string, videoPath: string): Promise<number> {
+  try {
+    const { stderr } = await execFileAsync(ffmpegPath, ["-i", videoPath]).catch((e) => e);
+    const match = String(stderr || "").match(/Duration:\s*(\d+):(\d+):(\d+\.?\d*)/);
+    if (match) {
+      const hours = parseFloat(match[1]);
+      const minutes = parseFloat(match[2]);
+      const seconds = parseFloat(match[3]);
+      const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+      if (totalSeconds > 0) return totalSeconds;
+    }
+  } catch {}
+  return 60; // default 60s
+}
 
 export async function GET() {
   try {
@@ -63,16 +102,15 @@ export async function POST(req: NextRequest) {
     const videoPublicUrl = `/uploads/hero-sequence/${videoFileName}`;
 
     // 2. Locate ffmpeg binary
-    let ffmpegPath = "ffmpeg";
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const ffmpegStatic = require("ffmpeg-static");
-      if (ffmpegStatic) ffmpegPath = ffmpegStatic;
-    } catch {
-      // fallback to system ffmpeg
-    }
+    const ffmpegPath = getFfmpegPath();
 
-    // 3. Clean old sequence frames
+    // 3. Detect video duration & calculate adaptive FPS (always target ~240 frames for 100% smoothness)
+    const duration = await getVideoDuration(ffmpegPath, videoFilePath);
+    const TARGET_FRAMES = 240;
+    const targetFps = Math.max(1, Math.min(30, TARGET_FRAMES / Math.max(1, duration)));
+    const fpsFilter = `fps=${targetFps.toFixed(4)},scale=1920:-2`;
+
+    // 4. Clean old sequence frames
     const oldFiles = fs.readdirSync(OUTPUT_DIR);
     for (const f of oldFiles) {
       if (f.startsWith("frame_") && (f.endsWith(".jpg") || f.endsWith(".webp"))) {
@@ -80,11 +118,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Extract high-res WebP frames (1920px Full HD, quality 88, ~2.25fps)
+    // 5. Extract high-res WebP frames (1920px Full HD, quality 85)
     const framePattern = path.join(OUTPUT_DIR, "frame_%04d.webp");
-    const cmd = `"${ffmpegPath}" -y -i "${videoFilePath}" -vf "fps=2.25,scale=1920:-2" -c:v libwebp -quality 88 -preset drawing "${framePattern}"`;
-
-    await execAsync(cmd);
+    await execFileAsync(ffmpegPath, [
+      "-y",
+      "-i", videoFilePath,
+      "-vf", fpsFilter,
+      "-c:v", "libwebp",
+      "-quality", "85",
+      "-preset", "drawing",
+      framePattern,
+    ]);
 
     // 5. Count extracted frames
     const newFiles = fs

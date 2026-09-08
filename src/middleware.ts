@@ -5,6 +5,7 @@ import { getToken } from "next-auth/jwt";
 const intlMiddleware = createMiddleware({
   locales: ["ja", "en"],
   defaultLocale: "ja",
+  localeDetection: false,
 });
 
 /**

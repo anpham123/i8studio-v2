@@ -36,7 +36,7 @@ export function buildMetadata({
       languages: {
         en: `${SITE_URL}/en${path}`,
         ja: `${SITE_URL}/ja${path}`,
-        "x-default": `${SITE_URL}/en${path}`,
+        "x-default": `${SITE_URL}/ja${path}`,
       },
     },
     openGraph: {

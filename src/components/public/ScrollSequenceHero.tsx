@@ -191,7 +191,7 @@ export default function ScrollSequenceHero({
           setIsReady(true);
         }
         if (i === 6 || (i === 1 && !imagesRef.current[5])) {
-          renderFrame(6);
+          renderFrame(Math.min(6, activeFramesCount));
         }
       };
       img.onerror = () => {
@@ -223,7 +223,7 @@ export default function ScrollSequenceHero({
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       lastDrawnFrameRef.current = -1;
-      renderFrame(6);
+      renderFrame(Math.min(6, activeFramesCount));
     };
 
     handleResize();
@@ -235,16 +235,16 @@ export default function ScrollSequenceHero({
   useEffect(() => {
     if (useFallback) return;
 
-    const startFrame = 6;
-    const endFrame = Math.max(startFrame, activeFramesCount - 4);
+    // Skip black fade-in at the beginning (first 5 frames) and fade-out at the end (last 6 frames)
+    const startFrame = Math.min(6, activeFramesCount);
+    const endFrame = Math.max(startFrame, activeFramesCount - 6);
 
     let rafId: number | null = null;
     const unsubscribe = smoothProgress.on("change", (latest) => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        // Map 0% -> 88% scroll progress cleanly across the illuminated scene,
-        // holding the final illuminated frame steadily at the end (88% -> 100%)
-        const clampedProgress = Math.min(1, Math.max(0, latest / 0.88));
+        // Map 0% -> 100% scroll progress directly from first illuminated frame to last illuminated frame
+        const clampedProgress = Math.min(1, Math.max(0, latest));
         const targetFrame = Math.min(
           endFrame,
           Math.max(startFrame, Math.round(startFrame + clampedProgress * (endFrame - startFrame)))
