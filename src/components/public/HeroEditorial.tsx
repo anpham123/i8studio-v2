@@ -176,8 +176,8 @@ function GridTile({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
-            ? "hover:opacity-95"
-            : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
+          ? "hover:opacity-95"
+          : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
           }`}
         style={{
           transformOrigin: "center center",
@@ -239,8 +239,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
     offset: ["start start", "end start"],
   });
 
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0]);
 
   // Hero image = first image, masonry uses the rest
   const heroImage = images[0];
@@ -428,16 +428,13 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             />
           )}
 
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent" />
-
-          {/* Text overlay */}
+          {/* Text overlay directly on photo with luminous high-contrast text-shadow */}
           <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-end pb-16 sm:pb-20 px-6 text-center z-10"
+            className="absolute inset-0 flex flex-col items-center justify-end pb-14 sm:pb-18 px-6 text-center z-10 pointer-events-none"
             style={{ y: textY, opacity: textOpacity }}
           >
             <motion.h1
-              className="font-serif text-[32px] sm:text-[40px] md:text-[48px] font-normal text-white tracking-[0.05em] leading-[1.15] mb-3 drop-shadow-lg"
+              className="font-serif text-[30px] sm:text-[44px] md:text-[54px] font-black text-white tracking-[0.08em] leading-[1.15] mb-2 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_16px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,0.95)]"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -446,7 +443,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             </motion.h1>
 
             <motion.p
-              className="font-serif text-[17px] sm:text-[20px] md:text-[22px] font-medium text-white/95 tracking-[0.08em] mb-3 drop-shadow-md"
+              className="font-serif text-[18px] sm:text-[22px] md:text-[26px] font-bold text-[#FFE8A3] tracking-[0.1em] mb-3 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_14px_rgba(0,0,0,1),_0_0_24px_rgba(0,0,0,0.95)]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -455,7 +452,7 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
             </motion.p>
 
             <motion.div
-              className="text-[15px] sm:text-[16px] md:text-[17px] text-white/90 leading-[1.8] max-w-5xl drop-shadow-sm font-normal flex flex-col items-center"
+              className="text-[14px] sm:text-[16px] md:text-[17px] text-white font-semibold leading-[1.8] max-w-4xl [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_3px_10px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,0.95)] flex flex-col items-center"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}

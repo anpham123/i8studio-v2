@@ -112,7 +112,7 @@ export default function ScrollSequenceHero({
           setActiveFramesCount(data.totalFrames);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Render frame on Canvas

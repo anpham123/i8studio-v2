@@ -297,19 +297,19 @@ function WorkCardItem({
     if (!isHovered) return "scale(1) translate3d(0, 0, 0)";
     switch (motionMode) {
       case 0:
-        // Zoom sâu từ xa lại gần (Deep push-in zoom)
-        return "scale(1.24) translate3d(0, 0, 0)";
+        // Zoom chậm nhẹ nhàng từ từ (Gentle slow push-in zoom)
+        return "scale(1.06) translate3d(0, 0, 0)";
       case 1:
-        // Zoom sâu + quay lia sang phải (Deep zoom & pan right)
-        return "scale(1.22) translate3d(6%, 0, 0)";
+        // Zoom chậm + lia nhẹ sang phải (Gentle zoom & slight pan right)
+        return "scale(1.06) translate3d(1.5%, 0, 0)";
       case 2:
-        // Zoom sâu + quay lia sang trái (Deep zoom & pan left)
-        return "scale(1.22) translate3d(-6%, 0, 0)";
+        // Zoom chậm + lia nhẹ sang trái (Gentle zoom & slight pan left)
+        return "scale(1.06) translate3d(-1.5%, 0, 0)";
       case 3:
-        // Zoom sâu + lia từ dưới lên trên (Deep zoom & pan upward)
-        return "scale(1.22) translate3d(0, -5%, 0)";
+        // Zoom chậm + lia nhẹ từ dưới lên (Gentle zoom & slight pan upward)
+        return "scale(1.06) translate3d(0, -1.5%, 0)";
       default:
-        return "scale(1.22) translate3d(0, 0, 0)";
+        return "scale(1.06) translate3d(0, 0, 0)";
     }
   };
 
@@ -414,8 +414,8 @@ function WorkCardItem({
                 aspectRatio: aspectRatio ? `${aspectRatio}` : undefined,
                 transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
                 transition: isHovered
-                  ? "transform 7.5s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.3s ease"
-                  : "transform 0.9s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease",
+                  ? "transform 2.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease"
+                  : "transform 1.0s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease",
               }}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
