@@ -36,9 +36,18 @@ function isVideoFile(url?: string) {
  */
 function getPositionRatio(idx: number): { ratio: string; label: string; color: string } {
   if (idx === 0) return { ratio: "Full", label: "Hero full màn hình (Vị trí #2)", color: "bg-amber-100 text-amber-800 border-amber-300" };
-  const masonryIdx = (idx - 1) % 13;
-  if (masonryIdx <= 3) return { ratio: "3:5", label: `Dọc 4 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-violet-100 text-violet-700 border-violet-200" };
-  if (masonryIdx === 4) return { ratio: "16:9", label: `Banner lớn (Vị trí #${idx + 2})`, color: "bg-orange-100 text-orange-700 border-orange-200" };
+  
+  // 3 block đầu tiên (idx 1 -> 39: chứa đúng 12 ảnh dọc, 3 banner lớn, 24 ảnh ngang):
+  if (idx < 40) {
+    const masonryIdx = (idx - 1) % 13;
+    if (masonryIdx <= 3) return { ratio: "3:5", label: `Dọc 4 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-violet-100 text-violet-700 border-violet-200" };
+    if (masonryIdx === 4) return { ratio: "16:9", label: `Banner lớn (Vị trí #${idx + 2})`, color: "bg-orange-100 text-orange-700 border-orange-200" };
+    return { ratio: "16:9", label: `Ngang 2 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-cyan-100 text-cyan-700 border-cyan-200" };
+  }
+
+  // Từ block 4 trở đi (idx >= 40: đã hết 12 ảnh dọc, chuyển sang 4 ảnh ngang 16:9 thay thế):
+  const after3BlocksIdx = (idx - 40) % 13;
+  if (after3BlocksIdx === 4) return { ratio: "16:9", label: `Banner lớn (Vị trí #${idx + 2})`, color: "bg-orange-100 text-orange-700 border-orange-200" };
   return { ratio: "16:9", label: `Ngang 2 ảnh/hàng (Vị trí #${idx + 2})`, color: "bg-cyan-100 text-cyan-700 border-cyan-200" };
 }
 

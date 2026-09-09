@@ -37,10 +37,10 @@ const PLACEHOLDER_COLORS = [
 ];
 
 /*
- * Masonry block pattern:
- * - Row 1: 4 vertical cards (3:5) [Ảnh 3: Giữ nguyên]
- * - Row 2: 1 full-screen cinematic banner (16:9) [Ảnh 4: Giữ nguyên]
- * - Row 3-6: 2 widescreen cards per row (16:9) [Ảnh 1 & 2: Chỉnh 2 ảnh/dòng]
+ * Masonry block pattern (Blocks 1-3: uses 12 vertical cards total):
+ * - Row 1: 4 vertical cards (3:5)
+ * - Row 2: 1 full-screen cinematic banner (16:9)
+ * - Row 3-6: 2 widescreen cards per row (16:9)
  */
 const MASONRY_BLOCK = [
   [
@@ -48,6 +48,42 @@ const MASONRY_BLOCK = [
     { targetCols: 4, aspect: "3/5" },
     { targetCols: 4, aspect: "3/5" },
     { targetCols: 4, aspect: "3/5" },
+  ],
+  [
+    { targetCols: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
+  ],
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+  ],
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+  ],
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+  ],
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+  ],
+];
+
+/*
+ * Masonry block pattern from block 4 onwards (When all 12 vertical cards are used):
+ * - Row 1-2: 4 widescreen cards (2 rows x 2 cards, 16:9) replacing 4 vertical cards
+ * - Row 3: 1 full-screen cinematic banner (16:9)
+ * - Row 4-7: 8 widescreen cards per block (4 rows x 2 cards, 16:9)
+ */
+const MASONRY_BLOCK_HORIZONTAL = [
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
+  ],
+  [
+    { targetCols: 2, aspect: "16/9" },
+    { targetCols: 2, aspect: "16/9" },
   ],
   [
     { targetCols: 1, aspect: "16/9", minHeight: "calc(100vh - 48px)" },
@@ -220,7 +256,8 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
   let blockIndex = 0;
 
   while (itemsAllocated < totalMasonryCount) {
-    for (const rowTemplate of MASONRY_BLOCK) {
+    const currentBlockTemplate = blockIndex < 3 ? MASONRY_BLOCK : MASONRY_BLOCK_HORIZONTAL;
+    for (const rowTemplate of currentBlockTemplate) {
       if (itemsAllocated >= totalMasonryCount) break;
       const remaining = totalMasonryCount - itemsAllocated;
       const countForThisRow = Math.min(rowTemplate.length, remaining);
