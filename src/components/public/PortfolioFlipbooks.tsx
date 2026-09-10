@@ -33,100 +33,152 @@ const JAP_TITLE_MAP: Record<string, string> = {
   "Townhouse Portfolio": "住宅 ポートフォリオ",
 };
 
+function getCardDetails(fb: FlipbookItem, isJa: boolean) {
+  const cleanEnglish = fb.title
+    .replace(/porfolio|portfolio/gi, "")
+    .replace(/^[-_\s]+|[-_\s]+$/g, "")
+    .trim()
+    .toUpperCase() || fb.title.toUpperCase();
+
+  let locationTag = "ARCHITECTURE";
+  let status = "EXCLUSIVE";
+
+  if (/apartment/i.test(fb.title)) {
+    locationTag = "TOKYO / RESIDENTIAL";
+    status = "EXCLUSIVE";
+  } else if (/resort|hotel/i.test(fb.title)) {
+    locationTag = "HOSPITALITY / RESORT";
+    status = "EXCLUSIVE";
+  } else if (/townhouse|house/i.test(fb.title)) {
+    locationTag = "RESIDENTIAL / VILLA";
+    status = "EXCLUSIVE";
+  }
+
+  const subTitle = isJa
+    ? (fb.titleJa || JAP_TITLE_MAP[fb.title] || fb.title)
+    : (fb.title || fb.description);
+
+  return {
+    bigTitle: cleanEnglish,
+    locationTag,
+    subTitle,
+    status,
+  };
+}
+
 export default function PortfolioFlipbooks({ flipbooks, isJa, hasPortfolios }: Props) {
   const [activeBook, setActiveBook] = useState<FlipbookItem | null>(null);
 
   if (flipbooks.length === 0) return null;
 
+  const gridColsCls =
+    flipbooks.length === 1
+      ? "grid-cols-1 max-w-xl mx-auto"
+      : flipbooks.length === 2
+      ? "grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-8"
+      : flipbooks.length === 3
+      ? "grid-cols-1 md:grid-cols-3 w-full gap-6 md:gap-8 xl:gap-10"
+      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full gap-5 md:gap-6 xl:gap-8";
+
   return (
     <>
-      <section className={hasPortfolios ? "bg-[#fafaf8] border-t border-gray-100" : ""}>
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <section className={`py-16 md:py-24 ${hasPortfolios ? "bg-[#fafaf8] border-t border-gray-100" : "bg-white"}`}>
+        <div className="max-w-[1560px] mx-auto px-4 sm:px-8 lg:px-12">
+          {/* ── Centered Header ── */}
           <motion.div
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-14"
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12 sm:mb-16"
           >
-            <p className="text-[17px] sm:text-[18px] uppercase tracking-[0.22em] text-[#b8935a] font-bold mb-3">
+            <p className="text-[13px] sm:text-[14px] uppercase tracking-[0.25em] text-[#b8935a] font-bold mb-2.5">
               {isJa ? "資料・ドキュメント" : "DOCUMENTS"}
             </p>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#111] tracking-wide" style={{ fontFamily: "var(--font-noto-serif), serif" }}>
+            <h2
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#111] tracking-tight"
+              style={{ fontFamily: "var(--font-noto-serif), serif" }}
+            >
               {isJa ? "ポートフォリオ PDF" : "Portfolio PDF"}
             </h2>
-            <p className="text-gray-500 text-sm mt-3 max-w-lg mx-auto">
+            <p className="text-gray-500 text-sm sm:text-[15px] mt-3 max-w-xl mx-auto">
               {isJa
                 ? "各カテゴリのポートフォリオPDFをご覧いただけます。"
                 : "Browse our portfolio PDFs for each project category."}
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* ── Wide Full-Spread Grid with Large Immersive Cards ── */}
+          <div className={`grid ${gridColsCls}`}>
             {flipbooks.map((fb, idx) => {
-              const fbTitle = isJa ? (fb.titleJa || JAP_TITLE_MAP[fb.title] || fb.title) : fb.title;
-              const fbDesc = isJa ? (fb.descriptionJa || fb.description) : fb.description;
+              const details = getCardDetails(fb, isJa);
               return (
                 <motion.div
                   key={fb.id}
-                  initial={{ opacity: 0, y: 35 }}
+                  initial={{ opacity: 0, y: 25 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
-                  transition={{ duration: 0.75, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex"
+                  transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col"
                 >
-                  {/* Card Lift & Scale Effect (Toàn bộ thẻ nhấc bổng & phóng lớn khi rê chuột) */}
                   <button
                     onClick={() => setActiveBook(fb)}
-                    className="group block rounded-2xl overflow-hidden border border-gray-100 bg-white text-left w-full h-full shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.14)] hover:-translate-y-3 hover:scale-[1.03] transition-all duration-500 ease-out hover:border-[#b8935a]/50 ring-0 hover:ring-4 hover:ring-[#b8935a]/15 flex flex-col justify-between"
+                    className="group text-left w-full flex flex-col cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#b8935a]"
                   >
-                    <div>
-                      {/* Cover with Hover Zoom Effect (Ảnh bên trong phóng to mượt mà điện ảnh) */}
-                      <div className="aspect-[4/3] bg-gradient-to-br from-[#1a1a2e] to-[#111] overflow-hidden relative">
-                        {fb.coverImage ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={fb.coverImage}
-                            alt={fbTitle}
-                            className="w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1" className="opacity-30">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                              <polyline points="14 2 14 8 20 8" />
-                              <line x1="16" y1="13" x2="8" y2="13" />
-                              <line x1="16" y1="17" x2="8" y2="17" />
-                            </svg>
-                          </div>
-                        )}
-                        {/* Cinematic dark gradient on hover */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                          <span className="bg-white text-gray-900 text-xs font-bold px-6 py-2.5 rounded-full shadow-2xl transform translate-y-3 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                            {isJa ? "PDFを読む" : "Read Now"}
-                          </span>
+                    {/* 1. Large Image Container with Headline Overlay */}
+                    <div className="relative w-full aspect-[4/3.2] rounded-2xl md:rounded-[22px] overflow-hidden bg-neutral-900 shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-1.5">
+                      {fb.coverImage ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={fb.coverImage}
+                          alt={details.subTitle}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-neutral-800 flex items-center justify-center">
+                          <span className="text-white/40 text-xs font-mono uppercase">PDF Document</span>
                         </div>
-                        {/* PDF badge */}
-                        <div className="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md z-10">
-                          PDF
-                        </div>
-                      </div>
-                      {/* Info */}
-                      <div className="p-6">
-                        <h3 className="text-lg font-bold text-[#111] mb-1.5 group-hover:text-[#b8935a] transition-colors duration-300">
-                          {fbTitle}
+                      )}
+
+                      {/* Vignette / Contrast Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/40 group-hover:via-black/30 transition-all duration-300" />
+
+                      {/* Prominent Overlay Title (RUSUTSU / THE NIGO HOUSE / NATURE WITHIN / MASU style) */}
+                      <div className="absolute inset-x-0 top-0 pt-7 sm:pt-9 px-4 flex items-start justify-center text-center pointer-events-none">
+                        <h3
+                          className="text-white font-extrabold text-2xl sm:text-3xl md:text-3xl lg:text-[28px] xl:text-[34px] uppercase tracking-wide leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] line-clamp-2"
+                          style={{ fontFamily: "var(--font-outfit), var(--font-display), sans-serif" }}
+                        >
+                          {details.bigTitle}
                         </h3>
-                        {fbDesc && <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{fbDesc}</p>}
+                      </div>
+
+                      {/* Hover Read Indicator Pill */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <span className="bg-white/95 backdrop-blur-sm text-neutral-900 text-xs sm:text-sm font-bold px-6 py-3 rounded-full shadow-2xl transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          {isJa ? "PDFを閲覧" : "View PDF"}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="px-6 pb-6 pt-0">
-                      <span className="inline-flex items-center gap-1.5 text-[#b8935a] text-sm font-semibold group-hover:translate-x-1.5 transition-transform duration-300">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        {isJa ? "PDFを読む →" : "Read PDF →"}
-                      </span>
+                    {/* 2. Text Info Area Below Image */}
+                    <div className="mt-4 space-y-1.5 px-0.5">
+                      {/* Line 1: Location / Tag */}
+                      <p className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-neutral-800">
+                        {details.locationTag}
+                      </p>
+
+                      {/* Line 2: Japanese / Project Subtitle */}
+                      <p
+                        className="text-[14px] sm:text-[15px] font-medium text-neutral-700 leading-snug line-clamp-1 group-hover:text-[#b8935a] transition-colors duration-300"
+                      >
+                        {details.subTitle}
+                      </p>
+
+                      {/* Line 3: Status / Category Gold Tag */}
+                      <p className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#c5a666]">
+                        {details.status}
+                      </p>
                     </div>
                   </button>
                 </motion.div>

@@ -107,70 +107,101 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero (full-viewport with bottom-aligned content to showcase product) ── */}
-      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] overflow-hidden flex flex-col justify-end pb-14 sm:pb-16 md:pb-20">
-        {/* Background: video or image */}
-        {(() => {
-          // Priority: heroVideo > heroImage (if video) > mediaEmbedUrl (if video) > heroImage (as image)
-          const heroVideoUrl = data.heroVideo || "";
-          const heroSrc = data.heroImage || "";
-          const isHeroImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
-          const mediaUrl = data.mediaEmbedUrl || "";
-          const isMediaVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl);
+      {/* ── Hero (Solution 3: Ken Burns Auto-Panoramic Pan Hero on Mobile) ── */}
+      <section className="relative w-full bg-[#0c0c10] overflow-hidden flex flex-col justify-end items-center h-[calc(100vh-var(--header-h,76px))] min-h-[580px] sm:min-h-[600px] max-h-[1200px] pb-10 sm:pb-16 md:pb-20 select-none">
 
-          const useVideo = heroVideoUrl
-            || (isHeroImageVideo ? heroSrc : null)
-            || (!heroSrc && isMediaVideo ? mediaUrl : null);
-          const useImage = !useVideo ? heroSrc : null;
+        {/* Blueprint CAD Grid Background */}
+        <div
+          className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.18) 1px, transparent 1px)`,
+            backgroundSize: "36px 36px",
+          }}
+        />
 
-          return (
-            <>
-              {useVideo ? (
-                <video
-                  src={useVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-              ) : useImage ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={useImage}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => { e.currentTarget.style.display = "none"; }}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
-              )}
-              {/* Subtle top and bottom gradients so product in center is completely clear */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent pointer-events-none" />
-            </>
-          );
-        })()}
+        {/* Panoramic Scan Indicator Badge on Mobile */}
+        <div className="sm:hidden absolute top-6 right-5 z-20 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-[#c5a666]/35 text-[9.5px] font-mono text-[#c5a666] tracking-wider uppercase flex items-center gap-1.5 shadow-lg">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a666] animate-pulse" />
+          <span>⟷ PANORAMIC SCAN</span>
+        </div>
 
-        {/* Content overlay (Gọn gàng, hạ xuống phía dưới để không che ảnh sản phẩm) */}
-        <div className="relative z-10 text-center px-6 max-w-5xl md:max-w-6xl mx-auto mb-2">
+        {/* Media Background Layer with Ken Burns Auto-Panoramic Pan on Mobile */}
+        <div className="absolute inset-0 z-1 overflow-hidden pointer-events-none flex items-center justify-start sm:justify-center">
+          {(() => {
+            const heroVideoUrl = data.heroVideo || "";
+            const heroSrc = data.heroImage || "";
+            const isHeroImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(heroSrc);
+            const mediaUrl = data.mediaEmbedUrl || "";
+            const isMediaVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl);
+
+            const useVideo = heroVideoUrl
+              || (isHeroImageVideo ? heroSrc : null)
+              || (!heroSrc && isMediaVideo ? mediaUrl : null);
+            const useImage = !useVideo ? heroSrc : null;
+
+            return (
+              <>
+                {useVideo ? (
+                  <video
+                    src={useVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center"
+                  />
+                ) : useImage ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <motion.img
+                    initial={{ scale: 1.04 }}
+                    animate={{
+                      scale: 1,
+                      x: ["0%", "-42%", "0%"],
+                    }}
+                    transition={{
+                      scale: { duration: 3.5, ease: [0.16, 1, 0.3, 1] },
+                      x: { duration: 22, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" },
+                    }}
+                    src={useImage}
+                    alt={title}
+                    className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center sm:!transform-none"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#111] via-[#1a1a2e] to-[#111]" />
+                )}
+
+                {/* Dark Vignette and Readability Gradient Overlays */}
+                <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/95 via-black/45 to-black/30" />
+                <div className="hidden sm:block absolute inset-0 z-2 bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
+              </>
+            );
+          })()}
+        </div>
+
+        {/* Content overlay */}
+        <div className="relative z-10 text-center px-5 sm:px-6 max-w-5xl md:max-w-6xl mx-auto">
+          {/* Category / Sub-badge */}
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="text-base sm:text-lg md:text-xl uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-3 drop-shadow-sm"
+            className="text-xs sm:text-base md:text-lg uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-2 sm:mb-3 drop-shadow-md"
           >
             {title}
           </motion.p>
+
+          {/* Main Title / Hero Tagline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-tight mb-4 drop-shadow-md md:whitespace-nowrap"
+            className="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-snug sm:leading-tight mb-3 sm:mb-4 drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {heroTagline}
           </motion.h1>
+
           {(() => {
             if (!heroDesc) return null;
 
@@ -191,7 +222,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="text-white/85 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-6 leading-relaxed font-light drop-shadow-sm space-y-1"
+                className="text-white/90 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-4 sm:mb-6 leading-relaxed font-light drop-shadow-md space-y-1"
               >
                 {lines.map((line, idx) => (
                   <span key={idx} className="block whitespace-normal md:whitespace-nowrap">
@@ -201,10 +232,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               </motion.div>
             );
           })()}
+
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
               href={`/${locale}/contact`}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-lg"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
             >
               <span>{isJa ? "無料相談する" : "Free Consultation"}</span>
             </Link>
@@ -216,7 +248,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
+          className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
         >
           <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
             <motion.div

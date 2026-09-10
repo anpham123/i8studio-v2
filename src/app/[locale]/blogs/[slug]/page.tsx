@@ -98,7 +98,7 @@ export default async function BlogDetailPage({ params }: Props) {
   });
 
   return (
-    <article>
+    <article className="w-full max-w-full overflow-x-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}

@@ -126,7 +126,19 @@ const DEFAULT_STATS = [
   { numJa: "2,000+", numEn: "2,000+", labelJa: "完了プロジェクト", labelEn: "Completed Projects" },
 ];
 
-const DEFAULT_MILESTONES = [
+interface MilestoneItem {
+  year?: string;
+  yearJa?: string;
+  yearEn?: string;
+  titleJa: string;
+  titleEn: string;
+  descJa: string;
+  descEn: string;
+  image?: string;
+  images?: string[];
+}
+
+const DEFAULT_MILESTONES: MilestoneItem[] = [
   {
     year: "2019",
     yearJa: "2019年",
@@ -209,15 +221,86 @@ function buildStats(settings: Record<string, string>, overview?: Record<string, 
   });
 }
 
-interface MilestoneItem {
-  year?: string;
-  yearJa?: string;
-  yearEn?: string;
-  titleJa: string;
-  titleEn: string;
-  descJa: string;
-  descEn: string;
-  image?: string;
+/* ------------------------------------------------------------------ */
+/*  Milestone Image Slideshow Component (2s Auto-transition + Full Image) */
+/* ------------------------------------------------------------------ */
+function MilestoneImageSlideshow({
+  images,
+  fallbackImage,
+  title,
+}: {
+  images?: string[];
+  fallbackImage?: string;
+  title: string;
+}) {
+  const validImages =
+    Array.isArray(images) && images.length > 0
+      ? images.filter(Boolean)
+      : fallbackImage
+        ? [fallbackImage]
+        : [];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % validImages.length);
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [validImages.length]);
+
+  if (validImages.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[220px] flex items-center justify-center bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3]">
+        <span className="text-black text-sm font-medium">{title}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full min-h-[220px] md:min-h-[260px] overflow-hidden bg-gray-100">
+      {validImages.map((src, idx) => (
+        <motion.div
+          key={src + "-" + idx}
+          initial={false}
+          animate={{
+            opacity: idx === currentIndex ? 1 : 0,
+          }}
+          transition={{
+            opacity: { duration: 0.5, ease: "easeInOut" },
+          }}
+          className="absolute inset-0 w-full h-full"
+          style={{ zIndex: idx === currentIndex ? 2 : 1 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={`${title} - ${idx + 1}`}
+            className="w-full h-full object-cover select-none group-hover:scale-108 transition-transform duration-700 ease-out"
+          />
+        </motion.div>
+      ))}
+
+      {/* Modern subtle slide indicator if 2+ images */}
+      {validImages.length > 1 && (
+        <div className="absolute bottom-3.5 right-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 pointer-events-none shadow-sm">
+          {validImages.map((_, dotIdx) => (
+            <div
+              key={dotIdx}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                dotIdx === currentIndex
+                  ? "w-4 bg-[#c5a666]"
+                  : "w-1.5 bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function MilestoneDotItem({
@@ -235,7 +318,7 @@ function MilestoneDotItem({
   const dotOpacity = useTransform(progress, [threshold - 0.06, threshold], [0, 1], { clamp: true });
 
   return (
-    <div className="absolute left-6 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
+    <div className="absolute left-4 sm:left-6 md:left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
       <motion.div
         style={{ scale: dotScale, opacity: dotOpacity }}
         className="relative flex items-center justify-center"
@@ -267,6 +350,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
   const MILESTONES = milestones && milestones.length > 0 ? milestones : DEFAULT_MILESTONES;
 
   const heroBgImage = overview?.heroImage || settings.aboutHeroImage || "";
+  const heroBgImageMobile = overview?.heroImageMobile || settings.aboutHeroImageMobile || heroBgImage;
   const teamImage = overview?.teamImage || settings.aboutImageTeam || "";
   const timelineRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -278,37 +362,37 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
 
   return (
     <div className="min-h-screen bg-white selection:bg-[#111] selection:text-white">
-      {/* ── Hero (3D Wireframe to Photoreal Render Laser Scan Reveal) ────────── */}
-      <section className="relative h-[calc(100vh-var(--header-h,76px))] min-h-[600px] max-h-[1200px] bg-[#0c0b0a] overflow-hidden flex flex-col justify-end items-center pb-16 sm:pb-20 pt-24 select-none">
-        
+      {/* ── Hero (Solution 4: Art Direction — Desktop Landscape & Mobile Portrait) ────────── */}
+      <section className="relative w-full h-[calc(100vh-var(--header-h,76px))] min-h-[560px] sm:min-h-[600px] max-h-[1200px] bg-[#0c0b0a] overflow-hidden flex flex-col justify-end items-center pb-14 sm:pb-20 select-none">
+
         {/* ── 1. Under-Layer: 3D Technical Wireframe / Blueprint Mesh ── */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* Subtle architectural 3D coordinate grid */}
           <div
             className="absolute inset-0 opacity-25"
             style={{
               backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.2) 1px, transparent 1px)`,
-              backgroundSize: "44px 44px",
+              backgroundSize: "36px 36px",
             }}
           />
-          {/* Wireframe Contour Image overlay */}
           {heroBgImage && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={heroBgImage}
-              alt="3D Mesh"
-              className="w-full h-full object-cover opacity-20 filter grayscale invert contrast-200"
-            />
+            <div className="hidden sm:block absolute inset-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroBgImage}
+                alt="3D Mesh"
+                className="relative z-1 w-full h-full object-cover object-center opacity-20 filter grayscale invert contrast-200"
+              />
+            </div>
           )}
           {/* Subtle 3D Depth Vignette */}
           <div className="absolute inset-0 bg-radial from-transparent via-[#0c0b0a]/70 to-[#0c0b0a]" />
 
-          {/* Technical HUD Overlay Indicators (fade out gently after scan finishes) */}
+          {/* Technical HUD Overlay Indicators (Desktop) */}
           <motion.div
             initial={{ opacity: 0.9 }}
             animate={{ opacity: 0 }}
             transition={{ duration: 1.2, delay: 2.8 }}
-            className="absolute inset-0 p-6 sm:p-10 flex flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
+            className="hidden sm:flex absolute inset-0 p-6 sm:p-10 flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
           >
             <div className="flex justify-between items-center">
               <span className="flex items-center gap-2">
@@ -324,40 +408,55 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           </motion.div>
         </div>
 
-        {/* ── 2. Top-Layer: Photorealistic Architectural Render (Revealed via Laser Scan) ── */}
+        {/* ── 2. Top-Layer: Photorealistic Architectural Render with Auto-Panoramic Pan on Mobile ── */}
         {heroBgImage ? (
           <motion.div
             initial={{ clipPath: "inset(0 100% 0 0)" }}
             animate={{ clipPath: "inset(0 0% 0 0)" }}
             transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            className="absolute inset-0 z-1 overflow-hidden pointer-events-none"
+            className="absolute inset-0 z-1 overflow-hidden pointer-events-none flex items-center justify-start sm:justify-center"
           >
+            {/* Cinematic Auto-Pan Panoramic Render */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <motion.img
-              initial={{ scale: 1.08 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ scale: 1.04 }}
+              animate={{
+                scale: 1,
+                x: ["0%", "-42%", "0%"],
+              }}
+              transition={{
+                scale: { duration: 3.5, ease: [0.16, 1, 0.3, 1] },
+                x: { duration: 22, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" },
+              }}
               src={heroBgImage}
               alt="i8 STUDIO About Us"
-              className="w-full h-full object-cover"
+              className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center sm:!transform-none"
               onError={(e) => {
                 const t = e.currentTarget;
                 t.style.display = "none";
               }}
             />
-            {/* Gradient shadow overlay for crisp readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" />
+
+            {/* Gradient overlays for crisp readability */}
+            <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/95 via-black/45 to-black/35" />
+            <div className="absolute inset-0 z-2 bg-gradient-to-b from-black/40 via-transparent to-transparent pointer-events-none" />
           </motion.div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-[#111] via-[#161616] to-[#111]" />
         )}
 
-        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep ── */}
+        {/* ── Panoramic Scan Indicator Badge on Mobile ── */}
+        <div className="sm:hidden absolute top-6 right-5 z-20 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-[#c5a666]/35 text-[9.5px] font-mono text-[#c5a666] tracking-wider uppercase flex items-center gap-1.5 shadow-md">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a666] animate-pulse" />
+          <span>⟷ PANORAMIC SCAN</span>
+        </div>
+
+        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep (Desktop) ── */}
         <motion.div
           initial={{ left: "-5%", opacity: 0 }}
           animate={{ left: "105%", opacity: [0, 1, 1, 0] }}
           transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none flex items-center justify-center"
+          className="hidden sm:flex absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none items-center justify-center"
         >
           {/* Intense vertical laser beam core */}
           <div className="w-[2.5px] h-full bg-gradient-to-b from-transparent via-[#fff5d0] to-transparent shadow-[0_0_25px_8px_rgba(224,185,110,0.85)]" />
@@ -366,37 +465,39 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
         </motion.div>
 
         {/* ── 4. Floating Hero Typography ── */}
-        <div className="relative z-30 max-w-4xl mx-auto px-6 text-center">
+        <div className="relative z-30 max-w-4xl mx-auto px-5 sm:px-6 text-center pb-3 sm:pb-0 mb-2 sm:mb-0">
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-[14px] sm:text-[16px] md:text-[17px] uppercase tracking-[0.28em] text-[#c5a666] mb-3 font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="text-xs sm:text-[16px] md:text-[17px] uppercase tracking-[0.28em] text-[#c5a666] mb-2 sm:mb-3 font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
           >
             {isJa ? "私たちについて" : "ABOUT US"}
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-normal text-white leading-tight mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] md:whitespace-nowrap"
+            transition={{ delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-normal text-white leading-tight mb-3 sm:mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)] md:whitespace-nowrap"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {isJa
               ? (settings.aboutHeroTitleJa || "建築の夢を、鮮明な現実へと視覚化する")
               : (settings.aboutHeroTitleEn || "Visualizing Architectural Dreams into Vivid Reality")}
           </motion.h1>
+
+          {/* Description (Visible on both mobile & desktop) */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0, duration: 0.8 }}
-            className="text-white/90 text-sm sm:text-base md:text-[17px] max-w-5xl mx-auto leading-relaxed font-normal drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] mb-4 space-y-1.5"
+            transition={{ delay: 0.8, duration: 0.8 }}
+            className="text-white text-[13.5px] sm:text-base md:text-[17px] max-w-5xl mx-auto leading-relaxed font-normal drop-shadow-[0_2px_14px_rgba(0,0,0,1)] space-y-1.5 sm:space-y-1"
           >
             {(() => {
               const raw = isJa
                 ? (settings.aboutHeroDescJa || "2019年にベトナム・ダナンで設立。\n日本の建築・不動産市場に特化した高品質CGパートナーとして、80名のクリエイターが在籍。")
                 : (settings.aboutHeroDescEn || "Founded in 2019 in Da Nang, Vietnam.\nA high-quality CG partner specializing in the Japanese architecture and real estate market, with 80 creators.");
-              
+
               const formatted = isJa
                 ? raw.replace(/。\s*(?!$)/g, "。\n")
                 : raw.replace(/\.\s+(?=[A-Z])/g, ".\n");
@@ -415,7 +516,7 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4 }}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
+          className="hidden sm:block absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none"
         >
           <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
             <motion.div
@@ -510,15 +611,14 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
         </motion.div>
       </section>
 
-      {/* ── Timeline (Milestones with Staggered Scroll Motion) ─────── */}
-      <section className="bg-[#fafaf8] section-noise overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-28">
+      {/* ── Timeline (Milestones matching Workflow full-bleed image & floating typography) ─────── */}
+      <section className="w-full py-20 md:py-32 bg-[#fafaf8] section-noise overflow-hidden relative">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-16 md:mb-28">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7 }}
-            className="text-center mb-16"
           >
             <p className="text-[17px] sm:text-[18px] uppercase tracking-[0.22em] text-[#b8935a] font-bold mb-3">
               {isJa ? "歩みと沿革" : "OUR JOURNEY"}
@@ -527,139 +627,134 @@ export default function CompanyOverviewContent({ settings, milestones, overview 
               {isJa ? "沿革・マイルストーン" : "History & Milestones"}
             </h2>
           </motion.div>
+        </div>
 
-          <div ref={timelineRef} className="relative">
-            {/* Scroll-Linked Dynamic Vertical Timeline Line (Đường chỉ vàng mở rộng chạy theo cuộn chuột) */}
-            <motion.div
-              style={{ height: travelingDotTop }}
-              className="absolute left-6 md:left-1/2 top-0 w-[2px] bg-gradient-to-b from-[#c5a666]/40 via-[#b8935a] to-[#b8935a] -translate-x-1/2 z-10 origin-top pointer-events-none"
-            />
+        <div ref={timelineRef} className="relative w-full">
+          {/* Scroll-Linked Dynamic Vertical Timeline Line in Center Channel */}
+          <motion.div
+            style={{ height: travelingDotTop }}
+            className="hidden md:block absolute left-1/2 top-0 w-[2px] bg-gradient-to-b from-[#c5a666]/40 via-[#b8935a] to-[#b8935a] -translate-x-1/2 z-10 origin-top pointer-events-none"
+          />
 
-            <div className="space-y-16">
-              {MILESTONES.map((ms, i) => {
-                const isEven = i % 2 === 0;
-                return (
+          <div className="space-y-24 md:space-y-36">
+            {MILESTONES.map((ms, i) => {
+              const isEven = i % 2 === 0;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className={`w-full flex flex-col ${
+                    isEven ? "md:flex-row" : "md:flex-row-reverse"
+                  } gap-8 md:gap-0 items-center relative`}
+                >
+                  {/* 1. Image Container: Mobile aligns with text width (px-6 sm:px-10), Desktop is full-bleed */}
                   <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.98, x: isEven ? -30 : 30 }}
+                    whileInView={{ opacity: 1, scale: 1, x: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                    className={`relative flex flex-col md:flex-row items-stretch gap-6 md:gap-0 ${!isEven ? "md:flex-row-reverse" : ""}`}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full md:w-[calc(50%-22px)] px-6 sm:px-10 md:px-0 shrink-0"
                   >
-                    {/* Milestone Central Dot (Ẩn hoàn toàn, chỉ xuất hiện khi đường line và con trỏ cuộn chạm tới) */}
+                    <div
+                      className={`relative w-full h-[220px] sm:h-[280px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shadow-md ${
+                        isEven
+                          ? "rounded-2xl md:rounded-r-3xl md:rounded-l-none"
+                          : "rounded-2xl md:rounded-l-3xl md:rounded-r-none"
+                      }`}
+                    >
+                      <MilestoneImageSlideshow
+                        images={ms.images}
+                        fallbackImage={ms.image}
+                        title={isJa ? (ms.titleJa || ms.yearJa || ms.year || "") : (ms.titleEn || ms.yearEn || ms.year || "")}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* 2. Center Timeline Dot (44px channel, line & dot fully unobstructed) */}
+                  <div className="hidden md:flex w-11 shrink-0 items-center justify-center relative z-20">
                     <MilestoneDotItem
                       progress={smoothProgress}
                       index={i}
                       total={MILESTONES.length}
                     />
+                  </div>
 
-                    {/* Content (Text Card) with Left/Right Entrance Motion */}
-                    <motion.div
-                      initial={{ opacity: 0, x: isEven ? -35 : 35, y: 15 }}
-                      whileInView={{ opacity: 1, x: 0, y: 0 }}
-                      viewport={{ once: true, amount: 0.25 }}
-                      transition={{ duration: 0.75, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                      className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isEven ? "md:pr-4" : "md:pl-4"} flex flex-col`}
+                  {/* 3. Floating Editorial Typography Block (Matching Workflow Image 2) */}
+                  <div
+                    className={`relative w-full md:w-[calc(50%-22px)] flex-1 min-w-0 px-6 sm:px-10 md:px-12 lg:px-16 ${
+                      isEven
+                        ? "md:pl-10 lg:pl-16 md:pr-10 lg:pr-20"
+                        : "md:pr-10 lg:pr-16 md:pl-10 lg:pl-20"
+                    }`}
+                  >
+                    {/* Big Gold Year Header */}
+                    <span className="text-5xl sm:text-6xl md:text-7xl font-bold text-[#b8935a] block mb-2 font-roboto tracking-tight select-none">
+                      {isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}
+                    </span>
+
+                    {/* Step Title */}
+                    <h3
+                      className="text-2xl md:text-3xl font-semibold mb-4 text-[#b8935a]"
+                      style={{
+                        fontFamily: isJa
+                          ? "var(--font-noto-serif), serif"
+                          : "var(--font-cormorant), var(--font-noto-serif), serif",
+                      }}
                     >
-                      <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 shadow-sm hover:shadow-xl hover:border-gray-200 transition-all duration-500 h-full flex flex-col justify-center group">
-                        <span className="text-[16px] sm:text-[18px] md:text-[19px] tracking-[0.06em] text-[#b8935a] font-bold font-roboto">
-                          {isJa ? (ms.yearJa || ms.year) : (ms.yearEn || ms.year)}
-                        </span>
-                        <h3 className="text-[20px] sm:text-[22px] md:text-[24px] font-semibold text-[#111] mt-2 mb-3.5 group-hover:text-[#b8935a] transition-colors leading-snug">
-                          {isJa ? ms.titleJa : ms.titleEn}
-                        </h3>
-                        {(() => {
-                          const rawDesc = (isJa ? ms.descJa : ms.descEn) || "";
-                          let items = rawDesc
-                            .split(/\r?\n/)
+                      {isJa ? ms.titleJa : ms.titleEn}
+                    </h3>
+
+                    {/* Bullet Points */}
+                    {(() => {
+                      const rawDesc = (isJa ? ms.descJa : ms.descEn) || "";
+                      let items = rawDesc
+                        .split(/\r?\n/)
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+
+                      if (items.length <= 1 && rawDesc.length > 40) {
+                        if (isJa && rawDesc.includes("。")) {
+                          items = rawDesc
+                            .split(/(?<=。)/)
                             .map((s) => s.trim())
                             .filter(Boolean);
+                        } else if (!isJa && rawDesc.includes(". ")) {
+                          items = rawDesc
+                            .split(/(?<=\.\s+)/)
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                        }
+                      }
 
-                          if (items.length <= 1 && rawDesc.length > 40) {
-                            if (isJa && rawDesc.includes("。")) {
-                              items = rawDesc
-                                .split(/(?<=。)/)
-                                .map((s) => s.trim())
-                                .filter(Boolean);
-                            } else if (!isJa && rawDesc.includes(". ")) {
-                              items = rawDesc
-                                .split(/(?<=\.\s+)/)
-                                .map((s) => s.trim())
-                                .filter(Boolean);
-                            }
-                          }
+                      if (items.length > 1) {
+                        return (
+                          <ul className="space-y-3 mt-3">
+                            {items.map((item, idx) => {
+                              const cleanItem = item.replace(/^[-•・*]\s*/, "");
+                              return (
+                                <li key={idx} className="flex items-start gap-3 text-[15px] sm:text-[16px] text-neutral-800 font-normal leading-relaxed">
+                                  <span className="text-[#b8935a] font-bold text-base leading-[1.6] select-none shrink-0">•</span>
+                                  <span className="flex-1">{cleanItem}</span>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        );
+                      }
 
-                          if (items.length > 1) {
-                            return (
-                              <ul className="space-y-2.5 mt-1">
-                                {items.map((item, idx) => {
-                                  const cleanItem = item.replace(/^[-•・*]\s*/, "");
-                                  return (
-                                    <li key={idx} className="flex items-start gap-2.5 text-[15px] sm:text-[16px] text-black font-medium leading-relaxed">
-                                      <span className="text-[#b8935a] font-bold text-[15px] leading-[1.6] select-none shrink-0">•</span>
-                                      <span>{cleanItem}</span>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            );
-                          }
-
-                          return (
-                            <p className="text-[15px] sm:text-[16px] text-black font-medium leading-relaxed">
-                              {rawDesc}
-                            </p>
-                          );
-                        })()}
-                      </div>
-                    </motion.div>
-
-                    {/* Spacer for center dot alignment */}
-                    <div className="hidden md:block w-16 shrink-0" />
-
-                    {/* Opposite Side (Image Frame with Zoom Hover) */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, x: isEven ? 30 : -30 }}
-                      whileInView={{ opacity: 1, scale: 1, x: 0 }}
-                      viewport={{ once: true, amount: 0.3 }}
-                      transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                      className={`w-full ml-14 md:ml-0 md:w-[calc(50%-2rem)] ${isEven ? "md:pl-4" : "md:pr-4"} flex flex-col`}
-                    >
-                      <div className="w-full h-full min-h-[200px] md:min-h-[240px] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 border border-gray-100 shadow-sm relative group cursor-pointer">
-                        {ms.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={ms.image}
-                            alt={isJa ? ms.titleJa : ms.titleEn}
-                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                            onError={(e) => {
-                              const t = e.currentTarget;
-                              t.style.display = "none";
-                              const p = t.parentElement;
-                              if (p) {
-                                p.classList.add("flex", "items-center", "justify-center");
-                                const s = document.createElement("span");
-                                s.className = "text-black text-sm font-medium";
-                                s.textContent = isJa ? (ms.yearJa || ms.year || "") : (ms.yearEn || ms.year || "");
-                                p.appendChild(s);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full min-h-[200px] flex items-center justify-center bg-gradient-to-br from-[#f5f5f3] via-[#eeeeeb] to-[#f5f5f3]">
-                            <span className="text-black text-sm font-medium">
-                              {isJa ? (ms.yearJa || ms.year || "i8 STUDIO") : (ms.yearEn || ms.year || "i8 STUDIO")}
-                            </span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                      return (
+                        <p className="text-[15px] sm:text-[16px] text-neutral-800 font-normal leading-relaxed">
+                          {rawDesc}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

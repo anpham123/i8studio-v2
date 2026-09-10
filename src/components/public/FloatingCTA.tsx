@@ -43,32 +43,32 @@ export default function FloatingCTA() {
 
       {/* Mobile: sticky bottom bar */}
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`lg:hidden fixed inset-x-0 bottom-0 z-40 w-full max-w-full transition-all duration-300 pointer-events-auto ${
           hidden ? "translate-y-full" : "translate-y-0"
         }`}
       >
-        <div className="bg-[#0d0d14]/95 backdrop-blur-md border-t border-white/10 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <div className="grid grid-cols-3 gap-2">
+        <div className="w-full bg-[#0d0d14]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-4 pt-2.5 pb-[calc(0.6rem+env(safe-area-inset-bottom))] box-border">
+          <div className="grid grid-cols-3 gap-2 w-full max-w-lg mx-auto">
             <a
               href="tel:0914049090"
-              className="flex flex-col items-center gap-1 py-1.5 rounded-lg bg-white/5 text-white/70 hover:text-white transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 text-white/70 hover:text-white transition-colors text-center select-none active:scale-95"
             >
-              <Phone size={16} />
-              <span className="text-xs">Call</span>
+              <Phone size={15} />
+              <span className="text-[11px] sm:text-xs">Call</span>
             </a>
             <a
               href="mailto:info@i8studio.vn"
-              className="flex flex-col items-center gap-1 py-1.5 rounded-lg bg-white/5 text-white/70 hover:text-white transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 text-white/70 hover:text-white transition-colors text-center select-none active:scale-95"
             >
-              <Mail size={16} />
-              <span className="text-xs">Email</span>
+              <Mail size={15} />
+              <span className="text-[11px] sm:text-xs">Email</span>
             </a>
             <Link
               href={`/${locale}/contact`}
-              className="flex flex-col items-center gap-1 py-1.5 rounded-lg bg-white text-black hover:bg-white/90 transition-colors"
+              className="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-white text-black hover:bg-white/90 transition-colors text-center select-none active:scale-95 shadow-sm"
             >
-              <MessageSquare size={16} />
-              <span className="text-xs font-semibold">{t("getQuote")}</span>
+              <MessageSquare size={15} />
+              <span className="text-[11px] sm:text-xs font-semibold truncate max-w-full px-0.5">{t("getQuote")}</span>
             </Link>
           </div>
         </div>

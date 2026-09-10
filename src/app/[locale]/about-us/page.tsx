@@ -38,6 +38,7 @@ export default async function AboutPage() {
     descJa: string;
     descEn: string;
     image?: string;
+    images?: string[];
   }> = [];
   if (milestonesRow?.contentJson) {
     try {

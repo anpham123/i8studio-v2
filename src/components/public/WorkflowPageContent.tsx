@@ -87,8 +87,8 @@ function StepImageSlideshow({
     Array.isArray(images) && images.length > 0
       ? images.filter(Boolean)
       : fallbackImage
-      ? [fallbackImage]
-      : [];
+        ? [fallbackImage]
+        : [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -140,11 +140,10 @@ function StepImageSlideshow({
           {validImages.map((_, dotIdx) => (
             <div
               key={dotIdx}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                dotIdx === currentIndex
+              className={`h-1.5 rounded-full transition-all duration-300 ${dotIdx === currentIndex
                   ? "w-4 bg-[#c5a666]"
                   : "w-1.5 bg-white/40"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -206,35 +205,37 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* ── Hero: 3D Wireframe to Photoreal Laser Scan Reveal with WORKFLOW Split Typography ── */}
-      <section className="border-b border-gray-200/80 overflow-hidden relative w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[960px] flex items-start justify-center bg-[#0c0b0a] select-none">
+      {/* ── Hero: 3D Wireframe to Photoreal Laser Scan Reveal with WORKFLOW Split Typography (Solution 3) ── */}
+      <section className="border-b border-gray-200/80 overflow-hidden relative w-full h-[calc(100vh-var(--header-h,76px))] min-h-[580px] sm:min-h-[600px] max-h-[960px] flex items-start justify-center bg-[#0c0b0a] select-none">
 
         {/* ── 1. Under-Layer: 3D Technical Wireframe / Blueprint Mesh ── */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          {/* Subtle architectural 3D coordinate grid */}
           <div
             className="absolute inset-0 opacity-25"
             style={{
               backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.2) 1px, transparent 1px)`,
-              backgroundSize: "44px 44px",
+              backgroundSize: "36px 36px",
             }}
           />
-          {/* Wireframe Contour Image overlay */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={heroImage || "/uploads/1787802610927-upscalemedia-transformed.webp"}
-            alt="3D Wireframe Mesh"
-            className="w-full h-full object-cover object-center opacity-20 filter grayscale invert contrast-200"
-          />
+          {heroImage && (
+            <div className="hidden sm:block absolute inset-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage || "/uploads/1787802610927-upscalemedia-transformed.webp"}
+                alt="3D Wireframe Mesh"
+                className="relative z-1 w-full h-full object-cover object-center opacity-20 filter grayscale invert contrast-200"
+              />
+            </div>
+          )}
           {/* Subtle 3D Depth Vignette */}
           <div className="absolute inset-0 bg-radial from-transparent via-[#0c0b0a]/70 to-[#0c0b0a]" />
 
-          {/* Technical HUD Overlay Indicators */}
+          {/* Technical HUD Overlay Indicators (Desktop) */}
           <motion.div
             initial={{ opacity: 0.9 }}
             animate={{ opacity: 0 }}
             transition={{ duration: 1.2, delay: 2.8 }}
-            className="absolute inset-0 p-6 sm:p-10 flex flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
+            className="hidden sm:flex absolute inset-0 p-6 sm:p-10 flex-col justify-between pointer-events-none font-mono text-[10px] sm:text-xs text-[#c5a666]/70 uppercase tracking-widest z-10"
           >
             <div className="flex justify-between items-center">
               <span className="flex items-center gap-2">
@@ -250,63 +251,78 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
           </motion.div>
         </div>
 
-        {/* ── 2. Top-Layer: Photorealistic Architectural Render (Revealed via Laser Scan) ── */}
+        {/* ── 2. Top-Layer: Photorealistic Architectural Render with Auto-Panoramic Pan on Mobile ── */}
         <motion.div
           initial={{ clipPath: "inset(0 100% 0 0)" }}
           animate={{ clipPath: "inset(0 0% 0 0)" }}
           transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="absolute inset-0 z-1 overflow-hidden pointer-events-none"
+          className="absolute inset-0 z-1 overflow-hidden pointer-events-none flex items-center justify-start sm:justify-center"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <motion.img
-            initial={{ scale: 1.06 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ scale: 1.04 }}
+            animate={{
+              scale: 1,
+              x: ["0%", "-42%", "0%"],
+            }}
+            transition={{
+              scale: { duration: 3.5, ease: [0.16, 1, 0.3, 1] },
+              x: { duration: 22, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" },
+            }}
             src={heroImage || "/uploads/1787802610927-upscalemedia-transformed.webp"}
             alt="Architectural Visualization Workflow — i8 STUDIO"
-            className="w-full h-full object-cover object-center"
+            className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center sm:!transform-none"
           />
+
+          {/* Gradients */}
+          <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/80 via-transparent to-black/50" />
         </motion.div>
 
-        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep ── */}
-        <motion.div
-          initial={{ left: "-5%", opacity: 0 }}
-          animate={{ left: "105%", opacity: [0, 1, 1, 0] }}
-          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none flex items-center justify-center"
-        >
-          {/* Intense vertical laser beam core */}
-          <div className="w-[2.5px] h-full bg-gradient-to-b from-transparent via-[#fff5d0] to-transparent shadow-[0_0_25px_8px_rgba(224,185,110,0.85)]" />
-          {/* Trailing soft gold light wash */}
-          <div className="absolute inset-y-0 -left-10 w-20 bg-gradient-to-r from-transparent via-[#c5a666]/30 to-transparent blur-md" />
-        </motion.div>
+        {/* ── Panoramic Scan Indicator Badge on Mobile ── */}
+        <div className="sm:hidden absolute top-6 right-5 z-20 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-[#c5a666]/35 text-[9.5px] font-mono text-[#c5a666] tracking-wider uppercase flex items-center gap-1.5 shadow-md">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a666] animate-pulse" />
+          <span>⟷ PANORAMIC SCAN</span>
+        </div>
 
-        {/* ── 4. Oversized Semi-Transparent "WORKFLOW" Typography Split at Day/Night Divider ── */}
+        {/* ── Oversized "WORKFLOW" Typography Split at Day/Night Divider ── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.6 }}
-          className="absolute inset-0 z-30 pointer-events-none flex items-start pt-8 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-7 w-full"
+          className="absolute inset-0 z-30 pointer-events-none flex items-start pt-[18vh] sm:pt-12 md:pt-16 lg:pt-20 xl:pt-7 w-full"
         >
           {/* Left 50% (Bright Side): WORK */}
           <div className="w-1/2 flex justify-end pr-2 sm:pr-3 lg:pr-4">
             <h1
               style={{ fontSize: "clamp(3.2rem, 14vw, 12rem)" }}
-              className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/60 sm:text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-right"
+              className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-right"
             >
               WORK
             </h1>
           </div>
 
           {/* Right 50% (Dark Side): FLOW */}
-          <div className="w-1/2 flex justify-start pl-5 sm:pl-8 md:pl-10 lg:pl-12">
+          <div className="w-1/2 flex justify-start pl-4 sm:pl-8 md:pl-10 lg:pl-12">
             <div
               style={{ fontSize: "clamp(3.2rem, 14vw, 12rem)" }}
-              className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/60 sm:text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-left"
+              className="font-black tracking-[-0.04em] uppercase leading-none select-none font-sans text-white/65 drop-shadow-[0_4px_30px_rgba(0,0,0,0.35)] text-left"
             >
               FLOW
             </div>
           </div>
+        </motion.div>
+
+        {/* ── 3. Glowing Golden Laser Scan Beam & Flare Sweep (Desktop) ── */}
+        <motion.div
+          initial={{ left: "-5%", opacity: 0 }}
+          animate={{ left: "105%", opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          className="hidden sm:flex absolute inset-y-0 w-12 -translate-x-1/2 z-20 pointer-events-none items-center justify-center"
+        >
+          {/* Intense vertical laser beam core */}
+          <div className="w-[2.5px] h-full bg-gradient-to-b from-transparent via-[#fff5d0] to-transparent shadow-[0_0_25px_8px_rgba(224,185,110,0.85)]" />
+          {/* Trailing soft gold light wash */}
+          <div className="absolute inset-y-0 -left-10 w-20 bg-gradient-to-r from-transparent via-[#c5a666]/30 to-transparent blur-md" />
         </motion.div>
       </section>
 
@@ -328,18 +344,16 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: false, margin: "-40px 0px -40px 0px", amount: 0.2 }}
-              className={`w-full flex flex-col ${
-                reverse ? "md:flex-row-reverse" : "md:flex-row"
-              } gap-8 md:gap-12 lg:gap-16 items-center px-4 sm:px-6 md:px-0`}
+              className={`w-full flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"
+                } gap-8 md:gap-12 lg:gap-16 items-center px-4 sm:px-6 md:px-0`}
             >
               {/* Image with Smooth Fade + Slide & 3s Auto-transition (Full-bleed 1 bên) */}
               <motion.div
                 variants={imageVariants}
-                className={`relative w-full md:w-1/2 h-[340px] sm:h-[420px] md:h-[460px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-md border border-gray-200/60 ${
-                  reverse
+                className={`relative w-full md:w-1/2 h-[340px] sm:h-[420px] md:h-[460px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 shrink-0 shadow-md border border-gray-200/60 ${reverse
                     ? "md:rounded-l-3xl md:rounded-r-none rounded-2xl"
                     : "md:rounded-r-3xl md:rounded-l-none rounded-2xl"
-                }`}
+                  }`}
               >
                 <StepImageSlideshow
                   images={step.images}
@@ -350,11 +364,10 @@ export default function WorkflowPageContent({ steps, heroImage }: Props) {
 
               {/* Text Block with Gold Number and Color-Sweep Text */}
               <div
-                className={`relative w-full md:w-1/2 flex-1 min-w-0 px-4 sm:px-6 md:px-8 ${
-                  reverse
+                className={`relative w-full md:w-1/2 flex-1 min-w-0 px-4 sm:px-6 md:px-8 ${reverse
                     ? "md:pl-12 lg:pl-20 md:pr-8 lg:pr-16"
                     : "md:pr-12 lg:pr-20 md:pl-8 lg:pl-16"
-                }`}
+                  }`}
               >
                 {/* Step Number in Gold / Yellow */}
                 <span className="text-5xl md:text-7xl font-bold text-[#b8935a] block mb-2 font-roboto tracking-tight select-none">

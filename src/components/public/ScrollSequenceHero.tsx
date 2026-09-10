@@ -87,13 +87,22 @@ export default function ScrollSequenceHero({
   const [useFallback, setUseFallback] = useState(false);
   const lastDrawnFrameRef = useRef<number>(-1);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   // Scroll progress through container
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Immediate 1:1 responsive interpolation (zero inertia coasting, stops instantly when mouse stops)
+  // Immediate 1:1 responsive interpolation (zero inertia coasting)
   const smoothProgress = useSpring(scrollYProgress, {
     damping: 45,
     stiffness: 400,
@@ -102,6 +111,7 @@ export default function ScrollSequenceHero({
   });
 
   const [activeFramesCount, setActiveFramesCount] = useState(totalFrames);
+  const [currentFrameDisplay, setCurrentFrameDisplay] = useState(1);
 
   // Sync with meta.json from admin upload
   useEffect(() => {
@@ -115,7 +125,7 @@ export default function ScrollSequenceHero({
       .catch(() => { });
   }, []);
 
-  // Render frame on Canvas
+  // Render frame on Canvas (Exact 16:9 Fit on Mobile without cropping, Cover on Desktop)
   const renderFrame = useCallback(
     (frameIndex: number) => {
       const canvas = canvasRef.current;
@@ -124,10 +134,8 @@ export default function ScrollSequenceHero({
       if (!ctx) return;
 
       const idx = Math.min(Math.max(1, Math.round(frameIndex)), activeFramesCount) - 1;
-      if (idx === lastDrawnFrameRef.current) return;
 
       let img = imagesRef.current[idx];
-      // Fallback to nearest loaded frame if current frame is still downloading
       if (!img || !img.complete || img.naturalWidth === 0) {
         for (let i = idx - 1; i >= 0; i--) {
           if (imagesRef.current[i]?.complete && imagesRef.current[i]?.naturalWidth > 0) {
@@ -140,36 +148,29 @@ export default function ScrollSequenceHero({
       if (!img || !img.complete || img.naturalWidth === 0) return;
 
       lastDrawnFrameRef.current = idx;
+      setCurrentFrameDisplay(idx + 1);
 
       const w = canvas.width;
       const h = canvas.height;
-      const imgW = img.naturalWidth;
-      const imgH = img.naturalHeight;
-
-      // Cover calculation
-      const canvasRatio = w / h;
-      const imgRatio = imgW / imgH;
-
-      let renderW: number;
-      let renderH: number;
-      let offsetX: number;
-      let offsetY: number;
-
-      if (canvasRatio > imgRatio) {
-        renderW = w;
-        renderH = w / imgRatio;
-        offsetX = 0;
-        offsetY = (h - renderH) / 2;
-      } else {
-        renderH = h;
-        renderW = h * imgRatio;
-        offsetX = (w - renderW) / 2;
-        offsetY = 0;
-      }
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
+
+      const isMobileView = window.innerWidth < 640;
+      if (isMobileView) {
+        // Exact fit: 100% full image view on 16:9 canvas
+        ctx.drawImage(img, 0, 0, w, h);
+      } else {
+        // Desktop Cover mode
+        const imgW = img.naturalWidth || 1920;
+        const imgH = img.naturalHeight || 1080;
+        const scale = Math.max(w / imgW, h / imgH);
+        const drawW = imgW * scale;
+        const drawH = imgH * scale;
+        const drawX = (w - drawW) / 2;
+        const drawY = (h - drawH) / 2;
+        ctx.drawImage(img, drawX, drawY, drawW, drawH);
+      }
     },
     [activeFramesCount]
   );
@@ -220,8 +221,10 @@ export default function ScrollSequenceHero({
       const canvas = canvasRef.current;
       if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const isMobileView = window.innerWidth < 640;
       canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      // Exact 16:9 height on mobile (0 black gap above/below), fullscreen on desktop
+      canvas.height = (isMobileView ? (window.innerWidth / (16 / 9)) : window.innerHeight) * dpr;
       lastDrawnFrameRef.current = -1;
       renderFrame(Math.min(6, activeFramesCount));
     };
@@ -231,19 +234,44 @@ export default function ScrollSequenceHero({
     return () => window.removeEventListener("resize", handleResize);
   }, [renderFrame, activeFramesCount]);
 
+  // Touch Drag scrub on mobile
+  const touchStartXRef = useRef<number>(0);
+  const touchStartFrameRef = useRef<number>(6);
+  const isTouchingRef = useRef<boolean>(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartFrameRef.current = lastDrawnFrameRef.current > 0 ? lastDrawnFrameRef.current + 1 : 6;
+    isTouchingRef.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isTouchingRef.current) return;
+    const deltaX = e.touches[0].clientX - touchStartXRef.current;
+    const startFrame = Math.min(6, activeFramesCount);
+    const endFrame = Math.max(startFrame, activeFramesCount - 6);
+    const frameDelta = -Math.round((deltaX / window.innerWidth) * (endFrame - startFrame) * 1.5);
+    const targetFrame = Math.min(endFrame, Math.max(startFrame, touchStartFrameRef.current + frameDelta));
+    renderFrame(targetFrame);
+  };
+
+  const handleTouchEnd = () => {
+    isTouchingRef.current = false;
+  };
+
   // On-demand rendering when smooth scroll updates
   useEffect(() => {
     if (useFallback) return;
 
-    // Skip black fade-in at the beginning (first 5 frames) and fade-out at the end (last 6 frames)
     const startFrame = Math.min(6, activeFramesCount);
     const endFrame = Math.max(startFrame, activeFramesCount - 6);
 
     let rafId: number | null = null;
-    const unsubscribe = smoothProgress.on("change", (latest) => {
+
+    const unsubscribe = smoothProgress.on("change", (latest: number) => {
+      if (isTouchingRef.current) return;
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        // Map 0% -> 100% scroll progress directly from first illuminated frame to last illuminated frame
         const clampedProgress = Math.min(1, Math.max(0, latest));
         const targetFrame = Math.min(
           endFrame,
@@ -263,7 +291,7 @@ export default function ScrollSequenceHero({
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (!useFallback) return;
-    const unsubscribe = smoothProgress.on("change", (progress) => {
+    const unsubscribe = smoothProgress.on("change", (progress: number) => {
       const video = videoRef.current;
       if (video && video.duration) {
         const clampedProgress = Math.min(1, Math.max(0, progress / 0.88));
@@ -272,28 +300,51 @@ export default function ScrollSequenceHero({
         video.currentTime = startTime + clampedProgress * (endTime - startTime);
       }
     });
+
     return () => unsubscribe();
   }, [smoothProgress, useFallback]);
 
-  // Text overlay opacities for distinct story beats across the full house tour
-  const story1Opacity = useTransform(smoothProgress, [0, 0.10, 0.18], [1, 1, 0]);
-  const story1Y = useTransform(smoothProgress, [0, 0.18], [0, -30]);
+  // Track active beat for mobile and desktop transitions
+  const [currentBeat, setCurrentBeat] = useState(1);
+  useEffect(() => {
+    const unsubscribe = smoothProgress.on("change", (latest) => {
+      if (latest < 0.25) {
+        setCurrentBeat(1);
+      } else if (latest < 0.55) {
+        setCurrentBeat(2);
+      } else if (latest < 0.85) {
+        setCurrentBeat(3);
+      } else {
+        setCurrentBeat(4);
+      }
+    });
+    return () => unsubscribe();
+  }, [smoothProgress]);
 
-  const story2Opacity = useTransform(smoothProgress, [0.22, 0.32, 0.45, 0.54], [0, 1, 1, 0]);
-  const story2Y = useTransform(smoothProgress, [0.22, 0.32, 0.54], [30, 0, -30]);
+  // Desktop Story Beat opacities
+  const story1Opacity = useTransform(smoothProgress, [0, 0.03, 0.18, 0.25], [1, 1, 1, 0]);
+  const story1Y = useTransform(smoothProgress, [0, 0.03, 0.18, 0.25], [0, 0, 0, -20]);
 
-  const story3Opacity = useTransform(smoothProgress, [0.58, 0.68, 0.78, 0.86], [0, 1, 1, 0]);
-  const story3Y = useTransform(smoothProgress, [0.58, 0.68, 0.86], [30, 0, -30]);
+  const story2Opacity = useTransform(smoothProgress, [0.26, 0.32, 0.52, 0.6], [0, 1, 1, 0]);
+  const story2Y = useTransform(smoothProgress, [0.26, 0.32, 0.52, 0.6], [25, 0, 0, -25]);
 
-  const story4Opacity = useTransform(smoothProgress, [0.88, 0.94, 1], [0, 1, 1]);
-  const story4Y = useTransform(smoothProgress, [0.88, 1], [30, 0]);
+  const story3Opacity = useTransform(smoothProgress, [0.61, 0.68, 0.82, 0.88], [0, 1, 1, 0]);
+  const story3Y = useTransform(smoothProgress, [0.61, 0.68, 0.82, 0.88], [25, 0, 0, -25]);
+
+  const story4Opacity = useTransform(smoothProgress, [0.89, 0.94, 1], [0, 1, 1]);
+  const story4Y = useTransform(smoothProgress, [0.89, 0.94, 1], [25, 0, 0]);
 
   const progressPercent = Math.min(100, Math.round((loadedCount / Math.max(1, totalFrames)) * 100));
 
   return (
-    <div ref={containerRef} className="relative h-[600vh] bg-[#0a0a0a]">
-      {/* Sticky Fullscreen Frame */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+    <div ref={containerRef} className="relative w-full h-[300vh] sm:h-[600vh] bg-transparent sm:bg-[#0c0b0a]">
+      {/* Viewport Frame — Sticky 16:9 on Mobile, Sticky Fullscreen on Desktop */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="sticky top-[var(--header-h,76px)] sm:top-0 w-full aspect-[16/9] sm:aspect-auto sm:h-screen overflow-hidden flex items-center justify-center bg-black shadow-sm z-20"
+      >
         {/* Loading Indicator */}
         <AnimatePresence>
           {!isReady && !useFallback && (
@@ -301,13 +352,13 @@ export default function ScrollSequenceHero({
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6 }}
-              className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center gap-4 text-white"
+              className="absolute inset-0 z-50 bg-[#111] flex flex-col items-center justify-center gap-4 text-white"
             >
-              <div className="w-12 h-12 rounded-full border border-white/20 border-t-[#c5a666] animate-spin" />
-              <p className="text-xs uppercase tracking-[0.3em] text-white/70 font-roboto">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 border-t-[#c5a666] animate-spin" />
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/70 font-roboto">
                 Loading 3D Experience · {progressPercent}%
               </p>
-              <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="w-36 sm:w-48 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-[#c5a666] to-[#e6ca85] transition-all duration-200"
                   style={{ width: `${progressPercent}%` }}
@@ -317,120 +368,213 @@ export default function ScrollSequenceHero({
           )}
         </AnimatePresence>
 
-        {/* 1. Canvas (Image Sequence Mode) */}
+        {/* 1. Canvas (Image Sequence Mode — Exact 16:9 on mobile, Fullscreen on Desktop) */}
         {!useFallback && (
           <canvas
             ref={canvasRef}
-            className="w-full h-full object-cover select-none pointer-events-none"
+            className="w-full h-full object-cover select-none z-10 touch-none"
           />
         )}
 
-        {/* 2. Fallback Video Element (Scrubbing Mode) */}
+        {/* 2. Fallback Video Element */}
         {useFallback && (
-          <video
-            ref={videoRef}
-            src={fallbackVideo}
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-cover select-none pointer-events-none"
-          />
+          <div className="relative z-10 w-full h-full overflow-hidden flex items-center justify-center">
+            <video
+              ref={videoRef}
+              src={fallbackVideo}
+              muted
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover select-none pointer-events-none"
+            />
+          </div>
         )}
 
-        {/* ── Story Beat 1: Intro (0% - 25%) ── */}
+        {/* ── Mobile Overlay Banner (Matches Image 1 Exactly with 01 / 04 indicator) ── */}
+        <div className="sm:hidden absolute inset-0 z-20 flex flex-col justify-end p-4 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none">
+          <AnimatePresence mode="wait">
+            {currentBeat === 1 && (
+              <motion.div
+                key="mbeat1"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
+                  {introEyebrow}
+                </span>
+                <h1
+                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
+                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                >
+                  {introTitle}
+                </h1>
+                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
+                  {introDesc}
+                </p>
+              </motion.div>
+            )}
+            {currentBeat === 2 && (
+              <motion.div
+                key="mbeat2"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
+                  {beat1Tag}
+                </span>
+                <h2
+                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
+                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                >
+                  {beat1Title}
+                </h2>
+                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
+                  {beat1Desc}
+                </p>
+              </motion.div>
+            )}
+            {currentBeat === 3 && (
+              <motion.div
+                key="mbeat3"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
+                  {beat2Tag}
+                </span>
+                <h2
+                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
+                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                >
+                  {beat2Title}
+                </h2>
+                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
+                  {beat2Desc}
+                </p>
+              </motion.div>
+            )}
+            {currentBeat === 4 && (
+              <motion.div
+                key="mbeat4"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.2 }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
+                  {beat3Tag}
+                </span>
+                <h2
+                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
+                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                >
+                  {beat3Title}
+                </h2>
+                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
+                  {beat3Desc}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div className="pointer-events-auto mt-1 flex items-center justify-between">
+            <Link
+              href={beat3CtaLink}
+              className="inline-block px-4 py-1.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-[11px] font-bold uppercase tracking-wider rounded-full shadow-lg"
+            >
+              {beat3Cta}
+            </Link>
+            <div className="text-[11px] text-white/80 font-mono tracking-widest drop-shadow font-semibold">
+              0{currentBeat} / 04
+            </div>
+          </div>
+        </div>
+
+        {/* ── Desktop Story Beat 1: Intro ── */}
         <motion.div
           style={{ opacity: story1Opacity, y: story1Y }}
-          className="absolute inset-x-0 bottom-0 pb-8 sm:pb-12 md:pb-14 flex flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
+          className="hidden sm:flex absolute inset-x-0 bottom-0 pb-12 md:pb-14 flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
         >
-          <div className="flex flex-col items-center max-w-4xl mb-4 sm:mb-5">
-            <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
+          <div className="flex flex-col items-center max-w-4xl mb-5">
+            <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
               {introEyebrow}
             </span>
             <h1
-              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 whitespace-nowrap"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance]"
               style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
             >
               {introTitle}
             </h1>
-            <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
+            <p className="text-white/85 text-sm md:text-base max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
               {introDesc}
             </p>
           </div>
-
-          {/* Scroll Cue */}
-          <div className="flex flex-col items-center gap-1.5 mt-1">
-            <span className="text-[10px] uppercase tracking-[0.25em] text-white/50 whitespace-nowrap">
-              {isJa ? "スクロールして探索" : "Scroll to explore"}
-            </span>
-            <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="w-1 h-1.5 rounded-full bg-[#c5a666]"
-              />
-            </div>
-          </div>
         </motion.div>
 
-        {/* ── Story Beat 2: Living & Light (30% - 60%) ── */}
+        {/* ── Desktop Story Beat 2: Living & Light ── */}
         <motion.div
           style={{ opacity: story2Opacity, y: story2Y }}
-          className="absolute bottom-8 sm:bottom-12 md:bottom-14 left-6 sm:left-10 md:left-14 flex flex-col items-start pointer-events-none z-20"
+          className="hidden sm:flex absolute bottom-12 md:bottom-14 left-10 md:left-14 flex-col items-start pointer-events-none z-20"
         >
-          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
+          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             {beat1Tag}
           </span>
           <h2
-            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance]"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat1Title}
           </h2>
-          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-xl">
+          <p className="text-white/90 text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-md lg:max-w-xl">
             {beat1Desc}
           </p>
         </motion.div>
 
-        {/* ── Story Beat 3: Private Sanctuary (65% - 88%) ── */}
+        {/* ── Desktop Story Beat 3: Private Sanctuary ── */}
         <motion.div
           style={{ opacity: story3Opacity, y: story3Y }}
-          className="absolute bottom-24 sm:bottom-28 md:bottom-32 right-6 sm:right-10 md:right-14 flex flex-col items-end text-right pointer-events-none z-20"
+          className="hidden sm:flex absolute bottom-28 md:bottom-32 right-10 md:right-14 flex-col items-end text-right pointer-events-none z-20"
         >
-          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
+          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             {beat2Tag}
           </span>
           <h2
-            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] whitespace-nowrap"
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance]"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat2Title}
           </h2>
-          <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-sm sm:max-w-md lg:max-w-xl">
+          <p className="text-white/90 text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-md lg:max-w-xl">
             {beat2Desc}
           </p>
         </motion.div>
 
-        {/* ── Story Beat 4: Rooftop & CTA (92% - 100%) ── */}
+        {/* ── Desktop Story Beat 4: Rooftop & CTA ── */}
         <motion.div
           style={{ opacity: story4Opacity, y: story4Y }}
-          className="absolute inset-x-0 bottom-0 pb-14 sm:pb-20 flex flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
+          className="hidden sm:flex absolute inset-x-0 bottom-0 pb-20 flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
         >
-          <span className="text-xs sm:text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] whitespace-nowrap">
+          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             {beat3Tag}
           </span>
           <h2
-            className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 whitespace-nowrap"
+            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance]"
             style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
             {beat3Title}
           </h2>
-          <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl mb-6 font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
+          <p className="text-white/85 text-sm md:text-base max-w-xl mb-6 font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
             {beat3Desc}
           </p>
           <div className="flex items-center justify-center pointer-events-auto">
             <Link
               href={beat3CtaLink}
-              className="px-8 py-3.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-xs sm:text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
+              className="px-8 py-3.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
             >
               {beat3Cta}
             </Link>

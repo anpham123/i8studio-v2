@@ -13,7 +13,7 @@ export default function PortfolioHeroBanner({ heroImage, isJa, locale }: Props) 
   return (
     <section className="bg-white border-b border-gray-100 overflow-hidden select-none">
       <div className="w-full min-h-[calc(100vh-var(--header-h,76px))] max-h-[950px] grid grid-cols-1 lg:grid-cols-2 items-stretch">
-        
+
         {/* Left Column: White Editorial Layout */}
         <div className="bg-white p-8 sm:p-12 md:p-14 lg:p-16 xl:p-20 flex flex-col justify-between items-start z-10">
           {/* Top Eyebrow */}
@@ -83,8 +83,8 @@ export default function PortfolioHeroBanner({ heroImage, isJa, locale }: Props) 
         </div>
 
         {/* Right Column: 3D Wireframe to Photoreal Laser Scan Reveal */}
-        <div className="relative w-full h-[420px] sm:h-[520px] lg:h-auto min-h-full overflow-hidden bg-[#0c0b0a] group">
-          
+        <div className="relative w-full h-[380px] sm:h-[520px] lg:h-auto min-h-full overflow-hidden bg-[#0c0b0a] group">
+
           {/* ── 1. Under-Layer: 3D Technical Wireframe / Blueprint Mesh ── */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div
@@ -95,12 +95,21 @@ export default function PortfolioHeroBanner({ heroImage, isJa, locale }: Props) 
               }}
             />
             {heroImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={heroImage}
-                alt="3D Wireframe"
-                className="w-full h-full object-cover opacity-20 filter grayscale invert contrast-200"
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={heroImage}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-115 opacity-15 filter grayscale invert contrast-200 sm:hidden"
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={heroImage}
+                  alt="3D Wireframe"
+                  className="relative z-1 w-full h-full object-contain sm:object-cover opacity-20 filter grayscale invert contrast-200"
+                />
+              </>
             )}
             <div className="absolute inset-0 bg-radial from-transparent via-[#0c0b0a]/70 to-[#0c0b0a]" />
 
@@ -131,18 +140,28 @@ export default function PortfolioHeroBanner({ heroImage, isJa, locale }: Props) 
               initial={{ clipPath: "inset(0 100% 0 0)" }}
               animate={{ clipPath: "inset(0 0% 0 0)" }}
               transition={{ duration: 2.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-              className="absolute inset-0 z-1 overflow-hidden pointer-events-none"
+              className="absolute inset-0 z-1 overflow-hidden pointer-events-none flex items-center justify-center"
             >
+              {/* Ambient Blur Backdrop on Mobile */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125 opacity-55 sm:hidden"
+              />
+              <div className="absolute inset-0 bg-black/45 sm:hidden" />
+
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <motion.img
-                initial={{ scale: 1.08 }}
+                initial={{ scale: 1.05 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 3.5, ease: [0.16, 1, 0.3, 1] }}
                 src={heroImage}
                 alt="Architectural Visualization Portfolio — i8 STUDIO"
-                className="w-full h-full object-cover object-[75%_35%] sm:object-[76%_32%] lg:object-[78%_30%] group-hover:scale-105 transition-transform duration-1000 ease-out"
+                className="relative z-1 w-full h-full object-contain sm:object-cover object-center sm:object-[76%_32%] lg:object-[78%_30%] group-hover:scale-105 transition-transform duration-1000 ease-out drop-shadow-[0_10px_35px_rgba(0,0,0,0.85)]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
             </motion.div>
           )}
 

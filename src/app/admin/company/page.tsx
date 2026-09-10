@@ -13,7 +13,17 @@ const tabs = [
   { key: "workflow", label: "Workflow" },
 ] as const;
 
-interface Milestone { year?: string; yearJa: string; yearEn: string; titleJa: string; titleEn: string; descJa: string; descEn: string; image?: string; }
+interface Milestone {
+  year?: string;
+  yearJa: string;
+  yearEn: string;
+  titleJa: string;
+  titleEn: string;
+  descJa: string;
+  descEn: string;
+  image?: string;
+  images?: string[];
+}
 interface WorkflowStep {
   stepNumber: number;
   titleJa: string;
@@ -55,7 +65,15 @@ export default function CompanyContentPage() {
       try {
         const content = JSON.parse(sec.contentJson || "{}");
         if (sec.section === "overview") setOverview((o) => ({ ...o, ...content }));
-        if (sec.section === "milestones") setMilestones(Array.isArray(content) ? content : []);
+        if (sec.section === "milestones") {
+          const rawMilestones = Array.isArray(content) ? content : [];
+          setMilestones(
+            rawMilestones.map((m: any) => ({
+              ...m,
+              images: Array.isArray(m.images) && m.images.length > 0 ? m.images : m.image ? [m.image] : [],
+            }))
+          );
+        }
         if (sec.section === "workflow") {
           if (Array.isArray(content)) {
             setWorkflow(
@@ -96,7 +114,14 @@ export default function CompanyContentPage() {
 
   const handleSave = () => {
     if (activeTab === "overview") saveSection("overview", overview);
-    if (activeTab === "milestones") saveSection("milestones", milestones);
+    if (activeTab === "milestones") {
+      const formatted = milestones.map((m) => ({
+        ...m,
+        image: m.images && m.images.length > 0 ? m.images[0] : m.image || "",
+        images: m.images && m.images.length > 0 ? m.images : m.image ? [m.image] : [],
+      }));
+      saveSection("milestones", formatted);
+    }
     if (activeTab === "workflow") {
       saveSection("workflow", {
         heroImage: workflowHeroImage,
@@ -148,7 +173,7 @@ export default function CompanyContentPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Ảnh tập thể Đội ngũ (Team Section)</label>
-                  <p className="text-xs text-gray-500 mb-2">Ảnh hiển thị tại mục giới thiệu Team / Nhân sự.</p>
+                  <p className="text-xs text-gray-500 mb-2">Ảnh tập thể 80 thành viên i8 Studio.</p>
                   <ImageUpload
                     value={overview.teamImage || ""}
                     onChange={(url) => setOverview((o) => ({ ...o, teamImage: url }))}
@@ -157,24 +182,67 @@ export default function CompanyContentPage() {
               </div>
             </div>
 
+            {/* Stats */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Giới thiệu</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (JA)</label>
-                <RichEditor value={overview.introJa} onChange={(v) => setOverview((o) => ({ ...o, introJa: v }))} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Intro (EN)</label>
-                <RichEditor value={overview.introEn} onChange={(v) => setOverview((o) => ({ ...o, introEn: v }))} />
+              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Số liệu thống kê (Stats Bar)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Số nhân sự (VD: 80)</label>
+                  <input
+                    value={overview.staffCount || ""}
+                    onChange={(e) => setOverview((o) => ({ ...o, staffCount: e.target.value }))}
+                    placeholder="80"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Số năm KN (VD: 6)</label>
+                  <input
+                    value={overview.yearsExperience || ""}
+                    onChange={(e) => setOverview((o) => ({ ...o, yearsExperience: e.target.value }))}
+                    placeholder="6"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Khách hàng (VD: 200)</label>
+                  <input
+                    value={overview.clientCount || ""}
+                    onChange={(e) => setOverview((o) => ({ ...o, clientCount: e.target.value }))}
+                    placeholder="200"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Dự án hoàn thành (VD: 3000)</label>
+                  <input
+                    value={overview.projectCount || ""}
+                    onChange={(e) => setOverview((o) => ({ ...o, projectCount: e.target.value }))}
+                    placeholder="3000"
+                    className={inputCls}
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Philosophy / Message */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
-              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Số liệu thống kê</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Nhân sự</label><input type="number" value={overview.staffCount} onChange={(e) => setOverview((o) => ({ ...o, staffCount: e.target.value }))} className={inputCls} /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Năm kinh nghiệm</label><input type="number" value={overview.yearsExperience} onChange={(e) => setOverview((o) => ({ ...o, yearsExperience: e.target.value }))} className={inputCls} /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Khách hàng</label><input type="number" value={overview.clientCount} onChange={(e) => setOverview((o) => ({ ...o, clientCount: e.target.value }))} className={inputCls} /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1.5">Dự án</label><input type="number" value={overview.projectCount} onChange={(e) => setOverview((o) => ({ ...o, projectCount: e.target.value }))} className={inputCls} /></div>
+              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Lời ngỏ / Triết lý công ty (Intro Text)</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">🇯🇵 Tiếng Nhật (JP)</label>
+                  <RichEditor
+                    value={overview.introJa || ""}
+                    onChange={(val) => setOverview((o) => ({ ...o, introJa: val }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">🇬🇧 Tiếng Anh (EN)</label>
+                  <RichEditor
+                    value={overview.introEn || ""}
+                    onChange={(val) => setOverview((o) => ({ ...o, introEn: val }))}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -186,7 +254,7 @@ export default function CompanyContentPage() {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Milestones ({milestones.length})</h3>
-                <button onClick={() => setMilestones((m) => [...m, { yearJa: "", yearEn: "", titleJa: "", titleEn: "", descJa: "", descEn: "", image: "" }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm</button>
+                <button onClick={() => setMilestones((m) => [...m, { yearJa: "", yearEn: "", titleJa: "", titleEn: "", descJa: "", descEn: "", image: "", images: [] }])} className="flex items-center gap-1 text-blue-600 text-xs font-medium hover:text-blue-700"><Plus size={14} /> Thêm</button>
               </div>
               {milestones.map((ms, i) => (
                 <div key={i} className="bg-gray-50 rounded-lg p-4 space-y-3 relative">
@@ -220,17 +288,115 @@ export default function CompanyContentPage() {
                       <textarea value={ms.descEn} onChange={(e) => { const n = [...milestones]; n[i] = { ...n[i], descEn: e.target.value }; setMilestones(n); }} placeholder="Description in English..." rows={2} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-gray-500 mb-1">🖼️ Ảnh minh hoạ mốc lịch sử</label>
-                    <ImageUpload
-                      label="Tải ảnh mốc lịch sử"
-                      value={ms.image || ""}
-                      onChange={(url) => {
-                        const n = [...milestones];
-                        n[i] = { ...n[i], image: url };
-                        setMilestones(n);
-                      }}
-                    />
+
+                  {/* Multi-image section for Milestone (with 2s Auto Slideshow) */}
+                  <div className="bg-white p-4 rounded-xl border border-gray-200/90 shadow-2xs space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide">
+                          🖼️ Thư viện ảnh mốc này ({ms.images?.length || (ms.image ? 1 : 0)} ảnh)
+                        </label>
+                        <p className="text-[11px] text-gray-500 mt-0.5">
+                          Tải lên 2-3 ảnh để chạy hiệu ứng tự động đổi ảnh mỗi 2s trên trang Our Journey
+                        </p>
+                      </div>
+                      <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">
+                        ⏱️ Tự động chuyển ảnh 2s
+                      </span>
+                    </div>
+
+                    {/* Existing images list */}
+                    {ms.images && ms.images.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
+                        {ms.images.map((imgUrl, imgIdx) => (
+                          <div
+                            key={imgIdx}
+                            className="relative bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex flex-col shadow-xs"
+                          >
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-3 py-1.5 bg-gray-100/80 border-b border-gray-200">
+                              <span className="text-[11px] font-bold text-gray-700">
+                                Ảnh {imgIdx + 1} {imgIdx === 0 && <span className="text-blue-600 font-normal">(Ảnh chính)</span>}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const n = [...milestones];
+                                  const curImgs = n[i].images || [];
+                                  const updatedImgs = curImgs.filter((_, idx) => idx !== imgIdx);
+                                  n[i] = {
+                                    ...n[i],
+                                    images: updatedImgs,
+                                    image: updatedImgs[0] || "",
+                                  };
+                                  setMilestones(n);
+                                }}
+                                className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                title="Xóa ảnh này"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+
+                            {/* Thumbnail Preview */}
+                            <div className="relative aspect-[4/3] bg-black/5 overflow-hidden flex items-center justify-center p-1">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={imgUrl}
+                                alt=""
+                                className="w-full h-full object-contain rounded"
+                              />
+                            </div>
+
+                            {/* Change Photo Button */}
+                            <div className="p-2 border-t border-gray-100 bg-white">
+                              <ImageUpload
+                                label="🔄 Đổi ảnh này"
+                                value=""
+                                onChange={(newUrl) => {
+                                  if (!newUrl) return;
+                                  const n = [...milestones];
+                                  const curImgs = [...(n[i].images || [])];
+                                  curImgs[imgIdx] = newUrl;
+                                  n[i] = {
+                                    ...n[i],
+                                    images: curImgs,
+                                    image: curImgs[0] || "",
+                                  };
+                                  setMilestones(n);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add new photo if fewer than 5 images */}
+                    {(ms.images?.length || 0) < 5 && (
+                      <div className="pt-2">
+                        <ImageUpload
+                          label={
+                            (ms.images?.length || 0) === 0
+                              ? "Tải lên ảnh mốc lịch sử (Ảnh 1)"
+                              : `+ Thêm ảnh khác cho mốc ${i + 1} (Ảnh ${(ms.images?.length || 0) + 1})`
+                          }
+                          value=""
+                          onChange={(newUrl) => {
+                            if (!newUrl) return;
+                            const n = [...milestones];
+                            const curImgs = n[i].images ? [...n[i].images!] : n[i].image ? [n[i].image!] : [];
+                            const updatedImgs = [...curImgs, newUrl];
+                            n[i] = {
+                              ...n[i],
+                              images: updatedImgs,
+                              image: updatedImgs[0] || "",
+                            };
+                            setMilestones(n);
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
