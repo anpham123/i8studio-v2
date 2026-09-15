@@ -128,7 +128,7 @@ export default function BlogHero({
       </div>
 
       {/* Title section BELOW image */}
-      <div className="bg-[var(--surface)] pt-8 sm:pt-14 pb-4 sm:pb-6 border-b border-gray-100">
+      <div className="bg-[var(--surface)] pt-8 sm:pt-14 pb-2 sm:pb-3">
         <div className="w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-0">
           {/* Title - Supports <br> from admin */}
           <h1

@@ -22,11 +22,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const body = await req.json();
     const data = BlogPostSchema.partial().parse(body);
+    const { coverOrientation: _cov, ...prismaData } = data;
     const post = await prisma.blogPost.update({
       where: { id: params.id },
       data: {
-        ...data,
-        publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
+        ...prismaData,
+        publishedAt: prismaData.publishedAt ? new Date(prismaData.publishedAt) : undefined,
       },
     });
 

@@ -24,7 +24,7 @@ export default function BlogAdditionalGallery({
 
   if (!images || images.length === 0) return null;
 
-  const normalizedItems = images
+  const normalizedItems = (images || [])
     .map((item, i) => {
       const src = typeof item === "string" ? item : item?.image || "";
       const cap = typeof item === "string" ? captions?.[i] || "" : item?.caption || "";
@@ -34,28 +34,26 @@ export default function BlogAdditionalGallery({
 
   if (normalizedItems.length === 0) return null;
 
-  const titleFallback = sectionTitle ? sectionTitle.replace(/<[^>]*>/g, "") : "Visual";
+  const titleFallback = sectionTitle ? sectionTitle.replace(/<[^>]*>/g, "") : "Image";
 
   return (
     <>
       <div className="mt-8 pt-4">
-        {/* Bento / Masonry Grid 3 Columns (ArchDaily / Dezeen Style) */}
+        {/* Lưới 3 Cột linh hoạt: Ảnh dọc tự kéo dài theo chiều cao thật, ảnh ngang tự xếp khít */}
         <div
           className={
             normalizedItems.length === 1
               ? "max-w-2xl mx-auto"
-              : normalizedItems.length === 2
-              ? "grid grid-cols-1 sm:grid-cols-2 gap-5 items-start"
               : "columns-1 sm:columns-2 lg:columns-3 gap-5 [column-fill:_balance]"
           }
         >
           {normalizedItems.map((item) => (
             <figure
               key={item.idx}
-              className="break-inside-avoid mb-5 bg-white border border-gray-200/90 shadow-xs hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer overflow-hidden rounded-none"
+              className="break-inside-avoid mb-5 bg-white border border-gray-200/90 shadow-2xs hover:shadow-md transition-all duration-300 group flex flex-col cursor-pointer overflow-hidden rounded-none"
               onClick={() => setSelectedImage({ src: item.src, caption: item.cap })}
             >
-              {/* Image Container with Natural Full Aspect Ratio */}
+              {/* Image Container: Chiều cao tự nhiên (h-auto), hiển thị FULL 100% ảnh cả dọc lẫn ngang */}
               <div className="relative w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

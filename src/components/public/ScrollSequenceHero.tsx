@@ -111,7 +111,12 @@ export default function ScrollSequenceHero({
   });
 
   const [activeFramesCount, setActiveFramesCount] = useState(totalFrames);
+  const activeFramesCountRef = useRef(activeFramesCount);
   const [currentFrameDisplay, setCurrentFrameDisplay] = useState(1);
+
+  useEffect(() => {
+    activeFramesCountRef.current = activeFramesCount;
+  }, [activeFramesCount]);
 
   // Sync with meta.json from admin upload
   useEffect(() => {
@@ -133,7 +138,8 @@ export default function ScrollSequenceHero({
       const ctx = canvas.getContext("2d", { alpha: false });
       if (!ctx) return;
 
-      const idx = Math.min(Math.max(1, Math.round(frameIndex)), activeFramesCount) - 1;
+      const total = activeFramesCountRef.current || 240;
+      const idx = Math.min(Math.max(1, Math.round(frameIndex)), total) - 1;
 
       let img = imagesRef.current[idx];
       if (!img || !img.complete || img.naturalWidth === 0) {
@@ -172,7 +178,7 @@ export default function ScrollSequenceHero({
         ctx.drawImage(img, drawX, drawY, drawW, drawH);
       }
     },
-    [activeFramesCount]
+    []
   );
 
   // Preload all frames cleanly once
@@ -191,8 +197,9 @@ export default function ScrollSequenceHero({
         if (count >= Math.min(10, activeFramesCount)) {
           setIsReady(true);
         }
-        if (i === 6 || (i === 1 && !imagesRef.current[5])) {
-          renderFrame(Math.min(6, activeFramesCount));
+        // Only render initial frame if user hasn't scrolled yet
+        if (lastDrawnFrameRef.current === -1 && i === 1) {
+          renderFrame(1);
         }
       };
       img.onerror = () => {
@@ -208,7 +215,6 @@ export default function ScrollSequenceHero({
     }
 
     imagesRef.current = loadedImages;
-    setIsReady(true);
 
     return () => {
       isMounted = false;
@@ -225,14 +231,17 @@ export default function ScrollSequenceHero({
       canvas.width = window.innerWidth * dpr;
       // Exact 16:9 height on mobile (0 black gap above/below), fullscreen on desktop
       canvas.height = (isMobileView ? (window.innerWidth / (16 / 9)) : window.innerHeight) * dpr;
-      lastDrawnFrameRef.current = -1;
-      renderFrame(Math.min(6, activeFramesCount));
+      
+      const current = lastDrawnFrameRef.current >= 0 
+        ? lastDrawnFrameRef.current + 1 
+        : 1;
+      renderFrame(current);
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [renderFrame, activeFramesCount]);
+  }, [renderFrame]);
 
   // Touch Drag scrub on mobile
   const touchStartXRef = useRef<number>(0);

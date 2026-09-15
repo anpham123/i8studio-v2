@@ -523,9 +523,9 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
 
                       return (
                         <div key={imgIdx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                          <div className="relative w-24 h-16 rounded overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                          <div className="relative w-24 h-16 rounded overflow-hidden bg-gray-100 shrink-0 border border-gray-200 flex items-center justify-center">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={imgSrc} alt="" className="w-full h-full object-cover" />
+                            <img src={imgSrc} alt="" className="max-w-full max-h-full object-contain" />
                           </div>
 
                           <div className="flex-1">

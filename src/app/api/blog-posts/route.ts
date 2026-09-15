@@ -41,9 +41,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body.slug && body.title) body.slug = slugify(body.title);
     const data = BlogPostSchema.parse(body);
+    const { coverOrientation: _cov, ...prismaData } = data;
     const post = await prisma.blogPost.create({
       data: {
-        ...data,
+        ...prismaData,
         publishedAt: data.publishedAt ? new Date(data.publishedAt) : new Date(),
       },
     });

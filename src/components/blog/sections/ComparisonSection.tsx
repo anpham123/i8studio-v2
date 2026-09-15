@@ -1,5 +1,6 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
+import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
 import type { SectionData } from "./CheckcamSection";
 
 export default function ComparisonSection({
@@ -82,7 +83,7 @@ export default function ComparisonSection({
           />
         )}
 
-        {/* Comparison Images Grid */}
+        {/* Comparison Images Grid (Full view for both portrait and landscape) */}
         {hasImages && (
           <div>
             {!data && (
@@ -92,11 +93,11 @@ export default function ComparisonSection({
                 </h3>
               </div>
             )}
-            <div className={`grid ${before && after && before !== after ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-[800px]"} gap-6`}>
+            <div className={`grid ${before && after && before !== after ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 max-w-[800px]"} gap-6 items-start`}>
               {before && (
-                <div className="relative">
+                <div className="relative bg-white border border-gray-200/90 overflow-hidden rounded-none shadow-xs flex flex-col items-center justify-center">
                   {before !== after && (
-                    <span className="absolute top-3 left-3 bg-black/60 text-white text-[10px] uppercase tracking-wider px-3 py-1 rounded-none z-10">
+                    <span className="absolute top-3 left-3 bg-black/75 backdrop-blur-xs text-white text-[10.5px] uppercase tracking-wider px-3 py-1 rounded-none z-10 font-bold">
                       Before
                     </span>
                   )}
@@ -105,18 +106,18 @@ export default function ComparisonSection({
                     <img
                       src={before}
                       alt="Before"
-                      className="w-full aspect-[4/3] object-cover rounded-none shadow-xs"
+                      className="w-full h-auto object-contain block rounded-none"
                     />
                   ) : (
-                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
+                    <div className="w-full aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
                       <p className="text-[var(--ink-light)] text-sm leading-relaxed">{before}</p>
                     </div>
                   )}
                 </div>
               )}
               {after && before !== after && (
-                <div className="relative">
-                  <span className="absolute top-3 left-3 bg-[var(--accent)] text-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-none z-10">
+                <div className="relative bg-white border border-gray-200/90 overflow-hidden rounded-none shadow-xs flex flex-col items-center justify-center">
+                  <span className="absolute top-3 left-3 bg-[#b8935a] text-white text-[10.5px] uppercase tracking-wider px-3 py-1 rounded-none z-10 font-bold">
                     After
                   </span>
                   {after.startsWith("/") || after.startsWith("http") ? (
@@ -124,10 +125,10 @@ export default function ComparisonSection({
                     <img
                       src={after}
                       alt="After"
-                      className="w-full aspect-[4/3] object-cover rounded-none shadow-xs"
+                      className="w-full h-auto object-contain block rounded-none"
                     />
                   ) : (
-                    <div className="aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
+                    <div className="w-full aspect-[4/3] bg-[var(--surface-warm)] rounded-none flex items-center justify-center p-8">
                       <p className="text-[var(--ink-light)] text-sm leading-relaxed">{after}</p>
                     </div>
                   )}
@@ -137,36 +138,12 @@ export default function ComparisonSection({
           </div>
         )}
 
-        {/* Additional images */}
-        {remainingImages && remainingImages.length > 0 && (
-          <div className="mt-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-              {remainingImages.map((item, i) => {
-                const imgSrc = typeof item === "string" ? item : item.image;
-                const imgCap = typeof item === "string" ? (remainingCaptions?.[i] || "") : (item.caption || "");
-
-                return (
-                  <div key={i} className="flex flex-col bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
-                    <div className="h-[180px] sm:h-[200px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-1.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imgSrc}
-                        alt={imgCap || `${data?.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="w-full h-full object-cover rounded-none hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
-                      />
-                    </div>
-                    {imgCap && (
-                      <p
-                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Additional images (Bento / Masonry with Full-View) */}
+        <BlogAdditionalGallery
+          images={remainingImages}
+          captions={remainingCaptions}
+          sectionTitle={data?.title}
+        />
       </div>
     </section>
   );

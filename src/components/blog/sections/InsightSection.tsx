@@ -1,5 +1,6 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 import { getEmbedUrl } from "@/lib/embed";
+import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
 import type { SectionData } from "./CheckcamSection";
 
 export default function InsightSection({ data }: { data: SectionData }) {
@@ -73,35 +74,11 @@ export default function InsightSection({ data }: { data: SectionData }) {
         )}
 
         {/* Additional images */}
-        {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="mt-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-              {data.additionalImages.map((item, i) => {
-                const imgSrc = typeof item === "string" ? item : item.image;
-                const imgCap = typeof item === "string" ? (data.additionalImageCaptions?.[i] || "") : (item.caption || "");
-
-                return (
-                  <div key={i} className="flex flex-col bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
-                    <div className="h-[180px] sm:h-[200px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-1.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imgSrc}
-                        alt={imgCap || `${data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="w-full h-full object-cover rounded-none hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
-                      />
-                    </div>
-                    {imgCap && (
-                      <p
-                        className="text-[12px] sm:text-[13px] text-[var(--ink-muted)] italic p-2 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto font-serif"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <BlogAdditionalGallery
+          images={data.additionalImages}
+          captions={data.additionalImageCaptions}
+          sectionTitle={data.title}
+        />
       </div>
     </section>
   );

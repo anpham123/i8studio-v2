@@ -678,13 +678,15 @@ mark,
   word-break: break-word;
 }
 
-/* Bullet list (Danh sách gạch đầu dòng / chấm tròn) */
+/* Bullet list (Danh sách gạch đầu dòng / chấm tròn - căn thẳng hàng với mép trái văn bản) */
 .ProseMirror ul,
 .tiptap ul,
 .blog-content ul,
-.prose ul {
+.prose ul,
+article ul {
   list-style-type: disc !important;
-  padding-left: 1.625rem !important;
+  padding-left: 1.15rem !important;
+  margin-left: 0 !important;
   margin-top: 0.75rem !important;
   margin-bottom: 0.75rem !important;
 }
@@ -693,9 +695,11 @@ mark,
 .ProseMirror ol,
 .tiptap ol,
 .blog-content ol,
-.prose ol {
+.prose ol,
+article ol {
   list-style-type: decimal !important;
-  padding-left: 1.625rem !important;
+  padding-left: 1.25rem !important;
+  margin-left: 0 !important;
   margin-top: 0.75rem !important;
   margin-bottom: 0.75rem !important;
 }

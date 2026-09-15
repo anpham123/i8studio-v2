@@ -1,6 +1,7 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
 import { getEmbedUrl } from "@/lib/embed";
+import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
 import type { SectionData } from "./CheckcamSection";
 
 function renderFormattedBody(paragraphs: string[]) {
@@ -73,7 +74,7 @@ function renderFormattedBody(paragraphs: string[]) {
     return (
       <div
         key={pIdx}
-        className="text-[#222] text-[15.5px] sm:text-[16.5px] leading-[1.95] mb-4"
+        className="blog-content text-[#222] text-[15.5px] sm:text-[16.5px] leading-[1.95] mb-4"
         dangerouslySetInnerHTML={{ __html: sanitizeHtml(raw) }}
       />
     );
@@ -229,37 +230,12 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
           </div>
         )}
 
-        {/* 5. Additional Images Gallery (no border-radius) */}
-        {data.additionalImages && data.additionalImages.length > 0 && (
-          <div className="mt-8 pt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 items-stretch">
-              {data.additionalImages.map((item, i) => {
-                const imgSrc = typeof item === "string" ? item : item.image;
-                const imgCap = typeof item === "string" ? (data.additionalImageCaptions?.[i] || "") : (item.caption || "");
-
-                return (
-                  <div key={i} className="flex flex-col bg-white rounded-none border border-gray-200/80 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
-                    <div className="h-[200px] sm:h-[220px] w-full bg-[#f8fafc] overflow-hidden flex items-center justify-center p-1.5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imgSrc}
-                        alt={imgCap || `${data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} - ${i + 1}`}
-                        className="w-full h-full object-cover rounded-none hover:scale-105 transition-transform duration-300 block drop-shadow-xs"
-                      />
-                    </div>
-                    {imgCap && (
-                      <p
-                        className="text-[12px] text-gray-500 italic p-2 text-center leading-relaxed border-t border-gray-100 bg-white mt-auto font-serif"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(imgCap) }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
+        {/* 5. Additional Images Gallery */}
+        <BlogAdditionalGallery
+          images={data.additionalImages}
+          captions={data.additionalImageCaptions}
+          sectionTitle={data.title}
+        />
       </div>
     </section>
   );
