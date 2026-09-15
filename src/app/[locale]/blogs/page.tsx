@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const revalidate = 60;
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, collectionPageJsonLd } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
 
@@ -16,11 +16,21 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const topPost = await prisma.blogPost.findFirst({
+    where: { isPublished: true, locale: params.locale },
+    orderBy: { publishedAt: "desc" },
+    select: { coverImage: true },
+  }).catch(() => null);
+
+  const img = topPost?.coverImage || "/og-default.jpg";
+
   return buildMetadata({
     title: "Blog — Articles & Insights",
     description: "Insights, case studies, and behind-the-scenes from i8 STUDIO's architectural visualization work.",
     path: "/blogs",
     locale: params.locale,
+    image: img,
+    images: [img, "/og-default.jpg"],
   });
 }
 
@@ -45,6 +55,18 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const featured = !activeCategory ? posts.find((p) => p.isFeatured) : undefined;
   const rest = posts.filter((p) => p.id !== featured?.id);
 
+  const collectionLd = collectionPageJsonLd({
+    title: "Blog — Articles & Insights | i8 STUDIO",
+    description: "Insights, case studies, and behind-the-scenes from i8 STUDIO's architectural visualization work.",
+    url: `https://i8studio.vn/${locale}/blogs`,
+    items: posts.map((p) => ({
+      title: p.title,
+      url: `https://i8studio.vn/${locale}/blogs/${p.slug}`,
+      image: p.coverImage || undefined,
+      description: p.excerpt || undefined,
+    })),
+  });
+
   const heroEyebrow = activeCategory ? "BLOG" : "i8 STUDIO";
   const heroTitle = activeCategory
     ? (isJa ? (catDef?.nameJa || "ブログ") : (catDef?.nameEn || "Blog"))
@@ -57,6 +79,10 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
+      />
       {/* Hero header */}
       <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 text-center">
         <div className="max-w-[900px] mx-auto px-6">

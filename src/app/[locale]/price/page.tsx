@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 // force-dynamic: locale-dependent page, cannot be ISR cached across locales
 export const dynamic = "force-dynamic";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 import PricePageContent from "@/components/public/PricePageContent";
 import { prisma } from "@/lib/prisma";
 
@@ -11,12 +11,21 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const topPriceItem = await prisma.priceItem.findFirst({
+    where: { cardImage: { not: "" } },
+    select: { cardImage: true },
+  }).catch(() => null);
+
+  const img = topPriceItem?.cardImage || "/og-default.jpg";
+
   return buildMetadata({
     title: "Price — Service Pricing",
     description:
       "View our pricing for architectural visualization, 3DCG, VR, and animation services. Flexible plans for every project scale.",
     path: "/price",
     locale: params.locale,
+    image: img,
+    images: [img, "/og-default.jpg"],
   });
 }
 
@@ -45,5 +54,23 @@ export default async function PricePage({ params }: { params: { locale: string }
     order: item.order,
   }));
 
-  return <PricePageContent locale={locale} dbItems={items} dbServices={dbServices} />;
+  const cardImages = items.map((it) => it.cardImage).filter(Boolean);
+
+  const pageLd = webPageJsonLd({
+    title: "Price — Service Pricing | i8 STUDIO",
+    description:
+      "View our pricing for architectural visualization, 3DCG, VR, and animation services. Flexible plans for every project scale.",
+    url: "https://i8studio.vn/price",
+    images: cardImages.length > 0 ? cardImages : ["/og-default.jpg"],
+  });
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageLd) }}
+      />
+      <PricePageContent locale={locale} dbItems={items} dbServices={dbServices} />
+    </>
+  );
 }

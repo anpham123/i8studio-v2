@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 // ISR: regenerate every 60 seconds
 export const revalidate = 60;
 import { prisma } from "@/lib/prisma";
-import { buildMetadata, faqPageJsonLd } from "@/lib/seo";
+import { buildMetadata, faqPageJsonLd, webPageJsonLd } from "@/lib/seo";
 import ContactSection from "@/components/public/ContactSection";
 import QASection from "@/components/public/QASection";
 
@@ -18,6 +18,8 @@ export async function generateMetadata({
       "Get in touch with i8 STUDIO for your 3DCG, Animation, VR & BIM project. Free consultation, NDA available. We respond within 24 hours.",
     path: "/contact",
     locale: params.locale,
+    image: "/og-default.jpg",
+    images: ["/og-default.jpg"],
   });
 }
 
@@ -30,6 +32,14 @@ export default async function ContactPage({ params }: { params: { locale: string
   ]);
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
+  const pageLd = webPageJsonLd({
+    title: "Contact Us & FAQ | i8 STUDIO",
+    description:
+      "Get in touch with i8 STUDIO for your 3DCG, Animation, VR & BIM project. Free consultation, NDA available. We respond within 24 hours.",
+    url: "https://i8studio.vn/contact",
+    images: ["/og-default.jpg"],
+  });
+
   const faqLd = faqPageJsonLd(
     qaItems.map((q) => ({
       question: locale === "ja" ? q.questionJa || q.question : q.question,
@@ -39,6 +49,10 @@ export default async function ContactPage({ params }: { params: { locale: string
 
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageLd) }}
+      />
       {qaItems.length > 0 && (
         <script
           type="application/ld+json"

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 // ISR: regenerate every 60 seconds
 export const revalidate = 60;
 import { prisma } from "@/lib/prisma";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, collectionPageJsonLd } from "@/lib/seo";
 import { getImageAspectRatio } from "@/lib/image-meta";
 import WorksContent from "@/components/public/WorksContent";
 
@@ -12,12 +12,22 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const topWorks = await prisma.work.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    take: 4,
+    select: { image: true },
+  }).catch(() => []);
+
+  const topImages = topWorks.map((w) => w.image).filter(Boolean);
+
   return buildMetadata({
     title: "Works — Portfolio",
     description:
       "Browse our portfolio of architectural visualization, 3DCG, VR, and animation projects for the Japanese market.",
     path: "/works",
     locale: params.locale,
+    image: topImages[0] || "/og-default.jpg",
+    images: topImages.length > 0 ? topImages : ["/og-default.jpg"],
   });
 }
 
@@ -72,8 +82,25 @@ export default async function WorksPage() {
     .map((w) => w.image)
     .filter(Boolean) as string[];
 
+  const collectionJsonLdData = collectionPageJsonLd({
+    title: "Works — Portfolio | i8 STUDIO",
+    description:
+      "Browse our portfolio of architectural visualization, 3DCG, VR, and animation projects for the Japanese market.",
+    url: "https://i8studio.vn/works",
+    items: serializedWorks.map((w) => ({
+      title: w.title || "Architectural 3DCG Work",
+      url: `https://i8studio.vn/works#${w.id}`,
+      image: w.image,
+      description: w.subtitle || w.category,
+    })),
+  });
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLdData) }}
+      />
       {topImageUrls.map((url, i) => (
         <link key={i} rel="preload" as="image" href={url} fetchPriority="high" />
       ))}

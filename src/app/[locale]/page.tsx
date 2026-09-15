@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 // ISR: regenerate every 60 seconds
 export const revalidate = 30;
 
-import { buildMetadata, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { buildMetadata, organizationJsonLd, websiteJsonLd, webPageJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";
 import ScrollSequenceHero from "@/components/public/ScrollSequenceHero";
 
@@ -20,6 +20,7 @@ export async function generateMetadata({
       "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
     path: "",
     locale,
+    image: "/og-default.jpg",
   });
 }
 
@@ -54,6 +55,14 @@ export default async function HomePage() {
     console.error("Error loading home data:", err);
   }
 
+  const pageJsonLd = webPageJsonLd({
+    title: "i8 STUDIO — 3DCG, Animation, VR & BIM",
+    description:
+      "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
+    url: "https://i8studio.vn",
+    images: heroImages.map((img) => img.url).filter(Boolean),
+  });
+
   return (
     <>
       <script
@@ -63,6 +72,10 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageJsonLd) }}
       />
 
       {/* 1. Scroll-driven 3D Walkthrough Hero */}

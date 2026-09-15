@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import CompanyOverviewContent from "@/components/public/CompanyOverviewContent";
 
@@ -10,12 +10,20 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const setting = await prisma.setting.findFirst({
+    where: { key: "aboutHeroImage" },
+  }).catch(() => null);
+
+  const heroImg = setting?.value || "/og-default.jpg";
+
   return buildMetadata({
     title: "About Us — Company Overview",
     description:
       "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
     path: "/about-us",
     locale: params.locale,
+    image: heroImg,
+    images: [heroImg, "/og-default.jpg"],
   });
 }
 
@@ -54,5 +62,24 @@ export default async function AboutPage() {
     } catch { /* ignore */ }
   }
 
-  return <CompanyOverviewContent settings={settingsMap} milestones={milestones} overview={overview} />;
+  const milestoneImages = milestones.map((m) => m.image).filter(Boolean) as string[];
+  const aboutImages = [settingsMap.aboutHeroImage, ...milestoneImages, "/og-default.jpg"].filter(Boolean) as string[];
+
+  const pageLd = webPageJsonLd({
+    title: "About Us — Company Overview | i8 STUDIO",
+    description:
+      "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
+    url: "https://i8studio.vn/about-us",
+    images: aboutImages,
+  });
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageLd) }}
+      />
+      <CompanyOverviewContent settings={settingsMap} milestones={milestones} overview={overview} />
+    </>
+  );
 }
