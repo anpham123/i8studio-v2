@@ -68,12 +68,12 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(SITE_URL),
     openGraph: {
       siteName: "i8 STUDIO",
-      images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "i8 STUDIO" }],
+      images: [{ url: "/uploads/1787120036307-Cover16_240806_view03.webp", width: 1200, height: 630, alt: "i8 STUDIO" }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      images: ["/og-default.jpg"],
+      images: ["/uploads/1787120036307-Cover16_240806_view03.webp"],
     },
     robots: {
       index: true,

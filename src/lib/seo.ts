@@ -4,7 +4,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://i8studio.vn";
 const SITE_NAME = "i8 STUDIO";
 const DEFAULT_DESCRIPTION =
   "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/uploads/1787120036307-Cover16_240806_view03.webp`;
 
 export function getSiteUrl() {
   return SITE_URL;
