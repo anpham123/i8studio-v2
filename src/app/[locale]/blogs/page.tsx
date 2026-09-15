@@ -16,6 +16,7 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const topPost = await prisma.blogPost.findFirst({
     where: { isPublished: true, locale: params.locale },
     orderBy: { publishedAt: "desc" },
@@ -25,8 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const img = topPost?.coverImage || "/og-default.jpg";
 
   return buildMetadata({
-    title: "Blog — Articles & Insights",
-    description: "Insights, case studies, and behind-the-scenes from i8 STUDIO's architectural visualization work.",
+    title: isJa
+      ? "ブログ・知見 (Blog) — 建築CGトレンド・制作ノウハウ"
+      : "Blog — Articles & Insights | i8 STUDIO",
+    description: isJa
+      ? "建築ビジュアライゼーションの最新技術、CG制作ノウハウ、業界トレンドを発信。"
+      : "Insights, case studies, and behind-the-scenes from i8 STUDIO's architectural visualization work.",
     path: "/blogs",
     locale: params.locale,
     image: img,

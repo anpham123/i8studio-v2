@@ -11,6 +11,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const topFlipbooks = await prisma.flipbook.findMany({
     where: { active: true },
     orderBy: { order: "asc" },
@@ -20,9 +21,12 @@ export async function generateMetadata({
   const images = topFlipbooks.map((f) => f.coverImage).filter(Boolean);
 
   return buildMetadata({
-    title: "Insights — Publications",
-    description:
-      "Browse i8 STUDIO's newsletters and publications about 3DCG, Animation, VR & BIM for the Japanese architecture market.",
+    title: isJa
+      ? "刊行物・インサイト (Insights) — i8 STUDIO"
+      : "Insights — Publications | i8 STUDIO",
+    description: isJa
+      ? "i8 STUDIOが発行する建築CG・3Dビジュアライゼーションに関するニュースレターや最新の業界刊行物。"
+      : "Browse i8 STUDIO's newsletters and publications about 3DCG, Animation, VR & BIM for the Japanese architecture market.",
     path: "/insights",
     locale: params.locale,
     image: images[0] || "/og-default.jpg",

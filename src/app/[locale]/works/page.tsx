@@ -12,6 +12,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const topWorks = await prisma.work.findMany({
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
     take: 4,
@@ -21,9 +22,12 @@ export async function generateMetadata({
   const topImages = topWorks.map((w) => w.image).filter(Boolean);
 
   return buildMetadata({
-    title: "Works — Portfolio",
-    description:
-      "Browse our portfolio of architectural visualization, 3DCG, VR, and animation projects for the Japanese market.",
+    title: isJa
+      ? "制作実績 (Works) — 建築CGパース・アニメーション・VR"
+      : "Works — Portfolio | 3DCG & Architectural Visualization",
+    description: isJa
+      ? "i8 STUDIOの建築CGパース、3Dアニメーション、VR360、BIM制作実績一覧。日本の住宅・商業施設・リゾートなどの高品質CGビジュアライゼーション。"
+      : "Browse our portfolio of architectural visualization, 3DCG, VR, and animation projects for the Japanese market.",
     path: "/works",
     locale: params.locale,
     image: topImages[0] || "/og-default.jpg",

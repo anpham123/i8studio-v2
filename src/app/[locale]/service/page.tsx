@@ -11,6 +11,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const topServices = await prisma.service.findMany({
     orderBy: { order: "asc" },
     take: 4,
@@ -19,9 +20,12 @@ export async function generateMetadata({
   const images = topServices.map((s) => s.image).filter(Boolean);
 
   return buildMetadata({
-    title: "Services — 3DCG, Animation, VR & BIM",
-    description:
-      "Explore i8 STUDIO's full range of services: 3DCG visualization, Animation, VR, BIM, Pachinko, and Anime production for the Japanese market.",
+    title: isJa
+      ? "サービス一覧 (Services) — 3DCG・アニメーション・VR・BIM"
+      : "Services — 3DCG, Animation, VR & BIM | i8 STUDIO",
+    description: isJa
+      ? "建築CGパース、ウォークスルー動画、VR360、BIMモデリングなど、建築ビジュアライゼーションの幅広いサービスをご紹介。"
+      : "Explore i8 STUDIO's full range of services: 3DCG visualization, Animation, VR, BIM, Pachinko, and Anime production for the Japanese market.",
     path: "/service",
     locale: params.locale,
     image: images[0] || "/og-default.jpg",

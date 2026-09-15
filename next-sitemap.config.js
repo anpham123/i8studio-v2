@@ -1,6 +1,6 @@
 require("dotenv").config({ path: ".env.local" });
 
-const LOCALES = ["en", "ja"];
+const LOCALES = ["ja", "en"];
 
 const STATIC_PATHS = [
   "",
@@ -15,6 +15,7 @@ const STATIC_PATHS = [
   "/case-studies",
   "/insights",
   "/contact",
+  "/price",
 ];
 
 /** @type {import('next-sitemap').IConfig} */
@@ -28,6 +29,15 @@ module.exports = {
     ],
   },
   exclude: ["/admin", "/admin/*", "/api", "/api/*"],
+  transform: async (config, path) => {
+    const isJa = path.startsWith("/ja");
+    return {
+      loc: path,
+      changefreq: config.changefreq,
+      priority: isJa ? 1.0 : 0.8,
+      lastmod: config.autoLastmod ? new Date().toISOString() : undefined,
+    };
+  },
   additionalPaths: async (config) => {
     const results = [];
 

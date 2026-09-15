@@ -12,10 +12,14 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   return buildMetadata({
-    title: "Contact Us & FAQ",
-    description:
-      "Get in touch with i8 STUDIO for your 3DCG, Animation, VR & BIM project. Free consultation, NDA available. We respond within 24 hours.",
+    title: isJa
+      ? "お問い合わせ・よくある質問 (Contact & FAQ) — i8 STUDIO"
+      : "Contact Us & FAQ — i8 STUDIO",
+    description: isJa
+      ? "建築CGパース・アニメーション・VR制作のお見積もり・無料相談。日本語専任スタッフが24時間以内にご返信いたします。"
+      : "Get in touch with i8 STUDIO for your 3DCG, Animation, VR & BIM project. Free consultation, NDA available. We respond within 24 hours.",
     path: "/contact",
     locale: params.locale,
     image: "/og-default.jpg",

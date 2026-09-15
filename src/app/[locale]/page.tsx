@@ -14,10 +14,14 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const { locale } = params;
+  const isJa = locale === "ja";
   return buildMetadata({
-    title: "i8 STUDIO — 3DCG, Animation, VR & BIM",
-    description:
-      "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
+    title: isJa
+      ? "i8 STUDIO — 建築CGパース・3Dアニメーション・VR・BIM制作"
+      : "i8 STUDIO — 3DCG, Animation, VR & BIM",
+    description: isJa
+      ? "日本の建築・不動産市場向け高品質3DCGパース、建築アニメーション、VR・BIM制作。日本のクライアント50社以上との実績。"
+      : "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
     path: "",
     locale,
     image: "/og-default.jpg",

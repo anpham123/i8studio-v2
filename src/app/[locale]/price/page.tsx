@@ -11,6 +11,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const topPriceItem = await prisma.priceItem.findFirst({
     where: { cardImage: { not: "" } },
     select: { cardImage: true },
@@ -19,9 +20,12 @@ export async function generateMetadata({
   const img = topPriceItem?.cardImage || "/og-default.jpg";
 
   return buildMetadata({
-    title: "Price — Service Pricing",
-    description:
-      "View our pricing for architectural visualization, 3DCG, VR, and animation services. Flexible plans for every project scale.",
+    title: isJa
+      ? "料金案内 (Pricing) — 建築CGパース・アニメーション・VR"
+      : "Price — Service Pricing | i8 STUDIO",
+    description: isJa
+      ? "i8 STUDIOのCGパース制作、アニメーション、VR360、BIMモデリングの参考料金プラン。高品質なオフショア体制で適正価格をご提案。"
+      : "View our pricing for architectural visualization, 3DCG, VR, and animation services. Flexible plans for every project scale.",
     path: "/price",
     locale: params.locale,
     image: img,

@@ -10,6 +10,7 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
   const setting = await prisma.setting.findFirst({
     where: { key: "aboutHeroImage" },
   }).catch(() => null);
@@ -17,9 +18,12 @@ export async function generateMetadata({
   const heroImg = setting?.value || "/og-default.jpg";
 
   return buildMetadata({
-    title: "About Us — Company Overview",
-    description:
-      "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
+    title: isJa
+      ? "会社概要 (About Us) — i8 STUDIO"
+      : "About Us — Company Overview | i8 STUDIO",
+    description: isJa
+      ? "ベトナム・ダナンを拠点とする建築ビジュアライゼーション専門スタジオ「i8 STUDIO」。スタッフ80名体制で高品質・短納期の3DCG制作をご提供。"
+      : "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
     path: "/about-us",
     locale: params.locale,
     image: heroImg,
