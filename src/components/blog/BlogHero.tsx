@@ -1,18 +1,16 @@
 "use client";
 
 import { sanitizeHtml } from "@/lib/sanitize";
-import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 import { motion } from "framer-motion";
 
 export default function BlogHero({
-  category,
   eyebrow,
   title,
   subtitle,
   heroImage,
   locale = "ja",
 }: {
-  category: string;
+  category?: string;
   eyebrow?: string;
   title: string;
   subtitle?: string;
@@ -20,14 +18,6 @@ export default function BlogHero({
   locale?: string;
 }) {
   const isJa = locale === "ja";
-  const categoryLabel = isJa ? "カテゴリー" : "Category";
-  const catObj = BLOG_CATEGORIES.find(
-    (c) =>
-      c.slug.toLowerCase() === (category || "").toLowerCase() ||
-      c.aliases?.some((a) => a.toLowerCase() === (category || "").toLowerCase()) ||
-      c.nameEn.toLowerCase() === (category || "").toLowerCase()
-  );
-  const localizedCategory = isJa ? (catObj?.nameJa || category) : (catObj?.nameEn || category);
 
   const getEyebrowText = (eb?: string) => {
     if (!eb) return "";
@@ -140,15 +130,6 @@ export default function BlogHero({
       {/* Title section BELOW image */}
       <div className="bg-[var(--surface)] pt-8 sm:pt-14 pb-4 sm:pb-6 border-b border-gray-100">
         <div className="w-full max-w-[1024px] mx-auto px-5 sm:px-6 lg:px-0">
-          {/* Category badge */}
-          {localizedCategory && (
-            <div className="mb-2">
-              <span className="inline-block text-[11px] font-mono tracking-widest text-[#c5a666] uppercase">
-                {localizedCategory}
-              </span>
-            </div>
-          )}
-
           {/* Title - Supports <br> from admin */}
           <h1
             className="font-serif text-[clamp(22px,2.5vw,34px)] font-bold leading-[1.4] tracking-tight text-[#111] mb-3 max-w-full"

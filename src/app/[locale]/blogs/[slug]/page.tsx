@@ -41,12 +41,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   if (!post) return {};
 
+  const sectionImages: string[] = [];
+  try {
+    const parsed = JSON.parse(post.sections || "[]");
+    for (const sec of parsed) {
+      if (sec.image) sectionImages.push(sec.image);
+      if (Array.isArray(sec.additionalImages)) {
+        for (const ai of sec.additionalImages) {
+          const imgUrl = typeof ai === "string" ? ai : ai?.image;
+          if (imgUrl) sectionImages.push(imgUrl);
+        }
+      }
+    }
+  } catch {}
+
+  const allImages = [
+    post.coverImage,
+    post.heroImage,
+    ...sectionImages,
+  ].filter(Boolean) as string[];
+
   return buildMetadata({
     title: post.title.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, ""),
     description: post.excerpt || post.subtitle || post.title.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, ""),
     path: `/blogs/${post.slug}`,
     locale: params.locale,
-    image: post.heroImage || post.coverImage || undefined,
+    image: post.coverImage || post.heroImage || undefined,
+    images: allImages.length > 0 ? allImages : undefined,
     type: "article",
   });
 }
@@ -81,18 +102,35 @@ export default async function BlogDetailPage({ params }: Props) {
 
   // Parse sections JSON
   let sections: SectionData[] = [];
+  const sectionImages: string[] = [];
   try {
     sections = JSON.parse(post.sections || "[]");
+    for (const sec of sections) {
+      if (sec.image) sectionImages.push(sec.image);
+      if (Array.isArray(sec.additionalImages)) {
+        for (const ai of sec.additionalImages) {
+          const imgUrl = typeof ai === "string" ? ai : (ai as { image?: string })?.image;
+          if (imgUrl) sectionImages.push(imgUrl);
+        }
+      }
+    }
   } catch {
     sections = [];
   }
+
+  const allImages = [
+    post.coverImage,
+    post.heroImage,
+    ...sectionImages,
+  ].filter(Boolean) as string[];
 
   const siteUrl = getSiteUrl();
   const articleLd = articleJsonLd({
     title: post.title.replace(/<[^>]*>/g, ""),
     description: post.excerpt || post.subtitle || "",
     url: `${siteUrl}/${locale}/blogs/${slug}`,
-    imageUrl: post.heroImage || post.coverImage || undefined,
+    imageUrl: post.coverImage || post.heroImage || undefined,
+    images: allImages,
     datePublished: post.publishedAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),
   });

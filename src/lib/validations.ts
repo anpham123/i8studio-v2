@@ -203,6 +203,7 @@ export const BlogPostSchema = z.object({
   insightBody: z.string().optional().default(""),
   excerpt: z.string().optional().default(""),
   coverImage: z.string().optional().default(""),
+  coverOrientation: z.string().optional().default("landscape"),
   author: z.string().max(200).optional().default(""),
   authorRole: z.string().max(200).optional().default(""),
   readTime: z.number().int().optional().default(5),

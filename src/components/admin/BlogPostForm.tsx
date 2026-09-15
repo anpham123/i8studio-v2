@@ -8,6 +8,7 @@ import { slugify } from "@/lib/utils";
 import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import RichEditor from "@/components/admin/RichEditor";
+import MediaEmbedPreview from "@/components/admin/MediaEmbedPreview";
 
 interface AdditionalImageItem {
   image: string;
@@ -22,6 +23,7 @@ interface Section {
   title: string;
   body: string[];
   image: string;
+  mediaEmbedUrl?: string;
   reverse: boolean;
   caption: string;
   additionalImages: (string | AdditionalImageItem)[];
@@ -38,6 +40,7 @@ const emptySection = (): Section => ({
   title: "",
   body: [""],
   image: "",
+  mediaEmbedUrl: "",
   reverse: false,
   caption: "",
   additionalImages: [],
@@ -63,6 +66,7 @@ interface BlogPostData {
   insightBody: string;
   excerpt: string;
   coverImage: string;
+  coverOrientation?: string;
   author: string;
   authorRole: string;
   readTime: number;
@@ -97,6 +101,7 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
     insightBody: initial?.insightBody || "",
     excerpt: initial?.excerpt || "",
     coverImage: initial?.coverImage || "",
+    coverOrientation: initial?.coverOrientation || "landscape",
     author: initial?.author || "",
     authorRole: initial?.authorRole || "",
     readTime: initial?.readTime || 5,
@@ -118,6 +123,43 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (initial) {
+      setForm({
+        slug: initial.slug || "",
+        category: initial.category || "",
+        eyebrow: initial.eyebrow || "",
+        title: initial.title || "",
+        titleJp: initial.titleJp || "",
+        subtitle: initial.subtitle || "",
+        heroImage: initial.heroImage || "",
+        introDropcap: initial.introDropcap || "",
+        introPullquote: initial.introPullquote || "",
+        sections: initial.sections || "[]",
+        comparisonBefore: initial.comparisonBefore || "",
+        comparisonAfter: initial.comparisonAfter || "",
+        insightHeading: initial.insightHeading || "",
+        insightBody: initial.insightBody || "",
+        excerpt: initial.excerpt || "",
+        coverImage: initial.coverImage || "",
+        coverOrientation: initial.coverOrientation || "landscape",
+        author: initial.author || "",
+        authorRole: initial.authorRole || "",
+        readTime: initial.readTime || 5,
+        isPublished: initial.isPublished || false,
+        isFeatured: initial.isFeatured || false,
+        locale: initial.locale || "ja",
+      });
+      try {
+        const parsed = JSON.parse(initial.sections || "[]");
+        setSections(parsed.map((s: Section) => ({ ...emptySection(), ...s, additionalImages: s.additionalImages || [] })));
+      } catch {
+        // ignore
+      }
+    }
+  }, [initial]);
+
   const [categories, setCategories] = useState<{ id: string; slug: string; nameJa: string; nameEn: string }[]>([]);
 
   // Fetch blog categories
@@ -177,12 +219,12 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
       s.map((sec, j) =>
         j === si
           ? {
-              ...sec,
-              additionalImages: [
-                ...(sec.additionalImages || []),
-                { image: url, caption: "" },
-              ],
-            }
+            ...sec,
+            additionalImages: [
+              ...(sec.additionalImages || []),
+              { image: url, caption: "" },
+            ],
+          }
           : sec
       )
     );
@@ -424,18 +466,55 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                 <button type="button" onClick={() => addBodyParagraph(si)} className="text-xs text-blue-500 hover:text-blue-600">+ Thêm paragraph</button>
               </div>
 
-              {/* Image upload — available for ALL section types */}
-              <div className="mt-3">
+              {/* Media Visual: VR360 / AR / Video embed or Static Image */}
+              <div className="mt-4 pt-3 border-t border-gray-200 space-y-3">
                 <label className={labelCls}>
-                  Section Image {sec.type === "stage" && <span className="text-red-500">*</span>}
+                  🖼️ Visual Media: Ảnh Section hoặc Link VR360 / AR / Video Embed
                 </label>
-                <ImageUpload value={sec.image} onChange={(v) => updateSection(si, "image", v)} />
+
+                {/* VR360 Embed Input Box */}
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                      <span>🌐 Link VR360 / AR / Video Embed (Kuula, Matterport, YouTube, Sketchfab...)</span>
+                    </label>
+                    {sec.mediaEmbedUrl && (
+                      <button
+                        type="button"
+                        onClick={() => updateSection(si, "mediaEmbedUrl", "")}
+                        className="text-[11px] text-red-500 hover:underline"
+                      >
+                        Xóa link VR
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    value={sec.mediaEmbedUrl || ""}
+                    onChange={(e) => updateSection(si, "mediaEmbedUrl", e.target.value)}
+                    className="w-full px-3 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-mono"
+                    placeholder="VD: https://kuula.co/share/... hoặc https://my.matterport.com/show/?m=... hoặc link mp4"
+                  />
+                  {sec.mediaEmbedUrl && (
+                    <div className="mt-2">
+                      <p className="text-[11px] text-slate-500 mb-1">Preview tương tác VR360:</p>
+                      <MediaEmbedPreview url={sec.mediaEmbedUrl} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Static Image upload */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-500 block mb-1">
+                    Ảnh Section {sec.mediaEmbedUrl ? "(Ảnh dự phòng nếu không tải được VR)" : (sec.type === "stage" ? <span className="text-red-500">*</span> : "")}
+                  </label>
+                  <ImageUpload value={sec.image} onChange={(v) => updateSection(si, "image", v)} />
+                </div>
               </div>
 
               {/* Additional images with per-image caption */}
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <label className={labelCls}>📸 Ảnh bổ sung &amp; Caption riêng từng ảnh (Additional Images)</label>
-                
+
                 {sec.additionalImages && sec.additionalImages.length > 0 && (
                   <div className="space-y-3 mb-3">
                     {sec.additionalImages.map((item, imgIdx) => {
@@ -549,6 +628,17 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
               <label className={labelCls}>Read Time (phút)</label>
               <input type="number" value={form.readTime} onChange={(e) => set("readTime", parseInt(e.target.value) || 5)} className={inputCls} />
             </div>
+          </div>
+          <div>
+            <label className={labelCls}>Định dạng ảnh bìa (Cover Orientation)</label>
+            <select
+              value={form.coverOrientation || "landscape"}
+              onChange={(e) => set("coverOrientation", e.target.value)}
+              className={inputCls}
+            >
+              <option value="landscape">🖼️ Ảnh Ngang (Landscape - 16:9 / 4:3)</option>
+              <option value="portrait">📱 Ảnh Dọc (Portrait - 3:4 / 9:16)</option>
+            </select>
           </div>
           <div>
             <label className={labelCls}>Locale</label>

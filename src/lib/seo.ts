@@ -204,6 +204,7 @@ export function articleJsonLd({
   description,
   url,
   imageUrl,
+  images = [],
   datePublished,
   dateModified,
 }: {
@@ -211,20 +212,32 @@ export function articleJsonLd({
   description: string;
   url: string;
   imageUrl?: string;
+  images?: string[];
   datePublished: string;
   dateModified: string;
 }) {
-  const absImage = toAbsoluteUrl(imageUrl);
+  const imageList = (
+    images.length > 0
+      ? images
+      : [imageUrl || DEFAULT_OG_IMAGE]
+  ).filter(Boolean).map((img) => toAbsoluteUrl(img));
+
+  const primaryImage = imageList[0] || toAbsoluteUrl(DEFAULT_OG_IMAGE);
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": toAbsoluteUrl(url),
+    },
     headline: title,
     description,
     url: toAbsoluteUrl(url),
-    image: [absImage],
+    image: imageList,
     primaryImageOfPage: {
       "@type": "ImageObject",
-      url: absImage,
+      url: primaryImage,
       width: "1200",
       height: "630",
     },

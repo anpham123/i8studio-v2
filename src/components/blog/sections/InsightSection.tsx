@@ -1,4 +1,5 @@
 import { sanitizeHtml } from "@/lib/sanitize";
+import { getEmbedUrl } from "@/lib/embed";
 import type { SectionData } from "./CheckcamSection";
 
 export default function InsightSection({ data }: { data: SectionData }) {
@@ -26,11 +27,48 @@ export default function InsightSection({ data }: { data: SectionData }) {
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(bodyParagraphs.join("\n")) }}
         />
 
-        {/* Image if provided */}
-        {data.image && (
-          <div className="mt-10 aspect-[16/9] rounded-none overflow-hidden border border-gray-200/40 shadow-xs">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Main image"} className="w-full h-full object-cover rounded-none" />
+        {/* Visual: VR360 embed / Video / Image if provided */}
+        {(data.image || data.mediaEmbedUrl) && (
+          <div className="mt-10 aspect-[16/9] min-h-[340px] sm:min-h-[460px] rounded-none overflow-hidden border border-gray-200/40 shadow-xs bg-black">
+            {(() => {
+              const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+              const embedUrl = data.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+
+              if (isDirectVideo) {
+                return (
+                  <video
+                    src={data.mediaEmbedUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                );
+              }
+
+              if (embedUrl) {
+                return (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full h-full border-0"
+                    allowFullScreen
+                    allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                    title={data?.title ? data.title.replace(/<[^>]*>/g, "") : "VR360 Experience"}
+                  />
+                );
+              }
+
+              if (data.image) {
+                return (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Main image"} className="w-full h-full object-cover rounded-none" />
+                );
+              }
+
+              return null;
+            })()}
           </div>
         )}
 

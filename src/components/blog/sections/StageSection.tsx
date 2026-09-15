@@ -1,5 +1,6 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
+import { getEmbedUrl } from "@/lib/embed";
 import type { SectionData } from "./CheckcamSection";
 
 function renderFormattedBody(paragraphs: string[]) {
@@ -121,16 +122,58 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
           </div>
         </div>
 
-        {/* 2. Main Visual Frame (Full Width Image, no border-radius) */}
-        {hasImage && (
+        {/* 2. Main Visual Frame (Full Width VR360 Embed / Video / Image) */}
+        {(hasImage || data?.mediaEmbedUrl) && (
           <div className="mb-8">
             <div className="w-full bg-white rounded-none overflow-hidden border border-gray-200/90 shadow-xs flex flex-col hover:shadow-md transition-shadow">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={data.image}
-                alt={data?.title ? data.title.replace(/<[^>]*>/g, "") : "Section image"}
-                className="w-full h-auto object-cover block rounded-none"
-              />
+              {(() => {
+                const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+                const embedUrl = data.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+
+                if (isDirectVideo) {
+                  return (
+                    <div className="w-full aspect-video bg-black">
+                      <video
+                        src={data.mediaEmbedUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  );
+                }
+
+                if (embedUrl) {
+                  return (
+                    <div className="w-full aspect-video sm:aspect-[16/9] min-h-[360px] sm:min-h-[480px] bg-black">
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full border-0"
+                        allowFullScreen
+                        allow="accelerometer; gyroscope; xr-spatial-tracking; fullscreen; autoplay"
+                        title={data?.title ? data.title.replace(/<[^>]*>/g, "") : "VR360 Experience"}
+                      />
+                    </div>
+                  );
+                }
+
+                if (data.image) {
+                  return (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={data.image}
+                      alt={data?.title ? data.title.replace(/<[^>]*>/g, "") : "Section image"}
+                      className="w-full h-auto object-cover block rounded-none"
+                    />
+                  );
+                }
+
+                return null;
+              })()}
+
               {data.caption && (
                 <p
                   className="w-full text-[13px] text-gray-600 italic py-2.5 px-4 border-t border-gray-100 bg-[#fafaf8] text-center leading-relaxed font-serif"

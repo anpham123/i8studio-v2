@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import type { SolutionService } from "@/lib/solution-data";
-import { getEmbedUrl } from "@/components/admin/MediaEmbedPreview";
+import { getEmbedUrl } from "@/lib/embed";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };

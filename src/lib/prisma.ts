@@ -2,8 +2,17 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   __prisma: PrismaClient | undefined;
+  __prismaVersion: string | undefined;
 };
 
-export const prisma = globalForPrisma.__prisma ?? new PrismaClient();
+const CLIENT_VERSION = "2026_09_15_v2_cover_orientation";
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.__prisma = prisma;
+if (!globalForPrisma.__prisma || globalForPrisma.__prismaVersion !== CLIENT_VERSION) {
+  if (globalForPrisma.__prisma) {
+    globalForPrisma.__prisma.$disconnect().catch(() => {});
+  }
+  globalForPrisma.__prisma = new PrismaClient();
+  globalForPrisma.__prismaVersion = CLIENT_VERSION;
+}
+
+export const prisma = globalForPrisma.__prisma;

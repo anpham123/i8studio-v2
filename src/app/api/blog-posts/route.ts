@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ data: post }, { status: 201 });
   } catch (e) {
+    console.error("POST /api/blog-posts error:", e);
     if (e instanceof z.ZodError) return NextResponse.json({ error: e.issues }, { status: 400 });
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Failed" }, { status: 500 });
   }
 }
