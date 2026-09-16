@@ -12,13 +12,16 @@ services:
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       NEXTAUTH_URL: https://i8studio.vn
       NODE_ENV: production
+      PORT: 3003
     volumes:
       - /opt/i8studio/data/db:/app/prisma/data
       - /opt/i8studio/data/uploads:/app/public/uploads
     networks:
       - techzen-net
+    ports:
+      - "3003:3003"
     expose:
-      - "3000"
+      - "3003"
 
 networks:
   techzen-net:

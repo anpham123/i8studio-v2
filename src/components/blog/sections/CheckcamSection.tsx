@@ -2,6 +2,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
 import { getEmbedUrl } from "@/lib/embed";
 import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
+import AutoPlayVideo from "@/components/blog/AutoPlayVideo";
 
 export interface SectionData {
   type: "checkcam" | "stage" | "comparison" | "insight";
@@ -144,22 +145,17 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
         {(data.image || data.mediaEmbedUrl) && (!data.grid || data.grid.length === 0) && (
           <div className="w-full bg-white rounded-none overflow-hidden border border-gray-200/90 shadow-xs flex flex-col mb-8 hover:shadow-md transition-shadow">
             {(() => {
-              const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
-              const embedUrl = data.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+              const isEmbedVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+              const isImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.image || "");
+              const embedUrl = data.mediaEmbedUrl && !isEmbedVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
 
-              if (isDirectVideo) {
+              if (isEmbedVideo) {
                 return (
-                  <div className="w-full aspect-video bg-black">
-                    <video
-                      src={data.mediaEmbedUrl}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      controls
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <AutoPlayVideo
+                    src={data.mediaEmbedUrl!}
+                    className="w-full h-full object-cover"
+                    containerClassName="w-full aspect-video bg-black relative"
+                  />
                 );
               }
 
@@ -174,6 +170,16 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                       title={data.title ? data.title.replace(/<[^>]*>/g, "") : "VR360 Experience"}
                     />
                   </div>
+                );
+              }
+
+              if (isImageVideo && data.image) {
+                return (
+                  <AutoPlayVideo
+                    src={data.image}
+                    className="w-full h-auto object-cover block rounded-none"
+                    containerClassName="w-full bg-black relative"
+                  />
                 );
               }
 

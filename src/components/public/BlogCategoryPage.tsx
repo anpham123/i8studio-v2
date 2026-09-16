@@ -16,6 +16,7 @@ export default async function BlogCategoryPage({ locale, categorySlug }: Props) 
   const posts = await prisma.blogPost.findMany({
     where: {
       isPublished: true,
+      publishedAt: { lte: new Date() },
       category: { in: aliases },
       locale,
     },

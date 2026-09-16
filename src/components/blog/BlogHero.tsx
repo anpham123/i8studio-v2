@@ -1,7 +1,6 @@
 "use client";
 
 import { sanitizeHtml } from "@/lib/sanitize";
-import { motion } from "framer-motion";
 
 export default function BlogHero({
   eyebrow,
@@ -64,67 +63,29 @@ export default function BlogHero({
         </button>
       </div>
 
-      {/* Eyebrow top-right & Panoramic Badge */}
-      <div className="absolute top-6 sm:top-8 right-4 sm:right-10 lg:right-12 z-30 flex items-center gap-2.5">
-        {/* Panoramic Scan Indicator Badge on Mobile */}
-        <div className="sm:hidden px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-[#c5a666]/35 text-[9px] font-mono text-[#c5a666] tracking-wider uppercase flex items-center gap-1.5 shadow-md">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a666] animate-pulse" />
-          <span>⟷ PANORAMIC SCAN</span>
-        </div>
-
-        {eyebrow && (
-          <div className="hidden sm:block text-white/60 text-[11px] uppercase tracking-[0.24em]">
+      {/* Eyebrow top-right */}
+      {eyebrow && (
+        <div className="absolute top-6 sm:top-8 right-4 sm:right-10 lg:right-12 z-30 flex items-center gap-2.5">
+          <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white/80 text-[10px] sm:text-[11px] uppercase tracking-[0.24em] font-medium shadow-md">
             {getEyebrowText(eyebrow)}
           </div>
-        )}
-      </div>
-
-      {/* Blueprint Grid Background on Mobile */}
-      <div
-        className="sm:hidden absolute inset-0 z-0 opacity-20 pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(197, 166, 102, 0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(197, 166, 102, 0.18) 1px, transparent 1px)`,
-          backgroundSize: "36px 36px",
-        }}
-      />
-
-      {/* Hero image — Ken Burns Auto-Panoramic Pan on Mobile, full-viewport on Desktop */}
-      <div className="relative z-10 w-full h-[55vh] min-h-[380px] max-h-[520px] sm:h-[calc(100vh-var(--header-h,76px))] sm:min-h-[600px] sm:max-h-[1200px] overflow-hidden flex items-center justify-start sm:justify-center bg-[#0c0b0a]">
-        <div className="relative w-full h-full overflow-hidden flex items-center justify-start sm:justify-center bg-[#111]">
-          {heroImage ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <motion.img
-              initial={{ scale: 1.04 }}
-              animate={{
-                scale: 1,
-                x: ["0%", "-42%", "0%"],
-              }}
-              transition={{
-                scale: { duration: 3.5, ease: [0.16, 1, 0.3, 1] },
-                x: { duration: 22, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" },
-              }}
-              src={heroImage}
-              alt={title.replace(/<[^>]*>/g, "")}
-              className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center sm:!transform-none"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#0d0c0a] via-[#1e1b14] to-[#2a2318]" />
-          )}
-
-          {/* Gradients */}
-          <div className="absolute inset-0 z-2 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
-          <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-
-          {/* Grid pattern overlay on desktop */}
-          <div
-            className="hidden sm:block absolute inset-0 z-2 opacity-20 pointer-events-none"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(184,147,90,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(184,147,90,0.06) 1px, transparent 1px)",
-              backgroundSize: "60px 60px",
-            }}
-          />
         </div>
+      )}
+
+      {/* Hero Image — Full Screen Edge-to-Edge (100% Width & Height), crisp and vibrant */}
+      <div className="relative z-10 w-full h-[calc(100vh-var(--header-h,76px))] min-h-[450px] sm:min-h-[580px] flex items-center justify-center overflow-hidden bg-black/5">
+        {heroImage ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={heroImage}
+            alt={title.replace(/<[^>]*>/g, "")}
+            className="w-full h-full object-cover block select-none"
+            loading="eager"
+            decoding="async"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#0d0c0a] via-[#1e1b14] to-[#2a2318]" />
+        )}
       </div>
 
       {/* Title section BELOW image */}

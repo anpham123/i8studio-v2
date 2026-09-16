@@ -72,17 +72,45 @@ export default function AdminBlogPostsPage() {
     },
     {
       key: "isPublished", label: "Trạng thái",
-      render: (v) => v
-        ? <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-medium">Published</span>
-        : <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded-full font-medium">Draft</span>,
+      render: (_v, row) => {
+        if (!row.isPublished) {
+          return (
+            <span className="inline-flex items-center gap-1.5 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              Bản nháp
+            </span>
+          );
+        }
+        const isScheduled = row.publishedAt && new Date(row.publishedAt).getTime() > Date.now();
+        if (isScheduled) {
+          return (
+            <span className="inline-flex items-center gap-1.5 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-medium" title={`Lên lịch: ${formatDate(new Date(row.publishedAt), "HH:mm dd/MM/yyyy")}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+              Lên lịch ({formatDate(new Date(row.publishedAt), "HH:mm dd/MM")})
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Đã đăng
+          </span>
+        );
+      },
     },
     {
       key: "isFeatured", label: "Nổi bật",
       render: (v) => v ? <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">★ Featured</span> : null,
     },
     {
-      key: "publishedAt", label: "Ngày đăng", sortable: true,
-      render: (v) => <span className="text-xs text-gray-500">{formatDate(new Date(String(v)))}</span>,
+      key: "publishedAt", label: "Thời gian đăng", sortable: true,
+      render: (v) => {
+        try {
+          return <span className="text-xs text-gray-500 font-mono">{formatDate(new Date(String(v)), "HH:mm dd/MM/yyyy")}</span>;
+        } catch {
+          return <span className="text-xs text-gray-400">—</span>;
+        }
+      },
     },
   ];
 

@@ -2,6 +2,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories";
 import { getEmbedUrl } from "@/lib/embed";
 import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
+import AutoPlayVideo from "@/components/blog/AutoPlayVideo";
 import type { SectionData } from "./CheckcamSection";
 
 function renderFormattedBody(paragraphs: string[]) {
@@ -128,22 +129,17 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
           <div className="mb-8">
             <div className="w-full bg-white rounded-none overflow-hidden border border-gray-200/90 shadow-xs flex flex-col hover:shadow-md transition-shadow">
               {(() => {
-                const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
-                const embedUrl = data.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+                const isEmbedVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+                const isImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.image || "");
+                const embedUrl = data.mediaEmbedUrl && !isEmbedVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
 
-                if (isDirectVideo) {
+                if (isEmbedVideo) {
                   return (
-                    <div className="w-full aspect-video bg-black">
-                      <video
-                        src={data.mediaEmbedUrl}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        controls
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <AutoPlayVideo
+                      src={data.mediaEmbedUrl!}
+                      className="w-full h-full object-cover"
+                      containerClassName="w-full aspect-video bg-black relative"
+                    />
                   );
                 }
 
@@ -158,6 +154,16 @@ export default function StageSection({ data, locale = "ja" }: { data: SectionDat
                         title={data?.title ? data.title.replace(/<[^>]*>/g, "") : "VR360 Experience"}
                       />
                     </div>
+                  );
+                }
+
+                if (isImageVideo && data.image) {
+                  return (
+                    <AutoPlayVideo
+                      src={data.image}
+                      className="w-full h-auto object-cover block rounded-none"
+                      containerClassName="w-full bg-black relative"
+                    />
                   );
                 }
 

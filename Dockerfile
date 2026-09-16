@@ -43,7 +43,7 @@ RUN npm install -g prisma@5.22.0
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
+ENV PORT=3003
 ENV HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 1001 nodejs && \
@@ -69,6 +69,6 @@ COPY --chown=nextjs:nodejs scripts/start.sh ./scripts/start.sh
 RUN chmod +x ./scripts/start.sh
 
 USER nextjs
-EXPOSE 3000
+EXPOSE 3003
 
 CMD ["sh", "./scripts/start.sh"]

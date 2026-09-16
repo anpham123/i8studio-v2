@@ -19,7 +19,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isJa = params.locale === "ja";
   const topPost = await prisma.blogPost.findFirst({
-    where: { isPublished: true, locale: params.locale },
+    where: { isPublished: true, publishedAt: { lte: new Date() }, locale: params.locale },
     orderBy: { publishedAt: "desc" },
     select: { coverImage: true },
   }).catch(() => null);
@@ -48,7 +48,11 @@ export default async function BlogIndexPage({ params, searchParams }: Props) {
   const catDef = activeCategory ? getCategoryBySlugOrRoute(activeCategory) : undefined;
   const aliases = activeCategory ? getCategoryAliases(activeCategory) : undefined;
 
-  const where: Record<string, unknown> = { isPublished: true, locale };
+  const where: Record<string, unknown> = {
+    isPublished: true,
+    publishedAt: { lte: new Date() },
+    locale,
+  };
   if (aliases) {
     where.category = { in: aliases };
   }

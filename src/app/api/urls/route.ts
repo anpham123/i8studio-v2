@@ -256,7 +256,7 @@ export async function GET() {
         select: { slug: true, name: true, nameJa: true },
       }),
       prisma.blogPost.findMany({
-        where: { isPublished: true },
+        where: { isPublished: true, publishedAt: { lte: new Date() } },
         select: { slug: true, title: true, titleJp: true },
       }),
       prisma.post.findMany({

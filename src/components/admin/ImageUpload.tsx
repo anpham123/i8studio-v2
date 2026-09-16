@@ -1,16 +1,31 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, ImageIcon, Loader2, Film } from "lucide-react";
 
 interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
   label?: string;
   aspectHint?: string;
+  allowVideo?: boolean;
 }
 
-export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHint }: ImageUploadProps) {
+const ALLOWED_IMAGES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_VIDEOS = ["video/mp4", "video/webm", "video/quicktime"];
+
+export function isVideoUrl(url?: string | null): boolean {
+  if (!url) return false;
+  return /\.(mp4|webm|mov)(\?.*)?$/i.test(url) || url.startsWith("data:video/");
+}
+
+export default function ImageUpload({
+  value,
+  onChange,
+  label = "Ảnh",
+  aspectHint,
+  allowVideo = false,
+}: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
@@ -18,8 +33,9 @@ export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHi
 
   const upload = useCallback(async (file: File) => {
     setError("");
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
-      setError("Chỉ chấp nhận jpg, png, webp");
+    const allowed = allowVideo ? [...ALLOWED_IMAGES, ...ALLOWED_VIDEOS] : ALLOWED_IMAGES;
+    if (!allowed.includes(file.type)) {
+      setError(allowVideo ? "Chỉ chấp nhận JPG, PNG, WebP, MP4, WebM" : "Chỉ chấp nhận JPG, PNG, WebP");
       return;
     }
     if (file.size > 50 * 1024 * 1024) {
@@ -34,7 +50,7 @@ export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHi
     setUploading(false);
     if (data.url) onChange(data.url);
     else setError(data.error || "Upload thất bại");
-  }, [onChange]);
+  }, [onChange, allowVideo]);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -49,18 +65,38 @@ export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHi
     e.target.value = "";
   }, [upload]);
 
+  const isVideo = isVideoUrl(value);
+
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      {label && <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>}
       {value ? (
-        <div className="relative inline-block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className={`rounded-lg border border-gray-200 ${aspectHint === "16:9" ? "w-full max-w-md aspect-video object-cover" : "max-h-64 object-contain"}`}
-            onError={() => onChange("")}
-          />
+        <div className="relative inline-block max-w-full">
+          {isVideo ? (
+            <video
+              src={value}
+              controls
+              playsInline
+              className={`rounded-lg border border-gray-200 bg-black ${
+                aspectHint === "16:9" ? "w-full max-w-md aspect-video object-cover" : "max-h-64 object-contain"
+              }`}
+            />
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={value}
+              alt=""
+              className={`rounded-lg border border-gray-200 ${
+                aspectHint === "16:9" ? "w-full max-w-md aspect-video object-cover" : "max-h-64 object-contain"
+              }`}
+              onError={() => onChange("")}
+            />
+          )}
           <button
-            type="button" onClick={() => onChange("")}
-            className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow"
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow cursor-pointer transition-colors"
+            title={isVideo ? "Xóa video" : "Xóa ảnh"}
           >
             <X size={14} />
           </button>
@@ -71,28 +107,49 @@ export default function ImageUpload({ value, onChange, label = "Ảnh", aspectHi
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${dragging ? "border-blue-400 bg-blue-50" : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"}`}
+          className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-colors ${
+            dragging ? "border-blue-400 bg-blue-50" : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+          }`}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2 text-blue-600">
               <Loader2 size={28} className="animate-spin" />
-              <span className="text-sm">Đang tải lên...</span>
+              <span className="text-sm font-medium">Đang tải lên...</span>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-gray-400">
-              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                {dragging ? <Upload size={22} className="text-blue-500" /> : <ImageIcon size={22} />}
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center gap-1">
+                {dragging ? (
+                  <Upload size={22} className="text-blue-500" />
+                ) : allowVideo ? (
+                  <div className="flex items-center gap-1">
+                    <ImageIcon size={18} className="text-gray-500" />
+                    <Film size={18} className="text-purple-500" />
+                  </div>
+                ) : (
+                  <ImageIcon size={22} />
+                )}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Kéo thả hoặc click để chọn</p>
-                <p className="text-xs mt-0.5">JPG, PNG, WebP · Tối đa 50MB{aspectHint ? ` · Tỷ lệ ${aspectHint}` : ""}</p>
+                <p className="text-sm font-medium text-gray-700">Kéo thả hoặc click để chọn {allowVideo ? "ảnh / video" : "ảnh"}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {allowVideo
+                    ? "JPG, PNG, WebP · MP4, WebM (Tối đa 50MB · Video dưới 60s)"
+                    : `JPG, PNG, WebP · Tối đa 50MB${aspectHint ? ` · Tỷ lệ ${aspectHint}` : ""}`}
+                </p>
               </div>
             </div>
           )}
         </div>
       )}
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleChange} />
+      {error && <p className="text-red-500 text-xs mt-1.5">{error}</p>}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={allowVideo ? "image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" : "image/*"}
+        className="hidden"
+        onChange={handleChange}
+      />
     </div>
   );
 }

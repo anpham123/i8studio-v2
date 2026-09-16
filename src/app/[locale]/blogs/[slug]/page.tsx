@@ -14,7 +14,10 @@ import InsightSection from "@/components/blog/sections/InsightSection";
 import type { SectionData } from "@/components/blog/sections/CheckcamSection";
 import { sanitizeHtml } from "@/lib/sanitize";
 
-type Props = { params: { locale: string; slug: string } };
+type Props = {
+  params: { locale: string; slug: string };
+  searchParams?: { preview?: string };
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Try multiple Unicode normalization forms to handle NFC/NFKD mismatch
@@ -26,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let post = null;
   for (const s of slugVariants) {
     post = await prisma.blogPost.findFirst({
-      where: { slug: s, isPublished: true, locale: params.locale },
+      where: { slug: s, isPublished: true, publishedAt: { lte: new Date() }, locale: params.locale },
     });
     if (post) break;
   }
@@ -34,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) {
     for (const s of slugVariants) {
       post = await prisma.blogPost.findFirst({
-        where: { slug: s, isPublished: true },
+        where: { slug: s, isPublished: true, publishedAt: { lte: new Date() } },
       });
       if (post) break;
     }
@@ -72,8 +75,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function BlogDetailPage({ params }: Props) {
+export default async function BlogDetailPage({ params, searchParams }: Props) {
   const { locale, slug: rawSlug } = params;
+  const isPreview = searchParams?.preview === "admin";
+  const publicFilter = isPreview ? {} : { isPublished: true, publishedAt: { lte: new Date() } };
 
   // Try multiple Unicode normalization forms to handle NFC/NFKD mismatch
   const slugVariants = [
@@ -84,15 +89,15 @@ export default async function BlogDetailPage({ params }: Props) {
   let post = null;
   for (const s of slugVariants) {
     post = await prisma.blogPost.findFirst({
-      where: { slug: s, isPublished: true, locale },
+      where: { slug: s, locale, ...publicFilter },
     });
     if (post) break;
   }
-  // Fallback: find any published post with this slug (cross-locale)
+  // Fallback: find any post with this slug (cross-locale)
   if (!post) {
     for (const s of slugVariants) {
       post = await prisma.blogPost.findFirst({
-        where: { slug: s, isPublished: true },
+        where: { slug: s, ...publicFilter },
       });
       if (post) break;
     }
@@ -135,8 +140,15 @@ export default async function BlogDetailPage({ params }: Props) {
     dateModified: post.updatedAt.toISOString(),
   });
 
+  const isUnpublishedOrScheduled = !post.isPublished || new Date(post.publishedAt).getTime() > Date.now();
+
   return (
     <article className="w-full max-w-full overflow-x-hidden">
+      {isPreview && isUnpublishedOrScheduled && (
+        <div className="bg-amber-500 text-black px-4 py-2 text-center text-xs sm:text-sm font-semibold sticky top-0 z-50 shadow-md">
+          ⚠️ Chế độ xem trước ({!post.isPublished ? "Bản nháp - Chưa công khai" : `Lên lịch đăng lúc: ${new Date(post.publishedAt).toLocaleString("vi-VN")}`})
+        </div>
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}

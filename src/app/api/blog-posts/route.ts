@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const where = {
     ...(locale && { locale }),
-    ...(published === "true" && { isPublished: true }),
+    ...(published === "true" && { isPublished: true, publishedAt: { lte: new Date() } }),
   };
 
   const [data, total] = await Promise.all([

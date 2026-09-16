@@ -78,7 +78,7 @@ export default function ComparisonSection({
         {/* Body Paragraphs & Tables */}
         {bodyParagraphs.length > 0 && (
           <div
-            className="blog-content mb-10 max-w-[900px] text-[#111] leading-[1.9] text-[14px] sm:text-[15px]"
+            className="blog-content mb-10 w-full max-w-full text-[#111] leading-[1.9] text-[14px] sm:text-[15px]"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(bodyParagraphs.join("\n")) }}
           />
         )}

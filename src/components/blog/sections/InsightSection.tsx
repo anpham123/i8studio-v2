@@ -1,6 +1,7 @@
 import { sanitizeHtml } from "@/lib/sanitize";
 import { getEmbedUrl } from "@/lib/embed";
 import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
+import AutoPlayVideo from "@/components/blog/AutoPlayVideo";
 import type { SectionData } from "./CheckcamSection";
 
 export default function InsightSection({ data }: { data: SectionData }) {
@@ -32,19 +33,16 @@ export default function InsightSection({ data }: { data: SectionData }) {
         {(data.image || data.mediaEmbedUrl) && (
           <div className="mt-10 aspect-[16/9] min-h-[340px] sm:min-h-[460px] rounded-none overflow-hidden border border-gray-200/40 shadow-xs bg-black">
             {(() => {
-              const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
-              const embedUrl = data.mediaEmbedUrl && !isDirectVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+              const isEmbedVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+              const isImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.image || "");
+              const embedUrl = data.mediaEmbedUrl && !isEmbedVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
 
-              if (isDirectVideo) {
+              if (isEmbedVideo) {
                 return (
-                  <video
-                    src={data.mediaEmbedUrl}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    controls
+                  <AutoPlayVideo
+                    src={data.mediaEmbedUrl!}
                     className="w-full h-full object-cover"
+                    containerClassName="w-full h-full bg-black relative"
                   />
                 );
               }
@@ -61,10 +59,20 @@ export default function InsightSection({ data }: { data: SectionData }) {
                 );
               }
 
+              if (isImageVideo && data.image) {
+                return (
+                  <AutoPlayVideo
+                    src={data.image}
+                    className="w-full h-full object-cover"
+                    containerClassName="w-full h-full bg-black relative"
+                  />
+                );
+              }
+
               if (data.image) {
                 return (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Main image"} className="w-full h-full object-cover rounded-none" />
+                  <img src={data.image} alt={data.title ? data.title.replace(/<[^>]*>/g, "") : "Image"} className="w-full h-auto object-cover block rounded-none" />
                 );
               }
 
