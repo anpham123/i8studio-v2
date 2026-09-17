@@ -71,61 +71,59 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 410 Gone: Permanently deleted old URLs (instruct Googlebot to drop immediately)
   const normalizedPath = pathname.replace(/\/$/, "");
-  const DELETED_PERMANENT_PATHS = new Set([
-    "/hotel-mokurea-on-kouri-island-okinawa-all-rooms-have-ocean-views-and-terraces-and-an-infinity-pool",
-    "/ja/hotel-mokurea-on-kouri-island-okinawa-all-rooms-have-ocean-views-and-terraces-and-an-infinity-pool",
-    "/en/hotel-moclea-in-kouri-island-okinawa-all-rooms-with-ocean-views-and-terraces-featuring-an-infinity-pool",
-    "/ja/hotel-moclea-in-kouri-island-okinawa-all-rooms-with-ocean-views-and-terraces-featuring-an-infinity-pool",
-    "/en/residence-design-that-luxuriously-embraces-the-nature-of-miura-harmonizing-elegantly-with-the-city",
-    "/ja/residence-design-that-luxuriously-embraces-the-nature-of-miura-harmonizing-elegantly-with-the-city",
-    "/kudochi-sauna",
-    "/ja/kudochi-sauna",
-    "/en/kudochi-sauna",
-    "/apa-hotel",
-    "/ja/apa-hotel",
-    "/en/apa-hotel",
-    "/hiroshima-gate-park-taisei-design-planners-architects-engineers",
-    "/ja/hiroshima-gate-park-taisei-design-planners-architects-engineers",
-    "/en/hiroshima-gate-park-taisei-design-planners-architects-engineers",
-    "/neko-house",
-    "/ja/neko-house",
-    "/en/neko-house",
-    "/hotel-lobby",
-    "/ja/hotel-lobby",
-    "/en/hotel-lobby",
-    "/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto",
-    "/ja/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto",
-    "/en/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto",
-    "/club",
-    "/ja/club",
-    "/en/club",
-    "/l465rgyua3",
-    "/ja/l465rgyua3",
-    "/en/l465rgyua3",
-  ]);
-
-  if (DELETED_PERMANENT_PATHS.has(normalizedPath)) {
-    return new NextResponse(
-      "<!DOCTYPE html><html><head><meta name=\"robots\" content=\"noindex, nofollow\" /><title>410 Gone</title></head><body style=\"font-family:sans-serif;text-align:center;padding:50px;\"><h1>410 Gone</h1><p>Trang này đã bị xóa vĩnh viễn / This page has been permanently removed.</p><a href=\"/\" style=\"color:#2563eb;\">Quay lại trang chủ (Home)</a></body></html>",
-      {
-        status: 410,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "X-Robots-Tag": "noindex, nofollow, noarchive",
-        },
-      }
-    );
-  }
 
   // 301 redirect: Malformed LinkedIn external link
-  if (normalizedPath.includes("www.linkedin.com/in/i8-studio")) {
+  if (normalizedPath.includes("linkedin.com/in/i8-studio")) {
     return NextResponse.redirect("https://www.linkedin.com/in/i8-studio/", 301);
   }
 
-  // 301 redirects: Legacy service / category routes to current routes
-  const LEGACY_SERVICE_REDIRECTS: Record<string, string> = {
+  // 301 redirects: Legacy routes, old services, deleted projects to current active pages
+  const LEGACY_URL_REDIRECTS: Record<string, string> = {
+    // 1. Missing / New 404 Routes
+    "/market-news": "/ja/news",
+    "/ja/market-news": "/ja/news",
+    "/en/market-news": "/en/news",
+    "/vr360": "/ja/service/vr360",
+    "/ja/vr360": "/ja/service/vr360",
+    "/en/vr360": "/en/service/vr360",
+    "/bim-rxiepcax4z": "/ja/service/bim-services",
+    "/ja/bim-rxiepcax4z": "/ja/service/bim-services",
+    "/en/bim-rxiepcax4z": "/en/service/bim-services",
+
+    // 2. Deleted projects / portfolio items -> redirect to Works page
+    "/hotel-mokurea-on-kouri-island-okinawa-all-rooms-have-ocean-views-and-terraces-and-an-infinity-pool": "/ja/works",
+    "/ja/hotel-mokurea-on-kouri-island-okinawa-all-rooms-have-ocean-views-and-terraces-and-an-infinity-pool": "/ja/works",
+    "/en/hotel-moclea-in-kouri-island-okinawa-all-rooms-with-ocean-views-and-terraces-featuring-an-infinity-pool": "/en/works",
+    "/ja/hotel-moclea-in-kouri-island-okinawa-all-rooms-with-ocean-views-and-terraces-featuring-an-infinity-pool": "/ja/works",
+    "/en/residence-design-that-luxuriously-embraces-the-nature-of-miura-harmonizing-elegantly-with-the-city": "/en/works",
+    "/ja/residence-design-that-luxuriously-embraces-the-nature-of-miura-harmonizing-elegantly-with-the-city": "/ja/works",
+    "/kudochi-sauna": "/ja/works",
+    "/ja/kudochi-sauna": "/ja/works",
+    "/en/kudochi-sauna": "/en/works",
+    "/apa-hotel": "/ja/works",
+    "/ja/apa-hotel": "/ja/works",
+    "/en/apa-hotel": "/en/works",
+    "/hiroshima-gate-park-taisei-design-planners-architects-engineers": "/ja/works",
+    "/ja/hiroshima-gate-park-taisei-design-planners-architects-engineers": "/ja/works",
+    "/en/hiroshima-gate-park-taisei-design-planners-architects-engineers": "/en/works",
+    "/neko-house": "/ja/works",
+    "/ja/neko-house": "/ja/works",
+    "/en/neko-house": "/en/works",
+    "/hotel-lobby": "/ja/works",
+    "/ja/hotel-lobby": "/ja/works",
+    "/en/hotel-lobby": "/en/works",
+    "/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto": "/ja/works",
+    "/ja/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto": "/ja/works",
+    "/en/we-pursue-new-ways-of-living-while-cherishing-the-rich-nature-that-is-unique-to-shimamoto": "/en/works",
+    "/club": "/ja/works",
+    "/ja/club": "/ja/works",
+    "/en/club": "/en/works",
+    "/l465rgyua3": "/ja",
+    "/ja/l465rgyua3": "/ja",
+    "/en/l465rgyua3": "/en",
+
+    // 3. Legacy service / category routes to current routes
     "/service/3d-animation": "/ja/service/cg-video",
     "/ja/service/3d-animation": "/ja/service/cg-video",
     "/en/service/3d-animation": "/en/service/cg-video",
@@ -166,9 +164,9 @@ export async function middleware(request: NextRequest) {
     "/en/blog-2": "/en/blogs",
   };
 
-  if (LEGACY_SERVICE_REDIRECTS[normalizedPath]) {
+  if (LEGACY_URL_REDIRECTS[normalizedPath]) {
     return NextResponse.redirect(
-      new URL(LEGACY_SERVICE_REDIRECTS[normalizedPath], request.url),
+      new URL(LEGACY_URL_REDIRECTS[normalizedPath], request.url),
       301
     );
   }

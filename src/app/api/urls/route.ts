@@ -3,8 +3,40 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Danh sách 27 URLs gặp lỗi 404 từ Google Search Console
+// Danh sách 34 URLs gặp lỗi 404 từ Google Search Console (đã cấu hình 301 Redirect toàn bộ)
 const GSC_404_URLS = [
+  {
+    url: "https://i8studio.vn/market-news",
+    status: "SAI_CAN_REDIRECT",
+    statusLabel: "Sai đường dẫn (Đã Redirect 301)",
+    reason: "Link tin tức cũ. Chuyển hướng về trang tin tức chuẩn /ja/news.",
+    suggestedRedirect: "/ja/news",
+    currentEquivalent: "/ja/news",
+  },
+  {
+    url: "https://i8studio.vn/en/vr360",
+    status: "SAI_CAN_REDIRECT",
+    statusLabel: "Sai đường dẫn (Đã Redirect 301)",
+    reason: "Route tiếng Anh cũ thiếu tiền tố /service/. Đã chuyển hướng về /en/service/vr360.",
+    suggestedRedirect: "/en/service/vr360",
+    currentEquivalent: "/en/service/vr360",
+  },
+  {
+    url: "https://i8studio.vn/ja/www.linkedin.com/in/i8-studio",
+    status: "SAI_CU_PHAP",
+    statusLabel: "Sai cú pháp URL (Đã Redirect 301 ra ngoài)",
+    reason: "Link ngoài LinkedIn thiếu https://. Đã chuyển hướng về trang LinkedIn chính thức.",
+    suggestedRedirect: "https://www.linkedin.com/in/i8-studio/",
+    currentEquivalent: "https://www.linkedin.com/in/i8-studio/",
+  },
+  {
+    url: "https://i8studio.vn/en/bim-rxiepcax4z",
+    status: "SAI_CAN_REDIRECT",
+    statusLabel: "Sai đường dẫn (Đã Redirect 301)",
+    reason: "Slug tự sinh cũ của BIM. Đã chuyển hướng về /en/service/bim-services.",
+    suggestedRedirect: "/en/service/bim-services",
+    currentEquivalent: "/en/service/bim-services",
+  },
   {
     url: "https://i8studio.vn/service/3d-animation",
     status: "SAI_CAN_REDIRECT",

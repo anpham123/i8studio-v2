@@ -26,6 +26,16 @@ const nextConfig = {
         destination: "https://www.linkedin.com/:path*",
         permanent: true,
       },
+      {
+        source: "/:locale(ja|en)/www.linkedin.com/:path*",
+        destination: "https://www.linkedin.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/www.linkedin.com/:path*",
+        destination: "https://www.linkedin.com/:path*",
+        permanent: true,
+      },
     ];
   },
   async headers() {
