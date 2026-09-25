@@ -3,6 +3,7 @@ import { translateBlogEyebrow, translateBlogBadge } from "@/lib/blog-categories"
 import { getEmbedUrl } from "@/lib/embed";
 import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
 import AutoPlayVideo from "@/components/blog/AutoPlayVideo";
+import Panorama360Viewer from "@/components/public/Panorama360Viewer";
 
 export interface SectionData {
   type: "checkcam" | "stage" | "comparison" | "insight";
@@ -146,8 +147,18 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
           <div className="w-full bg-white rounded-none overflow-hidden border border-gray-200/90 shadow-xs flex flex-col mb-8 hover:shadow-md transition-shadow">
             {(() => {
               const isEmbedVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+              const isEmbedImage =
+                !isEmbedVideo &&
+                Boolean(
+                  data.mediaEmbedUrl &&
+                    (/\.(jpe?g|png|webp|gif|svg)(\?|$)/i.test(data.mediaEmbedUrl) ||
+                      data.mediaEmbedUrl.startsWith("/uploads/"))
+                );
               const isImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.image || "");
-              const embedUrl = data.mediaEmbedUrl && !isEmbedVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+              const embedUrl =
+                data.mediaEmbedUrl && !isEmbedVideo && !isEmbedImage
+                  ? getEmbedUrl(data.mediaEmbedUrl)
+                  : null;
 
               if (isEmbedVideo) {
                 return (
@@ -156,6 +167,14 @@ export default function CheckcamSection({ data, locale = "ja" }: { data: Section
                     className="w-full h-full object-cover"
                     containerClassName="w-full aspect-video bg-black relative"
                   />
+                );
+              }
+
+              if (isEmbedImage && data.mediaEmbedUrl) {
+                return (
+                  <div className="w-full aspect-video sm:aspect-[16/9] min-h-[360px] sm:min-h-[480px] bg-black">
+                    <Panorama360Viewer src={data.mediaEmbedUrl} />
+                  </div>
                 );
               }
 

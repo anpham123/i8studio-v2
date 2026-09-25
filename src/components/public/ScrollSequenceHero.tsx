@@ -5,6 +5,29 @@ import { useScroll, useTransform, useSpring, motion, AnimatePresence } from "fra
 import Link from "next/link";
 import { useLocale } from "next-intl";
 
+
+
+function renderFormattedText(text: string) {
+  if (!text) return null;
+  // Splits on <br>, <br/>, <br />, <\br>, </br>, or \n
+  const parts = text.split(/(?:<\\?br\s*\/?>|<\/br>|\r?\n)/i);
+  if (parts.length === 1) return text;
+  return parts.map((part, index) => (
+    <span key={index} className="inline-block sm:inline">
+      {index > 0 && <br />}
+      {part}
+    </span>
+  ));
+}
+
+function getContrastShadow(color: string, isBig = false) {
+  const isDark = /^#(?:[0-3][0-9a-fA-F]{5}|0{3})/i.test(color) || color === "black" || color === "#121316";
+  if (isDark) {
+    return isBig ? "drop-shadow(0 2px 14px rgba(255,255,255,0.85))" : "drop-shadow(0 2px 8px rgba(255,255,255,0.8))";
+  }
+  return isBig ? "drop-shadow(0 2px 14px rgba(0,0,0,0.95))" : "drop-shadow(0 2px 10px rgba(0,0,0,0.95))";
+}
+
 interface ScrollSequenceHeroProps {
   totalFrames?: number;
   framePattern?: (index: number) => string;
@@ -77,7 +100,25 @@ export default function ScrollSequenceHero({
     ? (heroTexts.heroBeat3CtaJa || "無料相談・お見積り")
     : (heroTexts.heroBeat3CtaEn || "Request Free Quote");
 
-  const beat3CtaLink = heroTexts.heroBeat3CtaLink || `/${locale}/contact`;
+  const beat3CtaLink = `/${locale}/landingpage`;
+
+  // Dynamic text colors from Admin Settings
+  const introTagColor = heroTexts.heroIntroTagColor || "#10b981";
+  const introTitleColor = heroTexts.heroIntroTitleColor || "#ffffff";
+  const introDescColor = heroTexts.heroIntroDescColor || "#ffffff";
+
+  const beat1TagColor = heroTexts.heroBeat1TagColor || "#10b981";
+  const beat1TitleColor = heroTexts.heroBeat1TitleColor || "#ffffff";
+  const beat1DescColor = heroTexts.heroBeat1DescColor || "#ffffff";
+
+  const beat2TagColor = heroTexts.heroBeat2TagColor || "#10b981";
+  const beat2TitleColor = heroTexts.heroBeat2TitleColor || "#ffffff";
+  const beat2DescColor = heroTexts.heroBeat2DescColor || "#ffffff";
+
+  const beat3TagColor = heroTexts.heroBeat3TagColor || "#10b981";
+  const beat3TitleColor = heroTexts.heroBeat3TitleColor || "#ffffff";
+  const beat3DescColor = heroTexts.heroBeat3DescColor || "#ffffff";
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -363,13 +404,13 @@ export default function ScrollSequenceHero({
               transition={{ duration: 0.6 }}
               className="absolute inset-0 z-50 bg-[#111] flex flex-col items-center justify-center gap-4 text-white"
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 border-t-[#c5a666] animate-spin" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 border-t-[#10b981] animate-spin" />
               <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/70 font-roboto">
                 Loading 3D Experience · {progressPercent}%
               </p>
               <div className="w-36 sm:w-48 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-[#c5a666] to-[#e6ca85] transition-all duration-200"
+                  className="h-full bg-gradient-to-r from-[#10b981] to-[#34d399] transition-all duration-200"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -410,17 +451,17 @@ export default function ScrollSequenceHero({
                 exit={{ opacity: 0, y: -3 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
-                  {introEyebrow}
+                <span style={{ color: introTagColor, filter: getContrastShadow(introTagColor) }} className="text-[10px] uppercase tracking-[0.25em] font-bold mb-1 block drop-shadow">
+                  {renderFormattedText(introEyebrow)}
                 </span>
                 <h1
-                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
-                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                  className="text-sm font-bold leading-tight mb-1 drop-shadow [text-wrap:balance] whitespace-pre-line"
+                  style={{ color: introTitleColor, filter: getContrastShadow(introTitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                 >
-                  {introTitle}
+                  {renderFormattedText(introTitle)}
                 </h1>
-                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
-                  {introDesc}
+                <p style={{ color: introDescColor, filter: getContrastShadow(introDescColor) }} className="text-xs sm:text-sm font-bold drop-shadow leading-snug line-clamp-2 mb-2">
+                  {renderFormattedText(introDesc)}
                 </p>
               </motion.div>
             )}
@@ -432,17 +473,17 @@ export default function ScrollSequenceHero({
                 exit={{ opacity: 0, y: -3 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
-                  {beat1Tag}
+                <span style={{ color: beat1TagColor, filter: getContrastShadow(beat1TagColor) }} className="text-[10px] uppercase tracking-[0.25em] font-bold mb-1 block drop-shadow">
+                  {renderFormattedText(beat1Tag)}
                 </span>
                 <h2
-                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
-                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                  className="text-sm font-bold leading-tight mb-1 drop-shadow [text-wrap:balance] whitespace-pre-line"
+                  style={{ color: beat1TitleColor, filter: getContrastShadow(beat1TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                 >
-                  {beat1Title}
+                  {renderFormattedText(beat1Title)}
                 </h2>
-                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
-                  {beat1Desc}
+                <p style={{ color: beat1DescColor, filter: getContrastShadow(beat1DescColor) }} className="text-xs sm:text-sm font-bold drop-shadow leading-snug line-clamp-2 mb-2">
+                  {renderFormattedText(beat1Desc)}
                 </p>
               </motion.div>
             )}
@@ -454,17 +495,17 @@ export default function ScrollSequenceHero({
                 exit={{ opacity: 0, y: -3 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
-                  {beat2Tag}
+                <span style={{ color: beat2TagColor, filter: getContrastShadow(beat2TagColor) }} className="text-[10px] uppercase tracking-[0.25em] font-bold mb-1 block drop-shadow">
+                  {renderFormattedText(beat2Tag)}
                 </span>
                 <h2
-                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
-                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                  className="text-sm font-bold leading-tight mb-1 drop-shadow [text-wrap:balance] whitespace-pre-line"
+                  style={{ color: beat2TitleColor, filter: getContrastShadow(beat2TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                 >
-                  {beat2Title}
+                  {renderFormattedText(beat2Title)}
                 </h2>
-                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
-                  {beat2Desc}
+                <p style={{ color: beat2DescColor, filter: getContrastShadow(beat2DescColor) }} className="text-xs sm:text-sm font-bold drop-shadow leading-snug line-clamp-2 mb-2">
+                  {renderFormattedText(beat2Desc)}
                 </p>
               </motion.div>
             )}
@@ -476,17 +517,17 @@ export default function ScrollSequenceHero({
                 exit={{ opacity: 0, y: -3 }}
                 transition={{ duration: 0.2 }}
               >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-[#c5a666] font-bold mb-1 block drop-shadow">
-                  {beat3Tag}
+                <span style={{ color: beat3TagColor, filter: getContrastShadow(beat3TagColor) }} className="text-[10px] uppercase tracking-[0.25em] font-bold mb-1 block drop-shadow">
+                  {renderFormattedText(beat3Tag)}
                 </span>
                 <h2
-                  className="text-sm font-bold text-white leading-tight mb-1 drop-shadow [text-wrap:balance]"
-                  style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+                  className="text-sm font-bold leading-tight mb-1 drop-shadow [text-wrap:balance] whitespace-pre-line"
+                  style={{ color: beat3TitleColor, filter: getContrastShadow(beat3TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
                 >
-                  {beat3Title}
+                  {renderFormattedText(beat3Title)}
                 </h2>
-                <p className="text-white/85 text-[11px] font-light drop-shadow leading-snug line-clamp-2 mb-2">
-                  {beat3Desc}
+                <p style={{ color: beat3DescColor, filter: getContrastShadow(beat3DescColor) }} className="text-xs sm:text-sm font-bold drop-shadow leading-snug line-clamp-2 mb-2">
+                  {renderFormattedText(beat3Desc)}
                 </p>
               </motion.div>
             )}
@@ -494,7 +535,7 @@ export default function ScrollSequenceHero({
           <div className="pointer-events-auto mt-1 flex items-center justify-between">
             <Link
               href={beat3CtaLink}
-              className="inline-block px-4 py-1.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-[11px] font-bold uppercase tracking-wider rounded-full shadow-lg"
+              className="inline-block px-4 py-1.5 bg-[#10b981] hover:bg-[#059669] text-white text-[11px] font-bold uppercase tracking-wider rounded-full shadow-lg"
             >
               {beat3Cta}
             </Link>
@@ -510,17 +551,17 @@ export default function ScrollSequenceHero({
           className="hidden sm:flex absolute inset-x-0 bottom-0 pb-12 md:pb-14 flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
         >
           <div className="flex flex-col items-center max-w-4xl mb-5">
-            <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-              {introEyebrow}
+            <span style={{ color: introTagColor, filter: getContrastShadow(introTagColor) }} className="text-sm md:text-[15px] uppercase tracking-[0.35em] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
+              {renderFormattedText(introEyebrow)}
             </span>
             <h1
-              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance]"
-              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+              className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance] whitespace-pre-line"
+              style={{ color: introTitleColor, filter: getContrastShadow(introTitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
             >
-              {introTitle}
+              {renderFormattedText(introTitle)}
             </h1>
-            <p className="text-white/85 text-sm md:text-base max-w-xl font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
-              {introDesc}
+            <p style={{ color: introDescColor, filter: getContrastShadow(introDescColor) }} className="text-base md:text-lg lg:text-xl max-w-2xl font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] leading-relaxed tracking-wide">
+              {renderFormattedText(introDesc)}
             </p>
           </div>
         </motion.div>
@@ -530,17 +571,17 @@ export default function ScrollSequenceHero({
           style={{ opacity: story2Opacity, y: story2Y }}
           className="hidden sm:flex absolute bottom-12 md:bottom-14 left-10 md:left-14 flex-col items-start pointer-events-none z-20"
         >
-          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-            {beat1Tag}
+          <span style={{ color: beat1TagColor, filter: getContrastShadow(beat1TagColor) }} className="text-sm md:text-[15px] uppercase tracking-[0.35em] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
+            {renderFormattedText(beat1Tag)}
           </span>
           <h2
-            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance]"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance] whitespace-pre-line"
+            style={{ color: beat1TitleColor, filter: getContrastShadow(beat1TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
-            {beat1Title}
+            {renderFormattedText(beat1Title)}
           </h2>
-          <p className="text-white/90 text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-md lg:max-w-xl">
-            {beat1Desc}
+          <p style={{ color: beat1DescColor, filter: getContrastShadow(beat1DescColor) }} className="text-base md:text-lg lg:text-xl leading-relaxed font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] max-w-lg lg:max-w-2xl tracking-wide">
+            {renderFormattedText(beat1Desc)}
           </p>
         </motion.div>
 
@@ -549,17 +590,17 @@ export default function ScrollSequenceHero({
           style={{ opacity: story3Opacity, y: story3Y }}
           className="hidden sm:flex absolute bottom-28 md:bottom-32 right-10 md:right-14 flex-col items-end text-right pointer-events-none z-20"
         >
-          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-            {beat2Tag}
+          <span style={{ color: beat2TagColor, filter: getContrastShadow(beat2TagColor) }} className="text-sm md:text-[15px] uppercase tracking-[0.35em] font-bold mb-2 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
+            {renderFormattedText(beat2Tag)}
           </span>
           <h2
-            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance]"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-3 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] [text-wrap:balance] whitespace-pre-line"
+            style={{ color: beat2TitleColor, filter: getContrastShadow(beat2TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
-            {beat2Title}
+            {renderFormattedText(beat2Title)}
           </h2>
-          <p className="text-white/90 text-sm md:text-base leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-md lg:max-w-xl">
-            {beat2Desc}
+          <p style={{ color: beat2DescColor, filter: getContrastShadow(beat2DescColor) }} className="text-base md:text-lg lg:text-xl leading-relaxed font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] max-w-lg lg:max-w-2xl tracking-wide">
+            {renderFormattedText(beat2Desc)}
           </p>
         </motion.div>
 
@@ -568,22 +609,22 @@ export default function ScrollSequenceHero({
           style={{ opacity: story4Opacity, y: story4Y }}
           className="hidden sm:flex absolute inset-x-0 bottom-0 pb-20 flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
         >
-          <span className="text-sm md:text-[15px] uppercase tracking-[0.35em] text-[#c5a666] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-            {beat3Tag}
+          <span style={{ color: beat3TagColor, filter: getContrastShadow(beat3TagColor) }} className="text-sm md:text-[15px] uppercase tracking-[0.35em] font-bold mb-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
+            {renderFormattedText(beat3Tag)}
           </span>
           <h2
-            className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance]"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3 [text-wrap:balance] whitespace-pre-line"
+            style={{ color: beat3TitleColor, filter: getContrastShadow(beat3TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
           >
-            {beat3Title}
+            {renderFormattedText(beat3Title)}
           </h2>
-          <p className="text-white/85 text-sm md:text-base max-w-xl mb-6 font-light drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] leading-relaxed">
-            {beat3Desc}
+          <p style={{ color: beat3DescColor, filter: getContrastShadow(beat3DescColor) }} className="text-base md:text-lg lg:text-xl max-w-2xl mb-6 font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] leading-relaxed tracking-wide whitespace-pre-line">
+            {renderFormattedText(beat3Desc)}
           </p>
           <div className="flex items-center justify-center pointer-events-auto">
             <Link
               href={beat3CtaLink}
-              className="px-8 py-3.5 bg-[#c5a666] hover:bg-[#b8935a] text-[#111] text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
+              className="px-8 py-3.5 bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
             >
               {beat3Cta}
             </Link>

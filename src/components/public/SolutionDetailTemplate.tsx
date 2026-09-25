@@ -142,14 +142,40 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             return (
               <>
                 {useVideo ? (
-                  <video
-                    src={useVideo}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center"
-                  />
+                  (/\.(mp4|webm|mov)(\?.*)?$/i.test(useVideo) || useVideo.startsWith("/uploads/")) ? (
+                    <video
+                      src={useVideo}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center"
+                    />
+                  ) : (() => {
+                    const embed = getEmbedUrl(useVideo);
+                    if (!embed) {
+                      return (
+                        <video
+                          src={useVideo}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          className="h-full min-w-[190%] sm:min-w-full sm:w-full sm:h-full object-cover object-center"
+                        />
+                      );
+                    }
+                    const fullEmbed = embed.includes("?")
+                      ? `${embed}&autoplay=1&mute=1&loop=1&controls=0`
+                      : `${embed}?autoplay=1&mute=1&loop=1&controls=0`;
+                    return (
+                      <iframe
+                        src={fullEmbed}
+                        className="w-full h-full min-w-[140%] min-h-[140%] pointer-events-none scale-110 object-cover border-0"
+                        allow="autoplay; fullscreen; encrypted-media"
+                      />
+                    );
+                  })()
                 ) : useImage ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <motion.img

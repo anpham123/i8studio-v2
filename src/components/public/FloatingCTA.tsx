@@ -7,9 +7,22 @@ import { useLocale, useTranslations } from "next-intl";
 
 export default function FloatingCTA() {
   const [hidden, setHidden] = useState(false);
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const locale = useLocale();
   const t = useTranslations("nav");
   const contactRef = useRef<Element | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Only show after scrolling down past initial hero (e.g. 600px or 80% viewport)
+      const threshold = typeof window !== "undefined" ? window.innerHeight * 0.75 : 500;
+      setScrolledPastHero(window.scrollY > threshold);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const contact = document.getElementById("contact");
@@ -24,12 +37,14 @@ export default function FloatingCTA() {
     return () => observer.disconnect();
   }, []);
 
+  const isVisible = scrolledPastHero && !hidden;
+
   return (
     <>
       {/* Desktop: pill fixed bottom-right */}
       <div
         className={`hidden lg:block fixed bottom-8 right-8 z-40 transition-all duration-300 ${
-          hidden ? "translate-y-20 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+          !isVisible ? "translate-y-20 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         }`}
       >
         <Link
@@ -44,7 +59,7 @@ export default function FloatingCTA() {
       {/* Mobile: sticky bottom bar */}
       <div
         className={`lg:hidden fixed inset-x-0 bottom-0 z-40 w-full max-w-full transition-all duration-300 pointer-events-auto ${
-          hidden ? "translate-y-full" : "translate-y-0"
+          !isVisible ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         }`}
       >
         <div className="w-full bg-[#0d0d14]/95 backdrop-blur-md border-t border-white/10 px-3 sm:px-4 pt-2.5 pb-[calc(0.6rem+env(safe-area-inset-bottom))] box-border">

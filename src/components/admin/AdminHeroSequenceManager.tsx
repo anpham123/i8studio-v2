@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Film, Upload, RefreshCw, CheckCircle2, Save, Type, Sparkles, ExternalLink } from "lucide-react";
+import { Film, Upload, RefreshCw, CheckCircle2, Save, Type, Sparkles, ExternalLink, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
 
 interface HeroMeta {
@@ -39,7 +39,90 @@ const DEFAULT_HERO_TEXTS: Record<string, string> = {
   heroBeat3CtaJa: "無料相談・お見積り",
   heroBeat3CtaEn: "Request Free Quote",
   heroBeat3CtaLink: "/contact",
+
+  heroIntroTagColor: "#10b981",
+  heroIntroTitleColor: "#ffffff",
+  heroIntroDescColor: "#ffffff",
+
+  heroBeat1TagColor: "#10b981",
+  heroBeat1TitleColor: "#ffffff",
+  heroBeat1DescColor: "#ffffff",
+
+  heroBeat2TagColor: "#10b981",
+  heroBeat2TitleColor: "#ffffff",
+  heroBeat2DescColor: "#ffffff",
+
+  heroBeat3TagColor: "#10b981",
+  heroBeat3TitleColor: "#ffffff",
+  heroBeat3DescColor: "#ffffff",
 };
+
+function ColorField({
+  label,
+  value,
+  onChange,
+  defaultValue = "#ffffff",
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  defaultValue?: string;
+}) {
+  const currentColor = value || defaultValue;
+  const presets = [
+    { label: "Trắng", hex: "#ffffff" },
+    { label: "Đen", hex: "#121316" },
+    { label: "Vàng", hex: "#f59e0b" },
+    { label: "Xanh ngọc", hex: "#10b981" },
+    { label: "Xanh lam", hex: "#38bdf8" },
+  ];
+
+  return (
+    <div className="bg-white/[0.03] border border-white/10 rounded-lg p-3">
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-xs text-stone-300 font-medium flex items-center gap-2">
+          <span
+            className="w-3.5 h-3.5 rounded-full border border-white/20 inline-block shadow-sm"
+            style={{ backgroundColor: currentColor }}
+          />
+          {label}
+        </label>
+        <span className="text-[11px] font-mono text-stone-400 uppercase">{currentColor}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={currentColor.startsWith("#") && currentColor.length === 7 ? currentColor : "#ffffff"}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent p-0"
+        />
+        <input
+          type="text"
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={defaultValue}
+          className="flex-1 bg-white/5 border border-white/15 rounded-md px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-[#c5a666]"
+        />
+      </div>
+      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+        {presets.map((p) => (
+          <button
+            key={p.hex}
+            type="button"
+            onClick={() => onChange(p.hex)}
+            className={`text-[10px] px-2 py-0.5 rounded border transition-all ${
+              currentColor.toLowerCase() === p.hex.toLowerCase()
+                ? "border-[#c5a666] text-[#c5a666] bg-[#c5a666]/10 font-bold"
+                : "border-white/10 text-stone-400 hover:border-white/25 hover:text-white"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminHeroSequenceManager() {
   const [meta, setMeta] = useState<HeroMeta | null>(null);
@@ -54,6 +137,8 @@ export default function AdminHeroSequenceManager() {
   const [texts, setTexts] = useState<Record<string, string>>(DEFAULT_HERO_TEXTS);
   const [savingTexts, setSavingTexts] = useState(false);
   const [activeTab, setActiveTab] = useState<"video" | "text">("text");
+  const [heroVideoHidden, setHeroVideoHidden] = useState(false);
+  const [togglingVisibility, setTogglingVisibility] = useState(false);
 
   const fetchMeta = async () => {
     try {
@@ -83,6 +168,7 @@ export default function AdminHeroSequenceManager() {
           ...prev,
           ...json.data,
         }));
+        setHeroVideoHidden(json.data.heroVideoHidden === "true");
       }
     } catch (e) {
       console.error(e);
@@ -200,6 +286,33 @@ export default function AdminHeroSequenceManager() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={async () => {
+              setTogglingVisibility(true);
+              const newVal = !heroVideoHidden;
+              try {
+                await fetch("/api/settings", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ heroVideoHidden: newVal ? "true" : "false" }),
+                });
+                setHeroVideoHidden(newVal);
+                toast(newVal ? "Đã ẩn video Hero trên trang chủ" : "Đã hiện video Hero trên trang chủ", "success");
+                fetch("/api/revalidate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: "/" }) });
+              } catch { toast("Lỗi khi cập nhật", "error"); }
+              setTogglingVisibility(false);
+            }}
+            disabled={togglingVisibility}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium backdrop-blur-sm border transition-colors disabled:opacity-50 ${
+              heroVideoHidden
+                ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30"
+                : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/30"
+            }`}
+            title={heroVideoHidden ? "Video đang bị ẩn trên trang chủ. Click để hiện lại." : "Video đang hiện trên trang chủ. Click để ẩn."}
+          >
+            {heroVideoHidden ? <EyeOff size={13} /> : <Eye size={13} />}
+            <span>{heroVideoHidden ? "Video đang ẩn" : "Video đang hiện"}</span>
+          </button>
           <a
             href="/ja"
             target="_blank"
@@ -327,6 +440,35 @@ export default function AdminHeroSequenceManager() {
                 />
               </div>
             </div>
+            {/* Màu sắc chữ Phân đoạn Mở đầu */}
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🎨</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c5a666]">
+                  Tùy chỉnh màu chữ Phân đoạn Mở đầu (Chống chìm màu khi đổi video)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <ColorField
+                  label="Màu tiêu đề nhỏ trên (Eyebrow)"
+                  value={texts.heroIntroTagColor}
+                  onChange={(val) => setTexts({ ...texts, heroIntroTagColor: val })}
+                  defaultValue="#10b981"
+                />
+                <ColorField
+                  label="Màu tiêu đề chính lớn"
+                  value={texts.heroIntroTitleColor}
+                  onChange={(val) => setTexts({ ...texts, heroIntroTitleColor: val })}
+                  defaultValue="#ffffff"
+                />
+                <ColorField
+                  label="Màu đoạn mô tả phụ"
+                  value={texts.heroIntroDescColor}
+                  onChange={(val) => setTexts({ ...texts, heroIntroDescColor: val })}
+                  defaultValue="#ffffff"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Section 2: Beat 1 (Góc trái dưới) */}
@@ -413,6 +555,35 @@ export default function AdminHeroSequenceManager() {
                 />
               </div>
             </div>
+            {/* Màu sắc chữ Phân đoạn 1 */}
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🎨</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c5a666]">
+                  Tùy chỉnh màu chữ Phân đoạn 1 (Chống chìm màu khi đổi video)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <ColorField
+                  label="Màu nhãn số thứ tự"
+                  value={texts.heroBeat1TagColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat1TagColor: val })}
+                  defaultValue="#10b981"
+                />
+                <ColorField
+                  label="Màu tiêu đề"
+                  value={texts.heroBeat1TitleColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat1TitleColor: val })}
+                  defaultValue="#ffffff"
+                />
+                <ColorField
+                  label="Màu mô tả"
+                  value={texts.heroBeat1DescColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat1DescColor: val })}
+                  defaultValue="#ffffff"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Section 3: Beat 2 (Góc phải dưới) */}
@@ -496,6 +667,35 @@ export default function AdminHeroSequenceManager() {
                   onChange={(e) => setTexts({ ...texts, heroBeat2DescEn: e.target.value })}
                   placeholder="Atmospheric ambient lighting and seamless indoor-outdoor sightlines create captivating visual storytelling."
                   className="w-full bg-white/5 border border-white/15 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#c5a666]"
+                />
+              </div>
+            </div>
+            {/* Màu sắc chữ Phân đoạn 2 */}
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🎨</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c5a666]">
+                  Tùy chỉnh màu chữ Phân đoạn 2 (Chống chìm màu khi đổi video)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <ColorField
+                  label="Màu nhãn số thứ tự"
+                  value={texts.heroBeat2TagColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat2TagColor: val })}
+                  defaultValue="#10b981"
+                />
+                <ColorField
+                  label="Màu tiêu đề"
+                  value={texts.heroBeat2TitleColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat2TitleColor: val })}
+                  defaultValue="#ffffff"
+                />
+                <ColorField
+                  label="Màu mô tả"
+                  value={texts.heroBeat2DescColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat2DescColor: val })}
+                  defaultValue="#ffffff"
                 />
               </div>
             </div>
@@ -620,6 +820,35 @@ export default function AdminHeroSequenceManager() {
                   onChange={(e) => setTexts({ ...texts, heroBeat3CtaLink: e.target.value })}
                   placeholder="/contact"
                   className="w-full bg-white/5 border border-white/15 rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-[#c5a666]"
+                />
+              </div>
+            </div>
+            {/* Màu sắc chữ Phân đoạn 3 */}
+            <div className="mt-5 pt-4 border-t border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">🎨</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c5a666]">
+                  Tùy chỉnh màu chữ Phân đoạn 3 (Chống chìm màu khi đổi video)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <ColorField
+                  label="Màu nhãn số thứ tự"
+                  value={texts.heroBeat3TagColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat3TagColor: val })}
+                  defaultValue="#10b981"
+                />
+                <ColorField
+                  label="Màu tiêu đề"
+                  value={texts.heroBeat3TitleColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat3TitleColor: val })}
+                  defaultValue="#ffffff"
+                />
+                <ColorField
+                  label="Màu mô tả"
+                  value={texts.heroBeat3DescColor}
+                  onChange={(val) => setTexts({ ...texts, heroBeat3DescColor: val })}
+                  defaultValue="#ffffff"
                 />
               </div>
             </div>

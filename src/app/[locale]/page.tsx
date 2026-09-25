@@ -15,6 +15,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = params;
   const isJa = locale === "ja";
+
+  const topWorks = await prisma.work.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    take: 5,
+    select: { image: true },
+  }).catch(() => []);
+  const topImages = topWorks.map((w) => w.image).filter(Boolean);
+
   return buildMetadata({
     title: isJa
       ? "i8 STUDIO — 建築CGパース・3Dアニメーション・VR・BIM制作"
@@ -24,7 +32,8 @@ export async function generateMetadata({
       : "High-quality 3DCG, Animation, VR & BIM outsourcing for Japanese architecture market. Trusted by 50+ Japanese companies.",
     path: "",
     locale,
-    image: "/og-default.jpg",
+    image: topImages[0] || "/og-default.jpg",
+    images: topImages.length > 0 ? topImages : ["/og-default.jpg"],
   });
 }
 
@@ -83,11 +92,13 @@ export default async function HomePage() {
       />
 
       {/* 1. Scroll-driven 3D Walkthrough Hero */}
-      <ScrollSequenceHero
-        fallbackVideo="/uploads/anhherrosection/1.mp4"
-        totalFrames={242}
-        heroTexts={heroTexts}
-      />
+      {heroTexts.heroVideoHidden !== "true" && (
+        <ScrollSequenceHero
+          fallbackVideo="/uploads/anhherrosection/1.mp4"
+          totalFrames={242}
+          heroTexts={heroTexts}
+        />
+      )}
 
       {/* 2. Masonry Editorial Gallery below */}
       <HeroEditorial images={heroImages} />

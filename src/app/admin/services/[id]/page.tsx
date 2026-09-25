@@ -210,18 +210,28 @@ export default function EditServicePage() {
                 </div>
               </div>
             )}
-            <Field form={form} set={set} k="heroVideo" label="Hero Video URL" placeholder="/uploads/videos/hero.mp4" />
-            {String(form.heroVideo || "").length > 0 && (
+            <Field form={form} set={set} k="heroVideo" label="Hero Video URL" placeholder="/uploads/videos/hero.mp4 hoặc link YouTube, Vimeo" />
+            {String(form.heroVideo || "").trim().length > 0 && (
               <div className="relative">
-                <video
-                  src={String(form.heroVideo)}
-                  controls
-                  muted
-                  className="w-full rounded-lg border border-gray-200 max-h-[200px] object-contain bg-black"
-                />
+                {(() => {
+                  const val = String(form.heroVideo || "").trim();
+                  const isDirect = /\.(mp4|webm|mov)(\?.*)?$/i.test(val) || val.startsWith("/uploads/");
+                  if (isDirect) {
+                    return (
+                      <video
+                        src={val}
+                        controls
+                        muted
+                        className="w-full rounded-lg border border-gray-200 max-h-[220px] object-contain bg-black"
+                      />
+                    );
+                  }
+                  return <MediaEmbedPreview url={val} className="max-h-[260px]" />;
+                })()}
                 <button
                   onClick={() => set("heroVideo", "")}
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
+                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors z-20 shadow-md"
+                  title="Xóa video"
                 >
                   <X size={12} />
                 </button>

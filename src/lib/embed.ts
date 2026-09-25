@@ -11,10 +11,18 @@ export function getEmbedUrl(url: string | null | undefined): string | null {
     /youtu\.be\/([a-zA-Z0-9_-]{11})/,
     /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
     /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/,
   ];
   for (const p of ytPatterns) {
     const m = trimmed.match(p);
-    if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+    if (m) return `https://www.youtube.com/embed/${m[1]}?rel=0&autoplay=1&mute=1`;
+  }
+
+  // Google Drive
+  const gdriveMatch = trimmed.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (gdriveMatch) {
+    return `https://drive.google.com/file/d/${gdriveMatch[1]}/preview`;
   }
 
   // Vimeo

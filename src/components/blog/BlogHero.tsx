@@ -42,7 +42,7 @@ export default function BlogHero({
   return (
     <section className="relative w-full max-w-full overflow-hidden isolate">
       {/* Back button top-left */}
-      <div className="absolute top-6 sm:top-8 left-4 sm:left-8 lg:left-12 z-30">
+      <div className="absolute top-4 sm:top-6 lg:top-8 left-4 sm:left-8 lg:left-12 z-30">
         <button
           type="button"
           onClick={handleBack}
@@ -65,26 +65,26 @@ export default function BlogHero({
 
       {/* Eyebrow top-right */}
       {eyebrow && (
-        <div className="absolute top-6 sm:top-8 right-4 sm:right-10 lg:right-12 z-30 flex items-center gap-2.5">
+        <div className="absolute top-4 sm:top-6 lg:top-8 right-4 sm:right-10 lg:right-12 z-30 flex items-center gap-2.5">
           <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white/80 text-[10px] sm:text-[11px] uppercase tracking-[0.24em] font-medium shadow-md">
             {getEyebrowText(eyebrow)}
           </div>
         </div>
       )}
 
-      {/* Hero Image — Full Screen Edge-to-Edge (100% Width & Height), crisp and vibrant */}
-      <div className="relative z-10 w-full h-[calc(100vh-var(--header-h,76px))] min-h-[450px] sm:min-h-[580px] flex items-center justify-center overflow-hidden bg-black/5">
+      {/* Hero Image — Full Width Edge-to-Edge & Full Image (Uncropped) */}
+      <div className="relative z-10 w-full overflow-hidden bg-[#0c0b0a]">
         {heroImage ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={heroImage}
             alt={title.replace(/<[^>]*>/g, "")}
-            className="w-full h-full object-cover block select-none"
+            className="w-full h-auto block select-none"
             loading="eager"
             decoding="async"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#0d0c0a] via-[#1e1b14] to-[#2a2318]" />
+          <div className="w-full h-[50vh] min-h-[350px] bg-gradient-to-br from-[#0d0c0a] via-[#1e1b14] to-[#2a2318]" />
         )}
       </div>
 

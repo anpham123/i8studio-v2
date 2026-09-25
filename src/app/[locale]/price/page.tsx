@@ -12,12 +12,27 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const isJa = params.locale === "ja";
-  const topPriceItem = await prisma.priceItem.findFirst({
-    where: { cardImage: { not: "" } },
-    select: { cardImage: true },
-  }).catch(() => null);
+  const [priceItems, topServices] = await Promise.all([
+    prisma.priceItem.findMany({
+      where: { cardImage: { not: "" } },
+      orderBy: { order: "asc" },
+      take: 4,
+      select: { cardImage: true },
+    }).catch(() => []),
+    prisma.service.findMany({
+      where: { image: { not: "" } },
+      orderBy: { order: "asc" },
+      take: 4,
+      select: { image: true },
+    }).catch(() => []),
+  ]);
 
-  const img = topPriceItem?.cardImage || "/og-default.jpg";
+  const images = [
+    ...priceItems.map((p) => p.cardImage),
+    ...topServices.map((s) => s.image),
+  ].filter(Boolean);
+
+  const img = images[0] || "/og-default.jpg";
 
   return buildMetadata({
     title: isJa
@@ -29,7 +44,7 @@ export async function generateMetadata({
     path: "/price",
     locale: params.locale,
     image: img,
-    images: [img, "/og-default.jpg"],
+    images: images.length > 0 ? images.slice(0, 5) : ["/og-default.jpg"],
   });
 }
 

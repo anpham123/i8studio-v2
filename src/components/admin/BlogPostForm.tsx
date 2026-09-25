@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/admin/Toast";
 import { slugify, formatDate } from "@/lib/utils";
-import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X, Calendar, Clock, Send, Eye, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, Save, Loader2, X, Calendar, Clock, Send, Eye, CheckCircle2, AlertCircle, Upload, Film } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import RichEditor from "@/components/admin/RichEditor";
 import MediaEmbedPreview from "@/components/admin/MediaEmbedPreview";
@@ -138,6 +138,8 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
   });
   const [saving, setSaving] = useState(false);
   const [savingAction, setSavingAction] = useState<"draft" | "publish" | "schedule" | "save" | null>(null);
+  const [uploadingVrIndex, setUploadingVrIndex] = useState<number | null>(null);
+  const [uploadVrProgress, setUploadVrProgress] = useState(0);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [scheduleInput, setScheduleInput] = useState<string>(() => {
     const d = initial?.publishedAt && new Date(initial.publishedAt).getTime() > Date.now()
@@ -243,6 +245,47 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
       if (j !== si || sec.body.length <= 1) return sec;
       return { ...sec, body: sec.body.filter((_, k) => k !== bi) };
     }));
+  };
+
+  const handleUploadVrVideo = (si: number, file: File) => {
+    if (!file) return;
+    const allowed = ["video/mp4", "video/webm", "video/quicktime"];
+    if (!allowed.includes(file.type)) {
+      toast("Chỉ chấp nhận video MP4, WebM, MOV", "error");
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast("Video quá lớn (tối đa 200MB)", "error");
+      return;
+    }
+    setUploadingVrIndex(si);
+    setUploadVrProgress(0);
+    const fd = new FormData();
+    fd.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (ev) => {
+      if (ev.lengthComputable) setUploadVrProgress(Math.round((ev.loaded / ev.total) * 100));
+    };
+    xhr.onload = () => {
+      setUploadingVrIndex(null);
+      setUploadVrProgress(0);
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (data.url) {
+          updateSection(si, "mediaEmbedUrl", data.url);
+          toast("Upload video thành công!", "success");
+        } else {
+          toast(data.error || "Upload video thất bại", "error");
+        }
+      } catch { toast("Upload video thất bại", "error"); }
+    };
+    xhr.onerror = () => {
+      setUploadingVrIndex(null);
+      setUploadVrProgress(0);
+      toast("Có lỗi xảy ra khi upload video", "error");
+    };
+    xhr.open("POST", "/api/upload-video");
+    xhr.send(fd);
   };
 
   // Additional images management
@@ -666,12 +709,59 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                       </button>
                     )}
                   </div>
-                  <input
-                    value={sec.mediaEmbedUrl || ""}
-                    onChange={(e) => updateSection(si, "mediaEmbedUrl", e.target.value)}
-                    className="w-full px-3 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-mono"
-                    placeholder="VD: https://kuula.co/share/... hoặc https://my.matterport.com/show/?m=... hoặc link mp4"
-                  />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      value={sec.mediaEmbedUrl || ""}
+                      onChange={(e) => updateSection(si, "mediaEmbedUrl", e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 font-mono"
+                      placeholder="VD: https://kuula.co/share/... hoặc https://my.matterport.com/show/?m=... hoặc upload video"
+                    />
+                    <label
+                      className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 border rounded-md text-xs font-medium cursor-pointer transition-colors shrink-0 ${
+                        uploadingVrIndex === si
+                          ? "bg-gray-100 text-gray-400 border-gray-200 cursor-wait"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-purple-400 hover:text-purple-600 shadow-2xs"
+                      }`}
+                      title="Upload video từ máy tính"
+                    >
+                      {uploadingVrIndex === si ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin text-purple-500" />
+                          <span>{uploadVrProgress}%</span>
+                        </>
+                      ) : (
+                        <>
+                          <Film size={13} className="text-purple-600" />
+                          <span>Upload video từ máy tính</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        className="hidden"
+                        disabled={uploadingVrIndex === si}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleUploadVrVideo(si, file);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {uploadingVrIndex === si && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Đang upload video...</span>
+                        <span className="font-mono font-semibold">{uploadVrProgress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-purple-500 rounded-full transition-all duration-300 ease-out"
+                          style={{ width: `${uploadVrProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   {sec.mediaEmbedUrl && (
                     <div className="mt-2">
                       <p className="text-[11px] text-slate-500 mb-1">Preview tương tác VR360:</p>

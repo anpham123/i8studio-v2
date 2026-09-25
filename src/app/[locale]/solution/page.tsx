@@ -11,12 +11,26 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const isJa = params.locale === "ja";
+  const topWorks = await prisma.work.findMany({
+    where: { image: { not: "" } },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    take: 5,
+    select: { image: true },
+  }).catch(() => []);
+  const topImages = topWorks.map((w) => w.image).filter(Boolean);
+
   return buildMetadata({
-    title: "Solution — What We Create",
-    description:
-      "High-quality 3DCG, Animation, VR Walkthrough, VR 360, Photo Composite, and Digital Model services for Japanese architecture and real estate.",
+    title: isJa
+      ? "ソリューション (Solution) — 建築CG・VR・動画制作"
+      : "Solution — What We Create | 3DCG, VR & Animation",
+    description: isJa
+      ? "高品質な建築CGパース、ウォークスルー動画、VR360、写真合成、デジタル模型など、日本の建築・不動産向けビジュアライゼーション。"
+      : "High-quality 3DCG, Animation, VR Walkthrough, VR 360, Photo Composite, and Digital Model services for Japanese architecture and real estate.",
     path: "/solution",
     locale: params.locale,
+    image: topImages[0] || "/og-default.jpg",
+    images: topImages.length > 0 ? topImages : ["/og-default.jpg"],
   });
 }
 

@@ -18,13 +18,25 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isJa = params.locale === "ja";
-  const topPost = await prisma.blogPost.findFirst({
+  const topPosts = await prisma.blogPost.findMany({
     where: { isPublished: true, publishedAt: { lte: new Date() }, locale: params.locale },
     orderBy: { publishedAt: "desc" },
+    take: 5,
     select: { coverImage: true },
-  }).catch(() => null);
+  }).catch(() => []);
 
-  const img = topPost?.coverImage || "/og-default.jpg";
+  let postImages = topPosts.map((p) => p.coverImage).filter(Boolean);
+  if (postImages.length < 2) {
+    const fallbackPosts = await prisma.blogPost.findMany({
+      where: { isPublished: true, publishedAt: { lte: new Date() } },
+      orderBy: { publishedAt: "desc" },
+      take: 5,
+      select: { coverImage: true },
+    }).catch(() => []);
+    postImages = fallbackPosts.map((p) => p.coverImage).filter(Boolean);
+  }
+
+  const img = postImages[0] || "/og-default.jpg";
 
   return buildMetadata({
     title: isJa
@@ -36,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: "/blogs",
     locale: params.locale,
     image: img,
-    images: [img, "/og-default.jpg"],
+    images: postImages.length > 0 ? postImages : ["/og-default.jpg"],
   });
 }
 

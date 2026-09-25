@@ -2,6 +2,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 import { getEmbedUrl } from "@/lib/embed";
 import BlogAdditionalGallery from "@/components/blog/BlogAdditionalGallery";
 import AutoPlayVideo from "@/components/blog/AutoPlayVideo";
+import Panorama360Viewer from "@/components/public/Panorama360Viewer";
 import type { SectionData } from "./CheckcamSection";
 
 export default function InsightSection({ data }: { data: SectionData }) {
@@ -34,8 +35,18 @@ export default function InsightSection({ data }: { data: SectionData }) {
           <div className="mt-10 aspect-[16/9] min-h-[340px] sm:min-h-[460px] rounded-none overflow-hidden border border-gray-200/40 shadow-xs bg-black">
             {(() => {
               const isEmbedVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.mediaEmbedUrl || "");
+              const isEmbedImage =
+                !isEmbedVideo &&
+                Boolean(
+                  data.mediaEmbedUrl &&
+                    (/\.(jpe?g|png|webp|gif|svg)(\?|$)/i.test(data.mediaEmbedUrl) ||
+                      data.mediaEmbedUrl.startsWith("/uploads/"))
+                );
               const isImageVideo = /\.(mp4|webm|mov)(\?|$)/i.test(data.image || "");
-              const embedUrl = data.mediaEmbedUrl && !isEmbedVideo ? getEmbedUrl(data.mediaEmbedUrl) : null;
+              const embedUrl =
+                data.mediaEmbedUrl && !isEmbedVideo && !isEmbedImage
+                  ? getEmbedUrl(data.mediaEmbedUrl)
+                  : null;
 
               if (isEmbedVideo) {
                 return (
@@ -44,6 +55,14 @@ export default function InsightSection({ data }: { data: SectionData }) {
                     className="w-full h-full object-cover"
                     containerClassName="w-full h-full bg-black relative"
                   />
+                );
+              }
+
+              if (isEmbedImage && data.mediaEmbedUrl) {
+                return (
+                  <div className="w-full h-full min-h-[340px] sm:min-h-[460px] bg-black">
+                    <Panorama360Viewer src={data.mediaEmbedUrl} />
+                  </div>
                 );
               }
 
