@@ -8,6 +8,8 @@ import {
   BookOpen, HelpCircle, BookOpenCheck, Mail, Users, Folder,
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
   Tag, DollarSign, Building2, Home, FileSpreadsheet,
+  LayoutTemplate, Sparkles, AlertCircle, GitCommit, LayoutGrid,
+  FolderCheck, ShieldCheck, Compass,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -43,6 +45,22 @@ const menuGroups: MenuGroup[] = [
       { href: "/admin/homepage", label: "Trang chủ", icon: Home },
       { href: "/admin/works", label: "Works", icon: Image },
       { href: "/admin/flipbooks", label: "Portfolio", icon: BookOpenCheck },
+    ],
+  },
+  {
+    title: "LANDING PAGE",
+    items: [
+      { href: "/admin/landingpage", label: "Tổng quan Landing Page", icon: LayoutTemplate, exact: true },
+      { href: "/admin/landingpage/hero", label: "01. Hero & Slogan", icon: Sparkles },
+      { href: "/admin/landingpage/pain-points", label: "02. Nỗi đau & Thách thức", icon: AlertCircle },
+      { href: "/admin/landingpage/workflow", label: "03. Quy trình 5 bước", icon: GitCommit },
+      { href: "/admin/landingpage/deliverables", label: "04. Hồ sơ bàn giao", icon: FolderCheck },
+      { href: "/admin/landingpage/services-bento", label: "05. Trụ cột Bento", icon: LayoutGrid },
+      { href: "/admin/landingpage/clients", label: "06. Đối tác & Uy tín", icon: ShieldCheck },
+      { href: "/admin/landingpage/applications", label: "07. Ứng dụng thực tế", icon: Layers },
+      { href: "/admin/landingpage/partners", label: "08. Thương hiệu & Đối tác", icon: Building2 },
+      { href: "/admin/landingpage/gallery", label: "09. Triển lãm dự án", icon: Compass },
+      { href: "/admin/landingpage/pricing", label: "10. Báo giá minh bạch", icon: DollarSign },
     ],
   },
   {

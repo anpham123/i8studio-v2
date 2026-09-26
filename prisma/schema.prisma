@@ -295,6 +295,7 @@ model BlogPost {
   // Metadata
   excerpt          String   @default("")
   coverImage       String   @default("")
+  coverOrientation String   @default("landscape")
   author           String   @default("")
   authorRole       String   @default("")
   readTime         Int      @default(5)
@@ -348,4 +349,13 @@ model HomeMedia {
   order     Int      @default(0)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model LandingPageSection {
+  id         String   @id @default(cuid())
+  sectionKey String   @unique // hero, pain-points, workflow, services-bento, deliverables, clients, gallery, pricing
+  contentEn  String   @default("{}")
+  contentJa  String   @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

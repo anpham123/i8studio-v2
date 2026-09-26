@@ -18,6 +18,7 @@ interface HeroImage {
 interface HeroEditorialProps {
   images?: HeroImage[];
   limit?: number;
+  showOverlayText?: boolean;
 }
 
 interface MasonryItem {
@@ -223,7 +224,7 @@ function GridTile({
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorialProps) {
+export default function HeroEditorial({ images = [], limit = 11, showOverlayText = false }: HeroEditorialProps) {
   const t = useTranslations("home");
   const sectionRef = useRef<HTMLElement>(null);
   const gridContainerRef = useRef<HTMLDivElement>(null);
@@ -429,59 +430,63 @@ export default function HeroEditorial({ images = [], limit = 11 }: HeroEditorial
           )}
 
           {/* Text overlay directly on photo with luminous high-contrast text-shadow */}
-          <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-end pb-14 sm:pb-18 px-6 text-center z-10 pointer-events-none"
-            style={{ y: textY, opacity: textOpacity }}
-          >
-            <motion.h1
-              className="font-serif text-[30px] sm:text-[44px] md:text-[54px] font-black text-white tracking-[0.08em] leading-[1.15] mb-2 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_16px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,0.95)]"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            >
-              {t("hero.title")}
-            </motion.h1>
-
-            <motion.p
-              className="font-serif text-[18px] sm:text-[22px] md:text-[26px] font-bold text-[#FFE8A3] tracking-[0.1em] mb-3 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_14px_rgba(0,0,0,1),_0_0_24px_rgba(0,0,0,0.95)]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
-            >
-              {t("hero.subtitle")}
-            </motion.p>
-
+          {showOverlayText && (
             <motion.div
-              className="text-[14px] sm:text-[16px] md:text-[17px] text-white font-semibold leading-[1.8] max-w-4xl [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_3px_10px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,0.95)] flex flex-col items-center"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="absolute inset-0 flex flex-col items-center justify-end pb-14 sm:pb-18 px-6 text-center z-10 pointer-events-none"
+              style={{ y: textY, opacity: textOpacity }}
             >
-              {t("hero.description")
-                .split("\n")
-                .map((line, idx) => (
-                  <span key={idx} className="block md:whitespace-nowrap">
-                    {line}
-                  </span>
-                ))}
+              <motion.h1
+                className="font-serif text-[30px] sm:text-[44px] md:text-[54px] font-black text-white tracking-[0.08em] leading-[1.15] mb-2 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_16px_rgba(0,0,0,1),_0_0_30px_rgba(0,0,0,0.95)]"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+              >
+                {t("hero.title")}
+              </motion.h1>
+
+              <motion.p
+                className="font-serif text-[18px] sm:text-[22px] md:text-[26px] font-bold text-[#FFE8A3] tracking-[0.1em] mb-3 [text-shadow:_0_2px_4px_rgba(0,0,0,0.9),_0_4px_14px_rgba(0,0,0,1),_0_0_24px_rgba(0,0,0,0.95)]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+              >
+                {t("hero.subtitle")}
+              </motion.p>
+
+              <motion.div
+                className="text-[14px] sm:text-[16px] md:text-[17px] text-white font-semibold leading-[1.8] max-w-4xl [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_3px_10px_rgba(0,0,0,1),_0_0_20px_rgba(0,0,0,0.95)] flex flex-col items-center"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+              >
+                {t("hero.description")
+                  .split("\n")
+                  .map((line, idx) => (
+                    <span key={idx} className="block md:whitespace-nowrap">
+                      {line}
+                    </span>
+                  ))}
+              </motion.div>
             </motion.div>
-          </motion.div>
+          )}
 
           {/* Scroll indicator */}
-          <motion.div
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-          >
+          {showOverlayText && (
             <motion.div
-              className="w-5 h-8 rounded-full border-2 border-white/40 flex items-start justify-center p-1"
-              animate={{ y: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
             >
-              <div className="w-1 h-2 rounded-full bg-white/60" />
+              <motion.div
+                className="w-5 h-8 rounded-full border-2 border-white/40 flex items-start justify-center p-1"
+                animate={{ y: [0, 4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+              >
+                <div className="w-1 h-2 rounded-full bg-white/60" />
+              </motion.div>
             </motion.div>
-          </motion.div>
+          )}
         </div>
       </div>
 

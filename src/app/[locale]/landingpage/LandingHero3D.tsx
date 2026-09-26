@@ -1,10 +1,26 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import * as THREE from "three";
+import { getLandingContent } from "./landingI18n";
+import {
+  createArchitecturalMaterials,
+  buildTropicalVilla,
+  buildCubicResidence,
+  buildGlassPavilion,
+  loadCustomModel,
+} from "./hero3dArchitectures";
 
-export default function LandingHero3D() {
+export default function LandingHero3D({
+  locale = "ja",
+  heroContent,
+}: {
+  locale?: string;
+  heroContent?: any;
+}) {
+  const defaultHero = getLandingContent(locale).hero;
+  const t = heroContent || defaultHero;
+  const contactHref = `/${locale}/contact`;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
@@ -14,17 +30,29 @@ export default function LandingHero3D() {
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    const modelCfg = t.model3d || {};
+    const mode = modelCfg.mode || "preset";
+    const presetId = modelCfg.presetId || "tropical-villa";
+    const customModelUrl = modelCfg.customModelUrl || "";
+    const rotationSpeed = typeof modelCfg.rotationSpeed === "number" ? modelCfg.rotationSpeed : 1;
+    const showWireframe = modelCfg.showWireframe !== false;
+    const wireframeColor = modelCfg.wireframeColor || "#f59e0b";
+    const ambientParticles = modelCfg.ambientParticles !== false;
+    const initialScale = modelCfg.initialScale || 1;
+    const defaultX = typeof modelCfg.positionX === "number" ? modelCfg.positionX : 5.0;
+    const defaultY = typeof modelCfg.positionY === "number" ? modelCfg.positionY : 0.6;
+
     // 1. Scene, Camera, Renderer
     const scene = new THREE.Scene();
 
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
 
-    const initialVillaX = width < 1024 ? 0 : 3.8;
+    const initialVillaX = width < 1024 ? 0 : defaultX;
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
-    camera.position.set(16 + initialVillaX * 0.4, 11, 20);
-    camera.lookAt(initialVillaX, 0.5, 0);
+    camera.position.set(16 + initialVillaX * 0.35, 12 + defaultY * 0.4, 21);
+    camera.lookAt(initialVillaX, defaultY + 1.2, 0);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -56,162 +84,79 @@ export default function LandingHero3D() {
     fillLight.position.set(-15, 15, 15);
     scene.add(fillLight);
 
-    // 3. Materials
-    const darkConcreteMat = new THREE.MeshStandardMaterial({
-      color: 0x14151a,
-      roughness: 0.35,
-      metalness: 0.65,
-    });
+    // Create materials with dynamic wireframe styling
+    const mats = createArchitecturalMaterials(wireframeColor, showWireframe);
 
-    const woodSlatMat = new THREE.MeshStandardMaterial({
-      color: 0x9a6538,
-      roughness: 0.6,
-      metalness: 0.1,
-    });
-
-    const whiteStuccoMat = new THREE.MeshStandardMaterial({
-      color: 0x22242b,
-      roughness: 0.4,
-      metalness: 0.4,
-    });
-
-    const poolWaterMat = new THREE.MeshStandardMaterial({
-      color: 0x0ea5e9,
-      roughness: 0.1,
-      metalness: 0.85,
-      transparent: true,
-      opacity: 0.75,
-    });
-
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xdbeafe,
-      transparent: true,
-      opacity: 0.35,
-      roughness: 0.05,
-      transmission: 0.8,
-      ior: 1.5,
-    });
-
-    const interiorGlowMat = new THREE.MeshBasicMaterial({
-      color: 0xfef08a,
-      transparent: true,
-      opacity: 0.85,
-    });
-
-    const wireframeMat = new THREE.LineBasicMaterial({
-      color: 0xf59e0b,
-      transparent: true,
-      opacity: 0.4,
-    });
-
-    const cyanWireMat = new THREE.LineBasicMaterial({
-      color: 0x38bdf8,
-      transparent: true,
-      opacity: 0.3,
-    });
-
-    // 4. Construct Modern Architectural Villa
+    // 4. Construct Architectural Model Group
     const villaGroup = new THREE.Group();
     scene.add(villaGroup);
 
-    const addBox = (
-      w: number,
-      h: number,
-      d: number,
-      x: number,
-      y: number,
-      z: number,
-      mat: THREE.Material,
-      wireMat: THREE.LineBasicMaterial = wireframeMat
-    ) => {
-      const geo = new THREE.BoxGeometry(w, h, d);
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(x, y + h / 2, z);
-      villaGroup.add(mesh);
+    if (mode === "custom" && customModelUrl) {
+      loadCustomModel(
+        customModelUrl,
+        villaGroup,
+        modelCfg,
+        mats,
+        () => {
+          try {
+            renderer.render(scene, camera);
+          } catch (e) {}
+          setIsReady(true);
+        },
+        () => {
+          // Fallback on load error
+          buildTropicalVilla(villaGroup, mats);
+          try {
+            renderer.render(scene, camera);
+          } catch (e) {}
+          setIsReady(true);
+        }
+      );
+    } else {
+      if (presetId === "cubic-modern") {
+        buildCubicResidence(villaGroup, mats);
+      } else if (presetId === "glass-pavilion") {
+        buildGlassPavilion(villaGroup, mats);
+      } else {
+        buildTropicalVilla(villaGroup, mats);
+      }
+      try {
+        renderer.render(scene, camera);
+      } catch (e) {}
+      setIsReady(true);
+    }
 
-      const edges = new THREE.EdgesGeometry(geo);
-      const wire = new THREE.LineSegments(edges, wireMat);
-      wire.position.copy(mesh.position);
-      villaGroup.add(wire);
-
-      return mesh;
-    };
-
-    // --- Ground Foundation Platform ---
-    addBox(14, 0.4, 11, 0, 0, 0, darkConcreteMat);
-
-    // --- Swimming Pool & Sun Deck ---
-    addBox(7.5, 0.25, 3.2, 2.5, 0.2, 3.2, poolWaterMat, cyanWireMat);
-    addBox(13.8, 0.1, 10.8, 0, 0.38, 0, whiteStuccoMat);
-
-    // --- Ground Floor Main Living Box ---
-    addBox(7, 3, 5.5, -2.5, 0.4, -0.5, darkConcreteMat);
-
-    // Ground Floor Glass Facade (Living room looking at pool)
-    addBox(6.8, 2.8, 0.1, -2.5, 0.4, 2.3, glassMat);
-
-    // Interior Warm Light Core
-    const intPointLight = new THREE.PointLight(0xfbbf24, 3.5, 9);
-    intPointLight.position.set(-2.5, 1.8, 0.5);
-    villaGroup.add(intPointLight);
-
-    const intCore = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.8, 1.5), interiorGlowMat);
-    intCore.position.set(-2.5, 1.4, 0.5);
-    villaGroup.add(intCore);
-
-    // --- Wooden Feature Wall / Vertical Louvers Accent ---
-    addBox(1.2, 3.1, 5.7, 1.2, 0.4, -0.5, woodSlatMat);
-
-    // --- Upper Floor Cantilevered Master Suite ---
-    addBox(8.5, 2.6, 5.2, 0.5, 3.5, 0.8, whiteStuccoMat);
-
-    // Upper Floor Panoramic Glass Balcony
-    addBox(8.2, 2.4, 0.1, 0.5, 3.6, 3.45, glassMat);
-
-    // Upper Interior Amber Light Core
-    const upperPointLight = new THREE.PointLight(0xf59e0b, 2.5, 7);
-    upperPointLight.position.set(0.5, 4.8, 1.2);
-    villaGroup.add(upperPointLight);
-
-    // Roof Floating Canopy / Overhang (Pergola)
-    addBox(9.8, 0.3, 6.4, 0.5, 6.1, 0.8, darkConcreteMat);
-
-    // Roof Slanted Solar / Architectural Fin
-    addBox(0.2, 1.4, 5.8, -3.8, 6.2, 0.8, woodSlatMat);
-    addBox(0.2, 1.4, 5.8, 4.8, 6.2, 0.8, woodSlatMat);
-
-    // Outdoor Lounge Table on Deck
-    addBox(1.6, 0.45, 1.2, -2.5, 0.4, 3.2, darkConcreteMat);
-
-    // Subtle Landscape Stepping Stones
-    for (let i = 0; i < 4; i++) {
-      addBox(1.2, 0.15, 0.7, -5.5, 0.4, 2.5 - i * 1.4, darkConcreteMat, cyanWireMat);
+    if (initialScale !== 1) {
+      villaGroup.scale.set(initialScale, initialScale, initialScale);
     }
 
     // --- Atmospheric 3D Particle Cloud / Light Embers ---
-    const particleCount = 180;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePos = new Float32Array(particleCount * 3);
+    let particleSystem: THREE.Points | null = null;
+    if (ambientParticles) {
+      const particleCount = 180;
+      const particleGeo = new THREE.BufferGeometry();
+      const particlePos = new Float32Array(particleCount * 3);
 
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePos[i] = (Math.random() - 0.5) * 36;
-      particlePos[i + 1] = Math.random() * 18 - 2;
-      particlePos[i + 2] = (Math.random() - 0.5) * 36;
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        particlePos[i] = (Math.random() - 0.5) * 36;
+        particlePos[i + 1] = Math.random() * 18 - 2;
+        particlePos[i + 2] = (Math.random() - 0.5) * 36;
+      }
+      particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
+
+      const particleMat = new THREE.PointsMaterial({
+        color: 0xf59e0b,
+        size: 0.18,
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+      });
+      particleSystem = new THREE.Points(particleGeo, particleMat);
+      scene.add(particleSystem);
     }
-    particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
 
-    const particleMat = new THREE.PointsMaterial({
-      color: 0xf59e0b,
-      size: 0.18,
-      transparent: true,
-      opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-    });
-    const particleSystem = new THREE.Points(particleGeo, particleMat);
-    scene.add(particleSystem);
-
-    // Position Villa: Shift to right on desktop so big left text has full clear space
-    villaGroup.position.set(initialVillaX, -1.8, 0);
+    // Position Villa: Shift to right and elevate above bottom margin so ground never clips
+    villaGroup.position.set(initialVillaX, defaultY, 0);
 
     // 5. Mouse Interaction & Dragging
     let isDragging = false;
@@ -269,10 +214,11 @@ export default function LandingHero3D() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      const newX = w < 1024 ? 0 : 3.8;
+      const newX = w < 1024 ? 0 : defaultX;
       villaGroup.position.x = newX;
-      camera.position.x = 16 + newX * 0.4;
-      camera.lookAt(newX, 0.5, 0);
+      camera.position.x = 16 + newX * 0.35;
+      camera.position.y = 12 + defaultY * 0.4;
+      camera.lookAt(newX, defaultY + 1.2, 0);
     };
     window.addEventListener("resize", handleResize);
 
@@ -285,9 +231,9 @@ export default function LandingHero3D() {
 
       const elapsedTime = clock.getElapsedTime();
 
-      // Continuous gentle auto-spin
+      // Continuous gentle auto-spin with speed control
       if (!isDragging) {
-        rotationVelocityY += 0.0012;
+        rotationVelocityY += 0.0012 * rotationSpeed;
       }
 
       // Apply drag rotation with damping
@@ -300,23 +246,24 @@ export default function LandingHero3D() {
       // Clamp X rotation
       villaGroup.rotation.x = Math.max(-0.45, Math.min(0.35, villaGroup.rotation.x));
 
-      // Gentle floating oscillation
-      villaGroup.position.y = -1.8 + Math.sin(elapsedTime * 1.2) * 0.22;
+      // Gentle floating oscillation elevated nicely
+      villaGroup.position.y = defaultY + Math.sin(elapsedTime * 1.2) * 0.18;
 
       // Subtle camera parallax
-      const targetLookX = container.clientWidth < 1024 ? 0 : 3.8;
-      camera.position.x += (16 + targetLookX * 0.4 + mouseTargetX * 4 - camera.position.x) * 0.04;
-      camera.position.y += (11 + mouseTargetY * 3 - camera.position.y) * 0.04;
-      camera.lookAt(targetLookX, 0.5, 0);
+      const targetLookX = container.clientWidth < 1024 ? 0 : defaultX;
+      camera.position.x += (14.5 + targetLookX * 0.35 + mouseTargetX * 3.5 - camera.position.x) * 0.04;
+      camera.position.y += (11 + defaultY * 0.4 + mouseTargetY * 2.5 - camera.position.y) * 0.04;
+      camera.lookAt(targetLookX, defaultY + 1.8, 0);
 
-      // Rotate particle dust
-      particleSystem.rotation.y = elapsedTime * 0.03;
+      // Rotate particle dust if enabled
+      if (particleSystem) {
+        particleSystem.rotation.y = elapsedTime * 0.03;
+      }
 
       renderer.render(scene, camera);
     };
 
     animate();
-    setIsReady(true);
 
     return () => {
       cancelAnimationFrame(animationId);
@@ -334,7 +281,7 @@ export default function LandingHero3D() {
       rimLight.dispose();
       fillLight.dispose();
     };
-  }, []);
+  }, [JSON.stringify(t.model3d)]);
 
   return (
     <section className="relative w-full min-h-[92vh] lg:min-h-screen bg-[#07080a] text-white overflow-hidden flex flex-col justify-between select-none">
@@ -354,21 +301,19 @@ export default function LandingHero3D() {
         ref={containerRef}
         className="absolute inset-0 z-10 flex items-center justify-center cursor-grab active:cursor-grabbing"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.68 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.3, delay: 1.15, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full h-full flex items-center justify-center"
+        <div
+          className={`w-full h-full flex items-center justify-center transition-opacity duration-700 ease-out ${
+            isReady ? "opacity-100" : "opacity-0"
+          }`}
         >
           <canvas ref={canvasRef} className="w-full h-full block" />
-        </motion.div>
+        </div>
 
         {/* Center Drag & Orbit Helper Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.8 }}
-          className="absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1.5"
+        <div
+          className={`absolute bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex flex-col items-center gap-1.5 transition-all duration-700 ease-out ${
+            isReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          }`}
         >
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-2xl">
             <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] animate-ping" />
@@ -376,52 +321,46 @@ export default function LandingHero3D() {
               KÉO ĐỂ XOAY 3D · DIỄN HỌA THỜI GIAN THỰC
             </span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Top Bar / Content Wrapper (Flush to the left margin, prominent and large) */}
       <div className="relative z-20 w-full px-6 sm:px-10 lg:px-14 xl:px-16 pt-8 lg:pt-14 pointer-events-none">
         {/* =========================================================================
-            TOP-LEFT CORNER: Entrances from Top-Left (-80px, -50px -> 0, 0)
+            TOP-LEFT CORNER: Smooth GPU hardware-accelerated entrance (Zero Jitter)
             ========================================================================= */}
-        <motion.div
-          initial={{ opacity: 0, x: -80, y: -50 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ duration: 0.95, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-[560px] lg:max-w-[620px] text-left pointer-events-auto"
-        >
+        <div className="hero-corner-top-left max-w-[560px] lg:max-w-[620px] text-left pointer-events-auto">
           {/* Studio Eyebrow Tag */}
           <div className="flex items-center gap-2.5 mb-3.5">
             <span className="text-[#f59e0b] font-mono text-xs sm:text-[13px] font-bold tracking-[0.28em] uppercase drop-shadow-[0_2px_8px_rgba(245,158,11,0.4)]">
-              // KONTUR ATELIER · 3D ARCHITECTURE
+              {t.eyebrow}
             </span>
           </div>
 
           {/* Large Bold Headline (Prominent, High Impact) */}
           <h1
-            className="text-4xl sm:text-5xl lg:text-[4.1rem] xl:text-[4.6rem] font-black tracking-tight text-white leading-[1.03] uppercase drop-shadow-[0_4px_32px_rgba(0,0,0,0.95)]"
+            className="text-4xl sm:text-5xl lg:text-[3.8rem] xl:text-[4.4rem] font-black tracking-tight text-white leading-[1.08] uppercase drop-shadow-[0_4px_32px_rgba(0,0,0,0.95)]"
             style={{ fontFamily: "var(--font-display), 'Plus Jakarta Sans', sans-serif" }}
           >
-            HIỆN THỰC HÓA <br />
+            {t.headlinePre} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/95 to-white/70">
-              NGÔI NHÀ
+              {t.headlineHighlight1}
             </span>{" "}
-            <span className="text-[#f59e0b] drop-shadow-[0_0_35px_rgba(245,158,11,0.5)]">MƠ ƯỚC.</span>
+            <span className="text-[#f59e0b] drop-shadow-[0_0_35px_rgba(245,158,11,0.5)]">{t.headlineHighlight2}</span>
           </h1>
 
           {/* Subtitle Description */}
           <p className="mt-5 text-sm sm:text-base lg:text-[1.05rem] text-white/85 font-normal leading-relaxed max-w-[490px] drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            Giải pháp thiết kế kiến trúc chuẩn kỹ thuật và diễn họa 3D không gian sống chân thực 100%. Giúp bạn hình dung trọn vẹn từng
-            góc nhìn, kiểm soát chi phí và tránh sai sót thi công.
+            {t.desc}
           </p>
 
           {/* Action CTA Button */}
           <div className="mt-7 flex items-center gap-4">
             <a
-              href="#nhan-tu-van"
+              href={contactHref}
               className="group inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-extrabold text-sm sm:text-[15px] tracking-wider uppercase transition-all duration-300 shadow-[0_0_35px_rgba(245,158,11,0.45)] hover:shadow-[0_0_50px_rgba(245,158,11,0.7)] hover:scale-105"
             >
-              <span>LIÊN HỆ DỰ ÁN</span>
+              <span>{t.ctaContact}</span>
               <span className="transition-transform duration-300 group-hover:translate-x-1.5 font-black text-base">→</span>
             </a>
 
@@ -429,36 +368,40 @@ export default function LandingHero3D() {
               href="#du-an"
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-white hover:text-white border border-white/20 text-sm font-semibold tracking-wide transition-all duration-200 backdrop-blur-md shadow-lg hover:border-white/40"
             >
-              <span>XEM BỘ SƯU TẬP</span>
+              <span>{t.ctaCollection}</span>
             </a>
           </div>
-        </motion.div>
+        </div>
+      </div>
+
+      {/* Interactive 3D Model Tag & Rotate Hint */}
+      <div className="hero-corner-top-right absolute top-24 right-6 sm:right-10 lg:right-16 z-20 pointer-events-none hidden sm:flex flex-col items-end">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/70 border border-white/15 backdrop-blur-md text-[11px] font-mono text-white/90 shadow-2xl">
+          <span className="w-2 h-2 rounded-full bg-[#f59e0b] animate-ping" />
+          <span className="text-[#f59e0b] font-bold">3D ARCHITECTURE:</span>
+          <span className="tracking-wide">
+            {t.model3d?.modelName || (t.model3d?.presetId === "cubic-modern" ? "THE MINIMALIST CUBIC RESIDENCE" : t.model3d?.presetId === "glass-pavilion" ? "THE GLASS SKY PAVILION" : "THE TROPICAL COURTYARD VILLA")}
+          </span>
+        </div>
+        <span className="text-[9px] text-white/40 font-mono mt-1 tracking-widest uppercase">
+          KÉO ĐỂ XOAY 360° · DRAG TO ROTATE
+        </span>
       </div>
 
       {/* Bottom Bar / Content Wrapper */}
       <div className="relative z-20 w-full px-6 sm:px-10 lg:px-14 xl:px-16 pb-16 lg:pb-24 flex items-end justify-between pointer-events-none">
         {/* Bottom Left: Micro Tagline / Scroll */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="hidden md:flex items-center gap-3 pointer-events-auto"
-        >
+        <div className="hero-corner-bottom-left hidden md:flex items-center gap-3 pointer-events-auto">
           <div className="w-9 h-[1.5px] bg-[#f59e0b]/60" />
           <span className="text-[11px] font-mono tracking-widest text-white/60 uppercase">
-            CUỘN ĐỂ KHÁM PHÁ CHI TIẾT
+            {t.scrollHint || "CUỘN ĐỂ KHÁM PHÁ CHI TIẾT"}
           </span>
-        </motion.div>
+        </div>
 
         {/* =========================================================================
-            BOTTOM-RIGHT CORNER: Pushed further right and lifted upwards
+            BOTTOM-RIGHT CORNER: Smooth GPU hardware-accelerated entrance (Zero Jitter)
             ========================================================================= */}
-        <motion.div
-          initial={{ opacity: 0, x: 80, y: 50 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ duration: 0.95, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-[340px] text-right flex flex-col items-end pointer-events-auto ml-auto"
-        >
+        <div className="hero-corner-bottom-right max-w-[340px] text-right flex flex-col items-end pointer-events-auto ml-auto">
           {/* Studio Badge with Globe */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 backdrop-blur-md mb-2.5">
             <svg
@@ -473,23 +416,23 @@ export default function LandingHero3D() {
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
             <span className="text-[10px] font-mono font-semibold tracking-wider text-white/80">
-              EST. 2026 · KONTUR ATELIER
+              {t.badgeEst || "EST. 2026 · KONTUR ATELIER"}
             </span>
           </div>
 
           {/* Micro Information */}
           <h3 className="text-xs md:text-sm font-semibold text-white tracking-wide mb-1">
-            KIẾN TRÚC & DIỄN HỌA 3D CHUẨN XÁC
+            {t.badgeTitle || "KIẾN TRÚC & DIỄN HỌA 3D CHUẨN XÁC"}
           </h3>
           <p className="text-[10px] md:text-[11px] text-white/60 font-light leading-relaxed max-w-[290px]">
-            Hơn 250+ gia chủ &amp; chủ đầu tư tin chọn giải pháp kiểm soát 100% chi phí và thông số trước khi thi công.
+            {t.badgeDesc || "Hơn 250+ gia chủ & chủ đầu tư tin chọn giải pháp kiểm soát 100% chi phí và thông số trước khi thi công."}
           </p>
 
           <div className="mt-2.5 flex items-center gap-2 text-[9px] font-mono text-[#f59e0b]/90 tracking-widest uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-            <span>SẴN SÀNG TIẾP NHẬN DỰ ÁN MỚI</span>
+            <span>{t.badgeStatus || "SẴN SÀNG TIẾP NHẬN DỰ ÁN MỚI"}</span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

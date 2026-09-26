@@ -356,6 +356,13 @@ export default function AdminHeroSequenceManager() {
       {/* TAB 1: TEXT CONTENT EDITOR */}
       {activeTab === "text" && (
         <div className="pt-6 space-y-6">
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-center gap-3 text-xs text-amber-200">
+            <span className="text-base flex-shrink-0">💡</span>
+            <span>
+              <strong>Mẹo hiển thị:</strong> Nội dung các mục mặc định nằm gọn trên <strong>1 dòng</strong>. Nếu muốn chủ động ngắt xuống dòng ở vị trí mong muốn, bạn chỉ cần nhập ký hiệu <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">&lt;\br&gt;</code> hoặc <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold">&lt;br&gt;</code>.
+            </span>
+          </div>
+
           {/* Section 1: Intro Beat */}
           <div className="bg-black/30 rounded-xl p-5 border border-white/10">
             <div className="flex items-center gap-2 mb-4">

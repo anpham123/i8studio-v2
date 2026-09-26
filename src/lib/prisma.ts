@@ -5,14 +5,22 @@ const globalForPrisma = globalThis as unknown as {
   __prismaVersion: string | undefined;
 };
 
-const CLIENT_VERSION = "2026_09_15_v2_cover_orientation";
+const CLIENT_VERSION = "2026_09_26_v3_landing_page";
 
-if (!globalForPrisma.__prisma || globalForPrisma.__prismaVersion !== CLIENT_VERSION) {
-  if (globalForPrisma.__prisma) {
-    globalForPrisma.__prisma.$disconnect().catch(() => {});
+function getClient(): PrismaClient {
+  if (!globalForPrisma.__prisma || globalForPrisma.__prismaVersion !== CLIENT_VERSION) {
+    if (globalForPrisma.__prisma) {
+      globalForPrisma.__prisma.$disconnect().catch(() => {});
+    }
+    globalForPrisma.__prisma = new PrismaClient();
+    globalForPrisma.__prismaVersion = CLIENT_VERSION;
   }
-  globalForPrisma.__prisma = new PrismaClient();
-  globalForPrisma.__prismaVersion = CLIENT_VERSION;
+  return globalForPrisma.__prisma;
 }
 
-export const prisma = globalForPrisma.__prisma;
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getClient();
+    return (client as any)[prop];
+  },
+});
