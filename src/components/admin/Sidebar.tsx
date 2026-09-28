@@ -9,7 +9,7 @@ import {
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
   Tag, DollarSign, Building2, Home, FileSpreadsheet,
   LayoutTemplate, Sparkles, AlertCircle, GitCommit, LayoutGrid,
-  FolderCheck, ShieldCheck, Compass,
+  FolderCheck, ShieldCheck, Compass, Link2,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -34,6 +34,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, exact: true },
       { href: "/admin/analytics", label: "Thống kê truy cập", icon: BarChart3 },
+      { href: "/admin/campaign-links", label: "Tạo link kênh (UTM)", icon: Link2 },
     ],
   },
   {

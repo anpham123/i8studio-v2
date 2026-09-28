@@ -742,7 +742,7 @@ export default function LandingPageInteractive({
 
       if (mainImg) {
         mainImg.src = data.img;
-        mainImg.alt = "Dự án tiêu điểm " + data.title;
+        mainImg.alt = "注目プロジェクト " + data.title;
       }
       if (catTag) catTag.textContent = data.catTag;
       if (title) title.textContent = data.title;

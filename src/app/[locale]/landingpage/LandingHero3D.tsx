@@ -384,7 +384,7 @@ export default function LandingHero3D({
           </span>
         </div>
         <span className="text-[9px] text-white/40 font-mono mt-1 tracking-widest uppercase">
-          KÉO ĐỂ XOAY 360° · DRAG TO ROTATE
+          360°ドラッグして回転 · DRAG TO ROTATE
         </span>
       </div>
 
@@ -394,7 +394,7 @@ export default function LandingHero3D({
         <div className="hero-corner-bottom-left hidden md:flex items-center gap-3 pointer-events-auto">
           <div className="w-9 h-[1.5px] bg-[#f59e0b]/60" />
           <span className="text-[11px] font-mono tracking-widest text-white/60 uppercase">
-            {t.scrollHint || "CUỘN ĐỂ KHÁM PHÁ CHI TIẾT"}
+            {t.scrollHint || "スクロールして詳細を見る"}
           </span>
         </div>
 
@@ -422,15 +422,15 @@ export default function LandingHero3D({
 
           {/* Micro Information */}
           <h3 className="text-xs md:text-sm font-semibold text-white tracking-wide mb-1">
-            {t.badgeTitle || "KIẾN TRÚC & DIỄN HỌA 3D CHUẨN XÁC"}
+            {t.badgeTitle || "建築設計＆高精度3DCG空間表現"}
           </h3>
           <p className="text-[10px] md:text-[11px] text-white/60 font-light leading-relaxed max-w-[290px]">
-            {t.badgeDesc || "Hơn 250+ gia chủ & chủ đầu tư tin chọn giải pháp kiểm soát 100% chi phí và thông số trước khi thi công."}
+            {t.badgeDesc || "250件以上の施主様・企業様に選ばれ、着工前に100%のコストと仕様を可視化。"}
           </p>
 
           <div className="mt-2.5 flex items-center gap-2 text-[9px] font-mono text-[#f59e0b]/90 tracking-widest uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-            <span>{t.badgeStatus || "SẴN SÀNG TIẾP NHẬN DỰ ÁN MỚI"}</span>
+            <span>{t.badgeStatus || "新規プロジェクト受付中"}</span>
           </div>
         </div>
       </div>

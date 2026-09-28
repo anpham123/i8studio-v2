@@ -8,24 +8,11 @@ import { getMergedLandingContent } from "@/lib/landingpage-data";
 
 export const revalidate = 60;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
-}): Promise<Metadata> {
-  const isJa = params.locale === "ja";
-  const isEn = params.locale === "en";
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: isJa
-      ? "KONTUR — 建築設計・3DCG空間ビジュアライゼーション"
-      : isEn
-      ? "KONTUR — Precision Architecture & 3D Visualization"
-      : "KONTUR — Kiến Trúc & Diễn Họa 3D Chuẩn Kỹ Thuật",
-    description: isJa
-      ? "技術基準に準拠した高精度な建築設計と、100%フォトリアルな3DCG空間ビジュアライゼーション。細部まで視覚化し、コストをコントロールし、施工ミスを未然に防ぎます。"
-      : isEn
-      ? "Technically compliant architectural design and 100% photorealistic 3D rendering. Visualize every detail, control costs, and prevent construction errors before breaking ground."
-      : "Giải pháp thiết kế kiến trúc chuẩn kỹ thuật và diễn họa 3D không gian sống chân thực 100%. Giúp bạn hình dung trọn vẹn, kiểm soát chi phí và tránh sai sót thi công.",
+    title: "KONTUR — 建築設計・3DCG空間ビジュアライゼーション",
+    description:
+      "技術基準に準拠した高精度な建築設計と、100%フォトリアルな3DCG空間ビジュアライゼーション。細部まで視覚化し、コストをコントロールし、施工ミスを未然に防ぎます。",
   };
 }
 
@@ -53,8 +40,9 @@ export default async function LandingPage({
   params?: { locale?: string };
 }) {
   const currentLocale = params?.locale || "ja";
-  const isJa = currentLocale === "ja";
-  const isEn = currentLocale === "en";
+  // Landing page chỉ sử dụng tiếng Nhật trên giao diện user (kể cả khi người dùng chuyển sang tiếng Anh)
+  const isJa = true;
+  const isEn = false;
   const contactHref = `/${currentLocale}/contact`;
 
   const {
@@ -67,14 +55,14 @@ export default async function LandingPage({
     partnerStats,
     partnerBrands,
     pricingTiers,
-  } = await getMergedLandingContent(currentLocale);
+  } = await getMergedLandingContent("ja");
 
   const pLakeside = galleryData["p-lakeside"] || Object.values(galleryData)[0] || {
     id: "p-lakeside",
     category: "villa",
-    catTag: isJa ? "高級リゾートヴィラ" : isEn ? "LUXURY RETREAT VILLA" : "BIỆT THỰ NGHỈ DƯỠNG CAO CẤP",
+    catTag: "高級リゾートヴィラ",
     title: "THE LAKESIDE HORIZON VILLA",
-    loc: isJa ? "ホーチャム · 850 m²" : isEn ? "Ho Tram • 850 m²" : "Hồ Tràm, Bà Rịa — Vũng Tàu",
+    loc: "ホーチャム · 850 m²",
     narrative: "",
     img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=90",
     solution: "",
@@ -88,12 +76,12 @@ export default async function LandingPage({
   return (
     <div className="landingpage-root">
       <LandingPageInteractive
-        locale={currentLocale}
+        locale="ja"
         deliverableCollections={deliverables}
         galleryProjects={galleryData}
       />
 
-      <LandingHero3D locale={currentLocale} heroContent={t.hero} />
+      <LandingHero3D locale="ja" heroContent={t.hero} />
 
       {/* =========================================================================
           SECTION: PAIN POINTS
