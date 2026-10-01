@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { MessageSquare, Phone, Mail } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { openInquiryDrawer } from "./QuickInquiryDrawer";
 
 export default function FloatingCTA() {
   const [hidden, setHidden] = useState(false);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
-  const locale = useLocale();
   const t = useTranslations("nav");
   const contactRef = useRef<Element | null>(null);
 
@@ -47,13 +46,14 @@ export default function FloatingCTA() {
           !isVisible ? "translate-y-20 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
         }`}
       >
-        <Link
-          href={`/${locale}/contact`}
-          className="bg-black/75 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md flex items-center gap-2 px-6 py-3 rounded-full shadow-lg shadow-black/10 transition-all duration-300 font-medium hover:scale-105 active:scale-95"
+        <button
+          type="button"
+          onClick={() => openInquiryDrawer()}
+          className="bg-black/75 hover:bg-black/90 text-white border border-white/15 backdrop-blur-md flex items-center gap-2 px-6 py-3 rounded-full shadow-lg shadow-black/10 transition-all duration-300 font-medium hover:scale-105 active:scale-95 cursor-pointer"
         >
           <MessageSquare size={16} />
           {t("getQuote")}
-        </Link>
+        </button>
       </div>
 
       {/* Mobile: sticky bottom bar */}
@@ -78,13 +78,14 @@ export default function FloatingCTA() {
               <Mail size={15} />
               <span className="text-[11px] sm:text-xs">Email</span>
             </a>
-            <Link
-              href={`/${locale}/contact`}
-              className="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-white text-black hover:bg-white/90 transition-colors text-center select-none active:scale-95 shadow-sm"
+            <button
+              type="button"
+              onClick={() => openInquiryDrawer()}
+              className="flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-white text-black hover:bg-white/90 transition-colors text-center select-none active:scale-95 shadow-sm cursor-pointer"
             >
               <MessageSquare size={15} />
               <span className="text-[11px] sm:text-xs font-semibold truncate max-w-full px-0.5">{t("getQuote")}</span>
-            </Link>
+            </button>
           </div>
         </div>
       </div>

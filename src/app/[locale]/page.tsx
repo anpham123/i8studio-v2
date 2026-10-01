@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
-// ISR: regenerate every 60 seconds
+// ISR: regenerate every 30 seconds
 export const revalidate = 30;
 
 import { buildMetadata, organizationJsonLd, websiteJsonLd, webPageJsonLd } from "@/lib/seo";
 import HeroEditorial from "@/components/public/HeroEditorial";
 import ScrollSequenceHero from "@/components/public/ScrollSequenceHero";
+import MidPageInquiryBanner from "@/components/public/MidPageInquiryBanner";
 
 export async function generateMetadata({
   params,
 }: {
   params: { locale: string };
-}): Promise<Metadata> {
+}) {
   const { locale } = params;
   const isJa = locale === "ja";
 
@@ -102,6 +103,9 @@ export default async function HomePage() {
 
       {/* 2. Masonry Editorial Gallery below */}
       <HeroEditorial images={heroImages} />
+
+      {/* 3. Mid-Page Architectural CTA Banner at 2/3 scroll point */}
+      <MidPageInquiryBanner />
     </>
   );
 }

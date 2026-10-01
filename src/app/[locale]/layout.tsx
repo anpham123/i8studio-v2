@@ -9,6 +9,7 @@ import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import FloatingCTA from "@/components/public/FloatingCTA";
 import FloatingBackToTop from "@/components/public/FloatingBackToTop";
+import QuickInquiryDrawer from "@/components/public/QuickInquiryDrawer";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
 import PageTransition from "@/components/public/PageTransition";
 import PageViewTracker from "@/components/public/PageViewTracker";
@@ -159,6 +160,7 @@ export default async function LocaleLayout({
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
           <FloatingBackToTop />
+          <QuickInquiryDrawer />
           <ExitIntentPopup />
           <PageViewTracker />
           <CustomCursor
