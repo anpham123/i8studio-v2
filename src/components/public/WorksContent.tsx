@@ -459,6 +459,14 @@ function WorkCardItem({
           {/* Static thumbnail image with cinematic slow zoom / pan motion (True Natural Masonry: Vertical stays Vertical, Horizontal stays Horizontal) */}
           {work.image ? (
             <img
+              ref={(img) => {
+                if (img && img.complete && img.naturalWidth > 0 && !isLoaded) {
+                  if (!aspectRatio && img.naturalHeight) {
+                    setAspectRatio(img.naturalWidth / img.naturalHeight);
+                  }
+                  setIsLoaded(true);
+                }
+              }}
               src={work.image}
               alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
               loading={index < 9 ? "eager" : "lazy"}
