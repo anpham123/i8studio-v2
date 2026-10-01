@@ -227,23 +227,25 @@ export default function ScrollSequenceHero({
     []
   );
 
-  // Preload all frames cleanly once
+  // Preload frames progressively (first 15 immediately, rest in background idle chunks)
   useEffect(() => {
     let isMounted = true;
     const loadedImages: HTMLImageElement[] = [];
     let count = 0;
+    const PRIORITY_BATCH = Math.min(15, activeFramesCount);
 
-    for (let i = 1; i <= activeFramesCount; i++) {
+    const loadSingle = (i: number) => {
       const img = new Image();
       img.src = framePattern(i);
       img.onload = () => {
         if (!isMounted) return;
         count++;
-        setLoadedCount(count);
+        if (count % 15 === 0 || count >= activeFramesCount) {
+          setLoadedCount(count);
+        }
         if (count >= Math.min(10, activeFramesCount)) {
           setIsReady(true);
         }
-        // Only render initial frame if user hasn't scrolled yet
         if (lastDrawnFrameRef.current === -1 && i === 1) {
           renderFrame(1);
         }
@@ -251,19 +253,45 @@ export default function ScrollSequenceHero({
       img.onerror = () => {
         if (!isMounted) return;
         count++;
-        setLoadedCount(count);
         if (i === 1) {
           setUseFallback(true);
           setIsReady(true);
         }
       };
-      loadedImages.push(img);
+      loadedImages[i - 1] = img;
+    };
+
+    // Load initial 15 frames immediately for instant interactive playback
+    for (let i = 1; i <= PRIORITY_BATCH; i++) {
+      loadSingle(i);
     }
 
+    // Load remainder in background chunks so main thread & network stay responsive
+    let nextIndex = PRIORITY_BATCH + 1;
+    let timerId: any = null;
+
+    const loadRemainingChunks = () => {
+      if (!isMounted || nextIndex > activeFramesCount) return;
+      const chunkEnd = Math.min(nextIndex + 15, activeFramesCount + 1);
+      for (let j = nextIndex; j < chunkEnd; j++) {
+        loadSingle(j);
+      }
+      nextIndex = chunkEnd;
+      if (nextIndex <= activeFramesCount) {
+        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(loadRemainingChunks, { timeout: 400 });
+        } else {
+          timerId = setTimeout(loadRemainingChunks, 150);
+        }
+      }
+    };
+
+    timerId = setTimeout(loadRemainingChunks, 200);
     imagesRef.current = loadedImages;
 
     return () => {
       isMounted = false;
+      if (timerId) clearTimeout(timerId);
     };
   }, [activeFramesCount, framePattern, renderFrame]);
 

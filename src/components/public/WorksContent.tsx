@@ -176,14 +176,13 @@ function setupScrollRowObserver(
         c.dataset.revealed = "true";
       });
     } else {
-      // Below viewport: set initial hidden push-up state
+      // Below viewport: set initial hidden push-up state (fast GPU transform)
       rowCards.forEach((c) => {
         c.dataset.revealed = "false";
       });
       gsap.set(rowCards, {
         opacity: 0,
-        y: 90,
-        clipPath: "inset(50% 0% 0% 0%)",
+        y: 40,
       });
       rowsToObserve.push({ rowCards, triggerEl: firstCard });
     }
@@ -191,25 +190,23 @@ function setupScrollRowObserver(
 
   // Animate initial rows inside the viewport
   if (initialRowsToAnimate.length > 0) {
-    const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
     initialRowsToAnimate.forEach(({ rowCards, index }) => {
       tl.fromTo(
         rowCards,
         {
           opacity: 0,
-          y: 90,
-          clipPath: "inset(50% 0% 0% 0%)",
+          y: 40,
         },
         {
           opacity: 1,
           y: 0,
-          clipPath: "inset(0% 0% 0% 0%)",
-          duration: 0.75,
-          stagger: 0.045,
-          ease: "power4.out",
-          clearProps: "transform,opacity,clipPath",
+          duration: 0.55,
+          stagger: 0.04,
+          ease: "power3.out",
+          clearProps: "transform,opacity",
         },
-        baseDelay + index * 0.14
+        baseDelay + index * 0.08
       );
     });
   }
@@ -227,17 +224,15 @@ function setupScrollRowObserver(
                 targetRow.rowCards,
                 {
                   opacity: 0,
-                  y: 90,
-                  clipPath: "inset(50% 0% 0% 0%)",
+                  y: 40,
                 },
                 {
                   opacity: 1,
                   y: 0,
-                  clipPath: "inset(0% 0% 0% 0%)",
-                  duration: 0.75,
-                  stagger: 0.045,
-                  ease: "power4.out",
-                  clearProps: "transform,opacity,clipPath",
+                  duration: 0.55,
+                  stagger: 0.04,
+                  ease: "power3.out",
+                  clearProps: "transform,opacity",
                 }
               );
               targetRow.rowCards.forEach((c) => {
@@ -249,8 +244,8 @@ function setupScrollRowObserver(
         });
       },
       {
-        rootMargin: "0px 0px -40px 0px", // Triggers naturally as row enters screen
-        threshold: 0.05,
+        rootMargin: "150px 0px 0px 0px", // Pre-reveals smoothly before entering viewport
+        threshold: 0.01,
       }
     );
 
@@ -495,16 +490,15 @@ function WorkCardItem({
             />
           )}
 
-          {/* Hover Video Preview (when video is available) */}
-          {hasHoverVideo && hoverVideoSrc && (
+          {/* Hover Video Preview (only mounted on actual hover to save memory & network) */}
+          {hasHoverVideo && hoverVideoSrc && isHovered && (
             <video
               ref={videoRef}
               muted
               loop
               playsInline
-              preload="metadata"
-              className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
-                }`}
+              autoPlay
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-300"
             >
               {hoverVideoSrc.endsWith(".webm") && (
                 <source src={hoverVideoSrc} type="video/webm" />
@@ -984,7 +978,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                   : "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
               }
             >
-              {filtered.map((work, index) => {
+              {displayedWorks.map((work, index) => {
                 const isItemComposite =
                   (work.type === "composite" || Boolean(work.beforeImage)) &&
                   Boolean(work.beforeImage) &&
@@ -1032,6 +1026,13 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
 
                 return cardElement;
               })}
+            </div>
+          )}
+
+          {/* Sentinel for progressive infinite loading */}
+          {hasMore && (
+            <div ref={sentinelRef} className="w-full h-16 flex items-center justify-center my-8">
+              <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
             </div>
           )}
         </main>

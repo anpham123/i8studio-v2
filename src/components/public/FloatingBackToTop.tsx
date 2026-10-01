@@ -1,31 +1,61 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export default function FloatingBackToTop() {
   const [visible, setVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const circleRef = useRef<SVGCircleElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+  const visibleRef = useRef(false);
   const locale = useLocale();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const tooltipText = locale === "ja" ? "トップへ戻る" : "Back to top";
 
-      if (scrollHeight > 0) {
-        setScrollProgress(Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)));
+  useEffect(() => {
+    let rafId: number | null = null;
+    let lastScrollTop = -1;
+
+    const updateScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      if (Math.abs(scrollTop - lastScrollTop) < 3) {
+        rafId = null;
+        return;
+      }
+      lastScrollTop = scrollTop;
+
+      const isVis = scrollTop > 400;
+      if (visibleRef.current !== isVis) {
+        visibleRef.current = isVis;
+        setVisible(isVis);
       }
 
-      // Show when scrolled past 400px
-      setVisible(scrollTop > 400);
+      if (isVis && circleRef.current) {
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
+        circleRef.current.style.strokeDashoffset = `${119.4 - (119.4 * progress) / 100}`;
+        if (tooltipRef.current) {
+          tooltipRef.current.textContent = `${tooltipText} (${Math.round(progress)}%)`;
+        }
+      }
+
+      rafId = null;
+    };
+
+    const handleScroll = () => {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(updateScroll);
+      }
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [tooltipText]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -33,8 +63,6 @@ export default function FloatingBackToTop() {
       behavior: "smooth",
     });
   };
-
-  const tooltipText = locale === "ja" ? "トップへ戻る" : "Back to top";
 
   return (
     <div
@@ -61,13 +89,14 @@ export default function FloatingBackToTop() {
             fill="none"
           />
           <circle
+            ref={circleRef}
             cx="24"
             cy="24"
             r="19"
-            className="stroke-white transition-all duration-150"
+            className="stroke-white"
             strokeWidth="2.5"
             strokeDasharray={119.4}
-            strokeDashoffset={119.4 - (119.4 * scrollProgress) / 100}
+            strokeDashoffset={119.4}
             strokeLinecap="round"
             fill="none"
           />
@@ -77,8 +106,11 @@ export default function FloatingBackToTop() {
         <ArrowUp size={18} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
 
         {/* Hover Tooltip (Desktop) */}
-        <span className="hidden lg:block absolute right-14 px-2.5 py-1 bg-black/90 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
-          {tooltipText} ({Math.round(scrollProgress)}%)
+        <span
+          ref={tooltipRef}
+          className="hidden lg:block absolute right-14 px-2.5 py-1 bg-black/90 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg"
+        >
+          {tooltipText} (0%)
         </span>
       </button>
     </div>

@@ -20,10 +20,15 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background-color: #ffffff;
   /* GPU-accelerated smooth scroll for supported browsers */
   -webkit-overflow-scrolling: touch;
+}
+
+/* High-performance rendering optimizations for smooth 60-120fps scrolling */
+.work-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 350px;
 }
 
 body {
