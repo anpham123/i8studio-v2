@@ -359,6 +359,229 @@ export default function ScrollSequenceHero({
     return () => unsubscribe();
   }, [smoothProgress, useFallback]);
 
+  // ── Step-based Wheel Scroll Controller (Plan A: 1 wheel roll = complete scene transition) ──
+  const BEAT_PROGRESSES = [0.0, 0.38, 0.74, 1.0];
+  const isAnimatingRef = useRef<boolean>(false);
+
+  const getContainerScrollBounds = useCallback(() => {
+    if (!containerRef.current) return null;
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const containerTop = rect.top + scrollTop;
+    const maxScroll = container.scrollHeight - window.innerHeight;
+    return { containerTop, maxScroll, rect, scrollY: scrollTop };
+  }, []);
+
+  const scrollToBeat = useCallback(
+    (targetIndex: number, duration: number = 850) => {
+      const bounds = getContainerScrollBounds();
+      if (!bounds || bounds.maxScroll <= 0) return;
+
+      const clampedIndex = Math.max(0, Math.min(BEAT_PROGRESSES.length - 1, targetIndex));
+      const targetProgress = BEAT_PROGRESSES[clampedIndex];
+      const targetY = bounds.containerTop + targetProgress * bounds.maxScroll;
+
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+
+      const startY = window.scrollY || document.documentElement.scrollTop;
+      const diff = targetY - startY;
+
+      if (Math.abs(diff) < 2) {
+        isAnimatingRef.current = false;
+        return;
+      }
+
+      const startTime = performance.now();
+
+      function step(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const p = Math.min(elapsed / duration, 1);
+        // easeInOutCubic: buttery smooth acceleration and deceleration
+        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+
+        window.scrollTo(0, startY + diff * ease);
+
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          window.scrollTo(0, targetY);
+          setTimeout(() => {
+            isAnimatingRef.current = false;
+          }, 120);
+        }
+      }
+
+      requestAnimationFrame(step);
+    },
+    [getContainerScrollBounds]
+  );
+
+  // Intercept mouse wheel when hero is sticky/active
+  useEffect(() => {
+    let wheelAccumulator = 0;
+    let resetTimer: NodeJS.Timeout | null = null;
+
+    const handleWheel = (e: WheelEvent) => {
+      const bounds = getContainerScrollBounds();
+      if (!bounds) return;
+
+      const { rect, containerTop, maxScroll, scrollY } = bounds;
+      // Active control zone: sticky within viewport
+      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
+
+      if (!isStickyActive) {
+        return; // Allow natural scroll outside hero
+      }
+
+      // If transition animation is running, lock wheel to prevent stopping midway
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        return;
+      }
+
+      wheelAccumulator += e.deltaY;
+      if (resetTimer) clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        wheelAccumulator = 0;
+      }, 200);
+
+      const threshold = 20;
+      if (Math.abs(wheelAccumulator) < threshold) {
+        return;
+      }
+
+      const isScrollingDown = wheelAccumulator > 0;
+      wheelAccumulator = 0;
+
+      const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
+
+      // Find closest beat index
+      let closestIdx = 0;
+      let minDiff = 999;
+      BEAT_PROGRESSES.forEach((bp, idx) => {
+        const diff = Math.abs(bp - currentProgress);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = idx;
+        }
+      });
+
+      if (isScrollingDown) {
+        if (closestIdx < BEAT_PROGRESSES.length - 1) {
+          e.preventDefault();
+          scrollToBeat(closestIdx + 1);
+        } else {
+          // At final scene (03 · Panorama): let user scroll down naturally to next section
+        }
+      } else {
+        if (closestIdx > 0) {
+          e.preventDefault();
+          scrollToBeat(closestIdx - 1);
+        } else {
+          // At first scene: let user scroll back to top if applicable
+        }
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
+  }, [getContainerScrollBounds, scrollToBeat]);
+
+  // Fallback: If scrollbar was dragged or mouse wheel stopped midway, auto-snap cleanly
+  useEffect(() => {
+    let snapTimer: NodeJS.Timeout | null = null;
+
+    const handleScrollEnd = () => {
+      if (isAnimatingRef.current) return;
+      const bounds = getContainerScrollBounds();
+      if (!bounds) return;
+
+      const { rect, containerTop, maxScroll, scrollY } = bounds;
+      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
+      if (!isStickyActive) return;
+
+      const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
+
+      let closestIdx = 0;
+      let minDiff = 999;
+      BEAT_PROGRESSES.forEach((bp, idx) => {
+        const diff = Math.abs(bp - currentProgress);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = idx;
+        }
+      });
+
+      // If stopped in middle motion (> 0.03 away from beat), auto-snap cleanly
+      if (minDiff > 0.03) {
+        scrollToBeat(closestIdx, 600);
+      }
+    };
+
+    const onScroll = () => {
+      if (isAnimatingRef.current) return;
+      if (snapTimer) clearTimeout(snapTimer);
+      snapTimer = setTimeout(handleScrollEnd, 220);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (snapTimer) clearTimeout(snapTimer);
+    };
+  }, [getContainerScrollBounds, scrollToBeat]);
+
+  // Keyboard navigation (ArrowDown, PageDown, Space, ArrowUp, PageUp)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const bounds = getContainerScrollBounds();
+      if (!bounds) return;
+      const { rect, containerTop, maxScroll, scrollY } = bounds;
+      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
+      if (!isStickyActive) return;
+
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+        const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
+        let closestIdx = 0;
+        let minDiff = 999;
+        BEAT_PROGRESSES.forEach((bp, idx) => {
+          const diff = Math.abs(bp - currentProgress);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = idx;
+          }
+        });
+        if (closestIdx < BEAT_PROGRESSES.length - 1) {
+          e.preventDefault();
+          scrollToBeat(closestIdx + 1);
+        }
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+        const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
+        let closestIdx = 0;
+        let minDiff = 999;
+        BEAT_PROGRESSES.forEach((bp, idx) => {
+          const diff = Math.abs(bp - currentProgress);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = idx;
+          }
+        });
+        if (closestIdx > 0) {
+          e.preventDefault();
+          scrollToBeat(closestIdx - 1);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [getContainerScrollBounds, scrollToBeat]);
+
   // Track active beat for mobile and desktop transitions
   const [currentBeat, setCurrentBeat] = useState(1);
   useEffect(() => {
@@ -544,9 +767,14 @@ export default function ScrollSequenceHero({
             >
               {beat3Cta}
             </Link>
-            <div className="text-xs sm:text-sm text-white/90 font-mono tracking-widest drop-shadow font-semibold">
-              0{currentBeat} / 04
-            </div>
+            <button
+              type="button"
+              onClick={() => scrollToBeat(currentBeat % 4)}
+              className="text-xs sm:text-sm text-white/90 font-mono tracking-widest drop-shadow font-semibold hover:text-[#10b981] transition-colors"
+              aria-label="Next scene"
+            >
+              0{currentBeat} / 04 ↓
+            </button>
           </div>
         </div>
 
@@ -661,7 +889,41 @@ export default function ScrollSequenceHero({
             </div>
           </div>
         </motion.div>
+
+        {/* ── Scene Step Navigation Pills (Desktop) ── */}
+        <div className="hidden sm:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3 bg-black/40 backdrop-blur-md py-3.5 px-2 rounded-full border border-white/10 pointer-events-auto shadow-2xl">
+          {[
+            { num: "01", title: isJa ? "建築の美" : "Exterior View" },
+            { num: "02", title: isJa ? "空間の調和" : "Spatial Harmony" },
+            { num: "03", title: isJa ? "プライベート空間" : "Private Sanctuary" },
+            { num: "04", title: isJa ? "パノラマ＆スカイ" : "Panorama Retreat" },
+          ].map((item, idx) => {
+            const isActive = currentBeat === idx + 1;
+            return (
+              <button
+                key={item.num}
+                type="button"
+                onClick={() => scrollToBeat(idx)}
+                className="group relative flex items-center justify-center p-1.5 focus:outline-none"
+                aria-label={`Jump to Scene ${item.num}: ${item.title}`}
+              >
+                <span
+                  className={`block rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "w-2.5 h-6 bg-[#10b981] shadow-[0_0_12px_rgba(16,185,129,0.9)]"
+                      : "w-2.5 h-2.5 bg-white/40 hover:bg-white/80 group-hover:scale-125"
+                  }`}
+                />
+                <span className="absolute right-10 px-2.5 py-1 bg-black/90 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none border border-white/15 shadow-lg translate-x-1 group-hover:translate-x-0">
+                  <span className="text-[#10b981] font-mono mr-1.5">{item.num}</span>
+                  {item.title}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
+
