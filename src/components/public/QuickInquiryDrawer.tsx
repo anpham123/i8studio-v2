@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { X, Send, CheckCircle2, MessageSquare, Mail, Phone, ExternalLink, Copy, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Send, Clock, Shield, Check } from "lucide-react";
 import { useLocale } from "next-intl";
 
-// Global custom event name for triggering the drawer from anywhere
 const INQUIRY_EVENT = "i8-open-inquiry-drawer";
 
 export function openInquiryDrawer(service?: string) {
@@ -18,47 +17,130 @@ export default function QuickInquiryDrawer() {
   const isJa = locale === "ja";
 
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<string>("3DCGパース");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneOrLine, setPhoneOrLine] = useState("");
-  const [driveLink, setDriveLink] = useState("");
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    service: "",
+    hearAboutUs: "",
+    referrer: "",
+    message: "",
+  });
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const services = isJa
-    ? [
-        { id: "3DCGパース", label: "3DCGパース（内観・外観）" },
-        { id: "建築アニメーション", label: "建築アニメーション動画" },
-        { id: "VR / 360°", label: "VR / 360° パノラマ" },
-        { id: "BIMモデリング", label: "BIM / 3Dモデリング" },
-        { id: "その他・総合相談", label: "その他・総合相談" },
-      ]
+    ? ["CGパース制作", "CG動画・アニメーション", "VR体験・ウォークスルー", "BIMモデリング", "パチンコ・パチスロCG", "アニメ・イラスト制作", "その他"]
     : [
-        { id: "3D Rendering", label: "3D Architectural Renderings" },
-        { id: "Animation", label: "Walkthrough & Cinematic Animation" },
-        { id: "VR / 360°", label: "VR & 360° Interactive Tours" },
-        { id: "BIM Modeling", label: "BIM & 3D CAD Modeling" },
-        { id: "Other", label: "Other / General Consultation" },
+        "3D CG Visualization",
+        "3D Animation",
+        "VR Experience",
+        "BIM Services",
+        "Pachinko & Slot CG",
+        "Anime & Illustration",
+        "Other",
       ];
 
-  // Set default service on locale change
+  const channels = [
+    {
+      key: "facebook",
+      label: isJa ? "Facebook" : "Facebook",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+      ),
+    },
+    {
+      key: "instagram",
+      label: isJa ? "Instagram" : "Instagram",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+        </svg>
+      ),
+    },
+    {
+      key: "linkedin",
+      label: isJa ? "LinkedIn" : "LinkedIn",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+          <rect x="2" y="9" width="4" height="12" />
+          <circle cx="4" cy="4" r="2" />
+        </svg>
+      ),
+    },
+    {
+      key: "twitter",
+      label: isJa ? "Twitter" : "Twitter",
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
+    },
+    {
+      key: "youtube",
+      label: isJa ? "YouTube" : "YouTube",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+      ),
+    },
+    {
+      key: "google",
+      label: isJa ? "Google検索" : "Google Search",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      ),
+    },
+    {
+      key: "referral",
+      label: isJa ? "ご紹介 / 口コミ" : "Referral / Word of Mouth",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
+    {
+      key: "other",
+      label: isJa ? "その他" : "Other",
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+      ),
+    },
+  ];
+
+  // Auto detect referrer
   useEffect(() => {
-    setSelectedService(isJa ? "3DCGパース" : "3D Rendering");
-  }, [isJa]);
+    try {
+      const rawReferrer = typeof document !== "undefined" ? document.referrer : "";
+      setForm((prev) => ({ ...prev, referrer: rawReferrer || "Direct / Quick Form" }));
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Listen for global open event
   useEffect(() => {
     const handleOpen = (e: Event) => {
       const customEvent = e as CustomEvent<{ service?: string }>;
       if (customEvent.detail?.service) {
-        setSelectedService(customEvent.detail.service);
+        setForm((prev) => ({ ...prev, service: customEvent.detail.service || "" }));
       }
-      setIsSuccess(false);
-      setErrorMsg("");
+      setStatus("idle");
       setIsOpen(true);
     };
 
@@ -89,60 +171,31 @@ export default function QuickInquiryDrawer() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  const handleCopyEmail = useCallback(() => {
-    navigator.clipboard.writeText("info@i8studio.vn");
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes("@")) {
-      setErrorMsg(isJa ? "有効なメールアドレスをご入力ください。" : "Please provide a valid email address.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMsg("");
-
+    setStatus("sending");
     try {
-      const detailsList = [
-        phoneOrLine ? `[Contact / LINE / Phone]: ${phoneOrLine}` : null,
-        driveLink ? `[Drawings / Cloud Link]: ${driveLink}` : null,
-        message ? `[Project Scope / Details]:\n${message}` : null,
-      ].filter(Boolean);
-
-      const finalMessage = detailsList.length > 0 ? detailsList.join("\n\n") : "(No additional message provided)";
-
       const res = await fetch("/api/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: fullName.trim() || (isJa ? "クイック見積もり訪問者" : "Quick Inquiry Visitor"),
-          email: email.trim(),
-          service: selectedService,
-          message: finalMessage,
-          hearAboutUs: "Quick Inquiry Drawer",
-          referrer: typeof window !== "undefined" ? window.location.href : "",
-        }),
+        body: JSON.stringify(form),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || (isJa ? "送信に失敗しました。" : "Submission failed."));
+      if (res.ok) {
+        setStatus("success");
+        setForm({
+          fullName: "",
+          email: "",
+          service: "",
+          hearAboutUs: "",
+          referrer: form.referrer,
+          message: "",
+        });
+      } else {
+        setStatus("error");
       }
-
-      setIsSuccess(true);
-      // Reset form
-      setFullName("");
-      setEmail("");
-      setPhoneOrLine("");
-      setDriveLink("");
-      setMessage("");
-    } catch (err: any) {
-      setErrorMsg(err.message || (isJa ? "送信エラーが発生しました。時間をおいて再試行してください。" : "An error occurred. Please try again."));
-    } finally {
-      setIsSubmitting(false);
+    } catch {
+      setStatus("error");
     }
   };
 
@@ -150,69 +203,63 @@ export default function QuickInquiryDrawer() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-50 bg-black/65 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsOpen(false)}
         aria-hidden="true"
       />
 
-      {/* Slide-over Drawer Panel */}
+      {/* Slide-over Drawer / Modal Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[520px] bg-[#0c0c11] text-white border-l border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out transform ${
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-[560px] bg-white text-gray-900 border-l border-gray-200 shadow-2xl flex flex-col transition-transform duration-300 ease-out transform ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="inquiry-title"
+        aria-labelledby="quick-form-title"
       >
-        {/* Header */}
-        <div className="flex items-start justify-between p-6 sm:p-7 border-b border-white/10 bg-white/[0.02]">
+        {/* Header with Title and Close Button */}
+        <div className="flex items-center justify-between px-6 sm:px-8 py-5 border-b border-gray-100">
           <div>
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] tracking-wider uppercase font-semibold mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {isJa ? "24時間以内にお見積り" : "Fast Quote in 24 Hours"}
-            </div>
-            <h2 id="inquiry-title" className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-              {isJa ? "プロジェクトのご相談・お見積り" : "Start Your Project"}
+            <h2 id="quick-form-title" className="text-lg sm:text-xl font-bold text-gray-900">
+              {isJa ? "お問い合わせ・お見積り" : "Contact & Estimate"}
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-400 mt-1">
-              {isJa
-                ? "図面やイメージをお持ちであれば即日概算をお届けします。"
-                : "Share your drawings or briefs for a fast, detailed quotation."}
+            <p className="text-xs text-gray-500 mt-0.5">
+              {isJa ? "プロジェクトのご相談はこちらから承ります" : "Tell us about your project"}
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 text-neutral-400 hover:text-white flex items-center justify-center transition-colors -mr-1 -mt-1 cursor-pointer"
-            aria-label="Close drawer"
+            className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Close"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Body Content */}
-        <div className="flex-1 overflow-y-auto px-6 sm:px-7 py-6 space-y-6">
-          {isSuccess ? (
-            <div className="py-12 px-4 text-center flex flex-col items-center justify-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center animate-bounce">
-                <CheckCircle2 size={36} />
+        {/* Form Body - Exactly matching user screenshot */}
+        <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6">
+          {status === "success" ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 border border-green-100 flex items-center justify-center">
+                <Send size={28} className="text-green-500" />
               </div>
-              <h3 className="text-xl font-bold text-white">
-                {isJa ? "お問い合わせを受け付けました" : "Inquiry Received!"}
+              <h3 className="text-gray-900 font-bold text-xl mb-2">
+                {isJa ? "メッセージが送信されました" : "Message Sent"}
               </h3>
-              <p className="text-sm text-neutral-300 max-w-sm leading-relaxed">
+              <p className="text-gray-500 text-sm max-w-xs mx-auto">
                 {isJa
-                  ? "ご入力ありがとうございます。i8 STUDIOの担当ディレクターより、24時間以内に概算スケジュールとお見積りをご連絡いたします。"
-                  : "Thank you for reaching out. Our team will review your project details and get back to you with an estimate within 24 hours."}
+                  ? "お問い合わせいただきありがとうございます。24時間以内に担当者よりご連絡いたします。"
+                  : "We respond within 24 hours. Our team will review your inquiry shortly."}
               </p>
-              <div className="pt-4">
+              <div className="mt-6">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors cursor-pointer"
+                  className="px-6 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors cursor-pointer"
                 >
                   {isJa ? "閉じる" : "Close"}
                 </button>
@@ -220,173 +267,147 @@ export default function QuickInquiryDrawer() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Service Selection */}
+              {/* Full Name * */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-2.5">
-                  1. {isJa ? "ご希望の制作メニュー" : "Service Required"}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {isJa ? "お名前" : "Full Name"} *
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {services.map((svc) => (
-                    <button
-                      key={svc.id}
-                      type="button"
-                      onClick={() => setSelectedService(svc.id)}
-                      className={`text-left px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 border cursor-pointer ${
-                        selectedService === svc.id
-                          ? "bg-white text-black border-white shadow-md font-semibold"
-                          : "bg-white/5 text-neutral-300 border-white/10 hover:bg-white/10 hover:text-white"
-                      }`}
-                    >
-                      {svc.label}
-                    </button>
-                  ))}
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={form.fullName}
+                  onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
+                  placeholder={isJa ? "山田 太郎" : "Tanaka Hiroshi"}
+                />
               </div>
 
-              {/* Email (Required) */}
+              {/* Email * */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                  2. {isJa ? "メールアドレス" : "Email Address"}{" "}
-                  <span className="text-emerald-400">*</span>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {isJa ? "メールアドレス" : "Email"} *
                 </label>
                 <input
                   type="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={isJa ? "info@yourcompany.co.jp" : "name@company.com"}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 focus:bg-white/10 transition-colors"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
+                  placeholder={isJa ? "info@example.co.jp" : "hello@company.jp"}
                 />
               </div>
 
-              {/* Name & Company */}
+              {/* Service */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                  3. {isJa ? "お名前・会社名" : "Name / Company"}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {isJa ? "サービス" : "Service"}
                 </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder={isJa ? "例：山田 太郎（○○設計事務所）" : "e.g. John Doe (Studio Architecture)"}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 focus:bg-white/10 transition-colors"
-                />
+                <div className="relative">
+                  <select
+                    value={form.service}
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 text-sm appearance-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors bg-white pr-10 cursor-pointer"
+                  >
+                    <option value="">{isJa ? "サービスを選択してください" : "Select a service"}</option>
+                    {services.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
-              {/* Phone / LINE ID / WhatsApp */}
+              {/* Message * */}
               <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                  4. {isJa ? "お電話番号 または LINE ID (任意)" : "Phone / WhatsApp / LINE (Optional)"}
-                </label>
-                <input
-                  type="text"
-                  value={phoneOrLine}
-                  onChange={(e) => setPhoneOrLine(e.target.value)}
-                  placeholder={isJa ? "090-xxxx-xxxx または LINE ID" : "+1 ... or WhatsApp number"}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 focus:bg-white/10 transition-colors"
-                />
-              </div>
-
-              {/* Drive link / Cloud Folder */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                  5. {isJa ? "図面・CAD・資料の共有リンク (任意)" : "Drawings / Cloud Folder Link (Optional)"}
-                </label>
-                <input
-                  type="url"
-                  value={driveLink}
-                  onChange={(e) => setDriveLink(e.target.value)}
-                  placeholder={isJa ? "Google Drive / Dropbox / Box 等の共有URL" : "Google Drive, Dropbox, Box or OneDrive URL"}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 focus:bg-white/10 transition-colors"
-                />
-                <p className="text-[11px] text-neutral-400 mt-1">
-                  {isJa
-                    ? "※ 大容量のCAD、PDF、SketchUpデータは共有リンクをご記入いただくとスムーズです。"
-                    : "* For large CAD, PDF or 3D files, please paste a cloud share link."}
-                </p>
-              </div>
-
-              {/* Message */}
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 uppercase tracking-wider mb-1.5">
-                  6. {isJa ? "ご要望・納期・プロジェクト概要" : "Project Details & Timeline"}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {isJa ? "お問い合わせ内容" : "Message"} *
                 </label>
                 <textarea
-                  rows={3}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={
-                    isJa
-                      ? "希望納期、アングル数、建築の規模（平米数や階数）などご自由にご記入ください。"
-                      : "Describe project type, expected timeline, number of views or requirements..."
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white text-sm placeholder:text-neutral-500 focus:outline-none focus:border-emerald-400 focus:bg-white/10 transition-colors resize-none"
+                  required
+                  rows={4}
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-300 text-sm resize-none focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-300 transition-colors"
+                  placeholder={isJa ? "プロジェクトの概要、ご要望、スケジュールなどをご記入ください..." : "Tell us about your project..."}
                 />
               </div>
 
-              {errorMsg && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/25 text-red-300 text-xs">
-                  {errorMsg}
+              {/* Survey: How did you hear about us? */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {isJa ? "当スタジオをどこでお知りになりましたか？" : "How did you hear about us?"}
+                  </label>
+                  <span className="text-[11px] text-gray-400">
+                    {isJa ? "チャンネルを選択（任意）" : "Select a channel (Optional)"}
+                  </span>
                 </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {channels.map((ch) => {
+                    const isSelected = form.hearAboutUs === ch.label;
+                    return (
+                      <button
+                        key={ch.key}
+                        type="button"
+                        onClick={() => setForm({ ...form, hearAboutUs: isSelected ? "" : ch.label })}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                            : "bg-gray-50/70 hover:bg-gray-100 text-gray-700 border-gray-200"
+                        }`}
+                      >
+                        <span className="shrink-0 flex items-center justify-center">{ch.icon}</span>
+                        <span className="truncate">{ch.label}</span>
+                        {isSelected && <Check size={12} className="ml-auto text-white shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {status === "error" && (
+                <p className="text-red-500 text-sm">
+                  {isJa ? "送信に失敗しました。時間をおいて再試行してください。" : "Failed to send message. Please try again later."}
+                </p>
               )}
 
-              {/* Submit Button */}
+              {/* Send Message Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                disabled={status === "sending"}
+                className="w-full bg-[#121826] hover:bg-gray-900 text-white font-semibold py-3.5 rounded-lg transition-colors text-base disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
-                {isSubmitting ? (
+                {status === "sending" ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     <span>{isJa ? "送信中..." : "Sending..."}</span>
                   </>
                 ) : (
                   <>
-                    <Send size={15} />
-                    <span>{isJa ? "この内容で無料お見積りを依頼する" : "Submit Quick Inquiry (Free Quote)"}</span>
+                    <Send size={16} />
+                    <span>{isJa ? "メッセージを送信" : "Send Message"}</span>
                   </>
                 )}
               </button>
+
+              {/* Response Time & NDA Notes */}
+              <div className="flex items-center gap-4 text-black text-xs font-semibold pt-1">
+                <div className="flex items-center gap-1.5">
+                  <Clock size={13} className="text-gray-700" />
+                  <span>{isJa ? "24時間以内に返信" : "We respond within 24 hours"}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Shield size={13} className="text-gray-700" />
+                  <span>{isJa ? "秘密保持契約（NDA）対応" : "NDA available upon request"}</span>
+                </div>
+              </div>
             </form>
           )}
-
-          {/* Quick Direct Channels */}
-          <div className="pt-4 border-t border-white/10 space-y-3">
-            <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-              {isJa ? "または直接のお問い合わせ・ご相談" : "Direct Contact Channels"}
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <a
-                href={isJa ? "https://line.me/ti/p/~i8studio" : "https://wa.me/84914049090"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-200 transition-colors"
-              >
-                <MessageSquare size={13} className="text-emerald-400" />
-                <span>{isJa ? "LINE 公式" : "WhatsApp"}</span>
-                <ExternalLink size={11} className="text-neutral-500" />
-              </a>
-
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-200 transition-colors cursor-pointer"
-              >
-                {copiedEmail ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} className="text-neutral-400" />}
-                <span>{copiedEmail ? (isJa ? "コピー完了" : "Copied!") : "Email コピー"}</span>
-              </button>
-            </div>
-            <div className="text-center">
-              <a
-                href="tel:0914049090"
-                className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 hover:text-white transition-colors"
-              >
-                <Phone size={11} />
-                <span>Hotline: +84 914 049 090</span>
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </>
