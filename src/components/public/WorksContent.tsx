@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import Lightbox from "@/components/public/Lightbox";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
@@ -267,11 +267,13 @@ function WorkCardItem({
   onClick,
   typeLabel,
   index = 0,
+  isExpandedShowcase = false,
 }: {
   work: Work;
   onClick: () => void;
   typeLabel: string;
   index?: number;
+  isExpandedShowcase?: boolean;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -359,28 +361,93 @@ function WorkCardItem({
 
   const [aspectRatio, setAspectRatio] = useState<number | null>(work.aspectRatio || null);
 
+  useEffect(() => {
+    if (!isCompositeSlider || !work.image || aspectRatio) return;
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        setAspectRatio(img.naturalWidth / img.naturalHeight);
+      }
+    };
+    img.src = work.image;
+  }, [isCompositeSlider, work.image, aspectRatio]);
+
+  const isPortrait = Boolean(aspectRatio && aspectRatio < 0.95);
+
   return (
     <motion.div
       data-flip-id={work.id}
-      initial={{ opacity: 0, y: 16 }}
+      data-composite={isCompositeSlider ? "true" : undefined}
+      initial={{ opacity: 0, y: isCompositeSlider ? 0 : 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.3), ease: "easeOut" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="work-card break-inside-avoid w-full group inline-block will-change-transform mb-6"
+      className={`work-card w-full group ${
+        isCompositeSlider
+          ? "block my-2"
+          : "break-inside-avoid w-full group inline-block will-change-transform mb-6"
+      }`}
     >
       {isCompositeSlider ? (
-        <div
-          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
-          className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] shadow-xs will-change-transform"
-        >
-          <BeforeAfterSlider
-            beforeImage={work.beforeImage!}
-            afterImage={work.image!}
-            beforeLabel="Before"
-            afterLabel="After"
-            autoAspect={true}
-          />
+        <div className={`w-full ${isPortrait ? "max-w-[620px] mx-auto" : "max-w-5xl mx-auto"}`}>
+          <div
+            style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
+            className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[4px] shadow-sm will-change-transform group/slider"
+          >
+            <BeforeAfterSlider
+              beforeImage={work.beforeImage!}
+              afterImage={work.image!}
+              beforeLabel="Before"
+              afterLabel="After"
+              autoAspect={true}
+            />
+
+            {/* Top-right Fullscreen / Lightbox button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
+              className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-white text-[12px] font-medium backdrop-blur-md transition-all shadow-md hover:scale-105 cursor-pointer"
+              title="Fullscreen Comparison"
+              aria-label="Fullscreen Comparison"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Fullscreen</span>
+            </button>
+
+            {/* Top-left subtle badge */}
+            <div className="absolute top-3.5 left-3.5 z-20 pointer-events-none flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/55 text-white/90 text-[11px] font-medium tracking-wider uppercase backdrop-blur-md shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Photo Composite
+            </div>
+          </div>
+
+          <div
+            onClick={onClick}
+            className="work-card-info mt-4 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-4"
+          >
+            <div>
+              <h3 className="text-[19px] sm:text-[22px] font-semibold text-black tracking-[0.01em] leading-snug">
+                <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
+                  {work.title}
+                </span>
+              </h3>
+              {work.titleJa && (
+                <p className="text-[13px] sm:text-[14px] text-[#666] mt-0.5">
+                  {work.titleJa}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 text-[12px] text-[#777] mt-1 sm:mt-0 shrink-0">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f2efe9] text-[#555] text-[11px] font-medium tracking-wide">
+                ↔ Drag slider to compare
+              </span>
+            </div>
+          </div>
         </div>
       ) : (
         <div
@@ -451,16 +518,18 @@ function WorkCardItem({
         </div>
       )}
 
-      <div
-        onClick={onClick}
-        className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer"
-      >
-        <h3 className="text-[17px] sm:text-[18px] font-semibold text-black tracking-[0.01em] leading-snug">
-          <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
-            {work.title}
-          </span>
-        </h3>
-      </div>
+      {!isCompositeSlider && (
+        <div
+          onClick={onClick}
+          className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer"
+        >
+          <h3 className="text-[17px] sm:text-[18px] font-semibold text-black tracking-[0.01em] leading-snug">
+            <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
+              {work.title}
+            </span>
+          </h3>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -909,34 +978,60 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
           ) : (
             <div
               ref={gridRef}
-              className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
+              className={
+                activeType === "composite"
+                  ? "flex flex-col gap-12 sm:gap-16 w-full max-w-5xl mx-auto"
+                  : "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
+              }
             >
-              {filtered.map((work, index) => (
-                <WorkCardItem
-                  key={work.id}
-                  work={work}
-                  index={index}
-                  typeLabel={t(`types.${work.type}`)}
-                  onClick={() => {
-                    const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
-                    if (work.vrUrl) {
-                      setVrModal({ url: work.vrUrl, title: work.title });
-                    } else if (work.videoUrl) {
-                      setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type, title: work.title });
-                    } else if (work.type === "composite" || work.beforeImage) {
-                      setLightbox({
-                        src: work.image || "",
-                        beforeImage: work.beforeImage || "",
-                        alt: altText,
-                        type: "composite",
-                        title: work.titleJa ? `${work.title} (${work.titleJa})` : work.title,
-                      });
-                    } else if (work.image) {
-                      setLightbox({ src: work.image, alt: altText, type: work.type, title: work.title });
-                    }
-                  }}
-                />
-              ))}
+              {filtered.map((work, index) => {
+                const isItemComposite =
+                  (work.type === "composite" || Boolean(work.beforeImage)) &&
+                  Boolean(work.beforeImage) &&
+                  Boolean(work.image);
+
+                const cardElement = (
+                  <WorkCardItem
+                    key={work.id}
+                    work={work}
+                    index={index}
+                    typeLabel={t(`types.${work.type}`)}
+                    isExpandedShowcase={isItemComposite}
+                    onClick={() => {
+                      const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
+                      if (work.vrUrl) {
+                        setVrModal({ url: work.vrUrl, title: work.title });
+                      } else if (work.videoUrl) {
+                        setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type, title: work.title });
+                      } else if (work.type === "composite" || work.beforeImage) {
+                        setLightbox({
+                          src: work.image || "",
+                          beforeImage: work.beforeImage || "",
+                          alt: altText,
+                          type: "composite",
+                          title: work.titleJa ? `${work.title} (${work.titleJa})` : work.title,
+                        });
+                      } else if (work.image) {
+                        setLightbox({ src: work.image, alt: altText, type: work.type, title: work.title });
+                      }
+                    }}
+                  />
+                );
+
+                if (isItemComposite && activeType !== "composite") {
+                  return (
+                    <div
+                      key={work.id}
+                      style={{ columnSpan: "all", WebkitColumnSpan: "all" }}
+                      className="block [column-span:_all] w-full my-8 sm:my-12 clear-both"
+                    >
+                      {cardElement}
+                    </div>
+                  );
+                }
+
+                return cardElement;
+              })}
             </div>
           )}
         </main>
