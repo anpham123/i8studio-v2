@@ -40,9 +40,11 @@ interface ScrollSequenceHeroProps {
   heroTexts?: Record<string, string>;
 }
 
+const defaultFramePattern = (i: number) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.webp`;
+
 export default function ScrollSequenceHero({
-  totalFrames = 242,
-  framePattern = (i) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.webp`,
+  totalFrames = 240,
+  framePattern = defaultFramePattern,
   fallbackVideo = "/video/video 1.mp4",
   heroTexts = {},
 }: ScrollSequenceHeroProps) {
@@ -132,6 +134,7 @@ export default function ScrollSequenceHero({
   const [isReady, setIsReady] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
   const lastDrawnFrameRef = useRef<number>(-1);
+  const targetFrameRef = useRef<number>(1);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -187,12 +190,23 @@ export default function ScrollSequenceHero({
       const total = activeFramesCountRef.current || 240;
       const idx = Math.min(Math.max(1, Math.round(frameIndex)), total) - 1;
 
+      targetFrameRef.current = idx + 1;
       let img = imagesRef.current[idx];
       if (!img || !img.complete || img.naturalWidth === 0) {
+        // Search backwards first
         for (let i = idx - 1; i >= 0; i--) {
           if (imagesRef.current[i]?.complete && imagesRef.current[i]?.naturalWidth > 0) {
             img = imagesRef.current[i];
             break;
+          }
+        }
+        // If not found, search forwards
+        if (!img || !img.complete || img.naturalWidth === 0) {
+          for (let i = idx + 1; i < total; i++) {
+            if (imagesRef.current[i]?.complete && imagesRef.current[i]?.naturalWidth > 0) {
+              img = imagesRef.current[i];
+              break;
+            }
           }
         }
       }
@@ -227,27 +241,29 @@ export default function ScrollSequenceHero({
     []
   );
 
-  // Preload frames progressively (first 15 immediately, rest in background idle chunks)
+  // Preload all frames cleanly with robust parallel loading & throttled UI updates
   useEffect(() => {
     let isMounted = true;
     const loadedImages: HTMLImageElement[] = [];
     let count = 0;
-    const PRIORITY_BATCH = Math.min(15, activeFramesCount);
+    const total = activeFramesCount;
 
-    const loadSingle = (i: number) => {
+    for (let i = 1; i <= total; i++) {
       const img = new Image();
       img.src = framePattern(i);
       img.onload = () => {
         if (!isMounted) return;
         count++;
-        if (count % 15 === 0 || count >= activeFramesCount) {
+        // Throttle progress updates to avoid React re-rendering churn
+        if (count % 20 === 0 || count >= total) {
           setLoadedCount(count);
         }
-        if (count >= Math.min(10, activeFramesCount)) {
+        if (count >= 10) {
           setIsReady(true);
         }
-        if (lastDrawnFrameRef.current === -1 && i === 1) {
-          renderFrame(1);
+        // If user scrolled to this frame while it was loading or it is frame 1, render immediately
+        if (targetFrameRef.current === i || (lastDrawnFrameRef.current === -1 && i === 1)) {
+          renderFrame(i);
         }
       };
       img.onerror = () => {
@@ -259,39 +275,12 @@ export default function ScrollSequenceHero({
         }
       };
       loadedImages[i - 1] = img;
-    };
-
-    // Load initial 15 frames immediately for instant interactive playback
-    for (let i = 1; i <= PRIORITY_BATCH; i++) {
-      loadSingle(i);
     }
 
-    // Load remainder in background chunks so main thread & network stay responsive
-    let nextIndex = PRIORITY_BATCH + 1;
-    let timerId: any = null;
-
-    const loadRemainingChunks = () => {
-      if (!isMounted || nextIndex > activeFramesCount) return;
-      const chunkEnd = Math.min(nextIndex + 15, activeFramesCount + 1);
-      for (let j = nextIndex; j < chunkEnd; j++) {
-        loadSingle(j);
-      }
-      nextIndex = chunkEnd;
-      if (nextIndex <= activeFramesCount) {
-        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-          (window as any).requestIdleCallback(loadRemainingChunks, { timeout: 400 });
-        } else {
-          timerId = setTimeout(loadRemainingChunks, 150);
-        }
-      }
-    };
-
-    timerId = setTimeout(loadRemainingChunks, 200);
     imagesRef.current = loadedImages;
 
     return () => {
       isMounted = false;
-      if (timerId) clearTimeout(timerId);
     };
   }, [activeFramesCount, framePattern, renderFrame]);
 
@@ -331,8 +320,8 @@ export default function ScrollSequenceHero({
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isTouchingRef.current) return;
     const deltaX = e.touches[0].clientX - touchStartXRef.current;
-    const startFrame = Math.min(6, activeFramesCount);
-    const endFrame = Math.max(startFrame, activeFramesCount - 6);
+    const startFrame = 1;
+    const endFrame = activeFramesCount;
     const frameDelta = -Math.round((deltaX / window.innerWidth) * (endFrame - startFrame) * 1.5);
     const targetFrame = Math.min(endFrame, Math.max(startFrame, touchStartFrameRef.current + frameDelta));
     renderFrame(targetFrame);
@@ -346,8 +335,8 @@ export default function ScrollSequenceHero({
   useEffect(() => {
     if (useFallback) return;
 
-    const startFrame = Math.min(6, activeFramesCount);
-    const endFrame = Math.max(startFrame, activeFramesCount - 6);
+    const startFrame = 1;
+    const endFrame = activeFramesCount;
 
     let rafId: number | null = null;
 
