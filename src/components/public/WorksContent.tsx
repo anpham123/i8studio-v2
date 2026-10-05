@@ -278,7 +278,10 @@ function WorkCardItem({
 
   const hoverVideoSrc = work.hoverVideo || (isVideoFile(work.videoUrl) ? work.videoUrl : undefined);
   const hasHoverVideo = Boolean(hoverVideoSrc);
-  const isCompositeSlider = (work.type === "composite" || Boolean(work.beforeImage)) && Boolean(work.beforeImage) && Boolean(work.image);
+  const isComposite = (work.type === "composite" || Boolean(work.beforeImage)) && Boolean(work.beforeImage) && Boolean(work.image);
+  // Inline Before/After slider only in the "Photo Composite" tab (isExpandedShowcase).
+  // In "Show all" a composite renders as a normal card showing the After image; click → fullscreen Before/After.
+  const isCompositeSlider = isComposite && isExpandedShowcase;
 
   // Cinematic Camera Motion Mode for static images:
   // 0: Zoom chậm từ xa lại gần (Slow Push-in / Dolly-in)
@@ -509,6 +512,14 @@ function WorkCardItem({
 
           {/* Subtle cinematic gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+          {/* Composite (Show all): After image only — badge hints that click opens Before/After */}
+          {isComposite && (
+            <div className="absolute top-3 left-3 z-10 pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 text-white text-[10.5px] font-medium tracking-wider uppercase shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              Before / After
+            </div>
+          )}
         </div>
       )}
 
@@ -990,7 +1001,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                     work={work}
                     index={index}
                     typeLabel={t(`types.${work.type}`)}
-                    isExpandedShowcase={isItemComposite}
+                    isExpandedShowcase={isItemComposite && activeType === "composite"}
                     onClick={() => {
                       const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
                       if (work.vrUrl) {
@@ -1012,17 +1023,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
                   />
                 );
 
-                if (isItemComposite && activeType !== "composite") {
-                  return (
-                    <div
-                      key={work.id}
-                      style={{ columnSpan: "all", WebkitColumnSpan: "all" }}
-                      className="block [column-span:_all] w-full my-8 sm:my-12 clear-both"
-                    >
-                      {cardElement}
-                    </div>
-                  );
-                }
+                // "Show all": composites flow in the masonry grid like any other card (no full-width row)
 
                 return cardElement;
               })}
