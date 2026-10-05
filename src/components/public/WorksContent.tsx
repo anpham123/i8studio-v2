@@ -370,6 +370,17 @@ function WorkCardItem({
     img.src = work.image;
   }, [isCompositeSlider, work.image, aspectRatio]);
 
+  // Hydration-race fix: on reload, cached images can finish loading before React attaches
+  // onLoad → isLoaded never flips and the card stays opacity-0. Check the DOM state on mount.
+  const imgRef = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img || !img.complete || img.naturalWidth === 0) return;
+    if (img.naturalHeight && !aspectRatio) setAspectRatio(img.naturalWidth / img.naturalHeight);
+    setIsLoaded(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [work.image]);
+
   const isPortrait = Boolean(aspectRatio && aspectRatio < 0.95);
 
   return (
@@ -462,6 +473,7 @@ function WorkCardItem({
           {/* Static thumbnail image with cinematic slow zoom / pan motion (True Natural Masonry: Vertical stays Vertical, Horizontal stays Horizontal) */}
           {work.image ? (
             <img
+              ref={imgRef}
               src={work.image}
               alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
               loading={index < 9 ? "eager" : "lazy"}
