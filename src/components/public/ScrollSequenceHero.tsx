@@ -293,6 +293,8 @@ export default function ScrollSequenceHero({
     const unsub = scrollYProgress.on("change", (v) => {
       if (e.touching) return;
       e.target = Math.min(1, Math.max(0, v));
+      // Big jump (e.g. Back-to-top button) → snap directly, don't "rewind" through every frame
+      if (Math.abs(e.target - e.current) > 0.2) e.current = e.target;
       kick();
     });
     return () => {
