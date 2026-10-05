@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useScroll, useTransform, useSpring, motion, AnimatePresence } from "framer-motion";
+import { useScroll, useTransform, useMotionValue, motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 
-
+/*
+ * ScrollSequenceHero — performance rewrite (2026-10-05)
+ *
+ * Key principles:
+ *  - Native scrolling: no wheel/keyboard hijacking, no auto-snap. Frames follow the scrollbar 1:1.
+ *  - Zero React re-renders while scrolling: canvas drawing runs in a single rAF loop driven by refs.
+ *  - Frames are decoded off the main thread (img.decode) before they are eligible for drawing.
+ *  - Progressive loading by stride (every 16th → 8th → 4th → 2nd → all) so any scroll position
+ *    has a nearby frame quickly. Mobile uses a smaller frame set and every 2nd frame.
+ *  - Frame URLs carry ?v=<updatedAt> so they can be cached as immutable by nginx.
+ */
 
 function renderFormattedText(text: string, forceNowrap = true) {
   if (!text) return null;
@@ -25,24 +35,36 @@ function renderFormattedText(text: string, forceNowrap = true) {
   );
 }
 
+/** Contrast shadow via text-shadow (much cheaper than CSS filter: drop-shadow over a repainting canvas) */
 function getContrastShadow(color: string, isBig = false) {
   const isDark = /^#(?:[0-3][0-9a-fA-F]{5}|0{3})/i.test(color) || color === "black" || color === "#121316";
   if (isDark) {
-    return isBig ? "drop-shadow(0 2px 14px rgba(255,255,255,0.85))" : "drop-shadow(0 2px 8px rgba(255,255,255,0.8))";
+    return isBig ? "0 2px 14px rgba(255,255,255,0.85)" : "0 2px 8px rgba(255,255,255,0.8)";
   }
-  return isBig ? "drop-shadow(0 2px 14px rgba(0,0,0,0.95))" : "drop-shadow(0 2px 10px rgba(0,0,0,0.95))";
+  return isBig
+    ? "0 2px 4px rgba(0,0,0,0.6), 0 2px 14px rgba(0,0,0,0.95)"
+    : "0 1px 3px rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.95)";
 }
 
 interface ScrollSequenceHeroProps {
   totalFrames?: number;
-  framePattern?: (index: number) => string;
   fallbackVideo?: string;
   heroTexts?: Record<string, string>;
 }
 
+interface HeroMeta {
+  totalFrames: number;
+  version: string;
+  hasMobile: boolean;
+}
+
+const BASE_PATH = "/sequences/hero";
+const MOBILE_BREAKPOINT = 640;
+// Scroll progress (0..1) at which each story beat is fully visible — used by the nav pills
+const BEAT_PROGRESSES = [0.0, 0.42, 0.75, 1.0];
+
 export default function ScrollSequenceHero({
-  totalFrames = 242,
-  framePattern = (i) => `/sequences/hero/frame_${String(i).padStart(4, "0")}.webp`,
+  totalFrames = 240,
   fallbackVideo = "/video/video 1.mp4",
   heroTexts = {},
 }: ScrollSequenceHeroProps) {
@@ -126,530 +148,382 @@ export default function ScrollSequenceHero({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const imagesRef = useRef<HTMLImageElement[]>([]);
-  const [loadedCount, setLoadedCount] = useState(0);
+  const [meta, setMeta] = useState<HeroMeta | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
-  const lastDrawnFrameRef = useRef<number>(-1);
+  const [currentBeat, setCurrentBeat] = useState(1);
 
-  const [isMobile, setIsMobile] = useState(false);
+  /* ------------------------------------------------------------------ */
+  /*  Mutable engine state (never triggers React renders)                */
+  /* ------------------------------------------------------------------ */
+  const engine = useRef({
+    images: [] as (HTMLImageElement | undefined)[],
+    decoded: [] as boolean[],
+    total: 0,
+    target: 0, // target progress 0..1 (from scroll)
+    current: 0, // smoothed progress 0..1
+    drawnIdx: -1,
+    raf: 0,
+    ctx: null as CanvasRenderingContext2D | null,
+    isMobile: false,
+    touching: false,
+    touchAxis: "" as "" | "x" | "y",
+    touchStartX: 0,
+    touchStartY: 0,
+    touchStartProgress: 0,
+    beat: 1,
+  });
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  // Smoothed progress exposed as a MotionValue so text overlays animate without React renders
+  const progress = useMotionValue(0);
 
-  // Scroll progress through container
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Immediate 1:1 responsive interpolation (zero inertia coasting)
-  const smoothProgress = useSpring(scrollYProgress, {
-    damping: 45,
-    stiffness: 400,
-    mass: 0.01,
-    restDelta: 0.00001,
-  });
-
-  const [activeFramesCount, setActiveFramesCount] = useState(totalFrames);
-  const activeFramesCountRef = useRef(activeFramesCount);
-  const [currentFrameDisplay, setCurrentFrameDisplay] = useState(1);
-
+  /* ------------------------------------------------------------------ */
+  /*  1. Read meta.json (frame count + version for cache busting)        */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    activeFramesCountRef.current = activeFramesCount;
-  }, [activeFramesCount]);
-
-  // Sync with meta.json from admin upload
-  useEffect(() => {
-    fetch("/sequences/hero/meta.json", { cache: "no-store" })
+    let cancelled = false;
+    const fallbackMeta: HeroMeta = { totalFrames, version: "", hasMobile: false };
+    const timeout = setTimeout(() => !cancelled && setMeta((m) => m || fallbackMeta), 2500);
+    fetch(`${BASE_PATH}/meta.json`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
-        if (data?.totalFrames && typeof data.totalFrames === "number" && data.totalFrames > 0) {
-          setActiveFramesCount(data.totalFrames);
-        }
+        if (cancelled) return;
+        const count = typeof data?.totalFrames === "number" && data.totalFrames > 0 ? data.totalFrames : totalFrames;
+        const version = String(data?.updatedAt || "").replace(/[^0-9A-Za-z]/g, "");
+        setMeta({ totalFrames: count, version, hasMobile: Boolean(data?.mobile) });
       })
-      .catch(() => { });
+      .catch(() => !cancelled && setMeta(fallbackMeta));
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [totalFrames]);
+
+  /* ------------------------------------------------------------------ */
+  /*  2. Canvas drawing                                                  */
+  /* ------------------------------------------------------------------ */
+  const nearestDecoded = useCallback((idx: number) => {
+    const e = engine.current;
+    if (e.decoded[idx]) return idx;
+    for (let d = 1; d < e.total; d++) {
+      if (idx - d >= 0 && e.decoded[idx - d]) return idx - d;
+      if (idx + d < e.total && e.decoded[idx + d]) return idx + d;
+    }
+    return -1;
   }, []);
 
-  // Render frame on Canvas (Exact 16:9 Fit on Mobile without cropping, Cover on Desktop)
-  const renderFrame = useCallback(
-    (frameIndex: number) => {
+  const drawIndex = useCallback((wantedIdx: number, force = false) => {
+    const e = engine.current;
+    const canvas = canvasRef.current;
+    if (!canvas || e.total === 0) return;
+    const idx = nearestDecoded(wantedIdx);
+    if (idx < 0 || (idx === e.drawnIdx && !force)) return;
+    const img = e.images[idx];
+    if (!img) return;
+
+    if (!e.ctx) e.ctx = canvas.getContext("2d", { alpha: false });
+    const ctx = e.ctx;
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const imgW = img.naturalWidth || 1920;
+    const imgH = img.naturalHeight || 1080;
+
+    if (e.isMobile) {
+      // Exact 16:9 fit on mobile
+      ctx.drawImage(img, 0, 0, w, h);
+    } else {
+      // Cover on desktop
+      const scale = Math.max(w / imgW, h / imgH);
+      const dw = imgW * scale;
+      const dh = imgH * scale;
+      ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    }
+    e.drawnIdx = idx;
+  }, [nearestDecoded]);
+
+  const progressToIndex = useCallback((p: number) => {
+    const e = engine.current;
+    if (e.total === 0) return 0;
+    // Skip a few lead-in/lead-out frames (matches previous behaviour)
+    const start = Math.min(5, e.total - 1);
+    const end = Math.max(start, e.total - 7);
+    return Math.round(start + Math.min(1, Math.max(0, p)) * (end - start));
+  }, []);
+
+  const updateBeat = useCallback((p: number) => {
+    const e = engine.current;
+    const beat = p < 0.25 ? 1 : p < 0.55 ? 2 : p < 0.85 ? 3 : 4;
+    if (beat !== e.beat) {
+      e.beat = beat;
+      setCurrentBeat(beat); // only fires 3 times over the whole hero
+    }
+  }, []);
+
+  // Single rAF loop: eases current → target, draws only when the frame index changes
+  const tick = useCallback(() => {
+    const e = engine.current;
+    const diff = e.target - e.current;
+    e.current = Math.abs(diff) < 0.0005 ? e.target : e.current + diff * 0.22;
+    progress.set(e.current);
+    updateBeat(e.current);
+    drawIndex(progressToIndex(e.current));
+    e.raf = e.current !== e.target ? requestAnimationFrame(tick) : 0;
+  }, [drawIndex, progress, progressToIndex, updateBeat]);
+
+  const kick = useCallback(() => {
+    const e = engine.current;
+    if (!e.raf) e.raf = requestAnimationFrame(tick);
+  }, [tick]);
+
+  /* ------------------------------------------------------------------ */
+  /*  3. Scroll → target progress                                        */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    const e = engine.current;
+    e.target = e.current = scrollYProgress.get();
+    const unsub = scrollYProgress.on("change", (v) => {
+      if (e.touching) return;
+      e.target = Math.min(1, Math.max(0, v));
+      kick();
+    });
+    return () => {
+      unsub();
+      if (e.raf) cancelAnimationFrame(e.raf);
+      e.raf = 0;
+    };
+  }, [scrollYProgress, kick]);
+
+  /* ------------------------------------------------------------------ */
+  /*  4. Canvas sizing (DPR capped for performance)                      */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const applySize = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const ctx = canvas.getContext("2d", { alpha: false });
-      if (!ctx) return;
-
-      const total = activeFramesCountRef.current || 240;
-      const idx = Math.min(Math.max(1, Math.round(frameIndex)), total) - 1;
-
-      let img = imagesRef.current[idx];
-      if (!img || !img.complete || img.naturalWidth === 0) {
-        for (let i = idx - 1; i >= 0; i--) {
-          if (imagesRef.current[i]?.complete && imagesRef.current[i]?.naturalWidth > 0) {
-            img = imagesRef.current[i];
-            break;
-          }
+      const e = engine.current;
+      e.isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+      const dpr = Math.min(window.devicePixelRatio || 1, e.isMobile ? 2 : 1.5);
+      const cssW = window.innerWidth;
+      const cssH = e.isMobile ? cssW / (16 / 9) : window.innerHeight;
+      const w = Math.round(cssW * dpr);
+      const h = Math.round(cssH * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        e.ctx = canvas.getContext("2d", { alpha: false });
+        if (e.ctx) {
+          e.ctx.imageSmoothingEnabled = true;
+          e.ctx.imageSmoothingQuality = "medium";
         }
+        drawIndex(progressToIndex(e.current), true);
       }
-
-      if (!img || !img.complete || img.naturalWidth === 0) return;
-
-      lastDrawnFrameRef.current = idx;
-      setCurrentFrameDisplay(idx + 1);
-
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-
-      const isMobileView = window.innerWidth < 640;
-      if (isMobileView) {
-        // Exact fit: 100% full image view on 16:9 canvas
-        ctx.drawImage(img, 0, 0, w, h);
-      } else {
-        // Desktop Cover mode
-        const imgW = img.naturalWidth || 1920;
-        const imgH = img.naturalHeight || 1080;
-        const scale = Math.max(w / imgW, h / imgH);
-        const drawW = imgW * scale;
-        const drawH = imgH * scale;
-        const drawX = (w - drawW) / 2;
-        const drawY = (h - drawH) / 2;
-        ctx.drawImage(img, drawX, drawY, drawW, drawH);
-      }
-    },
-    []
-  );
-
-  // Preload frames progressively (first 15 immediately, rest in background idle chunks)
-  useEffect(() => {
-    let isMounted = true;
-    const loadedImages: HTMLImageElement[] = [];
-    let count = 0;
-    const PRIORITY_BATCH = Math.min(15, activeFramesCount);
-
-    const loadSingle = (i: number) => {
-      const img = new Image();
-      img.src = framePattern(i);
-      img.onload = () => {
-        if (!isMounted) return;
-        count++;
-        if (count % 15 === 0 || count >= activeFramesCount) {
-          setLoadedCount(count);
-        }
-        if (count >= Math.min(10, activeFramesCount)) {
-          setIsReady(true);
-        }
-        if (lastDrawnFrameRef.current === -1 && i === 1) {
-          renderFrame(1);
-        }
-      };
-      img.onerror = () => {
-        if (!isMounted) return;
-        count++;
-        if (i === 1) {
-          setUseFallback(true);
-          setIsReady(true);
-        }
-      };
-      loadedImages[i - 1] = img;
     };
+    const onResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(applySize, 120);
+    };
+    applySize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
+  }, [drawIndex, progressToIndex, useFallback]);
 
-    // Load initial 15 frames immediately for instant interactive playback
-    for (let i = 1; i <= PRIORITY_BATCH; i++) {
-      loadSingle(i);
+  /* ------------------------------------------------------------------ */
+  /*  5. Progressive frame loading                                       */
+  /* ------------------------------------------------------------------ */
+  useEffect(() => {
+    if (!meta) return;
+    const e = engine.current;
+    let cancelled = false;
+
+    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    e.isMobile = isMobile;
+    const total = meta.totalFrames;
+    e.total = total;
+    e.images = new Array(total);
+    e.decoded = new Array(total).fill(false);
+    e.drawnIdx = -1;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conn = (navigator as any).connection;
+    const saveData = Boolean(conn?.saveData) || /(^|-)2g$/.test(conn?.effectiveType || "");
+    const useMobileSet = isMobile && meta.hasMobile;
+    // Mobile / data-saver: load every 2nd (or 3rd) frame — nearest-frame drawing fills the gaps
+    const step = saveData ? 3 : isMobile ? 2 : 1;
+    const dir = useMobileSet ? `${BASE_PATH}/m` : BASE_PATH;
+    const qs = meta.version ? `?v=${meta.version}` : "";
+    const urlFor = (idx: number) => `${dir}/frame_${String(idx + 1).padStart(4, "0")}.webp${qs}`;
+
+    // Build load order: first frames, then coarse → fine strides
+    const order: number[] = [];
+    const seen = new Set<number>();
+    const push = (i: number) => {
+      if (i >= 0 && i < total && i % step === 0 && !seen.has(i)) {
+        seen.add(i);
+        order.push(i);
+      }
+    };
+    const startIdx = progressToIndex(e.current);
+    for (let i = 0; i < 6 * step; i++) push(startIdx + i);
+    for (const stride of [16, 8, 4, 2, 1]) {
+      for (let i = 0; i < total; i += stride) push(i);
     }
 
-    // Load remainder in background chunks so main thread & network stay responsive
-    let nextIndex = PRIORITY_BATCH + 1;
-    let timerId: any = null;
+    let cursor = 0;
+    let inFlight = 0;
+    const CONCURRENCY = 6;
 
-    const loadRemainingChunks = () => {
-      if (!isMounted || nextIndex > activeFramesCount) return;
-      const chunkEnd = Math.min(nextIndex + 15, activeFramesCount + 1);
-      for (let j = nextIndex; j < chunkEnd; j++) {
-        loadSingle(j);
-      }
-      nextIndex = chunkEnd;
-      if (nextIndex <= activeFramesCount) {
-        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-          (window as any).requestIdleCallback(loadRemainingChunks, { timeout: 400 });
-        } else {
-          timerId = setTimeout(loadRemainingChunks, 150);
-        }
+    const loadNext = () => {
+      while (!cancelled && inFlight < CONCURRENCY && cursor < order.length) {
+        const idx = order[cursor++];
+        inFlight++;
+        const img = new Image();
+        img.decoding = "async";
+        img.src = urlFor(idx);
+        e.images[idx] = img;
+        const done = (ok: boolean) => {
+          inFlight--;
+          if (cancelled) return;
+          if (ok) {
+            e.decoded[idx] = true;
+            const wanted = progressToIndex(e.current);
+            if (e.drawnIdx < 0 || Math.abs(idx - wanted) < Math.abs(e.drawnIdx - wanted)) {
+              drawIndex(wanted, true);
+            }
+            if (e.drawnIdx >= 0) setIsReady(true);
+          } else if (idx === order[0] && !e.decoded.some(Boolean)) {
+            // First frame failed — fall back to video scrubbing
+            setUseFallback(true);
+            setIsReady(true);
+            cancelled = true;
+            return;
+          }
+          loadNext();
+        };
+        img.decode().then(() => done(true), () => done(img.complete && img.naturalWidth > 0));
       }
     };
-
-    timerId = setTimeout(loadRemainingChunks, 200);
-    imagesRef.current = loadedImages;
+    loadNext();
 
     return () => {
-      isMounted = false;
-      if (timerId) clearTimeout(timerId);
+      cancelled = true;
     };
-  }, [activeFramesCount, framePattern, renderFrame]);
+  }, [meta, drawIndex, progressToIndex]);
 
-  // Resize canvas to match display DPI
+  /* ------------------------------------------------------------------ */
+  /*  6. Fallback video scrubbing                                        */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const isMobileView = window.innerWidth < 640;
-      canvas.width = window.innerWidth * dpr;
-      // Exact 16:9 height on mobile (0 black gap above/below), fullscreen on desktop
-      canvas.height = (isMobileView ? (window.innerWidth / (16 / 9)) : window.innerHeight) * dpr;
-      
-      const current = lastDrawnFrameRef.current >= 0 
-        ? lastDrawnFrameRef.current + 1 
-        : 1;
-      renderFrame(current);
-    };
+    if (!useFallback) return;
+    const unsub = progress.on("change", (p) => {
+      const video = videoRef.current;
+      if (video && video.duration) {
+        const clamped = Math.min(1, Math.max(0, p / 0.88));
+        const startTime = 0.025 * video.duration;
+        const endTime = 0.975 * video.duration;
+        video.currentTime = startTime + clamped * (endTime - startTime);
+      }
+    });
+    return () => unsub();
+  }, [progress, useFallback]);
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [renderFrame]);
-
-  // Touch Drag scrub on mobile
-  const touchStartXRef = useRef<number>(0);
-  const touchStartFrameRef = useRef<number>(6);
-  const isTouchingRef = useRef<boolean>(false);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-    touchStartFrameRef.current = lastDrawnFrameRef.current > 0 ? lastDrawnFrameRef.current + 1 : 6;
-    isTouchingRef.current = true;
+  /* ------------------------------------------------------------------ */
+  /*  7. Mobile horizontal drag scrub (visual only, doesn't move page)   */
+  /* ------------------------------------------------------------------ */
+  const handleTouchStart = (ev: React.TouchEvent) => {
+    const e = engine.current;
+    e.touchStartX = ev.touches[0].clientX;
+    e.touchStartY = ev.touches[0].clientY;
+    e.touchStartProgress = e.current;
+    e.touchAxis = "";
+    e.touching = false;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isTouchingRef.current) return;
-    const deltaX = e.touches[0].clientX - touchStartXRef.current;
-    const startFrame = Math.min(6, activeFramesCount);
-    const endFrame = Math.max(startFrame, activeFramesCount - 6);
-    const frameDelta = -Math.round((deltaX / window.innerWidth) * (endFrame - startFrame) * 1.5);
-    const targetFrame = Math.min(endFrame, Math.max(startFrame, touchStartFrameRef.current + frameDelta));
-    renderFrame(targetFrame);
+  const handleTouchMove = (ev: React.TouchEvent) => {
+    const e = engine.current;
+    const deltaX = ev.touches[0].clientX - e.touchStartX;
+    const deltaY = ev.touches[0].clientY - e.touchStartY;
+    if (!e.touchAxis) {
+      if (Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) return;
+      // Vertical swipe → let the browser scroll natively; horizontal → scrub frames
+      e.touchAxis = Math.abs(deltaX) > Math.abs(deltaY) ? "x" : "y";
+      e.touching = e.touchAxis === "x";
+    }
+    if (!e.touching) return;
+    e.target = Math.min(1, Math.max(0, e.touchStartProgress - (deltaX / window.innerWidth) * 1.5));
+    kick();
   };
 
   const handleTouchEnd = () => {
-    isTouchingRef.current = false;
+    const e = engine.current;
+    e.touching = false;
+    e.touchAxis = "";
   };
 
-  // On-demand rendering when smooth scroll updates
-  useEffect(() => {
-    if (useFallback) return;
-
-    const startFrame = Math.min(6, activeFramesCount);
-    const endFrame = Math.max(startFrame, activeFramesCount - 6);
-
-    let rafId: number | null = null;
-
-    const unsubscribe = smoothProgress.on("change", (latest: number) => {
-      if (isTouchingRef.current) return;
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const clampedProgress = Math.min(1, Math.max(0, latest));
-        const targetFrame = Math.min(
-          endFrame,
-          Math.max(startFrame, Math.round(startFrame + clampedProgress * (endFrame - startFrame)))
-        );
-        renderFrame(targetFrame);
-      });
-    });
-
-    return () => {
-      unsubscribe();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [smoothProgress, activeFramesCount, renderFrame, useFallback]);
-
-  // Fallback video scrubbing
-  const videoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    if (!useFallback) return;
-    const unsubscribe = smoothProgress.on("change", (progress: number) => {
-      const video = videoRef.current;
-      if (video && video.duration) {
-        const clampedProgress = Math.min(1, Math.max(0, progress / 0.88));
-        const startTime = 0.025 * video.duration;
-        const endTime = 0.975 * video.duration;
-        video.currentTime = startTime + clampedProgress * (endTime - startTime);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [smoothProgress, useFallback]);
-
-  // ── Step-based Wheel Scroll Controller (Plan A: 1 wheel roll = complete scene transition) ──
-  const BEAT_PROGRESSES = [0.0, 0.38, 0.74, 1.0];
-  const isAnimatingRef = useRef<boolean>(false);
-
-  const getContainerScrollBounds = useCallback(() => {
-    if (!containerRef.current) return null;
+  /* ------------------------------------------------------------------ */
+  /*  8. Scene navigation (native smooth scroll — never blocks the user) */
+  /* ------------------------------------------------------------------ */
+  const scrollToBeat = useCallback((targetIndex: number) => {
     const container = containerRef.current;
+    if (!container) return;
+    const clamped = Math.max(0, Math.min(BEAT_PROGRESSES.length - 1, targetIndex));
     const rect = container.getBoundingClientRect();
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const containerTop = rect.top + scrollTop;
-    const maxScroll = container.scrollHeight - window.innerHeight;
-    return { containerTop, maxScroll, rect, scrollY: scrollTop };
+    const containerTop = rect.top + window.scrollY;
+    // Same range as useScroll({ offset: ["start start", "end end"] })
+    const maxScroll = container.offsetHeight - window.innerHeight;
+    window.scrollTo({ top: containerTop + BEAT_PROGRESSES[clamped] * maxScroll, behavior: "smooth" });
   }, []);
 
-  const scrollToBeat = useCallback(
-    (targetIndex: number, duration: number = 850) => {
-      const bounds = getContainerScrollBounds();
-      if (!bounds || bounds.maxScroll <= 0) return;
+  /* ------------------------------------------------------------------ */
+  /*  Text overlay transforms (MotionValues → no React renders)          */
+  /* ------------------------------------------------------------------ */
+  const story1Opacity = useTransform(progress, [0, 0.03, 0.18, 0.25], [1, 1, 1, 0]);
+  const story1Y = useTransform(progress, [0, 0.03, 0.18, 0.25], [0, 0, 0, -20]);
 
-      const clampedIndex = Math.max(0, Math.min(BEAT_PROGRESSES.length - 1, targetIndex));
-      const targetProgress = BEAT_PROGRESSES[clampedIndex];
-      const targetY = bounds.containerTop + targetProgress * bounds.maxScroll;
+  const story2Opacity = useTransform(progress, [0.26, 0.32, 0.52, 0.6], [0, 1, 1, 0]);
+  const story2Y = useTransform(progress, [0.26, 0.32, 0.52, 0.6], [25, 0, 0, -25]);
 
-      if (isAnimatingRef.current) return;
-      isAnimatingRef.current = true;
+  const story3Opacity = useTransform(progress, [0.61, 0.68, 0.82, 0.88], [0, 1, 1, 0]);
+  const story3Y = useTransform(progress, [0.61, 0.68, 0.82, 0.88], [25, 0, 0, -25]);
 
-      const startY = window.scrollY || document.documentElement.scrollTop;
-      const diff = targetY - startY;
+  const story4Opacity = useTransform(progress, [0.89, 0.94, 1], [0, 1, 1]);
+  const story4Y = useTransform(progress, [0.89, 0.94, 1], [25, 0, 0]);
 
-      if (Math.abs(diff) < 2) {
-        isAnimatingRef.current = false;
-        return;
-      }
+  // Reusable text styles
+  const tagCls = "text-base md:text-lg lg:text-[20px] uppercase tracking-[0.3em] font-bold mb-2.5 block";
+  const titleCls = "text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3.5";
+  const serif = "var(--font-noto-serif), var(--font-display), serif";
 
-      const startTime = performance.now();
-
-      function step(currentTime: number) {
-        const elapsed = currentTime - startTime;
-        const p = Math.min(elapsed / duration, 1);
-        // easeInOutCubic: buttery smooth acceleration and deceleration
-        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-
-        window.scrollTo(0, startY + diff * ease);
-
-        if (p < 1) {
-          requestAnimationFrame(step);
-        } else {
-          window.scrollTo(0, targetY);
-          setTimeout(() => {
-            isAnimatingRef.current = false;
-          }, 120);
-        }
-      }
-
-      requestAnimationFrame(step);
-    },
-    [getContainerScrollBounds]
-  );
-
-  // Intercept mouse wheel when hero is sticky/active
-  useEffect(() => {
-    let wheelAccumulator = 0;
-    let resetTimer: NodeJS.Timeout | null = null;
-
-    const handleWheel = (e: WheelEvent) => {
-      const bounds = getContainerScrollBounds();
-      if (!bounds) return;
-
-      const { rect, containerTop, maxScroll, scrollY } = bounds;
-      // Active control zone: sticky within viewport
-      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
-
-      if (!isStickyActive) {
-        return; // Allow natural scroll outside hero
-      }
-
-      // If transition animation is running, lock wheel to prevent stopping midway
-      if (isAnimatingRef.current) {
-        e.preventDefault();
-        return;
-      }
-
-      wheelAccumulator += e.deltaY;
-      if (resetTimer) clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => {
-        wheelAccumulator = 0;
-      }, 200);
-
-      const threshold = 20;
-      if (Math.abs(wheelAccumulator) < threshold) {
-        return;
-      }
-
-      const isScrollingDown = wheelAccumulator > 0;
-      wheelAccumulator = 0;
-
-      const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
-
-      // Find closest beat index
-      let closestIdx = 0;
-      let minDiff = 999;
-      BEAT_PROGRESSES.forEach((bp, idx) => {
-        const diff = Math.abs(bp - currentProgress);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = idx;
-        }
-      });
-
-      if (isScrollingDown) {
-        if (closestIdx < BEAT_PROGRESSES.length - 1) {
-          e.preventDefault();
-          scrollToBeat(closestIdx + 1);
-        } else {
-          // At final scene (03 · Panorama): let user scroll down naturally to next section
-        }
-      } else {
-        if (closestIdx > 0) {
-          e.preventDefault();
-          scrollToBeat(closestIdx - 1);
-        } else {
-          // At first scene: let user scroll back to top if applicable
-        }
-      }
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      if (resetTimer) clearTimeout(resetTimer);
-    };
-  }, [getContainerScrollBounds, scrollToBeat]);
-
-  // Fallback: If scrollbar was dragged or mouse wheel stopped midway, auto-snap cleanly
-  useEffect(() => {
-    let snapTimer: NodeJS.Timeout | null = null;
-
-    const handleScrollEnd = () => {
-      if (isAnimatingRef.current) return;
-      const bounds = getContainerScrollBounds();
-      if (!bounds) return;
-
-      const { rect, containerTop, maxScroll, scrollY } = bounds;
-      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
-      if (!isStickyActive) return;
-
-      const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
-
-      let closestIdx = 0;
-      let minDiff = 999;
-      BEAT_PROGRESSES.forEach((bp, idx) => {
-        const diff = Math.abs(bp - currentProgress);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = idx;
-        }
-      });
-
-      // If stopped in middle motion (> 0.03 away from beat), auto-snap cleanly
-      if (minDiff > 0.03) {
-        scrollToBeat(closestIdx, 600);
-      }
-    };
-
-    const onScroll = () => {
-      if (isAnimatingRef.current) return;
-      if (snapTimer) clearTimeout(snapTimer);
-      snapTimer = setTimeout(handleScrollEnd, 220);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (snapTimer) clearTimeout(snapTimer);
-    };
-  }, [getContainerScrollBounds, scrollToBeat]);
-
-  // Keyboard navigation (ArrowDown, PageDown, Space, ArrowUp, PageUp)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const bounds = getContainerScrollBounds();
-      if (!bounds) return;
-      const { rect, containerTop, maxScroll, scrollY } = bounds;
-      const isStickyActive = rect.top <= 80 && rect.bottom >= window.innerHeight - 20;
-      if (!isStickyActive) return;
-
-      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
-        const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
-        let closestIdx = 0;
-        let minDiff = 999;
-        BEAT_PROGRESSES.forEach((bp, idx) => {
-          const diff = Math.abs(bp - currentProgress);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestIdx = idx;
-          }
-        });
-        if (closestIdx < BEAT_PROGRESSES.length - 1) {
-          e.preventDefault();
-          scrollToBeat(closestIdx + 1);
-        }
-      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
-        const currentProgress = Math.max(0, Math.min(1, (scrollY - containerTop) / maxScroll));
-        let closestIdx = 0;
-        let minDiff = 999;
-        BEAT_PROGRESSES.forEach((bp, idx) => {
-          const diff = Math.abs(bp - currentProgress);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestIdx = idx;
-          }
-        });
-        if (closestIdx > 0) {
-          e.preventDefault();
-          scrollToBeat(closestIdx - 1);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [getContainerScrollBounds, scrollToBeat]);
-
-  // Track active beat for mobile and desktop transitions
-  const [currentBeat, setCurrentBeat] = useState(1);
-  useEffect(() => {
-    const unsubscribe = smoothProgress.on("change", (latest) => {
-      if (latest < 0.25) {
-        setCurrentBeat(1);
-      } else if (latest < 0.55) {
-        setCurrentBeat(2);
-      } else if (latest < 0.85) {
-        setCurrentBeat(3);
-      } else {
-        setCurrentBeat(4);
-      }
-    });
-    return () => unsubscribe();
-  }, [smoothProgress]);
-
-  // Desktop Story Beat opacities
-  const story1Opacity = useTransform(smoothProgress, [0, 0.03, 0.18, 0.25], [1, 1, 1, 0]);
-  const story1Y = useTransform(smoothProgress, [0, 0.03, 0.18, 0.25], [0, 0, 0, -20]);
-
-  const story2Opacity = useTransform(smoothProgress, [0.26, 0.32, 0.52, 0.6], [0, 1, 1, 0]);
-  const story2Y = useTransform(smoothProgress, [0.26, 0.32, 0.52, 0.6], [25, 0, 0, -25]);
-
-  const story3Opacity = useTransform(smoothProgress, [0.61, 0.68, 0.82, 0.88], [0, 1, 1, 0]);
-  const story3Y = useTransform(smoothProgress, [0.61, 0.68, 0.82, 0.88], [25, 0, 0, -25]);
-
-  const story4Opacity = useTransform(smoothProgress, [0.89, 0.94, 1], [0, 1, 1]);
-  const story4Y = useTransform(smoothProgress, [0.89, 0.94, 1], [25, 0, 0]);
-
-  const progressPercent = Math.min(100, Math.round((loadedCount / Math.max(1, totalFrames)) * 100));
+  const mobileBeats = [
+    { key: "mbeat1", tag: introEyebrow, tagColor: introTagColor, title: introTitle, titleColor: introTitleColor, desc: introDesc, descColor: introDescColor, isH1: true },
+    { key: "mbeat2", tag: beat1Tag, tagColor: beat1TagColor, title: beat1Title, titleColor: beat1TitleColor, desc: beat1Desc, descColor: beat1DescColor },
+    { key: "mbeat3", tag: beat2Tag, tagColor: beat2TagColor, title: beat2Title, titleColor: beat2TitleColor, desc: beat2Desc, descColor: beat2DescColor },
+    { key: "mbeat4", tag: beat3Tag, tagColor: beat3TagColor, title: beat3Title, titleColor: beat3TitleColor, desc: beat3Desc, descColor: beat3DescColor },
+  ];
+  const mb = mobileBeats[currentBeat - 1];
+  const MobileTitleTag = mb.isH1 ? "h1" : "h2";
 
   return (
-    <div ref={containerRef} className="relative w-full h-[300vh] sm:h-[600vh] bg-transparent sm:bg-[#0c0b0a]">
+    <div ref={containerRef} className="relative w-full h-[300vh] sm:h-[350vh] bg-transparent sm:bg-[#0c0b0a]">
       {/* Viewport Frame — Sticky 16:9 on Mobile, Sticky Fullscreen on Desktop */}
       <div
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className="sticky top-[var(--header-h,76px)] sm:top-0 w-full aspect-[16/9] sm:aspect-auto sm:h-screen overflow-hidden flex items-center justify-center bg-black shadow-sm z-20"
+        style={{ contain: "layout paint" }}
       >
         {/* Loading Indicator */}
         <AnimatePresence>
@@ -657,29 +531,20 @@ export default function ScrollSequenceHero({
             <motion.div
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
               className="absolute inset-0 z-50 bg-[#111] flex flex-col items-center justify-center gap-4 text-white"
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 border-t-[#10b981] animate-spin" />
               <p className="text-[10px] sm:text-xs uppercase tracking-[0.3em] text-white/70 font-roboto">
-                Loading 3D Experience · {progressPercent}%
+                Loading 3D Experience
               </p>
-              <div className="w-36 sm:w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#10b981] to-[#34d399] transition-all duration-200"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* 1. Canvas (Image Sequence Mode — Exact 16:9 on mobile, Fullscreen on Desktop) */}
+        {/* 1. Canvas (Image Sequence Mode) */}
         {!useFallback && (
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full object-cover select-none z-10 touch-none"
-          />
+          <canvas ref={canvasRef} className="w-full h-full select-none z-10 touch-pan-y" />
         )}
 
         {/* 2. Fallback Video Element */}
@@ -696,97 +561,29 @@ export default function ScrollSequenceHero({
           </div>
         )}
 
-        {/* ── Mobile Overlay Banner (Matches Image 1 Exactly with 01 / 04 indicator) ── */}
+        {/* ── Mobile Overlay Banner ── */}
         <div className="sm:hidden absolute inset-0 z-20 flex flex-col justify-end p-4 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none">
           <AnimatePresence mode="wait">
-            {currentBeat === 1 && (
-              <motion.div
-                key="mbeat1"
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -3 }}
-                transition={{ duration: 0.2 }}
+            <motion.div
+              key={mb.key}
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span style={{ color: mb.tagColor, textShadow: getContrastShadow(mb.tagColor) }} className="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-1.5 block">
+                {renderFormattedText(mb.tag)}
+              </span>
+              <MobileTitleTag
+                className="text-base sm:text-lg font-bold leading-tight mb-1"
+                style={{ color: mb.titleColor, textShadow: getContrastShadow(mb.titleColor, true), fontFamily: serif }}
               >
-                <span style={{ color: introTagColor, filter: getContrastShadow(introTagColor) }} className="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-1.5 block drop-shadow">
-                  {renderFormattedText(introEyebrow)}
-                </span>
-                <h1
-                  className="text-base sm:text-lg font-bold leading-tight mb-1 drop-shadow"
-                  style={{ color: introTitleColor, filter: getContrastShadow(introTitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-                >
-                  {renderFormattedText(introTitle)}
-                </h1>
-                <p style={{ color: introDescColor, filter: getContrastShadow(introDescColor) }} className="text-sm sm:text-base font-bold drop-shadow leading-snug mb-2">
-                  {renderFormattedText(introDesc)}
-                </p>
-              </motion.div>
-            )}
-            {currentBeat === 2 && (
-              <motion.div
-                key="mbeat2"
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -3 }}
-                transition={{ duration: 0.2 }}
-              >
-                <span style={{ color: beat1TagColor, filter: getContrastShadow(beat1TagColor) }} className="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-1.5 block drop-shadow">
-                  {renderFormattedText(beat1Tag)}
-                </span>
-                <h2
-                  className="text-base sm:text-lg font-bold leading-tight mb-1 drop-shadow"
-                  style={{ color: beat1TitleColor, filter: getContrastShadow(beat1TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-                >
-                  {renderFormattedText(beat1Title)}
-                </h2>
-                <p style={{ color: beat1DescColor, filter: getContrastShadow(beat1DescColor) }} className="text-sm sm:text-base font-bold drop-shadow leading-snug mb-2">
-                  {renderFormattedText(beat1Desc)}
-                </p>
-              </motion.div>
-            )}
-            {currentBeat === 3 && (
-              <motion.div
-                key="mbeat3"
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -3 }}
-                transition={{ duration: 0.2 }}
-              >
-                <span style={{ color: beat2TagColor, filter: getContrastShadow(beat2TagColor) }} className="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-1.5 block drop-shadow">
-                  {renderFormattedText(beat2Tag)}
-                </span>
-                <h2
-                  className="text-base sm:text-lg font-bold leading-tight mb-1 drop-shadow"
-                  style={{ color: beat2TitleColor, filter: getContrastShadow(beat2TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-                >
-                  {renderFormattedText(beat2Title)}
-                </h2>
-                <p style={{ color: beat2DescColor, filter: getContrastShadow(beat2DescColor) }} className="text-sm sm:text-base font-bold drop-shadow leading-snug mb-2">
-                  {renderFormattedText(beat2Desc)}
-                </p>
-              </motion.div>
-            )}
-            {currentBeat === 4 && (
-              <motion.div
-                key="mbeat4"
-                initial={{ opacity: 0, y: 3 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -3 }}
-                transition={{ duration: 0.2 }}
-              >
-                <span style={{ color: beat3TagColor, filter: getContrastShadow(beat3TagColor) }} className="text-xs sm:text-sm uppercase tracking-[0.2em] font-bold mb-1.5 block drop-shadow">
-                  {renderFormattedText(beat3Tag)}
-                </span>
-                <h2
-                  className="text-base sm:text-lg font-bold leading-tight mb-1 drop-shadow"
-                  style={{ color: beat3TitleColor, filter: getContrastShadow(beat3TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-                >
-                  {renderFormattedText(beat3Title)}
-                </h2>
-                <p style={{ color: beat3DescColor, filter: getContrastShadow(beat3DescColor) }} className="text-sm sm:text-base font-bold drop-shadow leading-snug mb-2">
-                  {renderFormattedText(beat3Desc)}
-                </p>
-              </motion.div>
-            )}
+                {renderFormattedText(mb.title)}
+              </MobileTitleTag>
+              <p style={{ color: mb.descColor, textShadow: getContrastShadow(mb.descColor) }} className="text-sm sm:text-base font-bold leading-snug mb-2">
+                {renderFormattedText(mb.desc)}
+              </p>
+            </motion.div>
           </AnimatePresence>
           <div className="pointer-events-auto mt-1 flex items-center justify-between">
             <Link
@@ -798,7 +595,8 @@ export default function ScrollSequenceHero({
             <button
               type="button"
               onClick={() => scrollToBeat(currentBeat % 4)}
-              className="text-xs sm:text-sm text-white/90 font-mono tracking-widest drop-shadow font-semibold hover:text-[#10b981] transition-colors"
+              className="text-xs sm:text-sm text-white/90 font-mono tracking-widest font-semibold hover:text-[#10b981] transition-colors"
+              style={{ textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}
               aria-label="Next scene"
             >
               0{currentBeat} / 04 ↓
@@ -812,21 +610,15 @@ export default function ScrollSequenceHero({
           className="hidden sm:flex absolute inset-x-0 bottom-0 pb-12 md:pb-14 flex-col items-center justify-end text-center px-6 pointer-events-none z-20"
         >
           <div className="flex flex-col items-center max-w-[95vw] px-4 mb-5">
-            <span
-              style={{ color: introTagColor, filter: getContrastShadow(introTagColor) }}
-              className="text-base md:text-lg lg:text-[20px] uppercase tracking-[0.3em] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
-            >
+            <span style={{ color: introTagColor, textShadow: getContrastShadow(introTagColor) }} className={tagCls}>
               {renderFormattedText(introEyebrow)}
             </span>
-            <h1
-              className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3.5"
-              style={{ color: introTitleColor, filter: getContrastShadow(introTitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-            >
+            <h1 className={titleCls} style={{ color: introTitleColor, textShadow: getContrastShadow(introTitleColor, true), fontFamily: serif }}>
               {renderFormattedText(introTitle)}
             </h1>
             <p
-              style={{ color: introDescColor, filter: getContrastShadow(introDescColor) }}
-              className="text-lg md:text-xl lg:text-[24px] font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] leading-relaxed tracking-wide"
+              style={{ color: introDescColor, textShadow: getContrastShadow(introDescColor, true) }}
+              className="text-lg md:text-xl lg:text-[24px] font-bold leading-relaxed tracking-wide"
             >
               {renderFormattedText(introDesc)}
             </p>
@@ -838,21 +630,15 @@ export default function ScrollSequenceHero({
           style={{ opacity: story2Opacity, y: story2Y }}
           className="hidden sm:flex absolute bottom-12 md:bottom-14 left-10 md:left-14 flex-col items-start pointer-events-none z-20 max-w-[95vw] pr-6"
         >
-          <span
-            style={{ color: beat1TagColor, filter: getContrastShadow(beat1TagColor) }}
-            className="text-base md:text-lg lg:text-[20px] uppercase tracking-[0.3em] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
-          >
+          <span style={{ color: beat1TagColor, textShadow: getContrastShadow(beat1TagColor) }} className={tagCls}>
             {renderFormattedText(beat1Tag)}
           </span>
-          <h2
-            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]"
-            style={{ color: beat1TitleColor, filter: getContrastShadow(beat1TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-          >
+          <h2 className={titleCls} style={{ color: beat1TitleColor, textShadow: getContrastShadow(beat1TitleColor, true), fontFamily: serif }}>
             {renderFormattedText(beat1Title)}
           </h2>
           <p
-            style={{ color: beat1DescColor, filter: getContrastShadow(beat1DescColor) }}
-            className="text-lg md:text-xl lg:text-[22px] leading-relaxed font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] tracking-wide"
+            style={{ color: beat1DescColor, textShadow: getContrastShadow(beat1DescColor, true) }}
+            className="text-lg md:text-xl lg:text-[22px] leading-relaxed font-bold tracking-wide"
           >
             {renderFormattedText(beat1Desc)}
           </p>
@@ -863,21 +649,15 @@ export default function ScrollSequenceHero({
           style={{ opacity: story3Opacity, y: story3Y }}
           className="hidden sm:flex absolute bottom-28 md:bottom-32 right-10 md:right-14 flex-col items-end text-right pointer-events-none z-20 max-w-[95vw] pl-6"
         >
-          <span
-            style={{ color: beat2TagColor, filter: getContrastShadow(beat2TagColor) }}
-            className="text-base md:text-lg lg:text-[20px] uppercase tracking-[0.3em] font-bold mb-2.5 block drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
-          >
+          <span style={{ color: beat2TagColor, textShadow: getContrastShadow(beat2TagColor) }} className={tagCls}>
             {renderFormattedText(beat2Tag)}
           </span>
-          <h2
-            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-3.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)]"
-            style={{ color: beat2TitleColor, filter: getContrastShadow(beat2TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-          >
+          <h2 className={titleCls} style={{ color: beat2TitleColor, textShadow: getContrastShadow(beat2TitleColor, true), fontFamily: serif }}>
             {renderFormattedText(beat2Title)}
           </h2>
           <p
-            style={{ color: beat2DescColor, filter: getContrastShadow(beat2DescColor) }}
-            className="text-lg md:text-xl lg:text-[22px] leading-relaxed font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] tracking-wide"
+            style={{ color: beat2DescColor, textShadow: getContrastShadow(beat2DescColor, true) }}
+            className="text-lg md:text-xl lg:text-[22px] leading-relaxed font-bold tracking-wide"
           >
             {renderFormattedText(beat2Desc)}
           </p>
@@ -889,28 +669,22 @@ export default function ScrollSequenceHero({
           className="hidden sm:flex absolute inset-x-0 bottom-0 pb-20 flex-col items-center justify-end text-center px-6 z-20 pointer-events-none"
         >
           <div className="flex flex-col items-center max-w-[95vw] px-4">
-            <span
-              style={{ color: beat3TagColor, filter: getContrastShadow(beat3TagColor) }}
-              className="text-base md:text-lg lg:text-[20px] uppercase tracking-[0.3em] font-bold mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]"
-            >
+            <span style={{ color: beat3TagColor, textShadow: getContrastShadow(beat3TagColor) }} className={tagCls}>
               {renderFormattedText(beat3Tag)}
             </span>
-            <h2
-              className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] mb-3.5"
-              style={{ color: beat3TitleColor, filter: getContrastShadow(beat3TitleColor, true), fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
-            >
+            <h2 className={titleCls} style={{ color: beat3TitleColor, textShadow: getContrastShadow(beat3TitleColor, true), fontFamily: serif }}>
               {renderFormattedText(beat3Title)}
             </h2>
             <p
-              style={{ color: beat3DescColor, filter: getContrastShadow(beat3DescColor) }}
-              className="text-lg md:text-xl lg:text-[22px] mb-6 font-bold drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] leading-relaxed tracking-wide"
+              style={{ color: beat3DescColor, textShadow: getContrastShadow(beat3DescColor, true) }}
+              className="text-lg md:text-xl lg:text-[22px] mb-6 font-bold leading-relaxed tracking-wide"
             >
               {renderFormattedText(beat3Desc)}
             </p>
             <div className="flex items-center justify-center pointer-events-auto">
               <Link
                 href={beat3CtaLink}
-                className="px-8 py-3.5 bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold uppercase tracking-wider rounded-full transition-all shadow-xl hover:scale-105"
+                className="px-8 py-3.5 bg-[#10b981] hover:bg-[#059669] text-white text-sm font-bold uppercase tracking-wider rounded-full transition-[background-color,transform] shadow-xl hover:scale-105"
               >
                 {beat3Cta}
               </Link>
@@ -918,8 +692,8 @@ export default function ScrollSequenceHero({
           </div>
         </motion.div>
 
-        {/* ── Scene Step Navigation Pills (Desktop) ── */}
-        <div className="hidden sm:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3 bg-black/40 backdrop-blur-md py-3.5 px-2 rounded-full border border-white/10 pointer-events-auto shadow-2xl">
+        {/* ── Scene Step Navigation Pills (Desktop) — solid bg, no backdrop-blur over the repainting canvas ── */}
+        <div className="hidden sm:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3 bg-black/55 py-3.5 px-2 rounded-full border border-white/10 pointer-events-auto shadow-2xl">
           {[
             { num: "01", title: isJa ? "建築の美" : "Exterior View" },
             { num: "02", title: isJa ? "空間の調和" : "Spatial Harmony" },
@@ -954,4 +728,3 @@ export default function ScrollSequenceHero({
     </div>
   );
 }
-

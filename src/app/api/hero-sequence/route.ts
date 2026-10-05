@@ -8,7 +8,15 @@ const execFileAsync = promisify(execFile);
 
 const META_PATH = path.join(process.cwd(), "public", "sequences", "hero", "meta.json");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "sequences", "hero");
+// Lighter frame set for phones (<640px) — used by ScrollSequenceHero when meta.mobile === true
+const MOBILE_OUTPUT_DIR = path.join(OUTPUT_DIR, "m");
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "hero-sequence");
+
+// Frame encoding settings (perf 2026-10-05): 1600px/q72 desktop, 960px/q70 mobile
+const DESKTOP_WIDTH = 1600;
+const DESKTOP_QUALITY = 72;
+const MOBILE_WIDTH = 960;
+const MOBILE_QUALITY = 70;
 
 function getFfmpegPath(): string {
   const binaryName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
@@ -93,6 +101,9 @@ export async function POST(req: NextRequest) {
     if (!fs.existsSync(OUTPUT_DIR)) {
       fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     }
+    if (!fs.existsSync(MOBILE_OUTPUT_DIR)) {
+      fs.mkdirSync(MOBILE_OUTPUT_DIR, { recursive: true });
+    }
 
     // 1. Save uploaded video
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -108,44 +119,50 @@ export async function POST(req: NextRequest) {
     const duration = await getVideoDuration(ffmpegPath, videoFilePath);
     const TARGET_FRAMES = 240;
     const targetFps = Math.max(1, Math.min(30, TARGET_FRAMES / Math.max(1, duration)));
-    const fpsFilter = `fps=${targetFps.toFixed(4)},scale=1920:-2`;
+    const fps = `fps=${targetFps.toFixed(4)}`;
 
-    // 4. Clean old sequence frames
-    const oldFiles = fs.readdirSync(OUTPUT_DIR);
-    for (const f of oldFiles) {
-      if (f.startsWith("frame_") && (f.endsWith(".jpg") || f.endsWith(".webp"))) {
-        fs.unlinkSync(path.join(OUTPUT_DIR, f));
+    // 4. Clean old sequence frames (desktop + mobile)
+    for (const dir of [OUTPUT_DIR, MOBILE_OUTPUT_DIR]) {
+      for (const f of fs.readdirSync(dir)) {
+        if (f.startsWith("frame_") && (f.endsWith(".jpg") || f.endsWith(".webp"))) {
+          fs.unlinkSync(path.join(dir, f));
+        }
       }
     }
 
-    // 5. Extract high-res WebP frames (1920px Full HD, quality 85)
-    const framePattern = path.join(OUTPUT_DIR, "frame_%04d.webp");
+    // 5. Extract WebP frames: desktop + mobile in a single ffmpeg pass
     await execFileAsync(ffmpegPath, [
       "-y",
       "-i", videoFilePath,
-      "-vf", fpsFilter,
-      "-c:v", "libwebp",
-      "-quality", "85",
-      "-preset", "drawing",
-      framePattern,
-    ]);
+      "-filter_complex",
+      `[0:v]${fps},split=2[d][m];[d]scale=${DESKTOP_WIDTH}:-2[dout];[m]scale=${MOBILE_WIDTH}:-2[mout]`,
+      "-map", "[dout]", "-c:v", "libwebp", "-quality", String(DESKTOP_QUALITY), "-preset", "photo",
+      path.join(OUTPUT_DIR, "frame_%04d.webp"),
+      "-map", "[mout]", "-c:v", "libwebp", "-quality", String(MOBILE_QUALITY), "-preset", "photo",
+      path.join(MOBILE_OUTPUT_DIR, "frame_%04d.webp"),
+    ], { maxBuffer: 1024 * 1024 * 16 });
 
     // 5. Count extracted frames
     const newFiles = fs
       .readdirSync(OUTPUT_DIR)
       .filter((f) => f.startsWith("frame_") && (f.endsWith(".webp") || f.endsWith(".jpg")));
     const totalFrames = newFiles.length;
+    const mobileFrames = fs
+      .readdirSync(MOBILE_OUTPUT_DIR)
+      .filter((f) => f.startsWith("frame_") && f.endsWith(".webp")).length;
 
     if (totalFrames === 0) {
       throw new Error("Failed to extract frames from video");
     }
 
-    // 6. Write new metadata
+    // 6. Write new metadata (updatedAt is used by the client as a cache-busting version)
     const meta = {
       totalFrames,
       format: "webp",
-      width: 1920,
-      quality: 88,
+      width: DESKTOP_WIDTH,
+      quality: DESKTOP_QUALITY,
+      mobile: mobileFrames === totalFrames,
+      mobileWidth: MOBILE_WIDTH,
       videoUrl: videoPublicUrl,
       updatedAt: new Date().toISOString(),
     };

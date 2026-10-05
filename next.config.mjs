@@ -7,6 +7,8 @@ const nextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [],
+    // Uploaded filenames are timestamped (unique) → optimized variants can be cached long
+    minimumCacheTTL: 2592000,
   },
   experimental: {
     serverComponentsExternalPackages: ["sharp"],
