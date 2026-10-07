@@ -32,6 +32,57 @@ export interface ApplicationCard {
   outcomeVal: string;
 }
 
+export interface SolutionItem {
+  id: string;
+  num: string;
+  badge: string;
+  title: string;
+  subtitle: string;
+  desc: string;
+  painRelief: string;
+  highlights: string[];
+  specsBadge: string;
+  icon?: string;
+  image?: string;
+}
+
+export interface PricingTypologyItem {
+  id: string;
+  category: string;
+  name: string;
+  desc: string;
+  priceRange: string;
+  unit: string;
+  timeline: string;
+  deliverables: string[];
+  featured?: boolean;
+  tag?: string;
+}
+
+export interface PricingService3DItem {
+  id: string;
+  name: string;
+  desc: string;
+  priceRange: string;
+  unit: string;
+  speed: string;
+  suitableFor: string;
+}
+
+export interface PricingPrincipleItem {
+  icon: string;
+  title: string;
+  desc: string;
+}
+
+export interface PricingEstimatorType {
+  id: string;
+  name: string;
+  rateMin: number;
+  rateMax: number;
+  unit: string;
+}
+
 export interface PricingTierItem {
   id?: string;
   badge: string;
@@ -83,13 +134,32 @@ export interface LandingContent {
     title: string;
     eyebrow?: string;
     sub?: string;
+    subtitle?: string;
+    painEyebrow?: string;
+    painBadge?: string;
     cards?: Array<{
       tag: string;
-      badge: string;
+      badge?: string;
+      tagColor?: string;
+      icon?: string;
       quote: string;
       detail: string;
+      impact?: string;
       solLabel?: string;
       solText?: string;
+    }>;
+    solEyebrow?: string;
+    solTitle?: string;
+    solSubtitle?: string;
+    solSpecTag?: string;
+    solutionItems?: Array<{
+      id?: string;
+      badge?: string;
+      icon?: string;
+      title: string;
+      desc: string;
+      metric?: string;
+      engineTag?: string;
     }>;
     points?: Array<{
       num: string;
@@ -228,14 +298,42 @@ export interface LandingContent {
     hotlineText: string;
     btnViewDetail: string;
   };
+  solutions?: {
+    eyebrow?: string;
+    title: string;
+    sub?: string;
+    items?: SolutionItem[];
+  };
   pricing: {
     title: string;
     sub: string;
+    eyebrow?: string;
+    note?: string;
+    typologies?: PricingTypologyItem[];
+    services3d?: PricingService3DItem[];
+    estimator?: {
+      title: string;
+      desc: string;
+      ctaText: string;
+      disclaimer: string;
+      types?: PricingEstimatorType[];
+    };
+    principles?: PricingPrincipleItem[];
     tiers?: PricingTierItem[];
-    tier1: PricingTierItem;
-    tier2: PricingTierItem;
-    tier3: PricingTierItem;
+    tier1?: PricingTierItem;
+    tier2?: PricingTierItem;
+    tier3?: PricingTierItem;
     [key: string]: any;
+  };
+  cta?: {
+    eyebrow?: string;
+    title: string;
+    sub: string;
+    btnPrimary: string;
+    btnSecondary: string;
+    hotline: string;
+    email: string;
+    benefits?: string[];
   };
   lightbox: {
     btnConsult: string;
@@ -269,39 +367,203 @@ export const contentJa: LandingContent = {
     },
   },
   painPoints: {
-    title: "建築・設計において直面する主な課題と悩み",
+    title: "建築・設計において直面する主な課題と\n解決へのアプローチ",
+    subtitle: "施主様・設計事務所・施工会社が抱える「見えない」「合わない」「遅れる」リスクを、最先端3Dエンジニアリングとリアルタイム積算で解消します。",
+    painEyebrow: "現場と計画の間に潜む4つの主要な摩擦",
+    painBadge: "IDENTIFIED BOTTLENECKS",
     cards: [
       {
-        tag: "課題 01",
-        badge: "完成イメージの不一致",
+        tag: "認識の一致 / 意思疎通",
+        badge: "認識の一致 / 意思疎通",
+        tagColor: "amber",
+        icon: "PenTool",
         quote: "「頭の中のアイデアが形として見えず、共有できない」",
-        detail: "施主様の豊かなイメージを職人や施工会社に的確に伝えられず、完成後に想像と大きくかけ離れてしまうリスクを解消します。",
+        detail: "施主様の豊かなイメージを職人や施工会社に的確に伝えられず、完成後に想像と大きくかけ離れてしまうトラブルを招きます。",
+        impact: "仕上がり不満・手戻りコスト発生",
         solLabel: "Konturの解決策:",
         solText: "実寸大1:1スケールの高精細3Dレンダリングにより、完成後の住まいを明確に可視化。",
       },
       {
-        tag: "課題 02",
-        badge: "予期せぬ予算オーバー",
+        tag: "予算乖離 / 追加コスト",
+        badge: "予算乖離 / 追加コスト",
+        tagColor: "rose",
+        icon: "DollarSign",
         quote: "「図面と現場の乖離で、後から追加費用が膨らむ」",
-        detail: "部材や納まりの不透明さが原因で、着工後に想定外の追加工事や材料費が発生するトラブルを事前に防ぎます。",
+        detail: "部材や納まりの不透明さが原因で、着工後に想定外の追加工事や材料費が発生するトラブルを事前に防ぐことができません。",
+        impact: "想定外の予算超過・採算悪化",
         solLabel: "Konturの解決策:",
         solText: "精密なマテリアル設定と光学レンダリングで、着工前に確実な予算管理を実現。",
       },
       {
-        tag: "課題 03",
-        badge: "度重なる修正と工期遅延",
-        quote: "「図面修正の待ち時間が長く、予定していた着工に間に合わない」",
-        detail: "手戻りの多い修正フローや意思決定の遅れを解消し、スピーディーかつ正確な3D検討で工期短縮を実現します。",
+        tag: "工期遅延 / 修正の長期化",
+        badge: "工期遅延 / 修正の長期化",
+        tagColor: "orange",
+        icon: "Clock",
+        quote: "「図面修正の待ち時間が長く、予定着工に間に合わない」",
+        detail: "手戻りの多い2D修正フローや意思決定の遅延を解消できず、スピーディーかつ正確な合意形成を図ることが困難です。",
+        impact: "引き渡し遅延・スケジュール崩壊",
         solLabel: "Konturの解決策:",
         solText: "建築基準に準拠した実施図面と3Dモデルの100%整合性を保証。",
       },
       {
-        tag: "課題 04",
-        badge: "素材・カラーの選定ミス",
-        quote: "「マテリアルや光の調和が合わず、完成後に圧迫感を感じる」",
-        detail: "小さなサンプル帳だけでは分からない、自然光の移ろいや広角での質感の調和を事前に完璧にシミュレーションします。",
+        tag: "質感ミス / 光の不調和",
+        badge: "質感ミス / 光の不調和",
+        tagColor: "purple",
+        icon: "Sparkles",
+        quote: "「マテリアルや光の調和が合わず、完成後に違和感」",
+        detail: "小さなサンプル帳だけでは把握できない、自然光の移ろいや広角での質感の調和を事前にシミュレーションできません。",
+        impact: "空間のミスマッチ・再施工リスク",
         solLabel: "Konturの解決策:",
         solText: "小さなサンプル帳では分からない光の移ろいや広角の質感調和を事前に完璧にシミュレーション。",
+      },
+    ],
+    solEyebrow: "COMPREHENSIVE SOLUTION SUITE // 統合テクノロジーソリューション",
+    solTitle: "あらゆる設計・施工リスクを未然に防ぐ、次世代アーキテクチャソリューション群",
+    solSubtitle: "初期企画から基本設計、施工・引き渡しまでをシームレスに統合し、手戻りゼロの高品質建築を実現します。",
+    solSpecTag: "SPEC: ARCH_V4.2 // 8 CORE ENGINES",
+    solutionItems: [
+      {
+        id: "sol-1",
+        badge: "SOLUTION 01",
+        icon: "Monitor",
+        title: "8K超高精細フォトリアル3DCG",
+        desc: "人間目線パースと光彩物理シミュレーションを極限まで高め、図面が読めない施主様とも100%完全な合意形成を実現。",
+        metric: "精度 99.8%",
+        engineTag: "8K UHD ENGINE",
+      },
+      {
+        id: "sol-2",
+        badge: "SOLUTION 02",
+        icon: "Calculator",
+        title: "デジタル数量自動集計 & VEコスト最適化",
+        desc: "部材数量を自動拾い出し。予算超過リスクを早期検知し、品質を落とさないバリューエンジニアリング代替案を提示。",
+        metric: "追加費用ゼロ化",
+        engineTag: "AUTO QUANTITY",
+      },
+      {
+        id: "sol-3",
+        badge: "SOLUTION 03",
+        icon: "MessageSquare",
+        title: "リアルタイム3D合意形成プラットフォーム",
+        desc: "関係者全員がブラウザ上で同一3Dモデルを同時閲覧。その場で指示と承認を完了し、図面修正期間を70%短縮。",
+        metric: "リードタイム70%削減",
+        engineTag: "CLOUD SYNC",
+      },
+      {
+        id: "sol-4",
+        badge: "SOLUTION 04",
+        icon: "Sun",
+        title: "実在建材光学シミュレーション",
+        desc: "主要メーカーの実物スキャンデータと正確なIES配光データを採用。空間の質感ズレと色温度ミスマッチを完全根絶。",
+        metric: "建材実データ連動",
+        engineTag: "PHYSICS PBR",
+      },
+      {
+        id: "sol-5",
+        badge: "SOLUTION 05",
+        icon: "Layers",
+        title: "BIM / 施工連携・干渉チェック",
+        desc: "意匠・構造・設備（MEP）データを重ね合わせ、施工前の干渉や納まり破綻をデジタルツイン上で100%検知・修正。",
+        metric: "干渉エラー0件",
+        engineTag: "BIM CLASH FREE",
+      },
+      {
+        id: "sol-6",
+        badge: "SOLUTION 06",
+        icon: "Glasses",
+        title: "VR / メタバース空間ウォークスルー",
+        desc: "ゴーグルまたはPC操作で、図面上の空間を等身大で歩行体験。天井高や動線の抜け感を着工前に体感検証。",
+        metric: "没入空間検証",
+        engineTag: "WEB VR ENGINE",
+      },
+      {
+        id: "sol-7",
+        badge: "SOLUTION 07",
+        icon: "Compass",
+        title: "タイムラプス日照・周辺環境分析",
+        desc: "敷地GPS座標と連動し、四季折々の太陽軌道と隣地影を精密計算。採光・通風の最適配置をエビデンス付で立証。",
+        metric: "GPS連動解析",
+        engineTag: "SOLAR TRACKING",
+      },
+      {
+        id: "sol-8",
+        badge: "SOLUTION 08",
+        icon: "RefreshCw",
+        title: "アジャイル意匠・仕様即時変更",
+        desc: "打ち合わせ中の要望に応じて、壁面カラーや床材をリアルタイムにスイッチ。意思決定の迷いを即座に解消。",
+        metric: "即時マテリアル切替",
+        engineTag: "AGILE RENDERING",
+      },
+    ],
+  },
+  solutions: {
+    eyebrow: "// KONTUR ARCHITECTURAL SOLUTIONS · 建築課題の根本解決",
+    title: "課題を解決する、Konturの4つの革新的ソリューション",
+    sub: "最先端の3DCG空間表現と厳格な建築設計基準を融合。着工前の不安を100%解消し、理想の住まいを完璧に実現します。",
+    items: [
+      {
+        id: "sol-1",
+        num: "01",
+        badge: "実寸大1:1スケール可視化",
+        title: "100%フォトリアルな8K 3DCGシミュレーション",
+        subtitle: "完成イメージの不一致を完全解消",
+        desc: "図面上の数値を正確な3次元立体モデルへと変換。人間の視線高・広角パース・物理光シミュレーションにより、まるで完成後の空間に入り込んだかのような没入感を提供します。",
+        painRelief: "「頭の中のアイデアが形として見えず、共有できない」という課題を根本から解決。",
+        highlights: [
+          "8K超高精細レンダリング（外観・内観全方位）",
+          "朝昼夜の自然光・照明色温度シミュレーション",
+          "ミリ単位のプロポーション・家具納まり検証",
+        ],
+        specsBadge: "1:1 REAL SCALE ACCURACY",
+        icon: "Eye",
+      },
+      {
+        id: "sol-2",
+        num: "02",
+        badge: "厳密な部材積算・コスト固定",
+        title: "詳細積算内訳書と明確なコストコントロール",
+        subtitle: "予期せぬ予算オーバーを未然に防止",
+        desc: "意匠設計段階から施工部材・仕上げ面積・建具数量をすべてデジタル集計。曖昧な概算見積もりを排除し、着工後の追加請求や予期せぬ予算オーバーを徹底的に排除します。",
+        painRelief: "「図面と現場の乖離で、後から追加費用が膨らむ」不安を解消。",
+        highlights: [
+          "平米単価・数量・歩留まりを完全可視化した積算書",
+          "VE（バリューエンジニアリング）によるコスト削減提案",
+          "材料グレード別の差額比較マトリクス提供",
+        ],
+        specsBadge: "ZERO HIDDEN EXPENSES",
+        icon: "DollarSign",
+      },
+      {
+        id: "sol-3",
+        num: "03",
+        badge: "アジャイル設計フロー",
+        title: "迅速な3D意思決定と厳格なスケジュール管理",
+        subtitle: "手戻り修正と工期遅延を圧縮",
+        desc: "手戻りの多い2D図面の修正往復をやめ、リアルタイム3D検討による迅速な合意形成を実現。意思決定のスピードを倍増させ、計画から着工までのリードタイムを大幅に短縮します。",
+        painRelief: "「図面修正の待ち時間が長く、着工に間に合わない」ストレスを解消。",
+        highlights: [
+          "専任KTS（建築設計士）による迅速なレビュー対応",
+          "オンライン3Dモデル共有による即時フィードバック",
+          "マイルストーンごとの納期100%厳守コミット",
+        ],
+        specsBadge: "FAST-TRACK WORKFLOW",
+        icon: "Clock",
+      },
+      {
+        id: "sol-4",
+        num: "04",
+        badge: "実在マテリアル完全同期",
+        title: "実在建材データベース＆光学物理シミュレーション",
+        subtitle: "質感・色調の失敗リスクをゼロに",
+        desc: "国内・海外の実在建材メーカーのカタログスペックに基づき、反射率・粗さ・透過率を忠実に再現。自然光や照明器具の演色性を計算し、完成後の「思っていた色と違う」を完全に防ぎます。",
+        painRelief: "「小さなサンプル帳だけでは質感が掴めない」悩みを解消。",
+        highlights: [
+          "実在メーカー建材テクスチャ（タイル・石・木・金属）",
+          "光源スペクトル・ルクス値に基づく光学検証",
+          "昼光・夕景・夜間ダウンライトのシーン切替",
+        ],
+        specsBadge: "PHYSICALLY ACCURATE MATERIALS",
+        icon: "Layers",
       },
     ],
   },
@@ -449,8 +711,143 @@ export const contentJa: LandingContent = {
     btnViewDetail: "詳細を見る ↗",
   },
   pricing: {
-    title: "明瞭な設計・3DCGビジュアライゼーション料金プラン",
-    sub: "規模やご要望に応じた最適なプランをお選びいただけます。追加費用のない透明な価格設定です。",
+    title: "建築設計・3DCG空間ビジュアライゼーション 参考価格目安",
+    sub: "パッケージの押し付けではなく、建物の規模・延床面積（m²）・ご要望に応じた明瞭な参考単価をご案内します。追加費用のない透明な価格設定です。",
+    eyebrow: "// ARCHITECTURAL REFERENCE ESTIMATION · TRANSPARENT PRICING",
+    note: "※ 正式なお見積もりは、図面受領後または現地調査・ご要望ヒアリング後に詳細な積算内訳書としてご提示いたします。",
+    typologies: [
+      {
+        id: "villa",
+        category: "別荘・高級邸宅",
+        name: "ラグジュアリーヴィラ・注文住宅設計",
+        desc: "敷地環境と眺望を最大限に活かしたフルオーダーメイド建築設計 ＆ 8KフォトリアルCG空間表現。",
+        priceRange: "¥3,500 〜 ¥5,500",
+        unit: "/ m²（延床面積）",
+        timeline: "設計期間: 4〜8週間",
+        deliverables: [
+          "基本計画・動線ゾーニング図面一式",
+          "8K 外観・内観3DCGパース（全アングル）",
+          "日照・通風・周辺環境シミュレーション",
+          "仕上げ材選定マトリクス＆概算積算書",
+        ],
+        featured: true,
+        tag: "最も選ばれている種別",
+      },
+      {
+        id: "townhouse",
+        category: "都市型住宅",
+        name: "モダンタウンハウス・狭小地住宅",
+        desc: "限られた敷地で採光・通風・開放感を最大化するスマートな立体空間設計と機能美の追求。",
+        priceRange: "¥2,800 〜 ¥4,200",
+        unit: "/ m²（延床面積）",
+        timeline: "設計期間: 3〜6週間",
+        deliverables: [
+          "立体断面計画・スキップフロア検討図",
+          "日照シミュレーション＆プライバシー配慮設計",
+          "高精細3Dパース＆VRウォークスルー",
+          "構造・設備（MEP）基本整合性チェック",
+        ],
+        featured: false,
+        tag: "都市部・狭小地",
+      },
+      {
+        id: "penthouse",
+        category: "集合住宅・リノベ",
+        name: "ペントハウス＆ハイエンド内装設計",
+        desc: "ラグジュアリーな素材感と特注家具・間接照明をミリ単位で調和させた最高峰のインテリア空間。",
+        priceRange: "¥3,000 〜 ¥4,800",
+        unit: "/ m²（施工対象面積）",
+        timeline: "設計期間: 3〜5週間",
+        deliverables: [
+          "特注家具・建具詳細図面（1:20 / 1:10）",
+          "照明計画・調光シーン設定図",
+          "8K 内観フォトリアルビジュアライゼーション",
+          "実在メーカー建材・ファブリック仕様書",
+        ],
+        featured: false,
+        tag: "インテリア特化",
+      },
+      {
+        id: "commercial",
+        category: "商業・宿泊施設",
+        name: "リゾートホテル・ブティック・F&B",
+        desc: "ブランド価値と顧客体験を高める商業空間のマスタープラン、空間演出、プレゼンテーション用CG。",
+        priceRange: "個別お見積り",
+        unit: "プロジェクト規模に応じて算出",
+        timeline: "納期: 規模に応じて柔軟対応",
+        deliverables: [
+          "コンセプトマスタープラン＆動線計画",
+          "投資家・施主向けプロモーション用8K CG",
+          "シネマティック3Dアニメーション動画",
+          "許認可・実施設計チームとの技術連携",
+        ],
+        featured: false,
+        tag: "事業用プロジェクト",
+      },
+    ],
+    services3d: [
+      {
+        id: "still-render",
+        name: "8K 建築外観・内観スチルパース",
+        desc: "完成図面やスケッチから、質感・空気感・植栽まで極限までリアルに描写した静止画パース。",
+        priceRange: "¥18,000 〜 ¥30,000",
+        unit: "/ アングル（修正2回込）",
+        speed: "最短 3〜5 営業日納品",
+        suitableFor: "施主プレゼン・行政協議・広告販促用",
+      },
+      {
+        id: "animation",
+        name: "シネマティック3D建築アニメーション",
+        desc: "映画のようなカメラワークと物理シミュレーションによるドラマチックな空間ウォークスルー動画。",
+        priceRange: "¥60,000 〜 ¥120,000",
+        unit: "/ 15秒〜30秒クリップ",
+        speed: "7〜14 営業日納品",
+        suitableFor: "Web動画・プロモーション・大型案件",
+      },
+      {
+        id: "vr360",
+        name: "インタラクティブ VR 360°空間ツアー",
+        desc: "ブラウザやVRゴーグルで自由に部屋を行き来し、全方位を見渡せるバーチャル内覧データ。",
+        priceRange: "¥10,000 〜 ¥18,000",
+        unit: "/ パノラマ視点（ホットスポット込）",
+        speed: "5〜7 営業日納品",
+        suitableFor: "遠隔地施主様との確認・販売モデルルーム",
+      },
+    ],
+    estimator: {
+      title: "概算コストシミュレーター（参考目安）",
+      desc: "建物の種別と延床面積を選択して、設計・3Dビジュアライゼーション費用の概算レンジを即座に試算いただけます。",
+      ctaText: "この条件で詳細な積算内訳書を依頼する（無料）",
+      disclaimer: "※ 表示される金額は一般的な仕様に基づく参考目安です。実際の地盤・構造・特殊要望により変動します。",
+      types: [
+        { id: "villa", name: "高級ヴィラ・邸宅", rateMin: 3500, rateMax: 5500, unit: "円 / m²" },
+        { id: "townhouse", name: "モダンタウンハウス", rateMin: 2800, rateMax: 4200, unit: "円 / m²" },
+        { id: "penthouse", name: "ペントハウス・内装", rateMin: 3000, rateMax: 4800, unit: "円 / m²" },
+        { id: "rendering-only", name: "3DCGパース制作のみ", rateMin: 800, rateMax: 1500, unit: "円 / m²換算" },
+      ],
+    },
+    principles: [
+      {
+        icon: "ShieldCheck",
+        title: "追加費用ゼロの確定契約",
+        desc: "着工前に確定した図面と積算内訳書に基づき契約。お客様からの仕様変更がない限り追加請求は一切行いません。",
+      },
+      {
+        icon: "CheckCircle2",
+        title: "実面積に基づく明瞭計算",
+        desc: "曖昧な概算や一式表記を排除し、施工対象となる実延床面積（m²）と確定アングル数で透明に算出します。",
+      },
+      {
+        icon: "Sparkles",
+        title: "初回相談・概算見積もり完全無料",
+        desc: "平面図スケッチやご要望をお送りいただければ、24時間以内に概算費用レンジと工程表をご提示します。",
+      },
+      {
+        icon: "Layers",
+        title: "完全データ納品＆技術監理サポート",
+        desc: "完成後の高解像度画像はもちろん、施工会社様との打ち合わせに必要な詳細図面・仕様データを完全納品。",
+      },
+    ],
     tier1: {
       badge: "パース制作",
       name: "プラン 01: 8K 3DCG 外観・内観パース",
@@ -500,6 +897,21 @@ export const contentJa: LandingContent = {
       btnText: "実施設計プランを申し込む",
     },
   },
+  cta: {
+    eyebrow: "// START YOUR PROJECT WITH ZERO RISK //",
+    title: "理想の建築空間を、確かな精度で形にします",
+    sub: "図面や構想スケッチをお送りいただくだけで、経験豊富な建築家が24時間以内に初期3D検証と詳細積算をご提案します。",
+    btnPrimary: "無料相談・3Dシミュレーションを依頼する",
+    btnSecondary: "電話で今すぐ相談する",
+    hotline: "0984 384 190",
+    email: "contact@kontur.vn",
+    benefits: [
+      "完全無料の初期ヒアリング & 概算見積り",
+      "24時間以内のスピーディーな初期回答",
+      "NDA（秘密保持契約）対応で情報厳守",
+      "全国・海外プロジェクト対応可能",
+    ],
+  },
   lightbox: {
     btnConsult: "このプロジェクトについて相談する →",
   },
@@ -532,39 +944,203 @@ export const contentEn: LandingContent = {
     },
   },
   painPoints: {
-    title: "KEY CHALLENGES IN ARCHITECTURAL DESIGN & CONSTRUCTION",
+    title: "KEY ARCHITECTURAL CHALLENGES &\nSTRATEGIC SOLUTIONS",
+    subtitle: "Eliminating the risks of 'unclear vision', 'misaligned specs', and 'delayed schedules' across owners, architects, and contractors via 3D engineering.",
+    painEyebrow: "4 CRITICAL FRICTION POINTS IN ARCHITECTURE",
+    painBadge: "IDENTIFIED BOTTLENECKS",
     cards: [
       {
-        tag: "PAIN POINT 01",
-        badge: "REALITY MISMATCH",
-        quote: "“Ideas in mind, but unable to visualize the final outcome?”",
-        detail: "Homeowners often have vivid concepts but struggle to communicate them to builders, resulting in finished homes far from expectations.",
+        tag: "COMMUNICATION / CONSENSUS",
+        badge: "COMMUNICATION",
+        tagColor: "amber",
+        icon: "PenTool",
+        quote: "“Ideas in mind, but unable to visualize or align on the outcome?”",
+        detail: "Homeowners struggle to convey their exact vision to builders, risking completed spaces that drift far from the original dream.",
+        impact: "Disappointment & expensive rework costs",
         solLabel: "KONTUR SOLUTION:",
         solText: "Photorealistic 1:1 scale 3D renders from realistic viewpoints help visualize every angle.",
       },
       {
-        tag: "PAIN POINT 02",
-        badge: "BUDGET OVERRUNS",
-        quote: "“Drawings differ from reality, causing unexpected cost spikes?”",
-        detail: "Unclear drawings and lack of precise material specifications lead to unexpected contractor changes and budget escalation.",
+        tag: "BUDGET OVERRUNS / HIDDEN COSTS",
+        badge: "BUDGET DRIFT",
+        tagColor: "rose",
+        icon: "DollarSign",
+        quote: "“Drawings differ from the field, causing surprise cost spikes?”",
+        detail: "Opaque detailing and unquantified assemblies trigger unexpected structural changes and inflated material costs after breaking ground.",
+        impact: "Budget exhaustion & compromised margins",
         solLabel: "KONTUR SOLUTION:",
         solText: "Exact material takeoffs and physically-based optical renders to control budget before breaking ground.",
       },
       {
-        tag: "PAIN POINT 03",
-        badge: "SCHEDULE DELAYS",
-        quote: "“Endless waiting for drawing revisions, missing target start dates?”",
-        detail: "Slow design iteration and unclear decision-making delay construction timelines and drive up holding expenses.",
+        tag: "SCHEDULE DELAYS / REVISION CYCLES",
+        badge: "TIMELINE CRASH",
+        tagColor: "orange",
+        icon: "Clock",
+        quote: "“Endless waiting for drawing updates, missing the groundbreaking date?”",
+        detail: "Repetitive 2D drafting loops and sluggish approval workflows prevent fast, confident decision-making.",
+        impact: "Handover delays & derailed schedules",
         solLabel: "KONTUR SOLUTION:",
         solText: "Code-compliant blueprints perfectly matching 3D models with actual construction requirements.",
       },
       {
-        tag: "PAIN POINT 04",
-        badge: "MATERIAL ERRORS",
-        quote: "“Mismatched colors and materials, resulting in cramped spaces?”",
-        detail: "Choosing materials from tiny swatches without accurate lighting simulation leads to disappointing results after installation.",
+        tag: "MATERIAL ERRORS / LIGHTING DISCORD",
+        badge: "TEXTURE DRIFT",
+        tagColor: "purple",
+        icon: "Sparkles",
+        quote: "“Materials and lighting feel discordant and claustrophobic in reality?”",
+        detail: "Small swatch samples fail to predict how natural sunlight, shadows, and wide-angle finishes interact in full scale.",
+        impact: "Spatial mismatch & re-construction risk",
         solLabel: "KONTUR SOLUTION:",
         solText: "Committed 3-7 day turnaround with a clear, systematic 3-round review process.",
+      },
+    ],
+    solEyebrow: "COMPREHENSIVE SOLUTION SUITE // INTEGRATED TECH SUITE",
+    solTitle: "Next-Generation Architectural Solutions Eliminating Every Build Risk",
+    solSubtitle: "Seamlessly unifying schematic concepts, engineering blueprints, construction, and handover for zero-rework builds.",
+    solSpecTag: "SPEC: ARCH_V4.2 // 8 CORE ENGINES",
+    solutionItems: [
+      {
+        id: "sol-1",
+        badge: "SOLUTION 01",
+        icon: "Monitor",
+        title: "8K Ultra-Fine Photoreal 3DCG",
+        desc: "Maximizing eye-level perspectives and physical light calculations so non-technical clients achieve 100% mutual consensus.",
+        metric: "Accuracy 99.8%",
+        engineTag: "8K UHD ENGINE",
+      },
+      {
+        id: "sol-2",
+        badge: "SOLUTION 02",
+        icon: "Calculator",
+        title: "Automated Digital Quantities & VE Optimization",
+        desc: "Automated takeoff of components. Detects budget overruns early and presents Value Engineering alternatives without losing quality.",
+        metric: "Zero Added Cost",
+        engineTag: "AUTO QUANTITY",
+      },
+      {
+        id: "sol-3",
+        badge: "SOLUTION 03",
+        icon: "MessageSquare",
+        title: "Real-Time 3D Consensus Platform",
+        desc: "All stakeholders review the exact same 3D model in-browser. Annotate and approve on the spot, compressing revision cycles by 70%.",
+        metric: "70% Lead Time Cut",
+        engineTag: "CLOUD SYNC",
+      },
+      {
+        id: "sol-4",
+        badge: "SOLUTION 04",
+        icon: "Sun",
+        title: "Optical Physics Simulation with Real Materials",
+        desc: "Calibrated 3D scans and certified IES photometric data. Eradicating texture discrepancy and color temperature mismatches.",
+        metric: "Live PBR Specs",
+        engineTag: "PHYSICS PBR",
+      },
+      {
+        id: "sol-5",
+        badge: "SOLUTION 05",
+        icon: "Layers",
+        title: "BIM / Clash Detection & Site Coordination",
+        desc: "Overlaying architectural, structural, and MEP models to pinpoint and fix 100% of spatial clashes on the digital twin prior to site work.",
+        metric: "0 Clash Errors",
+        engineTag: "BIM CLASH FREE",
+      },
+      {
+        id: "sol-6",
+        badge: "SOLUTION 06",
+        icon: "Glasses",
+        title: "VR / Metaverse Spatial Walkthrough",
+        desc: "Walk freely through 1:1 scale rooms via VR goggles or desktop. Verify ceiling heights and circulatory sightlines before building.",
+        metric: "Full Immersion",
+        engineTag: "WEB VR ENGINE",
+      },
+      {
+        id: "sol-7",
+        badge: "SOLUTION 07",
+        icon: "Compass",
+        title: "Timelapse Solar & Microclimate Analysis",
+        desc: "Synced with site GPS to calculate sun paths and neighbor shadows across all 4 seasons, optimizing daylight and airflow.",
+        metric: "GPS Linked Data",
+        engineTag: "SOLAR TRACKING",
+      },
+      {
+        id: "sol-8",
+        badge: "SOLUTION 08",
+        icon: "RefreshCw",
+        title: "Agile Design & Live Finish Swapping",
+        desc: "Switch wall palettes, flooring, or facade materials instantaneously during meetings to eliminate hesitations immediately.",
+        metric: "Instant Swapping",
+        engineTag: "AGILE RENDERING",
+      },
+    ],
+  },
+  solutions: {
+    eyebrow: "// KONTUR ARCHITECTURAL SOLUTIONS · OVERCOMING EVERY CHALLENGE",
+    title: "4 Breakthrough Solutions by Kontur to Eliminate Every Risk",
+    sub: "Bridging architectural engineering precision with state-of-the-art 3DCG photorealism. Eliminate guesswork and ensure your build is flawless and cost-controlled.",
+    items: [
+      {
+        id: "sol-1",
+        num: "01",
+        badge: "1:1 REAL SCALE ACCURACY",
+        title: "100% Photorealistic 8K 3DCG Visualization",
+        subtitle: "Completely Eliminate Reality Mismatch",
+        desc: "Transforming 2D blueprints into millimeter-accurate 3D spatial models. Through human-eye eye levels, wide-angle optics, and physical lighting calculations, experience your future sanctuary before breaking ground.",
+        painRelief: "Solves: “Ideas in mind, but unable to visualize the final outcome”.",
+        highlights: [
+          "Ultra-high 8K rendering (360° exterior & interior views)",
+          "Dawn, noon, dusk, and nighttime lux simulations",
+          "Exact furniture clearances and structural proportion checks",
+        ],
+        specsBadge: "1:1 SCALE VERIFICATION",
+        icon: "Eye",
+      },
+      {
+        id: "sol-2",
+        num: "02",
+        badge: "RIGOROUS COST LOCK",
+        title: "Detailed Bill of Quantities & Strict Cost Control",
+        subtitle: "Prevent Surprise Budget Overruns",
+        desc: "Digital quantification of every material, finishing area, and custom millwork item right from the schematic stage. Eliminates vague lump sums and protects your budget from contractor markups.",
+        painRelief: "Solves: “Drawings differ from reality, causing unexpected cost spikes”.",
+        highlights: [
+          "Itemized rates, waste margins, and material volume schedules",
+          "Value Engineering (VE) cost optimization options",
+          "Material grade price comparison matrices",
+        ],
+        specsBadge: "ZERO HIDDEN EXPENSES",
+        icon: "DollarSign",
+      },
+      {
+        id: "sol-3",
+        num: "03",
+        badge: "AGILE REVIEW CYCLE",
+        title: "Fast-Track 3D Approvals & Schedule Guarantee",
+        subtitle: "Eliminate Iteration Bottlenecks & Delays",
+        desc: "Say goodbye to weeks of waiting on confusing 2D revision rounds. Interactive 3D design reviews facilitate prompt stakeholder consensus and compress project delivery times.",
+        painRelief: "Solves: “Endless waiting for drawing revisions, missing target start dates”.",
+        highlights: [
+          "Direct collaboration with lead architect & 3D specialist",
+          "Web-based 3D model sharing for instant annotations",
+          "100% milestone delivery commitment contractual guarantee",
+        ],
+        specsBadge: "FAST-TRACK WORKFLOW",
+        icon: "Clock",
+      },
+      {
+        id: "sol-4",
+        num: "04",
+        badge: "REAL MATERIAL REPLICATION",
+        title: "Authentic Material Database & Optical Simulation",
+        subtitle: "Zero Risk of Color & Texture Disappointment",
+        desc: "Using calibrated physical PBR shaders based on authentic manufacturer specs (tiles, stones, timbers, architectural metals). Accurately calculates Kelvin temperatures and natural daylighting.",
+        painRelief: "Solves: “Mismatched colors and materials, resulting in cramped spaces”.",
+        highlights: [
+          "Real-world manufacturer catalogs (PBR optical shaders)",
+          "Physically-accurate spectral and lumen calculations",
+          "Instant daylight, sunset, and indirect lighting scene toggling",
+        ],
+        specsBadge: "PHYSICALLY ACCURATE MATERIALS",
+        icon: "Layers",
       },
     ],
   },
@@ -712,8 +1288,143 @@ export const contentEn: LandingContent = {
     btnViewDetail: "View Details ↗",
   },
   pricing: {
-    title: "TRANSPARENT ARCHITECTURAL & 3D CG PRICING",
-    sub: "Choose the package tailored to your project scale. Completely transparent pricing with zero surprise fees.",
+    title: "Architectural Design & 3DCG Spatial Visualization Reference Rates",
+    sub: "Instead of rigid boxed packages, we provide transparent baseline rates tailored to your building typology, floor area (m²), and custom requirements. Zero hidden surprises.",
+    eyebrow: "// ARCHITECTURAL REFERENCE ESTIMATION · TRANSPARENT PRICING",
+    note: "※ Formal proposals and exact lump sums are provided as itemized bills of quantities upon receiving your CAD floor plans or site consultation.",
+    typologies: [
+      {
+        id: "villa",
+        category: "Luxury Villa & Estate",
+        name: "Custom Villa & Luxury Residence Design",
+        desc: "Bespoke architectural layout maximizing site topography & panoramic views, paired with photorealistic 8K spatial visualization.",
+        priceRange: "$25 — $40",
+        unit: "/ m² (Gross Floor Area)",
+        timeline: "Timeline: 4–8 Weeks",
+        deliverables: [
+          "Schematic 2D space planning & circulation zoning",
+          "Comprehensive 8K exterior & interior CGI views",
+          "Daylight, ventilation & site orientation studies",
+          "Full finishes schedule & itemized bill of quantities",
+        ],
+        featured: true,
+        tag: "Most Popular Typology",
+      },
+      {
+        id: "townhouse",
+        category: "Urban Residential",
+        name: "Modern Townhouse & Compact Living",
+        desc: "Clever vertical planning and daylight wells designed to maximize openness, privacy, and livability in dense settings.",
+        priceRange: "$18 — $30",
+        unit: "/ m² (Gross Floor Area)",
+        timeline: "Timeline: 3–6 Weeks",
+        deliverables: [
+          "Split-level sectional planning & spatial studies",
+          "Privacy & solar radiation simulation analysis",
+          "High-res 3D CGI views & VR spatial model",
+          "Architectural & MEP coordination checks",
+        ],
+        featured: false,
+        tag: "Urban & Compact",
+      },
+      {
+        id: "penthouse",
+        category: "Multi-family & Interior",
+        name: "Penthouse & High-End Interior Architecture",
+        desc: "Curated luxury materials, custom millwork drawings, and architectural lighting engineered to millimeter precision.",
+        priceRange: "$22 — $35",
+        unit: "/ m² (Usable Area)",
+        timeline: "Timeline: 3–5 Weeks",
+        deliverables: [
+          "Detailed custom joinery & millwork drawings (1:20)",
+          "Architectural lighting schedule & dimming scenes",
+          "Photorealistic 8K interior CG visualization",
+          "Authentic material & fabric specification board",
+        ],
+        featured: false,
+        tag: "Interior Focus",
+      },
+      {
+        id: "commercial",
+        category: "Hospitality & Commercial",
+        name: "Boutique Hotel, Resort & Commercial Spaces",
+        desc: "Strategic concept planning, spatial branding, and high-impact marketing visuals to accelerate project approvals and sales.",
+        priceRange: "Custom Quote",
+        unit: "Tailored to project scale",
+        timeline: "Timeline: Flexible milestone delivery",
+        deliverables: [
+          "Conceptual master planning & circulation studies",
+          "High-impact 8K promotional assets for investors",
+          "Cinematic 3D architectural animation clips",
+          "Technical alignment with local engineering teams",
+        ],
+        featured: false,
+        tag: "Commercial Ventures",
+      },
+    ],
+    services3d: [
+      {
+        id: "still-render",
+        name: "8K Exterior & Interior Still Renders",
+        desc: "Photorealistic imagery detailing texture, natural foliage, and architectural lighting from your blueprints or CAD models.",
+        priceRange: "$150 — $250",
+        unit: "/ View angle (2 free revisions)",
+        speed: "3–5 business days",
+        suitableFor: "Client approvals, city council review & marketing",
+      },
+      {
+        id: "animation",
+        name: "Cinematic 3D Architectural Animation",
+        desc: "Broadcast-quality walkthrough videos with dynamic camera paths, ambient soundscapes, and photorealistic physics.",
+        priceRange: "$500 — $1,000",
+        unit: "/ 15s–30s sequence clip",
+        speed: "7–14 business days",
+        suitableFor: "Web presentations, social media & investor decks",
+      },
+      {
+        id: "vr360",
+        name: "Interactive VR 360° Virtual Tour",
+        desc: "Seamless browser & VR headset walkthroughs allowing clients to inspect every corner before physical mockups.",
+        priceRange: "$90 — $150",
+        unit: "/ Panorama node (with hotspots)",
+        speed: "5–7 business days",
+        suitableFor: "Remote client approvals & sales showrooms",
+      },
+    ],
+    estimator: {
+      title: "Quick Reference Budget Estimator",
+      desc: "Select your project typology and adjust the total floor area (m²) to immediately estimate your architectural & 3D visualization baseline.",
+      ctaText: "Request Itemized Bill of Quantities (Free)",
+      disclaimer: "※ Figures shown are baseline estimates for budgeting purposes. Exact costs depend on specific site conditions and architectural complexity.",
+      types: [
+        { id: "villa", name: "Luxury Villa & Estate", rateMin: 25, rateMax: 40, unit: "USD / m²" },
+        { id: "townhouse", name: "Modern Townhouse", rateMin: 18, rateMax: 30, unit: "USD / m²" },
+        { id: "penthouse", name: "Penthouse & Interior", rateMin: 22, rateMax: 35, unit: "USD / m²" },
+        { id: "rendering-only", name: "3DCG Rendering Only", rateMin: 6, rateMax: 12, unit: "USD / m² equiv" },
+      ],
+    },
+    principles: [
+      {
+        icon: "ShieldCheck",
+        title: "Guaranteed Zero Cost Overruns",
+        desc: "Contracts are locked based on finalized drawings and itemized BOQ. No surprise invoices unless you request scope additions.",
+      },
+      {
+        icon: "CheckCircle2",
+        title: "Billed on Usable Floor Area",
+        desc: "Transparent calculation based on actual constructed square meters (m²) and contracted camera angles. No vague lump sums.",
+      },
+      {
+        icon: "Sparkles",
+        title: "Free Initial Consultation & Feasibility",
+        desc: "Send us your rough hand sketch or CAD file; receive a preliminary schedule and budget breakdown within 24 hours.",
+      },
+      {
+        icon: "Layers",
+        title: "Full Asset Handover & Site Supervision",
+        desc: "Complete handover of 8K print files, source models, and periodic architectural design supervision through project completion.",
+      },
+    ],
     tier1: {
       badge: "CG Rendering",
       name: "Tier 01: 8K 3D Exterior & Interior Renders",
@@ -762,6 +1473,21 @@ export const contentEn: LandingContent = {
       ],
       btnText: "REQUEST CONSTRUCTION TIER",
     },
+  },
+  cta: {
+    eyebrow: "// START YOUR PROJECT WITH ZERO RISK //",
+    title: "Bringing Your Architectural Visions into Tangible Reality",
+    sub: "Send us your project drawings or concept sketch. Our principal architects will deliver a precision 3D feasibility study and itemized estimate within 24 hours.",
+    btnPrimary: "Request Free 3D Consultation",
+    btnSecondary: "Call Us Now",
+    hotline: "0984 384 190",
+    email: "contact@kontur.vn",
+    benefits: [
+      "100% Free Initial Feasibility & Cost Estimate",
+      "Rapid 24-Hour Consultation Turnaround",
+      "Comprehensive NDA Protection for All Client Data",
+      "Nationwide & International Project Capacity",
+    ],
   },
   lightbox: {
     btnConsult: "Inquire about this project →",
@@ -820,6 +1546,77 @@ export const contentVi: LandingContent = {
         badge: "VẬT LIỆU SAI LỆCH",
         quote: "“Vật liệu phối màu không chuẩn, xây xong nhìn bí bách?”",
         detail: "Không được mô phỏng ánh sáng thực tế và chất liệu chân thực, dẫn đến không gian sống thiếu sáng, bí bách và mất đi tính thẩm mỹ.",
+      },
+    ],
+  },
+  solutions: {
+    eyebrow: "// KONTUR ARCHITECTURAL SOLUTIONS · GIẢI PHÁP ĐỘT PHÁ",
+    title: "4 Giải Pháp Kiến Trúc & 3DCG Đột Phá Tháo Gỡ Mọi Nỗi Lo",
+    sub: "Kết hợp giữa công nghệ diễn họa 3DCG Photorealistic 8K và tiêu chuẩn hồ sơ kỹ thuật thi công khắt khe. Giúp bạn kiểm soát 100% chi phí, thời gian và chất lượng ngôi nhà.",
+    items: [
+      {
+        id: "sol-1",
+        num: "01",
+        badge: "TRỰC QUAN HÓA TỈ LỆ THỰC 1:1",
+        title: "Mô Phỏng 3D Photorealistic 8K Chuẩn Từng Góc Nhìn",
+        subtitle: "Xóa Bỏ Hoàn Toàn Lệch Ý Tưởng",
+        desc: "Chuyển hóa toàn bộ bản vẽ kỹ thuật thành không gian 3 chiều sống động từ tầm mắt người thực tế. Bạn có thể bước vào ngôi nhà tương lai, kiểm tra độ cao trần, khoảng cách đồ đạc và tầm nhìn trước khi khởi công.",
+        painRelief: "Giải quyết triệt để nỗi lo: “Ý tưởng trong đầu nhưng không hình dung ra sao”.",
+        highlights: [
+          "Bàn giao hình ảnh 8K siêu nét từ mọi góc máy quan trọng",
+          "Mô phỏng đường đi ánh sáng mặt trời theo hướng nhà thực tế",
+          "Kiểm tra độ thông thoáng và khoảng cách chuẩn nhân trắc học",
+        ],
+        specsBadge: "1:1 REAL SCALE ACCURACY",
+        icon: "Eye",
+      },
+      {
+        id: "sol-2",
+        num: "02",
+        badge: "BÓC TÁCH CHI PHÍ MINH BẠCH",
+        title: "Bảng Dự Toán Chi Tiết & Khóa Chặt Ngân Sách",
+        subtitle: "Không Phát Sinh Chi Phí Thi Công",
+        desc: "Mọi mét vuông sàn, khối lượng bê tông, diện tích gạch ốp và quy cách cửa đều được bóc tách số liệu số hóa chuẩn xác. Loại bỏ các báo giá 'ước lượng chung chung', bảo vệ quyền lợi tài chính tối đa cho gia chủ.",
+        painRelief: "Giải quyết triệt để nỗi lo: “Bản vẽ một đằng, thi công một nẻo, đội chi phí”.",
+        highlights: [
+          "Bảng tiên lượng dự toán vật tư chi tiết đến từng cấu kiện",
+          "Tư vấn giải pháp Value Engineering (VE) tối ưu ngân sách",
+          "Bảng so sánh chênh lệch giữa các phân khúc vật liệu",
+        ],
+        specsBadge: "ZERO HIDDEN EXPENSES",
+        icon: "DollarSign",
+      },
+      {
+        id: "sol-3",
+        num: "03",
+        badge: "QUY TRÌNH THIẾT KẾ NHANH",
+        title: "Tương Tác Duyệt 3D Trực Tiếp & Cam Kết Tiến Độ",
+        subtitle: "Không Chờ Đợi Bản Vẽ Kéo Dài",
+        desc: "Rút ngắn thời gian chốt phương án nhờ quy trình làm việc số hóa linh hoạt. KTS chủ trì trao đổi trực tiếp trên mô hình 3D, tiếp thu ý kiến và hoàn thiện hồ sơ đúng hạn để bạn kịp ngày lành khởi công.",
+        painRelief: "Giải quyết triệt để nỗi lo: “Chờ đợi sửa bản vẽ quá lâu, lỡ ngày lành khởi công”.",
+        highlights: [
+          "KTS chủ trì đồng hành trao đổi phương án 1:1",
+          "Duyệt phương án trực quan qua mô hình 3D xoay 360 độ",
+          "Cam kết bàn giao từng giai đoạn đúng tiến độ hợp đồng",
+        ],
+        specsBadge: "FAST-TRACK WORKFLOW",
+        icon: "Clock",
+      },
+      {
+        id: "sol-4",
+        num: "04",
+        badge: "VẬT LIỆU THẬT THI CÔNG ĐƯỢC",
+        title: "Đồng Bộ Mã Vật Liệu Thực Tế & Ánh Sáng Vật Lý",
+        subtitle: "Xây Xong Đẹp Chuẩn Xác Như Ảnh 3D",
+        desc: "Sử dụng vật liệu từ danh mục các thương hiệu uy tín có sẵn trên thị trường Việt Nam & quốc tế. Tính toán chuẩn xác độ phản xạ ánh sáng, màu sơn và chỉ số hoàn màu CRI của đèn.",
+        painRelief: "Giải quyết triệt để nỗi lo: “Vật liệu phối màu không chuẩn, xây xong nhìn bí bách”.",
+        highlights: [
+          "Chỉ định rõ mã gạch, mã đá, màu sơn, chủng loại gỗ thực tế",
+          "Mô phỏng quang học chuẩn xác ban ngày, hoàng hôn và ban đêm",
+          "Cam kết không sử dụng chất liệu ảo không mua được ngoài thị trường",
+        ],
+        specsBadge: "PHYSICALLY ACCURATE MATERIALS",
+        icon: "Layers",
       },
     ],
   },
@@ -957,8 +1754,143 @@ export const contentVi: LandingContent = {
     btnViewDetail: "Xem chi tiết ↗",
   },
   pricing: {
-    title: "BẢNG GIÁ DỊCH VỤ THIẾT KẾ & DIỄN HỌA 3D MINH BẠCH",
-    sub: "Lựa chọn gói dịch vụ phù hợp với nhu cầu và quy mô công trình của bạn. Cam kết minh bạch, không phát sinh chi phí ẩn.",
+    title: "ĐỊNH MỨC DỰ TOÁN & BẢNG GIÁ THAM KHẢO MINH BẠCH",
+    sub: "Không áp đặt các gói cố định, Kontur cung cấp bảng định mức đơn giá tham khảo minh bạch theo từng loại hình công trình, diện tích sàn (m²) và nhu cầu thực tế của gia chủ. Cam kết không chi phí ẩn.",
+    eyebrow: "// ARCHITECTURAL REFERENCE ESTIMATION · MINH BẠCH CHI PHÍ",
+    note: "※ Báo giá chính xác trọn gói sẽ được bóc tách chi tiết theo hồ sơ mặt bằng và yêu cầu thực địa sau buổi tư vấn kỹ thuật miễn phí.",
+    typologies: [
+      {
+        id: "villa",
+        category: "Biệt thự & Dinh thự",
+        name: "Thiết Kế Biệt Thự & Villa Cao Cấp",
+        desc: "Quy hoạch không gian đỉnh cao, tối ưu vi khí hậu và cảnh quan sân vườn kết hợp diễn họa 3D 8K chân thực 100%.",
+        priceRange: "280.000 — 450.000",
+        unit: "VNĐ / m² sàn xây dựng",
+        timeline: "Thời gian: 4 — 8 tuần",
+        deliverables: [
+          "Mặt bằng công năng 2D & phân khu luồng di chuyển",
+          "Bộ ảnh diễn họa 3D 8K ngoại thất & nội thất toàn diện",
+          "Mô phỏng hướng nắng, thông gió & bóng đổ thực tế",
+          "Bảng chỉ định vật liệu hoàn thiện & dự toán bóc tách",
+        ],
+        featured: true,
+        tag: "Loại hình phổ biến nhất",
+      },
+      {
+        id: "townhouse",
+        category: "Nhà phố & Shophouse",
+        name: "Thiết Kế Nhà Phố & Biệt Thự Liền Kề",
+        desc: "Giải pháp thông minh cho nhà phố: xử lý lấy sáng tự nhiên, giếng trời đối lưu không khí và công năng linh hoạt.",
+        priceRange: "220.000 — 350.000",
+        unit: "VNĐ / m² sàn xây dựng",
+        timeline: "Thời gian: 3 — 6 tuần",
+        deliverables: [
+          "Bản vẽ mặt cắt lệch tầng & bố trí giếng trời thông gió",
+          "Kiểm tra tầm nhìn riêng tư & bức xạ nhiệt mặt tiền",
+          "Phối cảnh 3D sắc nét mặt tiền & các phòng chức năng",
+          "Hồ sơ kỹ thuật kiến trúc & khớp nối kết cấu cơ điện",
+        ],
+        featured: false,
+        tag: "Nhà phố & Đô thị",
+      },
+      {
+        id: "penthouse",
+        category: "Căn hộ & Nội thất cao cấp",
+        name: "Thiết Kế Penthouse & Căn Hộ Duplex",
+        desc: "Chăm chút vật liệu sang trọng, hệ thống tủ kệ may đo riêng và chiếu sáng kiến trúc tạo nên không gian sống đẳng cấp.",
+        priceRange: "250.000 — 380.000",
+        unit: "VNĐ / m² diện tích thông thủy",
+        timeline: "Thời gian: 3 — 5 tuần",
+        deliverables: [
+          "Bản vẽ chi tiết đồ gỗ đóng riêng tỷ lệ 1:20 & 1:10",
+          "Bản đồ chiếu sáng & kịch bản kịch tính Smart Home",
+          "Diễn họa 3D 8K nội thất chân thực từng chất liệu",
+          "Bảng mẫu vật liệu thực tế kèm mã nhà cung cấp",
+        ],
+        featured: false,
+        tag: "Nội thất cao cấp",
+      },
+      {
+        id: "commercial",
+        category: "Dự án Nghỉ dưỡng & F&B",
+        name: "Resort, Khách Sạn & Nhà Hàng Thương Mại",
+        desc: "Quy hoạch cảnh quan, định vị trải nghiệm khách hàng và gói hình ảnh/video 3D phục vụ đầu tư truyền thông bán hàng.",
+        priceRange: "Báo giá theo quy mô",
+        unit: "Tùy thuộc quy mô & diện tích dự án",
+        timeline: "Thời gian: Linh hoạt theo giai đoạn",
+        deliverables: [
+          "Quy hoạch tổng thể phân khu & luồng giao thông",
+          "Bộ ảnh 3D 8K chất lượng cao phục vụ truyền thông",
+          "Phim 3D Animation kiến trúc quảng bá dự án",
+          "Phối hợp kỹ thuật với đơn vị thi công & vận hành",
+        ],
+        featured: false,
+        tag: "Công trình kinh doanh",
+      },
+    ],
+    services3d: [
+      {
+        id: "still-render",
+        name: "Phối Cảnh 3D Ngoại & Nội Thất 8K",
+        desc: "Dựng hình 3D photorealistic chân thực từ bản vẽ CAD hoặc sketch, thể hiện rõ vật liệu, cây xanh và ánh sáng.",
+        priceRange: "1.500.000 — 2.500.000",
+        unit: "VNĐ / Góc nhìn (Cam)",
+        speed: "3 — 5 ngày làm việc",
+        suitableFor: "Thuyết trình chủ đầu tư, bán hàng, duyệt phương án",
+      },
+      {
+        id: "animation",
+        name: "Phim 3D Animation Kiến Trúc Điển Hình",
+        desc: "Video 3D chất lượng điện ảnh với chuyển động camera mượt mà, âm thanh môi trường và ánh sáng sống động.",
+        priceRange: "5.000.000 — 12.000.000",
+        unit: "VNĐ / Phân cảnh 15s - 30s",
+        speed: "7 — 14 ngày làm việc",
+        suitableFor: "Quảng cáo, giới thiệu dự án & mạng xã hội",
+      },
+      {
+        id: "vr360",
+        name: "Tour Thực Tế Ảo Tương Tác VR 360°",
+        desc: "Khách hàng tự do di chuyển qua các phòng trên điện thoại, máy tính hoặc kính VR trước khi xây dựng.",
+        priceRange: "800.000 — 1.500.000",
+        unit: "VNĐ / Điểm nhìn Panorama",
+        speed: "5 — 7 ngày làm việc",
+        suitableFor: "Nhà mẫu ảo, tương tác khách hàng từ xa",
+      },
+    ],
+    estimator: {
+      title: "Công Cụ Dự Toán Sơ Bộ Ngân Sách",
+      desc: "Chọn loại hình công trình và kéo diện tích sàn (m²) dự kiến để ước tính ngay khoảng ngân sách thiết kế tham khảo.",
+      ctaText: "Nhận Bảng Bóc Tách Dự Toán Chi Tiết (Miễn Phí)",
+      disclaimer: "※ Khoảng giá trên mang tính chất tham khảo chuẩn kỹ thuật. Đơn giá chính xác phụ thuộc vào hồ sơ mặt bằng và yêu cầu cụ thể.",
+      types: [
+        { id: "villa", name: "Biệt thự / Villa", rateMin: 280000, rateMax: 450000, unit: "VNĐ / m²" },
+        { id: "townhouse", name: "Nhà phố / Townhouse", rateMin: 220000, rateMax: 350000, unit: "VNĐ / m²" },
+        { id: "penthouse", name: "Penthouse / Căn hộ", rateMin: 250000, rateMax: 380000, unit: "VNĐ / m²" },
+        { id: "rendering-only", name: "Chỉ diễn họa 3D", rateMin: 60000, rateMax: 120000, unit: "VNĐ / m² tương đương" },
+      ],
+    },
+    principles: [
+      {
+        icon: "ShieldCheck",
+        title: "Cam Kết Không Phát Sinh Chi Phí",
+        desc: "Hợp đồng ký kết dựa trên khối lượng và đơn giá bóc tách minh bạch. Cam kết không phát sinh bất kỳ khoản phí ngoài nào.",
+      },
+      {
+        icon: "CheckCircle2",
+        title: "Tính Theo Diện Tích Sàn Thực Tế",
+        desc: "Đo đạc diện tích chuẩn xác theo m² sàn sử dụng thực tế. Không tính mập mờ theo kiểu khoán trọn gói thiếu căn cứ.",
+      },
+      {
+        icon: "Sparkles",
+        title: "Tư Vấn & Khảo Sát Sơ Bộ Miễn Phí",
+        desc: "Gửi bản vẽ mặt bằng hoặc thông tin khu đất; bạn sẽ nhận được phương án định hướng và bảng dự toán sơ bộ trong 24h.",
+      },
+      {
+        icon: "Layers",
+        title: "Bàn Giao Trọn Bộ File & Giám Sát Tác Giả",
+        desc: "Bàn giao đầy đủ file gốc in ấn và 3D, đồng thời KTS chủ trì sẵn sàng giải đáp thắc mắc hiện trường trong suốt quá trình xây.",
+      },
+    ],
     tier1: {
       badge: "DIỄN HỌA 3D",
       name: "Gói 01: Diễn Họa 3D 8K Ngoại & Nội Thất",
@@ -1008,6 +1940,21 @@ export const contentVi: LandingContent = {
       btnText: "ĐĂNG KÝ HỒ SƠ THI CÔNG",
     },
   },
+  cta: {
+    eyebrow: "// KHỞI ĐẦU DỰ ÁN KHÔNG RỦI RO //",
+    title: "Hiện Thực Hóa Không Gian Kiến Trúc Với Độ Chính Xác Tuyệt Đối",
+    sub: "Chỉ cần gửi bản vẽ mặt bằng hoặc phác thảo ý tưởng, đội ngũ KTS chủ trì sẽ phản hồi phương án 3D và bảng dự toán sơ bộ trong 24 giờ.",
+    btnPrimary: "Đăng Ký Tư Vấn & Nhận 3D Sơ Bộ Miễn Phí",
+    btnSecondary: "Gọi Hotline Trực Tiếp",
+    hotline: "0984 384 190",
+    email: "contact@kontur.vn",
+    benefits: [
+      "100% Miễn phí khảo sát & dự toán sơ bộ",
+      "Phản hồi tư vấn nhanh chóng trong vòng 24 giờ",
+      "Ký cam kết NDA bảo mật thông tin dự án",
+      "Năng lực triển khai toàn quốc & quốc tế",
+    ],
+  },
   lightbox: {
     btnConsult: "Tư vấn dự án này →",
   },
@@ -1033,6 +1980,7 @@ export interface GalleryProject {
   materials: string;
   deliverables: string[];
   keyHighlights: Array<{ label: string; value: string }>;
+  priceEstimate?: string;
 }
 
 export function getGalleryProjectsData(locale: string): Record<string, GalleryProject> {
@@ -1067,6 +2015,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["8K Full CGI Perspectives", "Architecture, Structural & MEP", "Precise Itemized BOQ", "VR 360° Interactive Tour"]
         : ["Phối cảnh 8K CGI ngoại & nội thất", "Hồ sơ kỹ thuật Kiến trúc + Kết cấu + MEP", "Bảng bóc tách khối lượng BOQ 100%", "VR 360° thực tế ảo"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥3,500,000〜 (¥4,100/m²)"
+        : isEn
+        ? "Est. Fee: From $25,000 ($30/m²)"
+        : "Chi phí TK & 3D: Từ 85.000.000đ (100.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "25–35 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "インフィニティプール18m" : isEn ? "18m Horizon Pool" : "Hồ bơi tràn viền 18m" },
@@ -1107,6 +2060,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["8K Exterior/Interior Renders", "Complete Working Drawings", "Structural Specs & BOQ", "Day/Night Lighting Analysis"]
         : ["Phối cảnh 8K chi tiết", "Hồ sơ thi công nhà phố hoàn chỉnh", "Bảng BOQ & tính toán kết cấu", "Mô phỏng chiếu sáng ngày/đêm"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥1,600,000〜 (¥3,800/m²)"
+        : isEn
+        ? "Est. Fee: From $12,500 ($30/m²)"
+        : "Chi phí TK & 3D: Từ 45.000.000đ (105.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "20–30 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "屋上禅ガーデン" : isEn ? "Rooftop Zen Garden" : "Vườn thiền Zen trên mái" },
@@ -1147,6 +2105,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["8K Photorealistic CG Package", "Custom Millwork Drawings", "MEP & Lighting Schedules", "Realtime VR 360° Exploration"]
         : ["Phối cảnh 8K nội thất siêu thực", "Bản vẽ chi tiết đồ gỗ & fixture", "Hồ sơ MEP & kịch bản ánh sáng", "Tour VR 360° tương tác"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥1,400,000〜 (¥4,000/m²)"
+        : isEn
+        ? "Est. Fee: From $10,500 ($30/m²)"
+        : "Chi phí TK & 3D: Từ 38.000.000đ (110.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "20–25 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "吹抜けパノラマ窓" : isEn ? "6.5m Panorama Wall" : "Vách kính thông tầng 6.5m" },
@@ -1187,6 +2150,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["Masterplan & 8K Perspectives", "Complete Resort Working Drawings", "Eco Impact Matrix & BOQ", "Landscape Master Detailing"]
         : ["Quy hoạch tổng thể & Render 8K", "Hồ sơ kỹ thuật thi công resort", "Bảng BOQ bóc tách toàn diện", "Bản vẽ cảnh quan rừng tự nhiên"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥4,800,000〜 (¥4,000/m²)"
+        : isEn
+        ? "Est. Fee: From $36,000 ($30/m²)"
+        : "Chi phí TK & 3D: Từ 120.000.000đ (100.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "30–45 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "樹冠キャノピーブリッジ" : isEn ? "Canopy Sky Walkway" : "Cầu gỗ xuyên tán rừng" },
@@ -1227,6 +2195,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["Commercial 8K Renders", "Bar & Seating Shop Drawings", "Operational Layout & MEP", "Pre-Opening Interactive VR"]
         : ["Bộ phối cảnh 8K thương mại", "Bản vẽ chi tiết quầy bar & nội thất", "Bản vẽ cấp thoát nước & thông gió", "VR 360° duyệt concept"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥1,200,000〜 (¥4,200/m²)"
+        : isEn
+        ? "Est. Fee: From $9,000 ($32/m²)"
+        : "Chi phí TK & 3D: Từ 32.000.000đ (115.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "15–20 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "錦鯉ウォーターガーデン" : isEn ? "Koi Zen Sanctuary" : "Hồ cá Koi check-in độc bản" },
@@ -1267,6 +2240,11 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         : isEn
         ? ["8K Coastal Villa Perspectives", "Anti-Corrosion Structural/MEP", "Detailed Itemized BOQ", "Multi-Tier Tropical Landscape"]
         : ["Phối cảnh 8K biệt thự ven biển", "Hồ sơ kỹ thuật kết cấu kháng mặn", "Bảng BOQ bóc tách vật tư 100%", "Bản vẽ cảnh quan cây xanh"],
+      priceEstimate: isJa
+        ? "設計・3D目安: ¥2,200,000〜 (¥4,200/m²)"
+        : isEn
+        ? "Est. Fee: From $16,500 ($30/m²)"
+        : "Chi phí TK & 3D: Từ 55.000.000đ (105.000đ/m²)",
       keyHighlights: [
         { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "25–35 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "熱帯中庭＆プール" : isEn ? "Courtyard Lagoon" : "Sân trong nhiệt đới & hồ bơi" },
@@ -1804,5 +2782,27 @@ export function getDefaultPricingTiers(locale: string): PricingTierItem[] {
   ];
 }
 
+export function getDefaultSolutions(locale: string): SolutionItem[] {
+  const content = getLandingContent(locale);
+  return content.solutions?.items || contentJa.solutions?.items || [];
+}
 
+export function getDefaultPricingTypologies(locale: string): PricingTypologyItem[] {
+  const content = getLandingContent(locale);
+  return content.pricing?.typologies || contentJa.pricing?.typologies || [];
+}
 
+export function getDefaultPricing3DServices(locale: string): PricingService3DItem[] {
+  const content = getLandingContent(locale);
+  return content.pricing?.services3d || contentJa.pricing?.services3d || [];
+}
+
+export function getDefaultPricingPrinciples(locale: string): PricingPrincipleItem[] {
+  const content = getLandingContent(locale);
+  return content.pricing?.principles || contentJa.pricing?.principles || [];
+}
+
+export function getDefaultPricingEstimator(locale: string) {
+  const content = getLandingContent(locale);
+  return content.pricing?.estimator || contentJa.pricing?.estimator;
+}

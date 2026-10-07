@@ -3,7 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getSectionData, getDefaultSectionData } from "@/lib/landingpage-data";
+import {
+  getSectionData,
+  getDefaultSectionData,
+  getLandingLayoutConfig,
+  saveLandingLayoutConfig,
+} from "@/lib/landingpage-data";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +19,9 @@ export async function GET(
   try {
     const { sectionKey } = params;
     const data = await getSectionData(sectionKey);
-    return NextResponse.json({ success: true, data });
+    const layoutConfig = await getLandingLayoutConfig();
+    const backgroundColor = layoutConfig.backgroundColors[sectionKey] || "#0b0d11";
+    return NextResponse.json({ success: true, data, backgroundColor });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || "Failed to load section" },
@@ -35,7 +42,17 @@ export async function PUT(
   try {
     const { sectionKey } = params;
     const body = await req.json();
-    const { contentEn, contentJa } = body;
+    const { contentEn, contentJa, backgroundColor } = body;
+
+    if (backgroundColor && typeof backgroundColor === "string") {
+      try {
+        const layoutConfig = await getLandingLayoutConfig();
+        layoutConfig.backgroundColors[sectionKey] = backgroundColor;
+        await saveLandingLayoutConfig(layoutConfig);
+      } catch (err) {
+        console.warn("Error updating section background color:", err);
+      }
+    }
 
     const enStr = typeof contentEn === "string" ? contentEn : JSON.stringify(contentEn || {});
     const jaStr = typeof contentJa === "string" ? contentJa : JSON.stringify(contentJa || {});

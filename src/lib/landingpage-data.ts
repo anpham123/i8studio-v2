@@ -9,7 +9,16 @@ import {
   getDefaultPartnerBrands,
   getDefaultGalleryTabs,
   getDefaultPricingTiers,
+  getDefaultSolutions,
+  getDefaultPricingTypologies,
+  getDefaultPricing3DServices,
+  getDefaultPricingPrinciples,
+  getDefaultPricingEstimator,
   type PricingTierItem,
+  type SolutionItem,
+  type PricingTypologyItem,
+  type PricingService3DItem,
+  type PricingPrincipleItem,
 } from "@/app/[locale]/landingpage/landingI18n";
 import { prisma } from "@/lib/prisma";
 
@@ -34,10 +43,10 @@ export const LANDING_SECTIONS: SectionMeta[] = [
   {
     key: "pain-points",
     order: 2,
-    label: "02. Nỗi đau & Thách thức",
-    subLabel: "4 Vấn đề trở ngại của gia chủ",
-    description: "Nhấn mạnh những nỗi đau thực tế của khách hàng (ý tưởng không khớp, đội chi phí, trễ tiến độ, lệch vật liệu).",
-    anchor: "#quy-trinh",
+    label: "02. Nỗi đau & Giải pháp Kontur",
+    subLabel: "Thách thức thực tế & 4 Trụ cột giải pháp đột phá",
+    description: "Nhấn mạnh nỗi đau thực tế của gia chủ và 4 giải pháp công nghệ 1:1, kiểm soát ngân sách & vật liệu của Kontur.",
+    anchor: "#noi-dau-giai-phap",
   },
   {
     key: "workflow",
@@ -45,7 +54,7 @@ export const LANDING_SECTIONS: SectionMeta[] = [
     label: "03. Quy trình 5 bước",
     subLabel: "Lộ trình kiểm soát tiến độ & thiết kế",
     description: "Quy trình làm việc 5 giai đoạn minh bạch từ tiếp nhận, concept 3D, kỹ thuật đến nghiệm thu bàn giao.",
-    anchor: "#dich-vu",
+    anchor: "#quy-trinh-thuc-hien",
   },
   {
     key: "deliverables",
@@ -64,44 +73,36 @@ export const LANDING_SECTIONS: SectionMeta[] = [
     anchor: "#dich-vu",
   },
   {
-    key: "clients",
-    order: 6,
-    label: "06. Đối tác & Uy tín",
-    subLabel: "Cam kết tiêu chuẩn & niềm tin",
-    description: "Các chứng chỉ, cam kết về độ chính xác thực tế, bảo hành bản vẽ và đồng hành cùng chủ nhà.",
-    anchor: "#doi-tac",
-  },
-  {
     key: "applications",
-    order: 7,
-    label: "07. Ứng dụng thực tế",
+    order: 6,
+    label: "06. Ứng dụng thực tế",
     subLabel: "Giải pháp theo từng đối tượng kiến trúc",
     description: "Bộ lọc và các thẻ giải pháp ứng dụng thực tế (BĐS, KTS, Nhà thầu, Gia chủ, Khách sạn, Vật liệu).",
-    anchor: "#ung-dung",
+    anchor: "#ung-dung-thuc-te",
   },
   {
     key: "partners",
-    order: 8,
-    label: "08. Thương hiệu & Đối tác",
+    order: 7,
+    label: "07. Thương hiệu & Đối tác",
     subLabel: "Thống kê quy mô & Logo marquee",
     description: "4 Chỉ số quy mô phân khúc và dải logo thương hiệu đối tác chuyển động vô tận.",
     anchor: "#khach-hang",
   },
   {
     key: "gallery",
-    order: 9,
-    label: "09. Triển lãm dự án",
+    order: 8,
+    label: "08. Triển lãm dự án",
     subLabel: "Showcase các dự án thực tế tiêu biểu",
     description: "Tiêu đề triển lãm, danh mục tab bộ lọc kiến trúc (Villa, Townhouse, Penthouse, Resort, F&B) và thông điệp tương tác.",
     anchor: "#du-an",
   },
   {
-    key: "pricing",
-    order: 10,
-    label: "10. Báo giá minh bạch",
-    subLabel: "3 Gói dịch vụ & Cam kết thi công",
-    description: "Bảng chi phí 3 gói kiến trúc, định mức đơn giá, cam kết thời gian hoàn thành và quyền lợi giám sát.",
-    anchor: "#bao-gia",
+    key: "cta",
+    order: 9,
+    label: "09. Kêu gọi hành động (CTA)",
+    subLabel: "Đăng ký tư vấn, hotline & bắt đầu dự án",
+    description: "Tiêu đề kêu gọi, cam kết tư vấn 1-1 miễn phí, nút hành động, hotline và thông tin liên hệ.",
+    anchor: "#dang-ky-tu-van",
   },
 ];
 
@@ -116,6 +117,21 @@ export function getDefaultSectionData(sectionKey: string): { en: any; ja: any } 
       return {
         en: contentEn.painPoints,
         ja: contentJa.painPoints,
+      };
+    case "solutions":
+      return {
+        en: contentEn.solutions || {
+          eyebrow: "// KONTUR ARCHITECTURAL SOLUTIONS",
+          title: "4 Breakthrough Solutions by Kontur to Eliminate Every Risk",
+          sub: "Bridging architectural engineering precision with state-of-the-art 3DCG photorealism.",
+          items: getDefaultSolutions("en"),
+        },
+        ja: contentJa.solutions || {
+          eyebrow: "// KONTUR ARCHITECTURAL SOLUTIONS · 建築課題の根本解決",
+          title: "課題を解決する、Konturの4つの革新的ソリューション",
+          sub: "最先端の3DCG空間表現と厳格な建築設計基準を融合。",
+          items: getDefaultSolutions("ja"),
+        },
       };
     case "workflow":
       return {
@@ -186,20 +202,65 @@ export function getDefaultSectionData(sectionKey: string): { en: any; ja: any } 
           projects: getGalleryProjectsData("ja"),
         },
       };
+    case "cta":
+      return {
+        en: contentEn.cta || {
+          eyebrow: "// START YOUR PROJECT WITH ZERO RISK //",
+          title: "Bringing Your Architectural Visions into Tangible Reality",
+          sub: "Send us your project drawings or concept sketch. Our principal architects will deliver a precision 3D feasibility study and itemized estimate within 24 hours.",
+          btnPrimary: "Request Free 3D Consultation",
+          btnSecondary: "Call Us Now",
+          hotline: "0984 384 190",
+          email: "contact@kontur.vn",
+          benefits: [
+            "100% Free Initial Feasibility & Cost Estimate",
+            "Rapid 24-Hour Consultation Turnaround",
+            "Comprehensive NDA Protection for All Client Data",
+            "Nationwide & International Project Capacity",
+          ],
+        },
+        ja: contentJa.cta || {
+          eyebrow: "// START YOUR PROJECT WITH ZERO RISK //",
+          title: "理想の建築空間を、確かな精度で形にします",
+          sub: "図面や構想スケッチをお送りいただくだけで、経験豊富な建築家が24時間以内に初期3D検証と詳細積算をご提案します。",
+          btnPrimary: "無料相談・3Dシミュレーションを依頼する",
+          btnSecondary: "電話で今すぐ相談する",
+          hotline: "0984 384 190",
+          email: "contact@kontur.vn",
+          benefits: [
+            "完全無料の初期ヒアリング & 概算見積り",
+            "24時間以内のスピーディーな初期回答",
+            "NDA（秘密保持契約）対応で情報厳守",
+            "全国・海外プロジェクト対応可能",
+          ],
+        },
+      };
     case "pricing":
       return {
         en: {
           info: {
             title: contentEn.pricing.title,
             sub: contentEn.pricing.sub,
+            eyebrow: contentEn.pricing.eyebrow,
+            note: contentEn.pricing.note,
           },
+          typologies: getDefaultPricingTypologies("en"),
+          services3d: getDefaultPricing3DServices("en"),
+          estimator: getDefaultPricingEstimator("en"),
+          principles: getDefaultPricingPrinciples("en"),
           tiers: getDefaultPricingTiers("en"),
         },
         ja: {
           info: {
             title: contentJa.pricing.title,
             sub: contentJa.pricing.sub,
+            eyebrow: contentJa.pricing.eyebrow,
+            note: contentJa.pricing.note,
           },
+          typologies: getDefaultPricingTypologies("ja"),
+          services3d: getDefaultPricing3DServices("ja"),
+          estimator: getDefaultPricingEstimator("ja"),
+          principles: getDefaultPricingPrinciples("ja"),
           tiers: getDefaultPricingTiers("ja"),
         },
       };
@@ -273,6 +334,141 @@ export async function getSectionData(sectionKey: string): Promise<{
   }
 }
 
+export interface LandingLayoutConfig {
+  order: string[];
+  backgroundColors: Record<string, string>;
+  visible: Record<string, boolean>;
+}
+
+export const DEFAULT_SECTION_ORDER: string[] = [
+  "hero",
+  "pain-points",
+  "workflow",
+  "deliverables",
+  "services-bento",
+  "applications",
+  "partners",
+  "gallery",
+  "cta",
+];
+
+export const DEFAULT_SECTION_BG: Record<string, string> = {
+  hero: "#07080a",
+  "pain-points": "#fdfcf9",
+  workflow: "radial-gradient(circle at 50% 30%, #fcfbf9 0%, #f5f0e8 60%, #ece5da 100%)",
+  deliverables: "radial-gradient(circle at 50% 30%, #fdfcf9 0%, #f7f4ed 60%, #eee8de 100%)",
+  "services-bento": "radial-gradient(circle at 50% 10%, #ffffff 0%, #f9f7f4 60%, #f4f0e8 100%)",
+  applications: "linear-gradient(180deg, #ffffff 0%, #fafbff 100%)",
+  partners: "linear-gradient(180deg, #f7f4ee 0%, #ede7dc 100%)",
+  gallery: "#07080a",
+  cta: "radial-gradient(circle at 50% 30%, #fcfbf9 0%, #f5f0e8 60%, #ece5da 100%)",
+};
+
+export const DEFAULT_SECTION_VISIBLE: Record<string, boolean> = {
+  hero: true,
+  "pain-points": true,
+  workflow: true,
+  deliverables: true,
+  "services-bento": true,
+  applications: true,
+  partners: true,
+  gallery: true,
+  cta: true,
+};
+
+export async function getLandingLayoutConfig(): Promise<LandingLayoutConfig> {
+  try {
+    let item: any = null;
+    if ("landingPageSection" in prisma) {
+      item = await (prisma as any).landingPageSection.findUnique({
+        where: { sectionKey: "_layout_settings" },
+      });
+    } else {
+      const rows: any = await (prisma as any).$queryRawUnsafe(
+        "SELECT * FROM LandingPageSection WHERE sectionKey = '_layout_settings' LIMIT 1"
+      ).catch(() => []);
+      item = rows[0] || null;
+    }
+
+    if (!item) {
+      return {
+        order: [...DEFAULT_SECTION_ORDER],
+        backgroundColors: { ...DEFAULT_SECTION_BG },
+        visible: { ...DEFAULT_SECTION_VISIBLE },
+      };
+    }
+
+    const raw = item.contentJa || item.contentEn || "{}";
+    const parsed = JSON.parse(raw);
+    const rawOrder: string[] = Array.isArray(parsed.order) && parsed.order.length > 0
+      ? parsed.order
+      : [...DEFAULT_SECTION_ORDER];
+
+    // Filter out obsolete keys like standalone 'solutions' (merged into pain-points)
+    const validKeys = new Set(DEFAULT_SECTION_ORDER);
+    const order: string[] = rawOrder.filter((k) => validKeys.has(k));
+
+    // Ensure all current DEFAULT_SECTION_ORDER items exist in order
+    DEFAULT_SECTION_ORDER.forEach((key) => {
+      if (!order.includes(key)) {
+        order.push(key);
+      }
+    });
+
+    return {
+      order,
+      backgroundColors: { ...DEFAULT_SECTION_BG, ...(parsed.backgroundColors || {}) },
+      visible: { ...DEFAULT_SECTION_VISIBLE, ...(parsed.visible || {}) },
+    };
+  } catch (error) {
+    console.error("Error loading landing layout config:", error);
+    return {
+      order: [...DEFAULT_SECTION_ORDER],
+      backgroundColors: { ...DEFAULT_SECTION_BG },
+      visible: { ...DEFAULT_SECTION_VISIBLE },
+    };
+  }
+}
+
+export async function saveLandingLayoutConfig(config: Partial<LandingLayoutConfig>) {
+  const current = await getLandingLayoutConfig();
+  const nextConfig: LandingLayoutConfig = {
+    order: Array.isArray(config.order) && config.order.length > 0 ? config.order : current.order,
+    backgroundColors: { ...current.backgroundColors, ...(config.backgroundColors || {}) },
+    visible: { ...current.visible, ...(config.visible || {}) },
+  };
+
+  const jsonStr = JSON.stringify(nextConfig);
+
+  if ("landingPageSection" in prisma) {
+    await (prisma as any).landingPageSection.upsert({
+      where: { sectionKey: "_layout_settings" },
+      update: { contentEn: jsonStr, contentJa: jsonStr },
+      create: { sectionKey: "_layout_settings", contentEn: jsonStr, contentJa: jsonStr },
+    });
+  } else {
+    const now = new Date().toISOString();
+    const existing: any = await (prisma as any).$queryRawUnsafe(
+      "SELECT id FROM LandingPageSection WHERE sectionKey = '_layout_settings' LIMIT 1"
+    ).catch(() => []);
+
+    if (existing && existing.length > 0) {
+      await (prisma as any).$executeRawUnsafe(
+        "UPDATE LandingPageSection SET contentEn = ?, contentJa = ?, updatedAt = ? WHERE sectionKey = '_layout_settings'",
+        jsonStr, jsonStr, now
+      );
+    } else {
+      const id = `lps_layout_${Date.now()}`;
+      await (prisma as any).$executeRawUnsafe(
+        "INSERT INTO LandingPageSection (id, sectionKey, contentEn, contentJa, createdAt, updatedAt) VALUES (?, '_layout_settings', ?, ?, ?, ?)",
+        id, jsonStr, jsonStr, now, now
+      );
+    }
+  }
+
+  return nextConfig;
+}
+
 export async function getAllSectionsData(locale: string = "ja") {
   const isEn = locale === "en";
   const result: Record<string, any> = {};
@@ -287,6 +483,7 @@ export async function getAllSectionsData(locale: string = "ja") {
 
 export async function getMergedLandingContent(locale: string = "ja"): Promise<{
   t: import("@/app/[locale]/landingpage/landingI18n").LandingContent;
+  layoutConfig: LandingLayoutConfig;
   galleryProjects: Record<string, import("@/app/[locale]/landingpage/landingI18n").GalleryProject>;
   deliverableCollections: any[];
   applicationCards: import("@/app/[locale]/landingpage/landingI18n").ApplicationCard[];
@@ -303,6 +500,8 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
   const deliverablesBase = getDeliverableCollections(locale);
 
   try {
+    const layoutConfig = await getLandingLayoutConfig();
+
     let dbSections: any[] = [];
     if ("landingPageSection" in prisma) {
       dbSections = await (prisma as any).landingPageSection.findMany();
@@ -325,6 +524,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
 
     const hero = parseLang("hero");
     const painPoints = parseLang("pain-points");
+    const solutions = parseLang("solutions");
     const workflow = parseLang("workflow");
     const servicesBento = parseLang("services-bento");
     const deliverablesData = parseLang("deliverables");
@@ -333,6 +533,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
     const partnersData = parseLang("partners");
     const galleryData = parseLang("gallery");
     const pricing = parseLang("pricing");
+    const ctaData = parseLang("cta");
 
     const mergedApplicationsCards =
       Array.isArray(applicationsData?.cards) && applicationsData.cards.length > 0
@@ -361,7 +562,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
             ? galleryData.filterTabs
             : getDefaultGalleryTabs(locale));
 
-    // Hợp nhất dữ liệu gallery projects (hỗ trợ cả projects lẫn spotlight)
+    // Hợp nhất dữ liệu gallery projects
     let baseProjects: Record<string, any> = { ...galleryBase };
     if (galleryData?.projects && typeof galleryData.projects === "object") {
       if (Array.isArray(galleryData.projects)) {
@@ -373,13 +574,27 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
         baseProjects = { ...galleryData.projects };
       }
     }
-    if (galleryData?.spotlight && typeof galleryData.spotlight === "object" && baseProjects["p-lakeside"]) {
-      baseProjects["p-lakeside"] = {
-        ...baseProjects["p-lakeside"],
-        ...galleryData.spotlight,
-      };
+    if (galleryData?.spotlight && typeof galleryData.spotlight === "object") {
+      const spId = galleryData.spotlight.id || "p-lakeside";
+      if (baseProjects[spId]) {
+        baseProjects[spId] = {
+          ...baseProjects[spId],
+          ...galleryData.spotlight,
+          priceValue: galleryData.spotlight.priceValue || baseProjects[spId].priceValue,
+          priceEstimate: galleryData.spotlight.priceValue || galleryData.spotlight.priceEstimate || baseProjects[spId].priceEstimate,
+        };
+      }
+      if (baseProjects["p-lakeside"]) {
+        baseProjects["p-lakeside"] = {
+          ...baseProjects["p-lakeside"],
+          ...galleryData.spotlight,
+          priceValue: galleryData.spotlight.priceValue || baseProjects["p-lakeside"].priceValue,
+          priceEstimate: galleryData.spotlight.priceValue || galleryData.spotlight.priceEstimate || baseProjects["p-lakeside"].priceEstimate,
+        };
+      }
     }
-    // Hợp nhất dữ liệu bảng giá (hỗ trợ cả mảng tiers động lẫn cấu trúc cũ tier1, tier2, tier3)
+
+    // Hợp nhất dữ liệu bảng giá tham khảo
     let mergedPricingTiers: PricingTierItem[] = getDefaultPricingTiers(locale);
     if (Array.isArray(pricing?.tiers) && pricing.tiers.length > 0) {
       mergedPricingTiers = pricing.tiers;
@@ -395,11 +610,40 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
       }
     }
 
+    const mergedTypologies =
+      Array.isArray(pricing?.typologies) && pricing.typologies.length > 0
+        ? pricing.typologies
+        : getDefaultPricingTypologies(locale);
+
+    const mergedServices3D =
+      Array.isArray(pricing?.services3d) && pricing.services3d.length > 0
+        ? pricing.services3d
+        : getDefaultPricing3DServices(locale);
+
+    const mergedEstimator = pricing?.estimator || getDefaultPricingEstimator(locale);
+
+    const mergedPrinciples =
+      Array.isArray(pricing?.principles) && pricing.principles.length > 0
+        ? pricing.principles
+        : getDefaultPricingPrinciples(locale);
+
+    const mergedSolutionsItems =
+      Array.isArray(painPoints?.solutionItems) && painPoints.solutionItems.length > 0
+        ? painPoints.solutionItems
+        : Array.isArray(solutions?.items) && solutions.items.length > 0
+        ? solutions.items
+        : getDefaultSolutions(locale);
+
     return {
       t: {
         ...base,
         hero: hero ? { ...base.hero, ...hero } : base.hero,
         painPoints: painPoints ? { ...base.painPoints, ...painPoints } : base.painPoints,
+        solutions: {
+          ...(base.solutions || {}),
+          ...(solutions || {}),
+          items: mergedSolutionsItems,
+        },
         workflow: workflow ? { ...base.workflow, ...workflow } : base.workflow,
         servicesBento: servicesBento ? { ...base.servicesBento, ...servicesBento } : base.servicesBento,
         deliverables: deliverablesData?.info ? { ...base.deliverables, ...deliverablesData.info } : base.deliverables,
@@ -413,8 +657,18 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
         gallery: galleryData?.info
           ? { ...base.gallery, ...galleryData.info, filterTabs: mergedGalleryTabs }
           : { ...base.gallery, filterTabs: mergedGalleryTabs },
-        pricing: pricing ? { ...base.pricing, ...pricing, tiers: mergedPricingTiers } : { ...base.pricing, tiers: mergedPricingTiers },
+        pricing: {
+          ...base.pricing,
+          ...(pricing || {}),
+          typologies: mergedTypologies,
+          services3d: mergedServices3D,
+          estimator: mergedEstimator,
+          principles: mergedPrinciples,
+          tiers: mergedPricingTiers,
+        },
+        cta: ctaData ? { ...(base.cta || {}), ...ctaData } : base.cta,
       },
+      layoutConfig,
       galleryProjects: baseProjects,
       galleryTabs: mergedGalleryTabs,
       pricingTiers: mergedPricingTiers,
@@ -431,6 +685,11 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
     console.error("Error fetching merged landing content:", e);
     return {
       t: base,
+      layoutConfig: {
+        order: [...DEFAULT_SECTION_ORDER],
+        backgroundColors: { ...DEFAULT_SECTION_BG },
+        visible: { ...DEFAULT_SECTION_VISIBLE },
+      },
       galleryProjects: galleryBase,
       galleryTabs: getDefaultGalleryTabs(locale),
       pricingTiers: getDefaultPricingTiers(locale),
