@@ -33,6 +33,11 @@ import {
   Filter,
   Check,
   Building2,
+  Phone,
+  Mail,
+  Clock,
+  MapPin,
+  Megaphone,
 } from "lucide-react";
 import {
   getDeliverableCollections,
@@ -40,7 +45,6 @@ import {
   getDefaultApplicationCategories,
   getDefaultPartnerStats,
   getDefaultPartnerBrands,
-  getDefaultGalleryTabs,
   getGalleryProjectsData,
   getDefaultPricingTiers,
 } from "@/app/[locale]/landingpage/landingI18n";
@@ -89,40 +93,40 @@ const SECTION_META: Record<string, SectionMeta> = {
     subLabel: "Các khối năng lực dịch vụ kiến trúc & 3D",
     anchor: "#dich-vu",
   },
-  clients: {
-    key: "clients",
-    order: 6,
-    label: "06. Đối tác & Uy tín",
-    subLabel: "Cam kết tiêu chuẩn & niềm tin",
-    anchor: "#doi-tac",
-  },
   applications: {
     key: "applications",
-    order: 7,
-    label: "07. Ứng dụng thực tế",
+    order: 6,
+    label: "06. Ứng dụng thực tế",
     subLabel: "Giải pháp theo từng đối tượng kiến trúc",
     anchor: "#ung-dung-thuc-te",
   },
   partners: {
     key: "partners",
-    order: 8,
-    label: "08. Thương hiệu & Đối tác",
+    order: 7,
+    label: "07. Thương hiệu & Đối tác",
     subLabel: "Thống kê quy mô & Logo marquee",
     anchor: "#khach-hang",
   },
   gallery: {
     key: "gallery",
-    order: 9,
-    label: "09. Triển lãm dự án",
+    order: 8,
+    label: "08. Triển lãm dự án",
     subLabel: "Showcase các dự án thực tế tiêu biểu",
     anchor: "#du-an",
   },
+  cta: {
+    key: "cta",
+    order: 9,
+    label: "09. Kêu gọi hành động (CTA)",
+    subLabel: "Sustainable Design, Slogan, Hotline & 4 Card Contact",
+    anchor: "#dang-ky-tu-van",
+  },
   pricing: {
-    key: "pricing",
+    key: "cta",
     order: 10,
-    label: "10. Báo giá minh bạch",
-    subLabel: "3 Gói dịch vụ & Cam kết thi công",
-    anchor: "#bao-gia",
+    label: "10. Kêu gọi hành động (CTA)",
+    subLabel: "Sustainable Design, Slogan, Hotline & 4 Card Contact",
+    anchor: "#dang-ky-tu-van",
   },
 };
 
@@ -409,8 +413,8 @@ export default function SectionEditorPage() {
             />
           )}
 
-          {sectionKey === "pricing" && (
-            <PricingForm
+          {(sectionKey === "pricing" || sectionKey === "cta") && (
+            <CtaForm
               lang={activeLang}
               contentJa={contentJa}
               contentEn={contentEn}
@@ -464,6 +468,8 @@ function BilingualField({
   activeLang,
   isTextArea = false,
   rows = 3,
+  defaultValueJa,
+  defaultValueEn,
 }: {
   label: string;
   subLabel?: string;
@@ -474,18 +480,24 @@ function BilingualField({
   activeLang: "ja" | "en" | "both";
   isTextArea?: boolean;
   rows?: number;
+  defaultValueJa?: string;
+  defaultValueEn?: string;
 }) {
   const getVal = (obj: any) => {
+    if (!obj) return undefined;
     let cur = obj;
     for (const p of path) {
-      if (!cur) return "";
+      if (cur === undefined || cur === null) return undefined;
       cur = cur[p];
     }
-    return cur || "";
+    return cur;
   };
 
-  const valJa = getVal(contentJa);
-  const valEn = getVal(contentEn);
+  const rawJa = getVal(contentJa);
+  const valJa = rawJa !== undefined && rawJa !== null ? String(rawJa) : (defaultValueJa ?? "");
+
+  const rawEn = getVal(contentEn);
+  const valEn = rawEn !== undefined && rawEn !== null ? String(rawEn) : (defaultValueEn ?? "");
 
   return (
     <div className="space-y-2">
@@ -559,160 +571,239 @@ function HeroSectionForm({
   contentEn: any;
   updateField: (lang: "en" | "ja", path: string[], value: any) => void;
 }) {
+  const { toast } = useToast();
+  const [uploadingBg, setUploadingBg] = useState(false);
+
+  const handleUploadHeroBg = async (file: File) => {
+    try {
+      setUploadingBg(true);
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.url) {
+          updateField("ja", ["backgroundImage"], data.url);
+          updateField("ja", ["image"], data.url);
+          updateField("en", ["backgroundImage"], data.url);
+          updateField("en", ["image"], data.url);
+          toast("Tải ảnh nền Hero thành công!", "success");
+        }
+      } else {
+        toast("Lỗi tải ảnh lên máy chủ", "error");
+      }
+    } catch {
+      toast("Có lỗi xảy ra khi tải ảnh", "error");
+    } finally {
+      setUploadingBg(false);
+    }
+  };
+
+  const currentBgUrl =
+    contentJa?.backgroundImage ||
+    contentJa?.image ||
+    contentEn?.backgroundImage ||
+    contentEn?.image ||
+    "/uploads/1791280382417-anh-section5.webp";
+
   return (
     <div className="space-y-6">
-      {/* Khối Tiêu đề chính & Slogan */}
+      {/* 1. KHỐI ẢNH NỀN HERO & NÚT UPLOAD */}
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles size={18} className="text-blue-500" />
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
+              1. Ảnh nền Hero Section (Background Image)
+            </h2>
+          </div>
+          {/* Nút Upload trực tiếp ảnh nền */}
+          <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg cursor-pointer transition shadow-sm">
+            <Upload size={14} />
+            <span>{uploadingBg ? "Đang tải ảnh..." : "Tải ảnh nền lên"}</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploadingBg}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUploadHeroBg(file);
+              }}
+            />
+          </label>
+        </div>
+
+        {/* Thumbnail preview ảnh nền đang chọn */}
+        <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="w-32 h-20 rounded-md overflow-hidden bg-slate-900 border border-slate-300 shrink-0 relative flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={currentBgUrl}
+              alt="Hero Background Preview"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="text-xs font-semibold text-slate-800 truncate">
+              Ảnh nền hiện tại: <span className="font-mono text-blue-600">{currentBgUrl}</span>
+            </p>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Bấm nút &quot;Tải ảnh nền lên&quot; ở trên để chọn ảnh từ máy tính, hoặc chỉnh sửa trực tiếp đường dẫn bên dưới.
+            </p>
+          </div>
+        </div>
+
+        <BilingualField
+          label="Đường dẫn ảnh nền kiến trúc (Image URL / Path)"
+          subLabel="Ví dụ: /uploads/1791280382417-anh-section5.webp hoặc URL ảnh chất lượng cao Unsplash"
+          path={["backgroundImage"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          defaultValueJa={contentJa?.backgroundImage || contentJa?.image || "/uploads/1791280382417-anh-section5.webp"}
+          defaultValueEn={contentEn?.backgroundImage || contentEn?.image || "/uploads/1791280382417-anh-section5.webp"}
+          updateField={updateField}
+          activeLang={lang}
+        />
+      </div>
+
+      {/* 2. KHỐI THƯƠNG HIỆU & TIÊU ĐỀ CHÍNH CĂN TRÁI (CHUẨN ẢNH 3) */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
           <Sparkles size={18} className="text-amber-500" />
           <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-            1. Tiêu đề & Thông điệp định vị chính (Main Headline)
+            2. Thương hiệu & Tiêu đề chính căn trái (Hero Brand & Headline)
           </h2>
         </div>
 
-        <BilingualField
-          label="Dòng chữ Eyebrow / Tagline đầu trang"
-          subLabel="Ví dụ: // KONTUR ATELIER · 3D ARCHITECTURAL VISUALIZATION"
-          path={["eyebrow"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <BilingualField
+            label="Tên thương hiệu góc trên (Brand Name)"
+            subLabel="Ví dụ: KAPUTELI hoặc i8STUDIO"
+            path={["brandName"]}
+            contentJa={contentJa}
+            contentEn={contentEn}
+            defaultValueJa={contentJa?.brandName || "KAPUTELI"}
+            defaultValueEn={contentEn?.brandName || "KAPUTELI"}
+            updateField={updateField}
+            activeLang={lang}
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <BilingualField
-            label="Tiêu đề: Tiền tố (Headline Prefix)"
-            subLabel="Ví dụ: 理想の住まいを、 / BRINGING YOUR"
-            path={["headlinePre"]}
+            label="Tagline phụ sau gạch ngang (Brand Subtagline)"
+            subLabel="Ví dụ: 実務直結型パースコンサルティング"
+            path={["brandSub"]}
             contentJa={contentJa}
             contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Tiêu đề: Điểm nhấn 1 (Highlight 1)"
-            subLabel="Ví dụ: 確かな空間へと / DREAM SPACE"
-            path={["headlineHighlight1"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Tiêu đề: Điểm nhấn 2 (Highlight 2)"
-            subLabel="Ví dụ: 具現化する。 / INTO REALITY."
-            path={["headlineHighlight2"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
+            defaultValueJa={contentJa?.brandSub || "実務直結型パースコンサルティング"}
+            defaultValueEn={contentEn?.brandSub || "Direct Practice Perspective Consulting"}
             updateField={updateField}
             activeLang={lang}
           />
         </div>
 
         <BilingualField
-          label="Đoạn văn miêu tả giá trị cốt lõi (Hero Description)"
-          subLabel="Mô tả kỹ thuật, độ chuẩn xác 100% và tiết kiệm chi phí"
-          path={["desc"]}
+          label="Tiêu đề chính phong cách thơ Nhật (Headline - Căn lề trái)"
+          subLabel="Hỗ trợ nhập </br> hoặc <r> hoặc xuống dòng để ngắt nhịp câu như ảnh mẫu."
+          path={["headline"]}
           contentJa={contentJa}
           contentEn={contentEn}
+          defaultValueJa={
+            contentJa?.headline ||
+            `設計の思想も、\n販売のロジックも、\n建築の構造も。\n\nすべて知っているから、\nあなたの指示は「これお願い」\nだけでいい。`
+          }
+          defaultValueEn={
+            contentEn?.headline ||
+            `Design philosophy,\nSales logic,\nArchitectural structure.\n\nKnowing it all,\nyour only instruction is\n"Please take care of this."`
+          }
           updateField={updateField}
           activeLang={lang}
           isTextArea
-          rows={3}
+          rows={5}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <BilingualField
+            label="Đoạn mô tả vạch đứng - Dòng 1 (Description Line 1)"
+            subLabel="Ví dụ: 担当者の成果を作る「販売の武器」を提供する。"
+            path={["desc"]}
+            contentJa={contentJa}
+            contentEn={contentEn}
+            defaultValueJa={contentJa?.desc || "担当者の成果を作る「販売の武器」を提供する。"}
+            defaultValueEn={contentEn?.desc || "Providing sales weapons that deliver measurable results."}
+            updateField={updateField}
+            activeLang={lang}
+          />
+
+          <BilingualField
+            label="Đoạn mô tả vạch đứng - Dòng 2 (Description Line 2)"
+            subLabel="Ví dụ: 株式会社カプテリ ｜ 実務直結型パースコンサルティング"
+            path={["descSub"]}
+            contentJa={contentJa}
+            contentEn={contentEn}
+            defaultValueJa={contentJa?.descSub || "株式会社カプテリ ｜ 実務直結型パースコンサルティング"}
+            defaultValueEn={contentEn?.descSub || "KAPUTELI Co., Ltd. | Architectural Consulting"}
+            updateField={updateField}
+            activeLang={lang}
+          />
+        </div>
       </div>
 
-      {/* Khối Nút Kêu gọi Hành động (CTA) */}
+      {/* 3. CẤU HÌNH CẶP NÚT: NÚT VÀNG CONTACT & CARD SỐ ĐIỆN THOẠI (CHỈ XEM, KÍCH THƯỚC BẰNG NHAU) */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          2. Các nút Kêu gọi hành động (Call To Action Buttons)
-        </h2>
+        <div className="border-b border-slate-100 pb-3">
+          <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+            <span>3. Cấu hình Cặp Nút: Nút Vàng Contact & Card Số Điện Thoại (Kích thước bằng nhau)</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Hai nút có kích thước ngang bằng nhau. Nút chính màu vàng là nút Contact (chuyển sang form). Card bên cạnh chỉ hiển thị duy nhất số điện thoại (chỉ để xem, không click).
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* NÚT VÀNG: CONTACT */}
+        <div className="p-3.5 bg-amber-50/60 rounded-xl border border-amber-200 space-y-2">
+          <label className="block text-xs font-bold text-amber-950 uppercase tracking-wide">
+            ★ Nút chính màu vàng (Contact CTA):
+          </label>
           <BilingualField
-            label="Nút liên hệ chính (Primary CTA)"
+            label="Tiêu đề nút vàng Contact"
+            subLabel="Mặc định: Contact → hoặc プロジェクト相談 →"
             path={["ctaContact"]}
             contentJa={contentJa}
             contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Nút xem bộ sưu tập (Secondary CTA)"
-            path={["ctaCollection"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Chữ gợi ý cuộn trang (Scroll Hint)"
-            path={["scrollHint"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-        </div>
-      </div>
-
-      {/* Khối Huy hiệu thành tích & Trạng thái */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          3. Huy hiệu Thành tích & Uy tín (Trust Badge)
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BilingualField
-            label="Năm thành lập / Thương hiệu (Badge EST)"
-            subLabel="Ví dụ: EST. 2026 · KONTUR ATELIER"
-            path={["badgeEst"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Trạng thái tiếp nhận dự án (Badge Status)"
-            subLabel="Ví dụ: SẴN SÀNG TIẾP NHẬN / ACCEPTING NEW PROJECTS"
-            path={["badgeStatus"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
+            defaultValueJa="Contact →"
+            defaultValueEn="Contact →"
             updateField={updateField}
             activeLang={lang}
           />
         </div>
 
-        <BilingualField
-          label="Tiêu đề huy hiệu (Badge Title)"
-          path={["badgeTitle"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-        />
-
-        <BilingualField
-          label="Nội dung chứng thực / Số lượng khách hàng (Badge Description)"
-          subLabel="Ví dụ: 250+施主様・企業様に選ばれ..."
-          path={["badgeDesc"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-          isTextArea
-          rows={2}
-        />
+        {/* CARD BÊN CẠNH: CHỈ HIỂN THỊ SỐ ĐIỆN THOẠI (KHÔNG CÓ CHỮ THỪA) */}
+        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+          <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+            ★ Card bên cạnh: Số điện thoại (Chỉ xem, kích thước bằng nút Contact, không để chữ nào khác):
+          </label>
+          <div className="max-w-md space-y-1">
+            <label className="block text-xs font-semibold text-slate-700">
+              Số điện thoại Hotline:
+            </label>
+            <input
+              type="text"
+              value={contentJa?.ctaPhoneNumber ?? contentEn?.ctaPhoneNumber ?? "03-5315-4001"}
+              onChange={(e) => {
+                updateField("ja", ["ctaPhoneNumber"], e.target.value);
+                updateField("en", ["ctaPhoneNumber"], e.target.value);
+              }}
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white font-mono font-bold text-amber-700 focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="03-5315-4001"
+            />
+            <p className="text-[11px] text-slate-400">
+              Mặc định: <span className="font-mono font-bold text-slate-600">03-5315-4001</span>. Trên giao diện User card này chỉ hiển thị số điện thoại, không click được (chỉ xem).
+            </p>
+          </div>
+        </div>
       </div>
-
-      {/* Khối Cấu hình Khối nhà 3D xoay tương tác */}
-      <Model3DManager
-        lang={lang}
-        contentJa={contentJa}
-        contentEn={contentEn}
-        updateField={updateField}
-      />
     </div>
   );
 }
@@ -1231,28 +1322,38 @@ function PainPointsForm({
   const cardsEn: any[] = Array.isArray(contentEn?.cards) ? contentEn.cards : [];
   const totalCount = Math.max(cardsJa.length, cardsEn.length);
 
+  // Solutions data
+  const solutionsJa: any[] = Array.isArray(contentJa?.solutionItems) ? contentJa.solutionItems : [];
+  const solutionsEn: any[] = Array.isArray(contentEn?.solutionItems) ? contentEn.solutionItems : [];
+  const totalSolutions = Math.max(solutionsJa.length, solutionsEn.length);
+
+  // Default solutions template for quick initialization
+  const defaultSolutionsJa = [
+    { badge: "SOLUTION 01", title: "8K超高精細フォトリアル3DCG & 光彩シミュレーション" },
+    { badge: "SOLUTION 02", title: "デジタル数量自動集計 & VEコスト最適化" },
+    { badge: "SOLUTION 03", title: "リアルタイム3D合意形成プラットフォーム" },
+    { badge: "SOLUTION 04", title: "実在建材光学シミュレーション & 質感再現" },
+    { badge: "SOLUTION 05", title: "BIM / 施工連携・干渉チェック" },
+    { badge: "SOLUTION 06", title: "VR / 360°空間ウォークスルー検証" },
+  ];
+  const defaultSolutionsEn = [
+    { badge: "SOLUTION 01", title: "8K Ultra-realistic 3D CGI & Optical Simulation" },
+    { badge: "SOLUTION 02", title: "Digital Quantity Takeoff & VE Cost Optimization" },
+    { badge: "SOLUTION 03", title: "Real-time 3D Consensus-building Platform" },
+    { badge: "SOLUTION 04", title: "Real Materials Optical Simulation & Texture Reproduction" },
+    { badge: "SOLUTION 05", title: "BIM & Construction Coordination / Clash Detection" },
+    { badge: "SOLUTION 06", title: "VR / 360° Immersive Spatial Walkthrough" },
+  ];
+
+  // Cards handlers
   const handleAddCard = () => {
     const nextIdx = totalCount + 1;
-    const pad = nextIdx < 10 ? `0${nextIdx}` : `${nextIdx}`;
-
     const newJa = {
-      tag: `課題 ${pad}`,
-      badge: "VẤN ĐỀ MỚI",
-      quote: "「Nhập trích dẫn hoặc câu hỏi nỗi đau...」",
-      detail: "Mô tả chi tiết nguyên nhân, rủi ro và hậu quả của vấn đề này...",
-      solLabel: "Konturの解決策:",
-      solText: "Mô tả giải pháp kiến trúc / 3D của Kontur để khắc phục triệt để...",
+      quote: "「部材や納まりの不透明さが原因で、着工後に想定外の追加工事や材料費が発生するトラブルを事前に防ぎます。」",
     };
-
     const newEn = {
-      tag: `PAIN POINT ${pad}`,
-      badge: "NEW CHALLENGE",
-      quote: "“Enter pain point question or quote...”",
-      detail: "Detailed explanation of the challenge and its consequences...",
-      solLabel: "KONTUR SOLUTION:",
-      solText: "Detailed explanation of Kontur's technical & architectural solution...",
+      quote: "“Pre-emptively prevents unexpected additional construction and material costs due to lack of clarity in components and detailing.”",
     };
-
     updateField("ja", ["cards"], [...cardsJa, newJa]);
     updateField("en", ["cards"], [...cardsEn, newEn]);
     toast(`Đã thêm Thẻ Nỗi đau #${nextIdx}`, "success");
@@ -1278,25 +1379,89 @@ function PainPointsForm({
     const sourceEn = cardsEn[idx] || {};
 
     const nextIdx = totalCount + 1;
-    const pad = nextIdx < 10 ? `0${nextIdx}` : `${nextIdx}`;
-
-    const cloneJa = { ...sourceJa, tag: `課題 ${pad}` };
-    const cloneEn = { ...sourceEn, tag: `PAIN POINT ${pad}` };
+    const cloneJa = { ...sourceJa };
+    const cloneEn = { ...sourceEn };
 
     updateField("ja", ["cards"], [...cardsJa, cloneJa]);
     updateField("en", ["cards"], [...cardsEn, cloneEn]);
     toast(`Đã nhân bản Thẻ Nỗi đau #${idx + 1}`, "success");
   };
 
+  // Solutions handlers
+  const handleAddSolution = () => {
+    const nextIdx = totalSolutions + 1;
+    const pad = nextIdx < 10 ? `0${nextIdx}` : `${nextIdx}`;
+    const newJa = {
+      badge: `SOLUTION ${pad}`,
+      title: "新規アーキテクチャソリューションのタイトル",
+    };
+    const newEn = {
+      badge: `SOLUTION ${pad}`,
+      title: "New Architecture Solution Title",
+    };
+    updateField("ja", ["solutionItems"], [...solutionsJa, newJa]);
+    updateField("en", ["solutionItems"], [...solutionsEn, newEn]);
+    toast(`Đã thêm Giải pháp #${nextIdx}`, "success");
+  };
+
+  const handleDeleteSolution = (idx: number) => {
+    if (totalSolutions <= 1) {
+      toast("Phải giữ lại tối thiểu 1 giải pháp", "error");
+      return;
+    }
+    if (!confirm(`Bạn có chắc muốn xóa Giải pháp #${idx + 1}?`)) return;
+
+    const newJa = solutionsJa.filter((_, i) => i !== idx);
+    const newEn = solutionsEn.filter((_, i) => i !== idx);
+
+    updateField("ja", ["solutionItems"], newJa);
+    updateField("en", ["solutionItems"], newEn);
+    toast(`Đã xóa Giải pháp #${idx + 1}`, "info");
+  };
+
+  const handleDuplicateSolution = (idx: number) => {
+    const sourceJa = solutionsJa[idx] || {};
+    const sourceEn = solutionsEn[idx] || {};
+
+    const nextIdx = totalSolutions + 1;
+    const pad = nextIdx < 10 ? `0${nextIdx}` : `${nextIdx}`;
+    const cloneJa = { ...sourceJa, badge: `SOLUTION ${pad}` };
+    const cloneEn = { ...sourceEn, badge: `SOLUTION ${pad}` };
+
+    updateField("ja", ["solutionItems"], [...solutionsJa, cloneJa]);
+    updateField("en", ["solutionItems"], [...solutionsEn, cloneEn]);
+    toast(`Đã nhân bản Giải pháp #${idx + 1}`, "success");
+  };
+
+  const handleLoadDefaultSolutions = () => {
+    if (totalSolutions > 0 && !confirm("Bạn có muốn nạp đè danh sách giải pháp mẫu của Kontur?")) return;
+    updateField("ja", ["solutionItems"], defaultSolutionsJa);
+    updateField("en", ["solutionItems"], defaultSolutionsEn);
+    toast("Đã nạp 6 giải pháp mẫu của hệ thống", "success");
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* 1. TIÊU ĐỀ SECTION NỖI ĐAU */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          Tiêu đề Section Nỗi đau & Thách thức
+          1. Tiêu đề Nỗi đau & Thách thức
         </h2>
         <BilingualField
-          label="Tiêu đề chính của Section"
+          label="Tiêu đề chính của Section Nỗi đau"
+          subLabel="Hỗ trợ nhập </br> hoặc <br> hoặc xuống dòng để ngắt dòng."
           path={["title"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          updateField={updateField}
+          activeLang={lang}
+          isTextArea
+          rows={2}
+        />
+        <BilingualField
+          label="Mô tả phụ bên dưới tiêu đề (Subtitle)"
+          subLabel="Ví dụ: '以下に一つでも心当たりがあるなら、私たちが力になれます。'"
+          path={["subtitle"]}
           contentJa={contentJa}
           contentEn={contentEn}
           updateField={updateField}
@@ -1304,124 +1469,68 @@ function PainPointsForm({
         />
       </div>
 
-      {/* Header bar for cards list with Add Button */}
-      <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
-        <div>
-          <h3 className="text-sm font-bold text-slate-800 uppercase">
-            Danh sách Thẻ Nỗi đau & Thách thức ({totalCount} thẻ)
-          </h3>
-          <p className="text-xs text-slate-500">
-            Bạn có thể thêm mới không giới hạn, chỉnh sửa hoặc xóa bất kỳ thẻ nỗi đau nào.
-          </p>
+      {/* 2. DANH SÁCH CÁC MỤC NỖI ĐAU LỚN */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800 uppercase">
+              2. Danh sách các mục Nỗi đau lớn ({totalCount} mục)
+            </h3>
+            <p className="text-xs text-slate-500">
+              Hiển thị dạng checklist lớn [✓] trên nền sáng #fdfcf9. Hỗ trợ nhập &lt;/br&gt; để xuống hàng.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddCard}
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>Thêm nỗi đau mới</span>
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleAddCard}
-          className="inline-flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
-        >
-          <Plus size={16} />
-          <span>Thêm nỗi đau mới</span>
-        </button>
-      </div>
+        <div className="space-y-3">
+          {Array.from({ length: totalCount }).map((_, idx) => (
+            <div key={idx} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3 relative group">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center">
+                    {idx + 1}
+                  </span>
+                  <h3 className="text-xs font-bold text-slate-800 uppercase">
+                    Mục Nỗi đau #{idx + 1}
+                  </h3>
+                </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {Array.from({ length: totalCount }).map((_, idx) => (
-          <div key={idx} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3 relative group">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-red-50 text-red-600 font-bold text-xs flex items-center justify-center">
-                  {idx + 1}
-                </span>
-                <h3 className="text-xs font-bold text-slate-800 uppercase">
-                  Nỗi đau / Vấn đề #{idx + 1}
-                </h3>
-              </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDuplicateCard(idx)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-md transition-all cursor-pointer"
+                    title="Nhân bản mục này"
+                  >
+                    <Copy size={12} />
+                    <span className="hidden sm:inline">Nhân bản</span>
+                  </button>
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => handleDuplicateCard(idx)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-md transition-all cursor-pointer"
-                  title="Nhân bản thẻ này"
-                >
-                  <Copy size={12} />
-                  <span className="hidden sm:inline">Nhân bản</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCard(idx)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-red-600 hover:text-white hover:bg-red-600 border border-red-200 hover:border-red-600 rounded-md transition-all cursor-pointer"
-                  title="Xóa thẻ nỗi đau này"
-                >
-                  <Trash2 size={12} />
-                  <span>Xóa</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <BilingualField
-                label="Thẻ Tag"
-                path={["cards", idx.toString(), "tag"]}
-                contentJa={contentJa}
-                contentEn={contentEn}
-                updateField={updateField}
-                activeLang={lang}
-              />
-              <BilingualField
-                label="Huy hiệu cảnh báo (Badge)"
-                path={["cards", idx.toString(), "badge"]}
-                contentJa={contentJa}
-                contentEn={contentEn}
-                updateField={updateField}
-                activeLang={lang}
-              />
-            </div>
-
-            <BilingualField
-              label="Câu hỏi / Trích dẫn nỗi đau (Quote)"
-              subLabel="Hiển thị trên 1 dòng. Nhập <br> hoặc <\BR> để ngắt dòng."
-              path={["cards", idx.toString(), "quote"]}
-              contentJa={contentJa}
-              contentEn={contentEn}
-              updateField={updateField}
-              activeLang={lang}
-            />
-
-            <BilingualField
-              label="Chi tiết giải thích hậu quả (Detail)"
-              path={["cards", idx.toString(), "detail"]}
-              contentJa={contentJa}
-              contentEn={contentEn}
-              updateField={updateField}
-              activeLang={lang}
-              isTextArea
-              rows={2}
-            />
-
-            {/* Kontur Solution Editor */}
-            <div className="pt-2 border-t border-slate-100 bg-amber-50/20 p-3 rounded-lg border border-amber-200/50 space-y-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-800 uppercase tracking-wide">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Giải pháp Kontur (Kontur Solution)</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteCard(idx)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-red-600 hover:text-white hover:bg-red-600 border border-red-200 hover:border-red-600 rounded-md transition-all cursor-pointer"
+                    title="Xóa mục này"
+                  >
+                    <Trash2 size={12} />
+                    <span>Xóa</span>
+                  </button>
+                </div>
               </div>
 
               <BilingualField
-                label="Tiêu đề nhãn giải pháp (Solution Label)"
-                subLabel="Mặc định: Kontur Solution: / Konturの解決策:"
-                path={["cards", idx.toString(), "solLabel"]}
-                contentJa={contentJa}
-                contentEn={contentEn}
-                updateField={updateField}
-                activeLang={lang}
-              />
-
-              <BilingualField
-                label="Nội dung giải pháp (Solution Description)"
-                subLabel="Mô tả phương án khắc phục triệt để của Kontur"
-                path={["cards", idx.toString(), "solText"]}
+                label="Nội dung nỗi đau lớn (Quote)"
+                subLabel="Hiển thị full width. Hỗ trợ nhập </br> hoặc <br> để ngắt dòng."
+                path={["cards", idx.toString(), "quote"]}
                 contentJa={contentJa}
                 contentEn={contentEn}
                 updateField={updateField}
@@ -1430,19 +1539,184 @@ function PainPointsForm({
                 rows={2}
               />
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddCard}
+          className="w-full py-3.5 border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/40 rounded-xl text-slate-600 hover:text-blue-600 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Plus size={16} />
+          <span>Thêm mục Nỗi đau lớn mới</span>
+        </button>
       </div>
 
-      {/* Bottom Add Card Button */}
-      <button
-        type="button"
-        onClick={handleAddCard}
-        className="w-full py-4 border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/40 rounded-xl text-slate-600 hover:text-blue-600 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <Plus size={16} />
-        <span>Thêm thẻ Nỗi đau & Thách thức mới</span>
-      </button>
+      {/* 3. SLOGAN ĐÁY KHUNG NỖI ĐAU */}
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
+          3. Slogan đúc kết đáy khung Nỗi đau (✦)
+        </h2>
+        <BilingualField
+          label="Câu đúc kết / Nguyên nhân cốt lõi"
+          subLabel="Mặc định: 'それは、作る側が現場を知らないから起きている。' / 'Tất cả bắt nguồn từ việc: Đơn vị diễn họa không thực sự am hiểu thi công hiện trường.'"
+          path={["conclusion"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          updateField={updateField}
+          activeLang={lang}
+        />
+      </div>
+
+      {/* 4. TIÊU ĐỀ GIẢI PHÁP */}
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
+          4. Tiêu đề Phần Giải pháp (Solutions Header)
+        </h2>
+        <BilingualField
+          label="Tiêu đề chính Giải pháp (Full Width)"
+          subLabel="Hỗ trợ nhập </br> hoặc <br> để xuống hàng. (Ví dụ: あらゆる設計・施工リスクを未然に防ぐ、</br>次世代アーキテクチャソリューション群)"
+          path={["solTitle"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          updateField={updateField}
+          activeLang={lang}
+          isTextArea
+          rows={2}
+        />
+        <BilingualField
+          label="Mô tả phụ Giải pháp (Subtitle)"
+          subLabel="Ví dụ: '8Kフォトリアル3D・デジタル数量集計・BIM連携による完全解決アプローチ。'"
+          path={["solSubtitle"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          updateField={updateField}
+          activeLang={lang}
+        />
+      </div>
+
+      {/* 5. DANH SÁCH GIẢI PHÁP */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800 uppercase">
+              5. Danh sách các Giải pháp ({totalSolutions} giải pháp)
+            </h3>
+            <p className="text-xs text-slate-500">
+              Mỗi giải pháp gồm Mã (Badge) và Tiêu đề lớn (Title). Đã bỏ phần mô tả chi tiết và metric theo yêu cầu.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {totalSolutions === 0 && (
+              <button
+                type="button"
+                onClick={handleLoadDefaultSolutions}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
+              >
+                <span>Nạp 6 giải pháp mẫu</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleAddSolution}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>Thêm giải pháp mới</span>
+            </button>
+          </div>
+        </div>
+
+        {totalSolutions === 0 ? (
+          <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-8 text-center space-y-3">
+            <p className="text-sm text-slate-600">Chưa có danh sách giải pháp riêng trong CSDL (đang dùng 6 giải pháp mặc định của hệ thống).</p>
+            <button
+              type="button"
+              onClick={handleLoadDefaultSolutions}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>Nạp 6 giải pháp mặc định để bắt đầu chỉnh sửa</span>
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {Array.from({ length: totalSolutions }).map((_, idx) => (
+              <div key={idx} className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm space-y-3 relative group">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <h3 className="text-xs font-bold text-slate-800 uppercase">
+                      Giải pháp #{idx + 1}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleDuplicateSolution(idx)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-slate-600 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-md transition-all cursor-pointer"
+                      title="Nhân bản giải pháp này"
+                    >
+                      <Copy size={12} />
+                      <span className="hidden sm:inline">Nhân bản</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSolution(idx)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] text-red-600 hover:text-white hover:bg-red-600 border border-red-200 hover:border-red-600 rounded-md transition-all cursor-pointer"
+                      title="Xóa giải pháp này"
+                    >
+                      <Trash2 size={12} />
+                      <span>Xóa</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div className="sm:col-span-1">
+                    <BilingualField
+                      label="Mã giải pháp"
+                      subLabel="VD: SOLUTION 01"
+                      path={["solutionItems", idx.toString(), "badge"]}
+                      contentJa={contentJa}
+                      contentEn={contentEn}
+                      updateField={updateField}
+                      activeLang={lang}
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <BilingualField
+                      label="Tiêu đề giải pháp (Full width)"
+                      subLabel="Hỗ trợ nhập </br> hoặc <br> để ngắt dòng."
+                      path={["solutionItems", idx.toString(), "title"]}
+                      contentJa={contentJa}
+                      contentEn={contentEn}
+                      updateField={updateField}
+                      activeLang={lang}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {totalSolutions > 0 && (
+          <button
+            type="button"
+            onClick={handleAddSolution}
+            className="w-full py-3.5 border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/40 rounded-xl text-slate-600 hover:text-blue-600 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>Thêm Giải pháp mới</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -3632,85 +3906,7 @@ function GalleryForm({
   const { toast } = useToast();
 
   // 1. Quản lý Thể loại Project (Filter Projects / Categories)
-  const rawTabsJa: any[] = Array.isArray(contentJa?.info?.filterTabs) && contentJa.info.filterTabs.length > 0
-    ? contentJa.info.filterTabs
-    : (Array.isArray(contentJa?.filterTabs) && contentJa.filterTabs.length > 0
-      ? contentJa.filterTabs
-      : getDefaultGalleryTabs("ja"));
-  const rawTabsEn: any[] = Array.isArray(contentEn?.info?.filterTabs) && contentEn.info.filterTabs.length > 0
-    ? contentEn.info.filterTabs
-    : (Array.isArray(contentEn?.filterTabs) && contentEn.filterTabs.length > 0
-      ? contentEn.filterTabs
-      : getDefaultGalleryTabs("en"));
-
-  const tabsCount = Math.max(rawTabsJa.length, rawTabsEn.length);
-  const normalizedTabsJa = Array.from({ length: tabsCount }, (_, i) => rawTabsJa[i] || { key: `tab-${i + 1}`, label: `カテゴリー ${i + 1}` });
-  const normalizedTabsEn = Array.from({ length: tabsCount }, (_, i) => rawTabsEn[i] || { key: normalizedTabsJa[i]?.key || `tab-${i + 1}`, label: `Category ${i + 1}` });
-
-  const handleUpdateTabLabel = (idx: number, langKey: "ja" | "en", val: string) => {
-    if (langKey === "ja") {
-      const updated = [...normalizedTabsJa];
-      updated[idx] = { ...updated[idx], label: val };
-      updateField("ja", ["info", "filterTabs"], updated);
-      updateField("ja", ["filterTabs"], updated);
-    } else {
-      const updated = [...normalizedTabsEn];
-      updated[idx] = { ...updated[idx], label: val };
-      updateField("en", ["info", "filterTabs"], updated);
-      updateField("en", ["filterTabs"], updated);
-    }
-  };
-
-  const handleUpdateTabKey = (idx: number, newKey: string) => {
-    const safeKey = newKey.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-    const updatedJa = [...normalizedTabsJa];
-    updatedJa[idx] = { ...updatedJa[idx], key: safeKey };
-    updateField("ja", ["info", "filterTabs"], updatedJa);
-    updateField("ja", ["filterTabs"], updatedJa);
-
-    const updatedEn = [...normalizedTabsEn];
-    updatedEn[idx] = { ...updatedEn[idx], key: safeKey };
-    updateField("en", ["info", "filterTabs"], updatedEn);
-    updateField("en", ["filterTabs"], updatedEn);
-  };
-
-  const handleAddTab = () => {
-    const newKey = `cat-${Date.now().toString().slice(-4)}`;
-    const newTabJa = { key: newKey, label: "新しいプロジェクト種別" };
-    const newTabEn = { key: newKey, label: "New Project Category" };
-
-    const nextJa = [...normalizedTabsJa, newTabJa];
-    const nextEn = [...normalizedTabsEn, newTabEn];
-
-    updateField("ja", ["info", "filterTabs"], nextJa);
-    updateField("ja", ["filterTabs"], nextJa);
-    updateField("en", ["info", "filterTabs"], nextEn);
-    updateField("en", ["filterTabs"], nextEn);
-    toast("Đã thêm thể loại Project mới thành công!", "success");
-  };
-
-  const handleDeleteTab = (idx: number) => {
-    const targetKey = normalizedTabsJa[idx]?.key;
-    if (targetKey === "all") {
-      toast("Không thể xóa thể loại 'Tất cả' mặc định", "error");
-      return;
-    }
-    if (tabsCount <= 1) {
-      toast("Phải giữ lại ít nhất 1 thể loại Project", "info");
-      return;
-    }
-    const updatedJa = normalizedTabsJa.filter((_, i) => i !== idx);
-    const updatedEn = normalizedTabsEn.filter((_, i) => i !== idx);
-
-    updateField("ja", ["info", "filterTabs"], updatedJa);
-    updateField("ja", ["filterTabs"], updatedJa);
-    updateField("en", ["info", "filterTabs"], updatedEn);
-    updateField("en", ["filterTabs"], updatedEn);
-    toast("Đã xóa thể loại Project", "info");
-  };
-
-  // 2. Quản lý Danh sách Card Dự án (Project Showcase Cards - Ảnh 2) kèm Bộ lọc
-  const [activeProjectFilter, setActiveProjectFilter] = useState<string>("all");
+  // 2. Quản lý Danh sách Card Dự án (Project Showcase Cards)
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
 
   const defaultProjectsJa = getGalleryProjectsData("ja");
@@ -3724,14 +3920,6 @@ function GalleryForm({
     : defaultProjectsEn;
 
   const allProjectKeys = Array.from(new Set([...Object.keys(rawProjectsJa), ...Object.keys(rawProjectsEn)]));
-
-  // Lọc theo project category tương ứng
-  const filteredProjectKeys = activeProjectFilter === "all"
-    ? allProjectKeys
-    : allProjectKeys.filter((k) => {
-      const p = rawProjectsJa[k] || rawProjectsEn[k];
-      return p?.category === activeProjectFilter;
-    });
 
   // Helper chuẩn hóa danh sách thông số chân card (specs)
   const getNormalizedSpecs = (specsRaw: any): Array<{ k: string; v: string }> => {
@@ -3757,7 +3945,12 @@ function GalleryForm({
       updateField("ja", ["projects"], updatedJa);
 
       // Cập nhật đồng bộ sang EN nếu forceSync, hoặc đang ở chế độ song ngữ, hoặc các trường dùng chung
-      const isShared = forceSync || lang === "both" || field === "category" || field === "img" || field === "title" || field === "style";
+      const isShared = forceSync || lang === "both" || field === "category" || field === "img" || field === "title" || field === "style" || field === "priceValue" || field === "priceEstimate";
+      // Nếu dự án đang là Spotlight, cập nhật cả spotlight
+      if (projId === selectedSpotlightSourceId || projId === spotlightJa?.id || projId === "p-lakeside") {
+        updateField("ja", ["spotlight"], { ...spotlightJa, [field]: val, ...(field === "priceValue" ? { priceEstimate: val } : {}) });
+        updateField("ja", ["projects", "p-lakeside"], { ...spotlightJa, [field]: val, ...(field === "priceValue" ? { priceEstimate: val } : {}) });
+      }
       if (isShared) {
         const updatedEn = { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } };
         updateField("en", ["projects"], updatedEn);
@@ -3853,7 +4046,7 @@ function GalleryForm({
 
   const handleAddProject = () => {
     const newId = `p-proj-${Date.now().toString().slice(-6)}`;
-    const cat = activeProjectFilter !== "all" ? activeProjectFilter : (normalizedTabsJa[1]?.key || "villa");
+    const cat = "villa";
     const newProjJa = {
       id: newId,
       category: cat,
@@ -3943,38 +4136,76 @@ function GalleryForm({
   const spotlightJa = contentJa?.projects?.["p-lakeside"] || contentJa?.spotlight || defaultSpotlightJa;
   const spotlightEn = contentEn?.projects?.["p-lakeside"] || contentEn?.spotlight || defaultSpotlightEn;
 
-  const handleSetProjectAsSpotlight = (projId: string) => {
+  const [selectedSpotlightSourceId, setSelectedSpotlightSourceId] = useState<string | null>(spotlightJa?.id || "p-lakeside");
+
+  const handleEditLargeCardForProject = (projId: string) => {
     const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId];
     const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId];
     if (pJa) {
-      updateField("ja", ["spotlight"], pJa);
-      updateField("ja", ["projects", "p-lakeside"], pJa);
+      const targetJa = { ...pJa, id: projId };
+      updateField("ja", ["spotlight"], targetJa);
+      updateField("ja", ["projects", "p-lakeside"], targetJa);
+      updateField("ja", ["projects", projId], targetJa);
     }
     if (pEn) {
-      updateField("en", ["spotlight"], pEn);
-      updateField("en", ["projects", "p-lakeside"], pEn);
+      const targetEn = { ...pEn, id: projId };
+      updateField("en", ["spotlight"], targetEn);
+      updateField("en", ["projects", "p-lakeside"], targetEn);
+      updateField("en", ["projects", projId], targetEn);
     }
-    toast(`Đã thiết lập dự án "${pJa?.title || projId}" làm Tiêu điểm (Card lớn)!`, "success");
+    setSelectedSpotlightSourceId(projId);
+    toast(`Đã nạp dự án "${pJa?.title || projId}" vào Card lớn! Đang cuộn xuống phần chỉnh sửa...`, "success");
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        const el = document.getElementById("admin-spotlight-section");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  };
+
+  const handleSetProjectAsSpotlight = (projId: string) => {
+    handleEditLargeCardForProject(projId);
   };
 
   const handleUpdateSpotlightField = (field: string, langKey: "ja" | "en", val: any) => {
+    const targetSourceId = selectedSpotlightSourceId || spotlightJa?.id || "p-lakeside";
+    const extraFields = (field === "priceValue") ? { priceValue: val, priceEstimate: val } : { [field]: val };
+
     if (langKey === "ja") {
-      const updatedJa = { ...spotlightJa, [field]: val };
+      const updatedJa = { ...spotlightJa, ...extraFields };
       updateField("ja", ["projects", "p-lakeside"], updatedJa);
       updateField("ja", ["spotlight"], updatedJa);
-      if (field === "img" || field === "category" || lang === "both") {
-        const updatedEn = { ...spotlightEn, [field]: val };
+      if (targetSourceId) {
+        const curProj = rawProjectsJa[targetSourceId] || {};
+        updateField("ja", ["projects", targetSourceId], { ...curProj, ...extraFields });
+      }
+      if (field === "img" || field === "category" || field === "priceValue" || lang === "both") {
+        const updatedEn = { ...spotlightEn, ...extraFields };
         updateField("en", ["projects", "p-lakeside"], updatedEn);
         updateField("en", ["spotlight"], updatedEn);
+        if (targetSourceId) {
+          const curProjEn = rawProjectsEn[targetSourceId] || {};
+          updateField("en", ["projects", targetSourceId], { ...curProjEn, ...extraFields });
+        }
       }
     } else {
-      const updatedEn = { ...spotlightEn, [field]: val };
+      const updatedEn = { ...spotlightEn, ...extraFields };
       updateField("en", ["projects", "p-lakeside"], updatedEn);
       updateField("en", ["spotlight"], updatedEn);
-      if (field === "img" || field === "category" || lang === "both") {
-        const updatedJa = { ...spotlightJa, [field]: val };
+      if (targetSourceId) {
+        const curProjEn = rawProjectsEn[targetSourceId] || {};
+        updateField("en", ["projects", targetSourceId], { ...curProjEn, ...extraFields });
+      }
+      if (field === "img" || field === "category" || field === "priceValue" || lang === "both") {
+        const updatedJa = { ...spotlightJa, ...extraFields };
         updateField("ja", ["projects", "p-lakeside"], updatedJa);
         updateField("ja", ["spotlight"], updatedJa);
+        if (targetSourceId) {
+          const curProj = rawProjectsJa[targetSourceId] || {};
+          updateField("ja", ["projects", targetSourceId], { ...curProj, ...extraFields });
+        }
       }
     }
   };
@@ -3996,6 +4227,129 @@ function GalleryForm({
     } catch {
       toast("Có lỗi xảy ra khi tải ảnh", "error");
     }
+  };
+
+  // Quản lý các khối nội dung đặc tính (Ảnh 4 - Giải pháp kiến trúc / Vật liệu / Tiêu đề khối tùy chỉnh, có Thêm / Xóa)
+  const defaultFeatureBlocksJa: Array<{ id: string; title: string; content: string }> = [
+    {
+      id: "fb-sol",
+      title: "☗ 建築ソリューション",
+      content: spotlightJa?.solution || "打ち放しコンクリートと天然木ルーバーが調和する上質な空間設計...",
+    },
+    {
+      id: "fb-mat",
+      title: "🧱 マテリアル仕様",
+      content: spotlightJa?.materials || "天然木ルーバー、打ち放しコンクリート、Low-E複層ガラス...",
+    },
+  ];
+
+  const defaultFeatureBlocksEn: Array<{ id: string; title: string; content: string }> = [
+    {
+      id: "fb-sol",
+      title: "☗ Architectural Solution",
+      content: spotlightEn?.solution || "Lakeside villa balancing raw concrete and natural timber louvers...",
+    },
+    {
+      id: "fb-mat",
+      title: "🧱 Material Specifications",
+      content: spotlightEn?.materials || "Natural timber louvers, board-formed concrete, Low-E glass...",
+    },
+  ];
+
+  const featureBlocksJa: Array<{ id: string; title: string; content: string }> =
+    Array.isArray(spotlightJa?.featureBlocks) && spotlightJa.featureBlocks.length > 0
+      ? spotlightJa.featureBlocks
+      : defaultFeatureBlocksJa;
+
+  const featureBlocksEn: Array<{ id: string; title: string; content: string }> =
+    Array.isArray(spotlightEn?.featureBlocks) && spotlightEn.featureBlocks.length > 0
+      ? spotlightEn.featureBlocks
+      : defaultFeatureBlocksEn;
+
+  const featureBlocksCount = Math.max(featureBlocksJa.length, featureBlocksEn.length);
+
+  const handleUpdateFeatureBlock = (
+    idx: number,
+    field: "title" | "content",
+    langKey: "ja" | "en",
+    val: string
+  ) => {
+    if (langKey === "ja") {
+      const nextJa = [...featureBlocksJa];
+      nextJa[idx] = {
+        id: nextJa[idx]?.id || `fb-${idx}`,
+        title: field === "title" ? val : (nextJa[idx]?.title || ""),
+        content: field === "content" ? val : (nextJa[idx]?.content || "")
+      };
+      handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
+      if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "ja", val);
+      if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "ja", val);
+
+      if (lang === "both") {
+        const nextEn = [...featureBlocksEn];
+        nextEn[idx] = {
+          id: nextEn[idx]?.id || nextJa[idx].id,
+          title: field === "title" ? val : (nextEn[idx]?.title || nextJa[idx].title),
+          content: field === "content" ? val : (nextEn[idx]?.content || nextJa[idx].content)
+        };
+        handleUpdateSpotlightField("featureBlocks", "en", nextEn);
+        if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "en", val);
+        if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "en", val);
+      }
+    } else {
+      const nextEn = [...featureBlocksEn];
+      nextEn[idx] = {
+        id: nextEn[idx]?.id || `fb-${idx}`,
+        title: field === "title" ? val : (nextEn[idx]?.title || ""),
+        content: field === "content" ? val : (nextEn[idx]?.content || "")
+      };
+      handleUpdateSpotlightField("featureBlocks", "en", nextEn);
+      if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "en", val);
+      if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "en", val);
+
+      if (lang === "both") {
+        const nextJa = [...featureBlocksJa];
+        nextJa[idx] = {
+          id: nextJa[idx]?.id || nextEn[idx].id,
+          title: field === "title" ? val : (nextJa[idx]?.title || nextEn[idx].title),
+          content: field === "content" ? val : (nextJa[idx]?.content || nextEn[idx].content)
+        };
+        handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
+        if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "ja", val);
+        if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "ja", val);
+      }
+    }
+  };
+
+  const handleAddFeatureBlock = () => {
+    const newId = `fb-${Date.now()}`;
+    const nextJa = [
+      ...featureBlocksJa,
+      { id: newId, title: "✨ Khối nội dung mới", content: "Nội dung giải pháp hoặc thông số chi tiết..." }
+    ];
+    const nextEn = [
+      ...featureBlocksEn,
+      { id: newId, title: "✨ New Feature Block", content: "Detailed architectural or technical description..." }
+    ];
+    handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
+    handleUpdateSpotlightField("featureBlocks", "en", nextEn);
+    toast("Đã thêm khối nội dung mới cho Card lớn!", "success");
+  };
+
+  const handleDeleteFeatureBlock = (idx: number) => {
+    if (featureBlocksCount <= 1) {
+      toast("Phải giữ lại ít nhất 1 khối nội dung", "info");
+      return;
+    }
+    const nextJa = featureBlocksJa.filter((_, i) => i !== idx);
+    const nextEn = featureBlocksEn.filter((_, i) => i !== idx);
+    handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
+    handleUpdateSpotlightField("featureBlocks", "en", nextEn);
+    if (nextJa[0]?.content) handleUpdateSpotlightField("solution", "ja", nextJa[0].content);
+    if (nextJa[1]?.content) handleUpdateSpotlightField("materials", "ja", nextJa[1].content);
+    if (nextEn[0]?.content) handleUpdateSpotlightField("solution", "en", nextEn[0].content);
+    if (nextEn[1]?.content) handleUpdateSpotlightField("materials", "en", nextEn[1].content);
+    toast("Đã xóa khối nội dung", "info");
   };
 
   // Quản lý gói hồ sơ bàn giao (Deliverables) của card lớn
@@ -4084,15 +4438,15 @@ function GalleryForm({
 
   return (
     <div className="space-y-8">
-      {/* 1. Header and Project Filter Categories */}
+      {/* 1. Header Architectural Projects Gallery */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
-            <span>1. Tiêu đề Showcase &amp; Quản lý Bộ lọc Project (Project Categories)</span>
+            <span>1. Tiêu đề Showcase (Architectural Projects Gallery)</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Quản lý tiêu đề Showcase và các thể loại Project hiển thị trên thanh bộ lọc triển lãm.
+            Quản lý tiêu đề Showcase hiển thị trên trang triển lãm dự án kiến trúc.
           </p>
         </div>
 
@@ -4105,114 +4459,27 @@ function GalleryForm({
           activeLang={lang}
         />
 
-        {/* Danh sách Thể loại Project với tính năng Thêm / Xóa */}
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Danh sách Thể loại Project ({tabsCount} thể loại)
-            </h4>
-            <button
-              type="button"
-              onClick={handleAddTab}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition"
-            >
-              <Plus size={14} />
-              <span>Thêm thể loại Project</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: tabsCount }).map((_, idx) => {
-              const tabJa = normalizedTabsJa[idx] || {};
-              const tabEn = normalizedTabsEn[idx] || {};
-              const isDefaultAll = tabJa.key === "all";
-
-              return (
-                <div
-                  key={`project-cat-${idx}`}
-                  className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-slate-50 hover:border-blue-300 transition space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-blue-700 uppercase tracking-wider bg-blue-100 px-2 py-0.5 rounded">
-                      Project Category #{idx + 1} {isDefaultAll && "(Mặc định: Tất cả)"}
-                    </span>
-                    {!isDefaultAll && (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTab(idx)}
-                        className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        title="Xóa thể loại này"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Mã định danh Project Category */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      Mã Project / Key filter:
-                    </label>
-                    <input
-                      type="text"
-                      disabled={isDefaultAll}
-                      value={tabJa.key || ""}
-                      onChange={(e) => handleUpdateTabKey(idx, e.target.value)}
-                      className={`w-full px-2.5 py-1 text-xs border rounded ${isDefaultAll
-                          ? "bg-slate-200 text-slate-500 cursor-not-allowed border-slate-300"
-                          : "border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        }`}
-                      placeholder="villa, townhouse..."
-                    />
-                  </div>
-
-                  {/* Tên Thể loại song ngữ */}
-                  {(lang === "ja" || lang === "both") && (
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                        Tên thể loại [JA / VI]:
-                      </label>
-                      <input
-                        type="text"
-                        value={tabJa.label || ""}
-                        onChange={(e) => handleUpdateTabLabel(idx, "ja", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="別荘・高級ヴィラ"
-                      />
-                    </div>
-                  )}
-
-                  {(lang === "en" || lang === "both") && (
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                        Tên thể loại [EN]:
-                      </label>
-                      <input
-                        type="text"
-                        value={tabEn.label || ""}
-                        onChange={(e) => handleUpdateTabLabel(idx, "en", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="Villas & Estates"
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <BilingualField
+          label="Mô tả phụ dưới tiêu đề Showcase (Sub-title)"
+          path={["info", "subtitle"]}
+          contentJa={contentJa}
+          contentEn={contentEn}
+          updateField={updateField}
+          activeLang={lang}
+          subLabel="Đoạn văn ngắn nằm ngay dưới tiêu đề chính showcase (Ví dụ: 左側に選択したプロジェクトの詳細、右側に全作品リストを表示しています)"
+        />
       </div>
 
-      {/* 2. Quản lý Danh sách Card Dự án (Project Showcase Cards - Ảnh 2) kèm BỘ LỌC PROJECT */}
+      {/* 2. Quản lý Danh sách Card Dự án (Project Showcase Cards) */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-              <span>2. Quản lý Danh sách Card Dự án (Ảnh 2 - Project Cards)</span>
+              <span>2. Quản lý Danh sách Dự án ({allProjectKeys.length} dự án)</span>
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Thêm, xóa và chỉnh sửa từng card dự án hiển thị trong triển lãm. Lọc dự án theo thể loại bên dưới.
+              Thêm, xóa và chỉnh sửa thông tin chi tiết từng dự án (ảnh, chi phí, giải pháp, vật liệu, hồ sơ bàn giao...).
             </p>
           </div>
           <button
@@ -4225,71 +4492,22 @@ function GalleryForm({
           </button>
         </div>
 
-        {/* BỘ LỌC PROJECT */}
-        <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-              <span>🎯 Bộ lọc Project:</span>
-              <span className="text-[11px] font-normal text-slate-500">
-                (Đang hiển thị: {filteredProjectKeys.length} / {allProjectKeys.length} dự án)
-              </span>
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            <button
-              type="button"
-              onClick={() => setActiveProjectFilter("all")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition border ${activeProjectFilter === "all"
-                  ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
-            >
-              <span>Tất cả ({allProjectKeys.length})</span>
-            </button>
-            {normalizedTabsJa.filter(t => t.key !== "all").map((cat) => {
-              const countInCat = allProjectKeys.filter((k) => {
-                const p = rawProjectsJa[k] || rawProjectsEn[k];
-                return p?.category === cat.key;
-              }).length;
-
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setActiveProjectFilter(cat.key)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition border flex items-center gap-1.5 ${activeProjectFilter === cat.key
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                    }`}
-                >
-                  <span>{cat.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${activeProjectFilter === cat.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
-                    }`}>
-                    {countInCat}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* DANH SÁCH CÁC CARD DỰ ÁN ĐÃ LỌC */}
-        {filteredProjectKeys.length === 0 ? (
+        {/* DANH SÁCH CÁC CARD DỰ ÁN */}
+        {allProjectKeys.length === 0 ? (
           <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
-            <p className="text-xs text-slate-500">Chưa có dự án nào thuộc thể loại này.</p>
+            <p className="text-xs text-slate-500">Chưa có dự án nào trong hệ thống.</p>
             <button
               type="button"
               onClick={handleAddProject}
               className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline"
             >
               <Plus size={13} />
-              <span>Thêm dự án đầu tiên vào thể loại này</span>
+              <span>Thêm dự án đầu tiên</span>
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredProjectKeys.map((projId) => {
+            {allProjectKeys.map((projId) => {
               const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
               const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
               const isExpanded = expandedProjectId === projId;
@@ -4310,8 +4528,8 @@ function GalleryForm({
                   {/* Card Header & Controls */}
                   <div className="p-4 pb-0 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 uppercase tracking-wide">
-                        {pJa.category || "villa"}
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
+                        #{projId}
                       </span>
                       {isSpotlight && (
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
@@ -4319,17 +4537,21 @@ function GalleryForm({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      {!isSpotlight && (
-                        <button
-                          type="button"
-                          onClick={() => handleSetProjectAsSpotlight(projId)}
-                          className="px-2 py-1 text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded transition"
-                          title="Chọn dự án này hiển thị ở Card lớn bên trái"
-                        >
-                          Chọn làm Card lớn
-                        </button>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEditLargeCardForProject(projId)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm transition cursor-pointer ${
+                          isSpotlight
+                            ? "bg-amber-600 text-white hover:bg-amber-700 ring-2 ring-amber-400"
+                            : "bg-amber-400 hover:bg-amber-500 text-slate-950"
+                        }`}
+                        title="Bấm để nạp và điền nội dung của dự án này vào Card lớn bên trái"
+                      >
+                        <Sparkles size={13} className={isSpotlight ? "text-amber-200" : "text-slate-900"} />
+                        <span>{isSpotlight ? "✎ Đang sửa Card lớn" : "✎ Sửa nội dung Card lớn"}</span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => handleDeleteProject(projId)}
@@ -4368,40 +4590,19 @@ function GalleryForm({
                         </label>
                       </div>
 
-                      <div className="flex-1 space-y-2">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                            Tên dự án (Title):
-                          </label>
-                          <input
-                            type="text"
-                            value={pJa.title || pEn.title || ""}
-                            onChange={(e) => {
-                              handleUpdateProject(projId, "title", "ja", e.target.value, true);
-                            }}
-                            className="w-full px-2 py-1 text-xs font-bold text-slate-800 border border-slate-300 rounded bg-white"
-                            placeholder="THE LAKESIDE HORIZON VILLA"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                            Thể loại Project (Category):
-                          </label>
-                          <select
-                            value={pJa.category || "villa"}
-                            onChange={(e) => {
-                              handleUpdateProject(projId, "category", "ja", e.target.value, true);
-                            }}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                          >
-                            {normalizedTabsJa.filter(t => t.key !== "all").map((cat) => (
-                              <option key={cat.key} value={cat.key}>
-                                {cat.label} ({cat.key})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase">
+                          Tên dự án (Title):
+                        </label>
+                        <input
+                          type="text"
+                          value={pJa.title || pEn.title || ""}
+                          onChange={(e) => {
+                            handleUpdateProject(projId, "title", "ja", e.target.value, true);
+                          }}
+                          className="w-full px-2 py-1 text-xs font-bold text-slate-800 border border-slate-300 rounded bg-white mt-1"
+                          placeholder="THE LAKESIDE HORIZON VILLA"
+                        />
                       </div>
                     </div>
                   </div>
@@ -4468,6 +4669,23 @@ function GalleryForm({
                           placeholder="Ho Tram • 850 m²"
                         />
                       )}
+                    </div>
+
+                    {/* Giá tiền hiển thị trên card nhỏ (Price) */}
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-600">
+                        Giá tiền hiển thị (Price - Cả chữ và số tiền):
+                      </label>
+                      <input
+                        type="text"
+                        value={pJa.priceValue || pJa.priceEstimate || pEn.priceValue || pEn.priceEstimate || ""}
+                        onChange={(e) => {
+                          handleUpdateProject(projId, "priceValue", "ja", e.target.value, true);
+                          handleUpdateProject(projId, "priceEstimate", "ja", e.target.value, true);
+                        }}
+                        className="w-full px-2 py-1 text-xs font-bold text-amber-700 border border-slate-300 rounded bg-white mt-0.5 focus:ring-1 focus:ring-amber-500"
+                        placeholder="¥2,500,000〜 (¥3,800/m²)"
+                      />
                     </div>
 
                     {/* Phong cách kiến trúc */}
@@ -4652,6 +4870,43 @@ function GalleryForm({
                             />
                           )}
                         </div>
+
+                        {/* MỤC ĐIỀN NỘI DUNG CARD LỚN CỦA DỰ ÁN NÀY (KHI BẤM XEM THÊM TRÊN CARD LỚN) */}
+                        <div className="pt-2 border-t border-slate-200">
+                          <label className="block text-[11px] font-bold text-amber-800 flex items-center gap-1">
+                            <Sparkles size={12} className="text-amber-600" />
+                            <span>Mục điền nội dung Card lớn (Hiển thị khi mở dự án này):</span>
+                          </label>
+                          <p className="text-[10px] text-slate-500 mb-1">
+                            Nội dung chi tiết mở rộng xuất hiện trên card lớn bên trái khi bấm chữ &quot;Xem thêm&quot;.
+                          </p>
+                          {lang === "both" ? (
+                            <div className="grid grid-cols-2 gap-2 mt-0.5">
+                              <textarea
+                                rows={3}
+                                value={pJa.detailContent || ""}
+                                onChange={(e) => handleUpdateProject(projId, "detailContent", "ja", e.target.value)}
+                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                                placeholder="Nội dung chi tiết Card lớn [JA / VI]..."
+                              />
+                              <textarea
+                                rows={3}
+                                value={pEn.detailContent || ""}
+                                onChange={(e) => handleUpdateProject(projId, "detailContent", "en", e.target.value)}
+                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                                placeholder="Large Card Content [EN]..."
+                              />
+                            </div>
+                          ) : (
+                            <textarea
+                              rows={3}
+                              value={(lang === "en" ? pEn.detailContent : pJa.detailContent) || ""}
+                              onChange={(e) => handleUpdateProject(projId, "detailContent", lang === "en" ? "en" : "ja", e.target.value)}
+                              className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white mt-0.5 focus:ring-1 focus:ring-amber-500"
+                              placeholder="Nội dung chi tiết Card lớn khi bấm Xem thêm..."
+                            />
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -4663,54 +4918,40 @@ function GalleryForm({
       </div>
 
       {/* 3. Dự án Tiêu điểm (Card lớn bên trái - Spotlight Project) */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
-        <div className="border-b border-slate-100 pb-3">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-            <span>3. Dự án Tiêu điểm Showcase (Card lớn bên trái)</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Tùy chỉnh toàn bộ thông tin chi tiết dự án nổi bật hiển thị ở cột bên trái của khu vực triển lãm.
-          </p>
+      <div id="admin-spotlight-section" className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 scroll-mt-6">
+        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+              <span>3. Dự án Tiêu điểm Showcase (Card lớn bên trái)</span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Tùy chỉnh toàn bộ thông tin chi tiết dự án nổi bật hiển thị ở cột bên trái của khu vực triển lãm.
+            </p>
+          </div>
+          {spotlightJa?.title && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-lg text-xs font-bold text-amber-900 shrink-0">
+              <span>✦ Đang sửa Card lớn:</span>
+              <span className="underline">{spotlightJa.title}</span>
+            </div>
+          )}
         </div>
 
         {/* Tên dự án & Thể loại */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Tên dự án tiêu điểm (Ví dụ: THE LAKESIDE HORIZON VILLA):
-            </label>
-            <input
-              type="text"
-              value={spotlightJa?.title || spotlightEn?.title || ""}
-              onChange={(e) => {
-                handleUpdateSpotlightField("title", "ja", e.target.value);
-                handleUpdateSpotlightField("title", "en", e.target.value);
-              }}
-              className="w-full px-3 py-2 text-sm font-bold uppercase tracking-wide border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="THE LAKESIDE HORIZON VILLA"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Thuộc Thể loại Project nào:
-            </label>
-            <select
-              value={spotlightJa?.category || "villa"}
-              onChange={(e) => {
-                handleUpdateSpotlightField("category", "ja", e.target.value);
-                handleUpdateSpotlightField("category", "en", e.target.value);
-              }}
-              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-            >
-              {normalizedTabsJa.filter(t => t.key !== "all").map((tab) => (
-                <option key={tab.key} value={tab.key}>
-                  {tab.label} ({tab.key})
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1">
+            Tên dự án tiêu điểm (Ví dụ: THE LAKESIDE HORIZON VILLA):
+          </label>
+          <input
+            type="text"
+            value={spotlightJa?.title || spotlightEn?.title || ""}
+            onChange={(e) => {
+              handleUpdateSpotlightField("title", "ja", e.target.value);
+              handleUpdateSpotlightField("title", "en", e.target.value);
+            }}
+            className="w-full px-3 py-2 text-sm font-bold uppercase tracking-wide border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            placeholder="THE LAKESIDE HORIZON VILLA"
+          />
         </div>
 
         {/* Nhãn thể loại & Địa điểm song ngữ */}
@@ -4768,18 +5009,18 @@ function GalleryForm({
           )}
         </div>
 
-        {/* MỤC MÔ TẢ CHO CARD LỚN (NARRATIVE / DESCRIPTION) */}
-        <div className="space-y-2 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
-          <label className="block text-xs font-bold text-amber-900">
-            ★ Mục Mô tả tóm tắt cho Card lớn (Project Narrative / Description):
+        {/* MỤC MÔ TẢ TÓM TẮT CHO CARD LỚN */}
+        <div className="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <label className="block text-xs font-bold text-slate-800">
+            Mục Mô tả tóm tắt cho Card lớn (Project Narrative - 2 dòng đầu):
           </label>
-          <p className="text-[11px] text-amber-700">
-            Đoạn văn giới thiệu không gian và ý niệm thiết kế xuất hiện trực tiếp ngay dưới tên dự án trên Card lớn.
+          <p className="text-[11px] text-slate-500">
+            Đoạn văn giới thiệu không gian ban đầu xuất hiện trực tiếp dưới tên dự án trên Card lớn.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             {(lang === "ja" || lang === "both") && (
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả [JA / VI]:</label>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả tóm tắt [JA / VI]:</label>
                 <textarea
                   rows={3}
                   value={spotlightJa?.narrative || ""}
@@ -4791,13 +5032,52 @@ function GalleryForm({
             )}
             {(lang === "en" || lang === "both") && (
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả [EN]:</label>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả tóm tắt [EN]:</label>
                 <textarea
                   rows={3}
                   value={spotlightEn?.narrative || ""}
                   onChange={(e) => handleUpdateSpotlightField("narrative", "en", e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Lakeside villa balancing raw board-formed concrete and natural timber louvers..."
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* MỤC ĐIỀN NỘI DUNG CARD LỚN (NỘI DUNG CHI TIẾT MỞ RỘNG KHI BẤM XEM THÊM) */}
+        <div className="space-y-2 p-4 bg-amber-50/70 rounded-xl border-2 border-amber-300 shadow-sm">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={16} className="text-amber-600" />
+            <label className="block text-xs font-bold text-amber-950 uppercase tracking-wide">
+              ★ Mục điền nội dung Card lớn (Nội dung chi tiết khi bấm &quot;Xem thêm&quot;):
+            </label>
+          </div>
+          <p className="text-[11px] text-amber-800 leading-relaxed">
+            Điền nội dung chi tiết mở rộng về giải pháp thiết kế, công năng kiến trúc và phân tích chuyên sâu. Khi khách hàng bấm chữ &quot;Xem thêm&quot; ở Card lớn, nội dung này sẽ bung ra đầy đủ.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            {(lang === "ja" || lang === "both") && (
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Nội dung chi tiết Card lớn [JA / VI]:</label>
+                <textarea
+                  rows={4}
+                  value={spotlightJa?.detailContent || ""}
+                  onChange={(e) => handleUpdateSpotlightField("detailContent", "ja", e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="Nhập nội dung chi tiết đầy đủ cho Card lớn: giải pháp vi khí hậu, hướng nắng gió, chi tiết phân khu chức năng..."
+                />
+              </div>
+            )}
+            {(lang === "en" || lang === "both") && (
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Nội dung chi tiết Card lớn [EN]:</label>
+                <textarea
+                  rows={4}
+                  value={spotlightEn?.detailContent || ""}
+                  onChange={(e) => handleUpdateSpotlightField("detailContent", "en", e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="Detailed architectural and engineering narrative for the expanded large card..."
                 />
               </div>
             )}
@@ -4850,54 +5130,246 @@ function GalleryForm({
           </div>
         </div>
 
-        {/* Giải pháp kiến trúc & Vật liệu chủ đạo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700">
-              🏛 Giải pháp kiến trúc &amp; Vi khí hậu (Solution):
+                {/* CẤU HÌNH HUY HIỆU GÓC ẢNH & NÚT TOÀN MÀN HÌNH (NỘI DUNG ẢNH 3) */}
+        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <span>🖼️ Nội dung góc trên ảnh Card lớn (Ảnh 3):</span>
             </label>
-            {(lang === "ja" || lang === "both") && (
-              <textarea
-                rows={2}
-                value={spotlightJa?.solution || ""}
-                onChange={(e) => handleUpdateSpotlightField("solution", "ja", e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                placeholder="Giải pháp [JA / VI]..."
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={spotlightJa?.showSpotlightBadge !== false}
+                onChange={(e) => {
+                  handleUpdateSpotlightField("showSpotlightBadge", "ja", e.target.checked);
+                  handleUpdateSpotlightField("showSpotlightBadge", "en", e.target.checked);
+                }}
+                className="rounded text-amber-600 focus:ring-amber-500"
               />
-            )}
-            {(lang === "en" || lang === "both") && (
-              <textarea
-                rows={2}
-                value={spotlightEn?.solution || ""}
-                onChange={(e) => handleUpdateSpotlightField("solution", "en", e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                placeholder="Solution [EN]..."
-              />
-            )}
+              <span>Hiển thị huy hiệu góc ảnh</span>
+            </label>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700">
-              🪵 Vật liệu hoàn thiện chủ đạo (Materials):
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                Chữ Huy hiệu góc trái (Mặc định: ✦ 選択中のプロジェクト):
+              </label>
+              {(lang === "ja" || lang === "both") && (
+                <input
+                  type="text"
+                  value={spotlightJa?.spotlightBadgeText || ""}
+                  onChange={(e) => handleUpdateSpotlightField("spotlightBadgeText", "ja", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="✦ 選択中のプロジェクト"
+                />
+              )}
+              {lang === "en" && (
+                <input
+                  type="text"
+                  value={spotlightEn?.spotlightBadgeText || ""}
+                  onChange={(e) => handleUpdateSpotlightField("spotlightBadgeText", "en", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="✦ SELECTED PROJECT"
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                Chữ Nút phóng to toàn màn hình góc phải:
+              </label>
+              {(lang === "ja" || lang === "both") && (
+                <input
+                  type="text"
+                  value={spotlightJa?.fullscreenBtnText || ""}
+                  onChange={(e) => handleUpdateSpotlightField("fullscreenBtnText", "ja", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="全画面表示"
+                />
+              )}
+              {lang === "en" && (
+                <input
+                  type="text"
+                  value={spotlightEn?.fullscreenBtnText || ""}
+                  onChange={(e) => handleUpdateSpotlightField("fullscreenBtnText", "en", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="Fullscreen View"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* CẤU HÌNH PHẦN GIÁ (GIÁ CẢ CHỮ VÀ SỐ TIỀN) */}
+        <div className="space-y-3 p-4 bg-amber-50/60 rounded-xl border border-amber-200">
+          <div className="flex items-center justify-between border-b border-amber-200/80 pb-2">
+            <div>
+              <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                <span>💰 Phần giá (Cả chữ nhãn và số tiền hiển thị trên ảnh):</span>
+              </label>
+              <p className="text-[11px] text-amber-800/80 mt-0.5">
+                Khung viền vàng nổi bật hiển thị ở góc dưới ảnh chính của Card lớn (hoặc tắt đi nếu không muốn hiển thị giá).
+              </p>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-900 shrink-0">
+              <input
+                type="checkbox"
+                checked={spotlightJa?.showPrice !== false}
+                onChange={(e) => {
+                  handleUpdateSpotlightField("showPrice", "ja", e.target.checked);
+                  handleUpdateSpotlightField("showPrice", "en", e.target.checked);
+                }}
+                className="rounded text-amber-600 focus:ring-amber-500"
+              />
+              <span>Bật hiển thị khung giá</span>
             </label>
-            {(lang === "ja" || lang === "both") && (
-              <textarea
-                rows={2}
-                value={spotlightJa?.materials || ""}
-                onChange={(e) => handleUpdateSpotlightField("materials", "ja", e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                placeholder="Vật liệu [JA / VI]..."
-              />
-            )}
-            {(lang === "en" || lang === "both") && (
-              <textarea
-                rows={2}
-                value={spotlightEn?.materials || ""}
-                onChange={(e) => handleUpdateSpotlightField("materials", "en", e.target.value)}
-                className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                placeholder="Materials [EN]..."
-              />
-            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                Chữ nhãn giá (Price Label - Ví dụ: 設計・3D目安費用:):
+              </label>
+              {(lang === "ja" || lang === "both") && (
+                <input
+                  type="text"
+                  value={spotlightJa?.priceLabel || ""}
+                  onChange={(e) => handleUpdateSpotlightField("priceLabel", "ja", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="設計・3D目安費用:"
+                />
+              )}
+              {lang === "en" && (
+                <input
+                  type="text"
+                  value={spotlightEn?.priceLabel || ""}
+                  onChange={(e) => handleUpdateSpotlightField("priceLabel", "en", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="Est. Design & 3D Fee:"
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                Số tiền (Price Value - Ví dụ: ¥2,500,000〜 (¥3,800/m²)):
+              </label>
+              {(lang === "ja" || lang === "both") && (
+                <input
+                  type="text"
+                  value={spotlightJa?.priceValue || ""}
+                  onChange={(e) => handleUpdateSpotlightField("priceValue", "ja", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs font-bold text-amber-700 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="¥2,500,000〜 (¥3,800/m²)"
+                />
+              )}
+              {lang === "en" && (
+                <input
+                  type="text"
+                  value={spotlightEn?.priceValue || ""}
+                  onChange={(e) => handleUpdateSpotlightField("priceValue", "en", e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs font-bold text-amber-700 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
+                  placeholder="$18,500~ ($28/m²)"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* NỘI DUNG TIÊU ĐỀ ẢNH 4 (CÓ TÍNH NĂNG THÊM / XÓA KHỐI) */}
+        <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <span>🧩 Các khối nội dung đặc tính Card lớn (Ảnh 4 - {featureBlocksCount} khối):</span>
+              </label>
+              <p className="text-[11px] text-slate-500">
+                Cho phép thêm, xóa và đổi tiêu đề linh hoạt (Giải pháp kiến trúc, Vật liệu, v.v.).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddFeatureBlock}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md border border-emerald-200 transition shrink-0"
+            >
+              <Plus size={13} />
+              <span>+ Thêm khối nội dung mới</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: featureBlocksCount }).map((_, fIdx) => {
+              const fbJa = featureBlocksJa[fIdx] || { title: "", content: "" };
+              const fbEn = featureBlocksEn[fIdx] || { title: "", content: "" };
+
+              return (
+                <div key={`fb-${fIdx}`} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 relative group">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                    <span className="text-[11px] font-bold text-amber-700">
+                      Khối #{fIdx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteFeatureBlock(fIdx)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-transparent hover:border-red-200 transition"
+                      title="Xóa khối nội dung này"
+                    >
+                      <Trash2 size={12} />
+                      <span>Xóa khối</span>
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
+                      Tiêu đề khối (Ví dụ: ☗ 建築ソリューション, 🧱 マテリアル仕様...):
+                    </label>
+                    {(lang === "ja" || lang === "both") && (
+                      <input
+                        type="text"
+                        value={fbJa.title || ""}
+                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "title", "ja", e.target.value)}
+                        className="w-full px-2 py-1 text-xs font-bold border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                        placeholder="Tiêu đề khối [JA / VI]"
+                      />
+                    )}
+                    {lang === "en" && (
+                      <input
+                        type="text"
+                        value={fbEn.title || ""}
+                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "title", "en", e.target.value)}
+                        className="w-full px-2 py-1 text-xs font-bold border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                        placeholder="Block Title [EN]"
+                      />
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-0.5">
+                      Nội dung chi tiết của khối:
+                    </label>
+                    {(lang === "ja" || lang === "both") && (
+                      <textarea
+                        rows={2}
+                        value={fbJa.content || ""}
+                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "content", "ja", e.target.value)}
+                        className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                        placeholder="Nội dung giải pháp, mô tả chi tiết..."
+                      />
+                    )}
+                    {lang === "en" && (
+                      <textarea
+                        rows={2}
+                        value={fbEn.content || ""}
+                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "content", "en", e.target.value)}
+                        className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
+                        placeholder="Detailed block content description..."
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -5067,9 +5539,9 @@ function GalleryForm({
    08. PRICING SECTION FORM
    ------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------
-   10. PRICING SECTION FORM (Báo giá minh bạch)
+   10. CTA SECTION FORM (Kêu gọi hành động / Sustainable Design)
    ------------------------------------------------------------------------- */
-function PricingForm({
+function CtaForm({
   lang,
   contentJa,
   contentEn,
@@ -5081,537 +5553,347 @@ function PricingForm({
   updateField: (lang: "en" | "ja", path: string[], value: any) => void;
 }) {
   const { toast } = useToast();
+  const [uploadingImg, setUploadingImg] = useState(false);
 
-  const defaultTiersJa = getDefaultPricingTiers("ja");
-  const defaultTiersEn = getDefaultPricingTiers("en");
+  const ja = contentJa || {};
+  const en = contentEn || {};
 
-  const getRawTiers = (content: any, defaultTiers: any[]) => {
-    if (Array.isArray(content?.tiers) && content.tiers.length > 0) {
-      return content.tiers;
+  const handleUpdate = (field: string, langKey: "ja" | "en", val: any) => {
+    updateField(langKey, [field], val);
+    if (field === "image" || field === "btnHref" || field === "card1Href" || field === "card2Href") {
+      updateField(langKey === "ja" ? "en" : "ja", [field], val);
     }
-    if (content?.tier1 || content?.tier2 || content?.tier3) {
-      const dynamicTiers: any[] = [];
-      Object.keys(content).forEach((k) => {
-        if (k.startsWith("tier") && typeof content[k] === "object" && content[k] !== null) {
-          dynamicTiers.push({ id: k, ...content[k] });
+  };
+
+  const handleUploadImage = async (file: File) => {
+    try {
+      setUploadingImg(true);
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.url) {
+          handleUpdate("image", "ja", data.url);
+          toast("Tải ảnh kiến trúc thành công!", "success");
         }
-      });
-      if (dynamicTiers.length > 0) return dynamicTiers;
-    }
-    return defaultTiers;
-  };
-
-  const rawTiersJa = getRawTiers(contentJa, defaultTiersJa);
-  const rawTiersEn = getRawTiers(contentEn, defaultTiersEn);
-  const count = Math.max(rawTiersJa.length, rawTiersEn.length);
-
-  const normalizedTiersJa = Array.from({ length: count }, (_, i) => rawTiersJa[i] || {
-    id: `tier-${Date.now()}-${i}`,
-    badge: "新規プラン",
-    name: "プラン名",
-    sub: "プラン概要説明",
-    price: "100,000",
-    unit: "円〜 / 式",
-    commitTime: "納期: 5〜7日",
-    commitSupport: "サポート対応",
-    features: ["8K解像度高品質パース納品", "マテリアル選定表付属"],
-    btnText: "申し込む",
-    isFeatured: false,
-  });
-
-  const normalizedTiersEn = Array.from({ length: count }, (_, i) => rawTiersEn[i] || {
-    ...normalizedTiersJa[i],
-    badge: "New Package",
-    name: "Package Name",
-    sub: "Package Summary",
-    features: ["8K High-Resolution Perspectives", "Material Specification Matrix"],
-    btnText: "Select Plan",
-  });
-
-  const handleUpdateTierField = (idx: number, field: string, langKey: "ja" | "en", val: any) => {
-    if (langKey === "ja") {
-      const updated = [...normalizedTiersJa];
-      updated[idx] = { ...updated[idx], [field]: val };
-      updateField("ja", ["tiers"], updated);
-      if (field === "price" || field === "unit" || field === "isFeatured") {
-        const updatedEn = [...normalizedTiersEn];
-        updatedEn[idx] = { ...updatedEn[idx], [field]: val };
-        updateField("en", ["tiers"], updatedEn);
+      } else {
+        toast("Lỗi tải ảnh lên máy chủ", "error");
       }
-    } else {
-      const updated = [...normalizedTiersEn];
-      updated[idx] = { ...updated[idx], [field]: val };
-      updateField("en", ["tiers"], updated);
-      if (field === "price" || field === "unit" || field === "isFeatured") {
-        const updatedJa = [...normalizedTiersJa];
-        updatedJa[idx] = { ...updatedJa[idx], [field]: val };
-        updateField("ja", ["tiers"], updatedJa);
-      }
+    } catch {
+      toast("Có lỗi xảy ra khi tải ảnh", "error");
+    } finally {
+      setUploadingImg(false);
     }
   };
 
-  const handleAddTier = () => {
-    const newId = `tier-${Date.now().toString().slice(-4)}`;
-    const newTierJa = {
-      id: newId,
-      badge: "新規プラン",
-      name: `プラン 0${count + 1}: 新規設計パッケージ`,
-      sub: "ご要望に合わせた柔軟なカスタムプラン。",
-      price: "200,000",
-      unit: "円〜 / 式",
-      commitTime: "納期: 7〜10営業日",
-      commitSupport: "サポート: 専任KTS伴走",
-      features: [
-        "8K解像度高品質パース納品",
-        "基本平面計画＆ゾーニング図面",
-        "修正対応＆技術相談サポート",
-      ],
-      btnText: "プランについて相談する",
-      isFeatured: false,
-    };
-    const newTierEn = {
-      id: newId,
-      badge: "NEW PACKAGE",
-      name: `Package 0${count + 1}: Custom Design Plan`,
-      sub: "Flexible customized architectural design solution.",
-      price: "$1,500",
-      unit: "USD / Project",
-      commitTime: "Timeline: 7-10 Business Days",
-      commitSupport: "Support: Dedicated Architect",
-      features: [
-        "8K High-Resolution Perspective Renders",
-        "Schematic 2D Floor Plan & Space Zoning",
-        "Revisions & Ongoing Technical Advisory",
-      ],
-      btnText: "Inquire Package",
-      isFeatured: false,
-    };
-
-    const updatedJa = [...normalizedTiersJa, newTierJa];
-    const updatedEn = [...normalizedTiersEn, newTierEn];
-    updateField("ja", ["tiers"], updatedJa);
-    updateField("en", ["tiers"], updatedEn);
-    toast("Đã thêm gói báo giá mới!", "success");
-  };
-
-  const handleDeleteTier = (idx: number) => {
-    if (count <= 1) {
-      toast("Phải giữ lại ít nhất 1 gói báo giá", "info");
-      return;
-    }
-    const updatedJa = normalizedTiersJa.filter((_, i) => i !== idx);
-    const updatedEn = normalizedTiersEn.filter((_, i) => i !== idx);
-    updateField("ja", ["tiers"], updatedJa);
-    updateField("en", ["tiers"], updatedEn);
-    toast("Đã xóa gói báo giá", "info");
-  };
-
-  // Quản lý Features Checklist (Ảnh 2)
-  const handleUpdateFeature = (tierIdx: number, fIdx: number, langKey: "ja" | "en", val: string) => {
-    if (langKey === "ja") {
-      const tier = normalizedTiersJa[tierIdx];
-      const nextFeatures = [...(tier.features || [])];
-      nextFeatures[fIdx] = val;
-      handleUpdateTierField(tierIdx, "features", "ja", nextFeatures);
-    } else {
-      const tier = normalizedTiersEn[tierIdx];
-      const nextFeatures = [...(tier.features || [])];
-      nextFeatures[fIdx] = val;
-      handleUpdateTierField(tierIdx, "features", "en", nextFeatures);
-    }
-  };
-
-  const handleAddFeature = (tierIdx: number) => {
-    const tierJa = normalizedTiersJa[tierIdx];
-    const tierEn = normalizedTiersEn[tierIdx];
-    const nextJa = [...(tierJa.features || []), "新しい特典・機能項目"];
-    const nextEn = [...(tierEn.features || []), "New Feature / Deliverable"];
-    handleUpdateTierField(tierIdx, "features", "ja", nextJa);
-    handleUpdateTierField(tierIdx, "features", "en", nextEn);
-    toast("Đã thêm đặc quyền / tính năng mới!", "success");
-  };
-
-  const handleDeleteFeature = (tierIdx: number, fIdx: number) => {
-    const tierJa = normalizedTiersJa[tierIdx];
-    const tierEn = normalizedTiersEn[tierIdx];
-    const nextJa = (tierJa.features || []).filter((_: any, i: number) => i !== fIdx);
-    const nextEn = (tierEn.features || []).filter((_: any, i: number) => i !== fIdx);
-    handleUpdateTierField(tierIdx, "features", "ja", nextJa);
-    handleUpdateTierField(tierIdx, "features", "en", nextEn);
-    toast("Đã xóa tính năng", "info");
-  };
+  const heroImg = ja.image || en.image || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85";
 
   return (
-    <div className="space-y-6">
-      {/* Section Header */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          Tiêu đề Section Báo giá minh bạch
-        </h2>
-
-        <BilingualField
-          label="Tiêu đề Section Báo giá"
-          path={["info", "title"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-        />
-
-        <BilingualField
-          label="Đoạn mô tả phụ (Subtitle)"
-          path={["info", "sub"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-          isTextArea
-          rows={2}
-        />
-      </div>
-
-      {/* Pricing Tiers Management */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div>
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-              <DollarSign size={18} className="text-emerald-600" />
-              <span>Danh sách các Gói Báo giá ({count} gói)</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Bạn có thể thêm gói mới, xóa gói, đánh dấu gói nổi bật và quản lý chi tiết các đặc quyền &amp; cam kết.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleAddTier}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition"
-          >
-            <Plus size={15} />
-            <span>Thêm gói báo giá mới</span>
-          </button>
+    <div className="space-y-8">
+      {/* 1. Slogan kiến trúc (Tiêu đề chính của Section CTA) */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+            <span>Câu Slogan kiến trúc (Tiêu đề chính)</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Đã bỏ phần tiêu đề 2 dòng cũ theo yêu cầu. Câu slogan dưới đây sẽ hiển thị to và nổi bật với kích thước lớn như tiêu đề chính của Section CTA.
+          </p>
         </div>
 
-        {/* Grid các Gói Báo Giá */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {Array.from({ length: count }).map((_, idx) => {
-            const tierJa = normalizedTiersJa[idx] || {};
-            const tierEn = normalizedTiersEn[idx] || {};
-            const featuresJa: string[] = Array.isArray(tierJa.features) ? tierJa.features : [];
-            const featuresEn: string[] = Array.isArray(tierEn.features) ? tierEn.features : [];
-            const fCount = Math.max(featuresJa.length, featuresEn.length);
+        {/* 1 Câu Slogan (Tiêu đề chính) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {(lang === "ja" || lang === "both") && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Câu Slogan [JA / VI]:
+              </label>
+              <input
+                type="text"
+                value={ja.slogan ?? ja.subTitle ?? "Enduring Beauty."}
+                onChange={(e) => handleUpdate("slogan", "ja", e.target.value)}
+                className="w-full px-3 py-2 text-sm font-medium border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                placeholder="Enduring Beauty."
+              />
+            </div>
+          )}
 
-            return (
-              <div
-                key={tierJa.id || `tier-${idx}`}
-                className={`bg-white p-5 rounded-xl border shadow-sm space-y-4 transition ${tierJa.isFeatured ? "border-amber-400 ring-2 ring-amber-100" : "border-slate-200 hover:border-slate-300"
-                  }`}
-              >
-                {/* Header Card */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center">
-                      #{idx + 1}
-                    </span>
-                    <label className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(tierJa.isFeatured)}
-                        onChange={(e) => handleUpdateTierField(idx, "isFeatured", "ja", e.target.checked)}
-                        className="rounded border-slate-300 text-amber-600 focus:ring-amber-500"
-                      />
-                      <span>Gói Nổi Bật (Khuyên dùng)</span>
-                    </label>
-                  </div>
+          {(lang === "en" || lang === "both") && (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Câu Slogan [EN]:
+              </label>
+              <input
+                type="text"
+                value={en.slogan ?? en.subTitle ?? "Enduring Beauty."}
+                onChange={(e) => handleUpdate("slogan", "en", e.target.value)}
+                className="w-full px-3 py-2 text-sm font-medium border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                placeholder="Enduring Beauty."
+              />
+            </div>
+          )}
+        </div>
+      </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteTier(idx)}
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                    title="Xóa gói báo giá này"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+      {/* 2. Nút CTA Button */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div>
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-900 inline-block"></span>
+            <span>Nút bấm Kêu gọi hành động (CTA Button)</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Nút bấm nổi bật ngay dưới câu slogan dẫn khách hàng đến trang liên hệ hoặc biểu mẫu.
+          </p>
+        </div>
 
-                {/* Huy hiệu & Tên gói */}
-                <div className="space-y-2">
-                  <div className="grid grid-cols-1 gap-2">
-                    {(lang === "ja" || lang === "both") && (
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Huy hiệu gói [JA / VI]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierJa.badge || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "badge", "ja", e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                          placeholder="おすすめプラン, パース制作..."
-                        />
-                      </div>
-                    )}
-                    {(lang === "en" || lang === "both") && (
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Huy hiệu gói [EN]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierEn.badge || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "badge", "en", e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                          placeholder="RECOMMENDED, FULL PACKAGE..."
-                        />
-                      </div>
-                    )}
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Nhãn nút bấm (Text):
+            </label>
+            <input
+              type="text"
+              value={ja.btnText ?? en.btnText ?? "Contact"}
+              onChange={(e) => {
+                handleUpdate("btnText", "ja", e.target.value);
+                handleUpdate("btnText", "en", e.target.value);
+              }}
+              className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+              placeholder="Contact"
+            />
+          </div>
 
-                  <div className="grid grid-cols-1 gap-2">
-                    {(lang === "ja" || lang === "both") && (
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Tên gói [JA / VI]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierJa.name || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "name", "ja", e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs font-bold text-slate-800 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                          placeholder="プラン 01: 8K 3DCG 外観・内観パース"
-                        />
-                      </div>
-                    )}
-                    {(lang === "en" || lang === "both") && (
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Tên gói [EN]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierEn.name || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "name", "en", e.target.value)}
-                          className="w-full px-2.5 py-1.5 text-xs font-bold text-slate-800 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                          placeholder="Package 01: 8K 3D Perspectives"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Đường dẫn liên kết (Href):
+            </label>
+            <input
+              type="text"
+              value={ja.btnHref ?? en.btnHref ?? "/ja/contact"}
+              onChange={(e) => {
+                handleUpdate("btnHref", "ja", e.target.value);
+                handleUpdate("btnHref", "en", e.target.value);
+              }}
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+              placeholder="/ja/contact"
+            />
+          </div>
+        </div>
+      </div>
 
-                {/* Mô tả tóm tắt */}
-                <div className="grid grid-cols-1 gap-2">
-                  {(lang === "ja" || lang === "both") && (
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                        Mô tả tóm tắt [JA / VI]:
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={tierJa.sub || ""}
-                        onChange={(e) => handleUpdateTierField(idx, "sub", "ja", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                        placeholder="Mô tả phạm vi áp dụng..."
-                      />
-                    </div>
-                  )}
-                  {(lang === "en" || lang === "both") && (
-                    <div>
-                      <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                        Mô tả tóm tắt [EN]:
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={tierEn.sub || ""}
-                        onChange={(e) => handleUpdateTierField(idx, "sub", "en", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                        placeholder="Scope description..."
-                      />
-                    </div>
-                  )}
-                </div>
+      {/* 3. 4 Card Contact ở dưới */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block"></span>
+            <span>4 Card Thông tin Liên hệ (Icon chuẩn SVG)</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            4 khối liên hệ gồm Hotline, Email, Hỗ trợ và Văn phòng Studio.
+          </p>
+        </div>
 
-                {/* Đơn giá & Đơn vị tính */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      Đơn giá:
-                    </label>
-                    <input
-                      type="text"
-                      value={tierJa.price || tierEn.price || ""}
-                      onChange={(e) => handleUpdateTierField(idx, "price", "ja", e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs font-bold text-emerald-700 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                      placeholder="180,000"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      Đơn vị tính:
-                    </label>
-                    <input
-                      type="text"
-                      value={tierJa.unit || tierEn.unit || ""}
-                      onChange={(e) => handleUpdateTierField(idx, "unit", "ja", e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-emerald-500"
-                      placeholder="円〜 / 式, VNĐ/m²..."
-                    />
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Card 1: Hotline */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-700">
+              <Phone size={15} />
+              <span>Card 1: Hotline / Điện thoại</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Nhãn thẻ:</label>
+              <input
+                type="text"
+                value={ja.card1Label ?? "Hotline / お電話窓口"}
+                onChange={(e) => handleUpdate("card1Label", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                placeholder="Hotline / お電話窓口"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Số điện thoại hiển thị:</label>
+              <input
+                type="text"
+                value={ja.card1Val ?? "0984 384 190"}
+                onChange={(e) => handleUpdate("card1Val", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-bold font-mono border border-slate-300 rounded-lg bg-white"
+                placeholder="0984 384 190"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Link gọi điện:</label>
+              <input
+                type="text"
+                value={ja.card1Href ?? "tel:0984384190"}
+                onChange={(e) => handleUpdate("card1Href", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white"
+                placeholder="tel:0984384190"
+              />
+            </div>
+          </div>
 
-                {/* Cam kết tiến độ & hỗ trợ */}
-                <div className="space-y-2">
-                  {(lang === "ja" || lang === "both") && (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Cam kết tiến độ [JA / VI]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierJa.commitTime || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "commitTime", "ja", e.target.value)}
-                          className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                          placeholder="納期: 5〜7営業日"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Cam kết hỗ trợ [JA / VI]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierJa.commitSupport || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "commitSupport", "ja", e.target.value)}
-                          className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                          placeholder="修正: 2回まで無料"
-                        />
-                      </div>
-                    </div>
-                  )}
+          {/* Card 2: Email */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-700">
+              <Mail size={15} />
+              <span>Card 2: Email tiếp nhận</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Nhãn thẻ:</label>
+              <input
+                type="text"
+                value={ja.card2Label ?? "Email / メール受付"}
+                onChange={(e) => handleUpdate("card2Label", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                placeholder="Email / メール受付"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Địa chỉ Email hiển thị:</label>
+              <input
+                type="text"
+                value={ja.card2Val ?? "info@i8studio.vn"}
+                onChange={(e) => handleUpdate("card2Val", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-bold font-mono border border-slate-300 rounded-lg bg-white"
+                placeholder="info@i8studio.vn"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Link gửi thư:</label>
+              <input
+                type="text"
+                value={ja.card2Href ?? "mailto:info@i8studio.vn"}
+                onChange={(e) => handleUpdate("card2Href", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white"
+                placeholder="mailto:info@i8studio.vn"
+              />
+            </div>
+          </div>
 
-                  {(lang === "en" || lang === "both") && (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Cam kết tiến độ [EN]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierEn.commitTime || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "commitTime", "en", e.target.value)}
-                          className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                          placeholder="Timeline: 5-7 Business Days"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Cam kết hỗ trợ [EN]:
-                        </label>
-                        <input
-                          type="text"
-                          value={tierEn.commitSupport || ""}
-                          onChange={(e) => handleUpdateTierField(idx, "commitSupport", "en", e.target.value)}
-                          className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                          placeholder="Revisions: 2 Free Rounds"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+          {/* Card 3: Support */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-700">
+              <Clock size={15} />
+              <span>Card 3: Thời gian hỗ trợ</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Nhãn thẻ:</label>
+              <input
+                type="text"
+                value={ja.card3Label ?? "Support / 相談対応"}
+                onChange={(e) => handleUpdate("card3Label", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                placeholder="Support / 相談対応"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Mô tả phản hồi:</label>
+              <input
+                type="text"
+                value={ja.card3Val ?? "24時間以内返答・土日祝相談可能"}
+                onChange={(e) => handleUpdate("card3Val", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white"
+                placeholder="24時間以内返答・土日祝相談可能"
+              />
+            </div>
+          </div>
 
-                {/* TÍNH NĂNG ẢNH 2: DANH SÁCH ĐẶC QUYỀN & TÍNH NĂNG (FEATURES CHECKLIST) */}
-                <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-                      <span className="text-amber-600">✓</span>
-                      <span>Đặc quyền &amp; Tính năng ({fCount})</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleAddFeature(idx)}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded transition"
-                    >
-                      <Plus size={12} />
-                      <span>Thêm dòng</span>
-                    </button>
-                  </div>
+          {/* Card 4: Studio */}
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-700">
+              <MapPin size={15} />
+              <span>Card 4: Địa điểm Studio</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Nhãn thẻ:</label>
+              <input
+                type="text"
+                value={ja.card4Label ?? "Studio / 拠点"}
+                onChange={(e) => handleUpdate("card4Label", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                placeholder="Studio / 拠点"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-slate-600 mb-1">Địa điểm văn phòng:</label>
+              <input
+                type="text"
+                value={ja.card4Val ?? "Tokyo & Ho Chi Minh City"}
+                onChange={(e) => handleUpdate("card4Val", "ja", e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white"
+                placeholder="Tokyo & Ho Chi Minh City"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <div className="space-y-2">
-                    {Array.from({ length: fCount }).map((_, fIdx) => (
-                      <div
-                        key={`f-${idx}-${fIdx}`}
-                        className="flex items-start gap-1.5 p-2 bg-slate-50/80 rounded-lg border border-slate-200"
-                      >
-                        <span className="text-amber-500 font-bold text-xs mt-1 shrink-0">✓</span>
-                        <div className="flex-1 space-y-1">
-                          {(lang === "ja" || lang === "both") && (
-                            <input
-                              type="text"
-                              value={featuresJa[fIdx] || ""}
-                              onChange={(e) => handleUpdateFeature(idx, fIdx, "ja", e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                              placeholder="8K解像度納品（印刷・Web両対応）..."
-                            />
-                          )}
-                          {(lang === "en" || lang === "both") && (
-                            <input
-                              type="text"
-                              value={featuresEn[fIdx] || ""}
-                              onChange={(e) => handleUpdateFeature(idx, fIdx, "en", e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                              placeholder="8K Print & Web Resolution Deliverables..."
-                            />
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteFeature(idx, fIdx)}
-                          className="p-1 text-slate-400 hover:text-red-600 rounded transition shrink-0"
-                          title="Xóa dòng tính năng này"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+      {/* 4. Ảnh kiến trúc bên phải */}
+      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
+        <div>
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+            <span>Hình ảnh Kiến trúc Biệt thự (Cột bên phải)</span>
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Hình ảnh tràn viền, góc phẳng sắc nét không bo góc ở cột bên phải. Khuyến nghị ảnh chụp kiến trúc độ phân giải cao tỉ lệ dọc hoặc vuông.
+          </p>
+        </div>
 
-                {/* Nút bấm CTA */}
-                <div className="pt-2 border-t border-slate-100">
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Nút Đăng ký (CTA Button Text):
-                  </label>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {(lang === "ja" || lang === "both") && (
-                      <input
-                        type="text"
-                        value={tierJa.btnText || ""}
-                        onChange={(e) => handleUpdateTierField(idx, "btnText", "ja", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                        placeholder="プラン01を相談する"
-                      />
-                    )}
-                    {(lang === "en" || lang === "both") && (
-                      <input
-                        type="text"
-                        value={tierEn.btnText || ""}
-                        onChange={(e) => handleUpdateTierField(idx, "btnText", "en", e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
-                        placeholder="Inquire Package"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex flex-col sm:flex-row gap-5 items-start">
+          {/* Preview ảnh */}
+          <div className="w-full sm:w-64 h-64 border border-slate-200 bg-slate-900 rounded-none overflow-hidden shrink-0 relative flex items-center justify-center">
+            {heroImg ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={heroImg}
+                alt="Architectural Preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-xs text-slate-400">Chưa có ảnh</span>
+            )}
+          </div>
+
+          <div className="flex-1 space-y-3 w-full">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Đường dẫn hình ảnh (URL):
+              </label>
+              <input
+                type="text"
+                value={heroImg}
+                onChange={(e) => handleUpdate("image", "ja", e.target.value)}
+                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg cursor-pointer transition shadow-sm">
+                <Upload size={14} />
+                <span>{uploadingImg ? "Đang tải ảnh..." : "Tải ảnh từ máy tính"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingImg}
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUploadImage(f);
+                  }}
+                />
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 // ============================================================================
 // PARTNERS FORM (08. Thương hiệu & Đối tác)
 // ============================================================================

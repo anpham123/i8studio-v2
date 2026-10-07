@@ -9,7 +9,7 @@ import {
   Settings, LogOut, X, ChevronRight, Brush, BarChart3,
   Tag, DollarSign, Building2, Home, FileSpreadsheet,
   LayoutTemplate, Sparkles, AlertCircle, GitCommit, LayoutGrid,
-  FolderCheck, ShieldCheck, Compass, Link2,
+  FolderCheck, ShieldCheck, Compass, Link2, Megaphone,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -57,11 +57,10 @@ const menuGroups: MenuGroup[] = [
       { href: "/admin/landingpage/workflow", label: "03. Quy trình 5 bước", icon: GitCommit },
       { href: "/admin/landingpage/deliverables", label: "04. Hồ sơ bàn giao", icon: FolderCheck },
       { href: "/admin/landingpage/services-bento", label: "05. Trụ cột Bento", icon: LayoutGrid },
-      { href: "/admin/landingpage/clients", label: "06. Đối tác & Uy tín", icon: ShieldCheck },
-      { href: "/admin/landingpage/applications", label: "07. Ứng dụng thực tế", icon: Layers },
-      { href: "/admin/landingpage/partners", label: "08. Thương hiệu & Đối tác", icon: Building2 },
-      { href: "/admin/landingpage/gallery", label: "09. Triển lãm dự án", icon: Compass },
-      { href: "/admin/landingpage/pricing", label: "10. Báo giá minh bạch", icon: DollarSign },
+      { href: "/admin/landingpage/applications", label: "06. Ứng dụng thực tế", icon: Layers },
+      { href: "/admin/landingpage/partners", label: "07. Thương hiệu & Đối tác", icon: Building2 },
+      { href: "/admin/landingpage/gallery", label: "08. Triển lãm dự án", icon: Compass },
+      { href: "/admin/landingpage/cta", label: "09. CTA & Liên hệ", icon: Megaphone },
     ],
   },
   {
