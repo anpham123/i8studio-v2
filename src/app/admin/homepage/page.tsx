@@ -66,6 +66,10 @@ export default function HomepagePage() {
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // Batch selection
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
+  const [batchDeleting, setBatchDeleting] = useState(false);
   // Add modal form
   const [addForm, setAddForm] = useState({ title: "", type: "image" as string });
   const [addImage, setAddImage] = useState<File | null>(null);
@@ -307,6 +311,66 @@ export default function HomepagePage() {
     setRevalidating(false);
   };
 
+  /* ─── Batch Actions ─── */
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === allSorted.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(allSorted.map((i) => i.id));
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setBatchDeleting(true);
+    try {
+      const res = await fetch("/api/home-media", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      if (res.ok) {
+        setItems((prev) => prev.filter((i) => !selectedIds.includes(i.id)));
+        toast(`Đã xóa ${selectedIds.length} mục`, "success");
+        setSelectedIds([]);
+        setShowBatchDeleteConfirm(false);
+        revalidateCache();
+      } else {
+        toast("Lỗi khi xóa hàng loạt", "error");
+      }
+    } catch {
+      toast("Lỗi khi xóa hàng loạt", "error");
+    } finally {
+      setBatchDeleting(false);
+    }
+  };
+
+  const handleBatchToggleActive = async (targetActive: boolean) => {
+    if (selectedIds.length === 0) return;
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/home-media/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ active: targetActive }),
+          })
+        )
+      );
+      setItems((prev) =>
+        prev.map((i) => (selectedIds.includes(i.id) ? { ...i, active: targetActive } : i))
+      );
+      toast(`Đã ${targetActive ? "hiện" : "ẩn"} ${selectedIds.length} mục`, "success");
+      revalidateCache();
+    } catch {
+      toast("Lỗi khi cập nhật trạng thái", "error");
+    }
+  };
+
   const heroItem = activeItems[0];
 
   return (
@@ -411,6 +475,51 @@ export default function HomepagePage() {
         </div>
       ) : (
         <div className="space-y-2">
+          {/* Batch action toolbar */}
+          {allSorted.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-gray-200 rounded-xl px-4 py-2.5 mb-3 shadow-sm">
+              <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium text-gray-700 select-none">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.length === allSorted.length && allSorted.length > 0}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer"
+                />
+                <span>{selectedIds.length > 0 ? `Đã chọn ${selectedIds.length} / ${allSorted.length}` : "Chọn tất cả"}</span>
+              </label>
+
+              {selectedIds.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleBatchToggleActive(true)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                  >
+                    Hiện ({selectedIds.length})
+                  </button>
+                  <button
+                    onClick={() => handleBatchToggleActive(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                  >
+                    Ẩn ({selectedIds.length})
+                  </button>
+                  <button
+                    onClick={() => setShowBatchDeleteConfirm(true)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                  >
+                    <Trash2 size={13} />
+                    Xóa ({selectedIds.length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="px-2 py-1.5 text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {allSorted.map((item, idx) => (
             <div
               key={item.id} draggable
@@ -418,11 +527,23 @@ export default function HomepagePage() {
               onDragOver={(e) => { e.preventDefault(); setDragOverIdx(idx); }}
               onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
               onDrop={() => handleDrop(idx)}
-              className={`flex items-center gap-3 bg-white rounded-xl border p-3 transition-all hover:shadow-md cursor-grab active:cursor-grabbing ${!item.active ? "opacity-50" : ""
-                } ${idx === 0 && item.active ? "border-amber-300 bg-amber-50/50 ring-1 ring-amber-200" : "border-gray-200"
-                } ${dragOverIdx === idx && dragIdx !== idx ? "border-blue-400 ring-2 ring-blue-200 bg-blue-50/50" : ""
-                } ${dragIdx === idx ? "opacity-40 scale-[0.98]" : ""}`}
+              className={`flex items-center gap-3 bg-white rounded-xl border p-3 transition-all hover:shadow-md cursor-grab active:cursor-grabbing ${
+                !item.active ? "opacity-50" : ""
+              } ${idx === 0 && item.active ? "border-amber-300 bg-amber-50/50 ring-1 ring-amber-200" : "border-gray-200"
+              } ${dragOverIdx === idx && dragIdx !== idx ? "border-blue-400 ring-2 ring-blue-200 bg-blue-50/50" : ""
+              } ${dragIdx === idx ? "opacity-40 scale-[0.98]" : ""} ${
+                selectedIds.includes(item.id) ? "ring-2 ring-blue-500/40 bg-blue-50/20" : ""
+              }`}
             >
+              {/* Checkbox */}
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(item.id)}
+                onChange={() => toggleSelect(item.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer shrink-0"
+              />
+
               {/* Drag handle */}
               <div className="text-gray-300 hover:text-gray-500 shrink-0"><GripVertical size={18} /></div>
 
@@ -691,6 +812,28 @@ export default function HomepagePage() {
               <button onClick={() => deletePermanently(deleteConfirm)}
                 className="flex items-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
                 <Trash2 size={16} /> Xóa
+              </button>
+            </div>
+          </div>
+        </div>, document.body)
+      }
+
+      {/* ─── Batch Delete Confirm ─── */}
+      {showBatchDeleteConfirm &&
+        createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setShowBatchDeleteConfirm(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center"><Trash2 size={24} className="text-red-500" /></div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Xóa {selectedIds.length} mục đã chọn?</h3>
+                <p className="text-sm text-gray-500">Hành động này sẽ xóa vĩnh viễn các mục đã chọn và không thể hoàn tác!</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowBatchDeleteConfirm(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Hủy</button>
+              <button onClick={handleBatchDelete} disabled={batchDeleting}
+                className="flex items-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50">
+                <Trash2 size={16} /> {batchDeleting ? "Đang xóa..." : `Xóa ${selectedIds.length} mục`}
               </button>
             </div>
           </div>

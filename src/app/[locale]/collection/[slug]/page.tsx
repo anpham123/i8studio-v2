@@ -2,10 +2,41 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
-import { COLLECTIONS, getCollectionBySlug } from "@/lib/collection-data";
+import { getCollectionBySlug } from "@/lib/collection-data";
 import CollectionDetailContent from "@/components/public/CollectionDetailContent";
 
 export const dynamic = "force-dynamic";
+
+interface DbColMeta {
+  titleJa?: string | null;
+  titleEn?: string | null;
+  descJa?: string | null;
+  descEn?: string | null;
+}
+
+interface DbColItem {
+  image: string;
+  captionJa?: string | null;
+  captionEn?: string | null;
+}
+
+interface DbColDetail {
+  slug: string;
+  titleJa: string;
+  titleEn: string;
+  descJa: string;
+  descEn: string;
+  coverImage: string;
+  imagesJson?: string | null;
+  items?: DbColItem[];
+}
+
+interface OtherCol {
+  slug: string;
+  titleJa: string;
+  titleEn: string;
+  coverImage: string;
+}
 
 export async function generateMetadata({
   params,
@@ -21,7 +52,7 @@ export async function generateMetadata({
       decodedSlug = rawSlug;
     }
 
-    let dbCol: any = null;
+    let dbCol: DbColMeta | null = null;
     try {
       dbCol = await prisma.collection.findFirst({
         where: {
@@ -61,31 +92,31 @@ export default async function CollectionDetailPage({
     decodedSlug = rawSlug;
   }
 
-  let dbCol: any = null;
+  let dbCol: DbColDetail | null = null;
   try {
-    dbCol = await prisma.collection.findFirst({
+    dbCol = (await prisma.collection.findFirst({
       where: {
         OR: [{ slug: decodedSlug }, { slug: rawSlug }],
       },
       include: {
         items: { orderBy: { order: "asc" } },
       },
-    });
+    })) as unknown as DbColDetail | null;
   } catch {
     try {
-      dbCol = await prisma.collection.findFirst({
+      dbCol = (await prisma.collection.findFirst({
         where: {
           OR: [{ slug: decodedSlug }, { slug: rawSlug }],
         },
-      });
+      })) as unknown as DbColDetail | null;
     } catch {
       dbCol = null;
     }
   }
 
-  let allDbCols: any[] = [];
+  let allDbCols: OtherCol[] = [];
   try {
-    allDbCols = await prisma.collection.findMany({
+    allDbCols = (await prisma.collection.findMany({
       where: { active: true, slug: { notIn: [decodedSlug, rawSlug] } },
       orderBy: { order: "asc" },
       take: 3,
@@ -95,7 +126,7 @@ export default async function CollectionDetailPage({
         titleEn: true,
         coverImage: true,
       },
-    });
+    })) as unknown as OtherCol[];
   } catch {
     allDbCols = [];
   }
@@ -103,7 +134,7 @@ export default async function CollectionDetailPage({
   if (dbCol) {
     let images: { image: string; captionJa: string; captionEn: string }[] = [];
     if (dbCol.items && dbCol.items.length > 0) {
-      images = dbCol.items.map((i: any) => ({
+      images = dbCol.items.map((i: DbColItem) => ({
         image: i.image,
         captionJa: i.captionJa || "",
         captionEn: i.captionEn || "",

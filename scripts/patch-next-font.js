@@ -14,6 +14,15 @@ try {
       console.log('✅ Patched @next/font loader.js');
     }
   }
+  const findPath = path.join(__dirname, '../node_modules/next/dist/compiled/@next/font/dist/google/find-font-files-in-css.js');
+  if (fs.existsSync(findPath)) {
+    let content = fs.readFileSync(findPath, 'utf8');
+    if (content.includes('const googleFontFileUrl = (_b = /src: url\\((.+?)\\)/.exec(line))') && content.includes('googleFontFileUrl = googleFontFileUrl.replace')) {
+      content = content.replace('const googleFontFileUrl = (_b = /src: url\\((.+?)\\)/.exec(line))', 'let googleFontFileUrl = (_b = /src: url\\((.+?)\\)/.exec(line))');
+      fs.writeFileSync(findPath, content, 'utf8');
+      console.log('✅ Patched @next/font find-font-files-in-css.js');
+    }
+  }
 } catch (err) {
   console.warn('⚠️ Could not patch next/font:', err.message);
 }

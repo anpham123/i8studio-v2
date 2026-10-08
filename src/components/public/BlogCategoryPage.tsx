@@ -5,7 +5,7 @@ import BlogListWithFilter from "./BlogListWithFilter";
 interface Props {
   locale: string;
   categorySlug: string;
-  categoryKey: string;
+  categoryKey?: string;
 }
 
 export default async function BlogCategoryPage({ locale, categorySlug }: Props) {
