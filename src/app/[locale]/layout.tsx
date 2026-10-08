@@ -3,13 +3,10 @@ import { getMessages } from "next-intl/server";
 import { Outfit, Cormorant_Garamond, Noto_Serif_JP, Playfair_Display, Roboto } from "next/font/google";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Script from "next/script";
 import "../globals.css";
 import Header from "@/components/public/Header";
 import Footer from "@/components/public/Footer";
 import FloatingCTA from "@/components/public/FloatingCTA";
-import FloatingBackToTop from "@/components/public/FloatingBackToTop";
-import QuickInquiryDrawer from "@/components/public/QuickInquiryDrawer";
 import ExitIntentPopup from "@/components/public/ExitIntentPopup";
 import PageTransition from "@/components/public/PageTransition";
 import PageViewTracker from "@/components/public/PageViewTracker";
@@ -33,8 +30,8 @@ const cormorant = Cormorant_Garamond({
 });
 
 const notoSerifJP = Noto_Serif_JP({
-  subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "900"],
+  preload: false,
   variable: "--font-noto-serif",
 });
 
@@ -77,22 +74,9 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       images: ["/og-default.jpg"],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots: { index: true, follow: true },
     icons: {
       icon: `/api/favicon?v=${faviconKey}`,
-    },
-    verification: {
-      google: "M2yi6RIMJiVIW2Ijao6mABwtiEQG-OSWAx0PInw6tS8",
     },
   };
 }
@@ -120,47 +104,17 @@ export default async function LocaleLayout({
 
   return (
     <html lang={params.locale}>
-      <head>
-        <meta name="google-site-verification" content="M2yi6RIMJiVIW2Ijao6mABwtiEQG-OSWAx0PInw6tS8" />
-        {/* Google tag (gtag.js) - Google Analytics 4 */}
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-FJ8KBNTLZB"
-        />
-        <Script
-          id="google-analytics-ga4"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-FJ8KBNTLZB', {
-                page_path: window.location.pathname,
-              });
-            `,
-          }}
-        />
-      </head>
       <body
         className={`${outfit.variable} ${cormorant.variable} ${notoSerifJP.variable} ${playfair.variable} ${roboto.variable} font-sans antialiased`}
         style={{ "--header-h": `${headerHeight}px` } as React.CSSProperties}
       >
         <NextIntlClientProvider messages={messages}>
-          <Header
-            headerHeight={headerHeight}
-            logoImage={settingsMap.logoImage}
-            logoHeight={parseInt(settingsMap.logoHeight) || 48}
-            services={services.map(s => ({ slug: s.slug, name: s.name, nameJa: s.nameJa, image: s.image }))}
-            menuImages={settingsMap}
-          />
+          <Header headerHeight={headerHeight} logoImage={settingsMap.logoImage} logoHeight={parseInt(settingsMap.logoHeight) || 48} services={services.map(s => ({ slug: s.slug, name: s.name, nameJa: s.nameJa, image: s.image }))} />
           <main style={{ paddingTop: headerHeight }}>
             <PageTransition>{children}</PageTransition>
           </main>
           <Footer settings={settingsMap} services={services} />
           <FloatingCTA />
-          <FloatingBackToTop />
-          <QuickInquiryDrawer />
           <ExitIntentPopup />
           <PageViewTracker />
           <CustomCursor
