@@ -248,6 +248,37 @@ export default function LandingPageInteractive({
       pGridObs.observe(pricingGrid);
     }
 
+    // 1k. Dedicated Observer for Section 10: Architectural CTA (Ảnh bên trái trượt từ phải qua, nội dung bên phải hiệu ứng giống Ảnh 2)
+    const ctaSection = document.getElementById("dang-ky-tu-van");
+    if (ctaSection) {
+      const ctaObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const photoCol = ctaSection.querySelector(".cta-arch-photo-col");
+              if (photoCol) photoCol.classList.add("revealed");
+
+              const slogan = ctaSection.querySelector(".cta-arch-slogan-heading");
+              if (slogan) slogan.classList.add("revealed");
+
+              const btnRow = ctaSection.querySelector(".cta-arch-btn-row");
+              if (btnRow) btnRow.classList.add("revealed");
+
+              const contactBlock = ctaSection.querySelector(".cta-arch-contact-info-block");
+              if (contactBlock) contactBlock.classList.add("revealed");
+
+              const cards = ctaSection.querySelectorAll(".cta-contact-item-card");
+              cards.forEach((c) => c.classList.add("revealed"));
+
+              ctaObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      );
+      ctaObserver.observe(ctaSection);
+    }
+
     // 2. Hero Slideshow Auto Rotation
     const slides = document.querySelectorAll<HTMLElement>("#heroSlideshow .hero-slide");
     const counterEl = document.querySelector<HTMLElement>(".hero-slide-counter .slide-active");
@@ -750,6 +781,10 @@ export default function LandingPageInteractive({
       if (narrativeEl && data.narrative) narrativeEl.textContent = data.narrative;
       if (solutionEl && data.solution) solutionEl.textContent = data.solution;
       if (materialsEl && data.materials) materialsEl.textContent = data.materials;
+      const priceValEl = document.getElementById("spotlightPriceVal");
+      if (priceValEl && data.priceEstimate) {
+        priceValEl.textContent = data.priceEstimate;
+      }
 
       if (deliverablesEl && data.deliverables) {
         deliverablesEl.innerHTML = (data.deliverables as any[])
@@ -828,8 +863,9 @@ export default function LandingPageInteractive({
       openGalleryModal(currentSpotlightId);
     };
 
-    zoomHintBtn?.addEventListener("click", handleZoomClick);
-    spotlightVisualFrame?.addEventListener("click", handleZoomClick);
+    // Legacy zoom modal is replaced by modern React Lightbox in LandingGalleryShowcase
+    // zoomHintBtn?.addEventListener("click", handleZoomClick);
+    // spotlightVisualFrame?.addEventListener("click", handleZoomClick);
     galleryModalCloseBtn?.addEventListener("click", closeGalleryModal);
 
     const handleGalleryModalBackdrop = (e: MouseEvent) => {

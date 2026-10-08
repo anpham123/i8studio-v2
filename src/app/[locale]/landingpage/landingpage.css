@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 /* ==========================================================================
    DESIGN TOKENS & SYSTEM VARIABLES
@@ -14,6 +14,7 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-heading: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
 
   /* Color Palette */
   --bg-page: #ffffff;
@@ -8573,3 +8574,1987 @@
   transform: translateY(-12px) !important;
   box-shadow: 0 26px 65px rgba(0, 0, 0, 0.25), 0 0 45px rgba(217, 119, 6, 0.18);
 }
+
+/* ==========================================================================
+   SECTION 2: 2 PHẦN TÁCH BIỆT (NỖI ĐAU & GIẢI PHÁP) - LIÊN KẾT TRỰC DIỆN 1-1
+   Đồng bộ 100% Màu sắc, Cỡ chữ, Font chữ, Nền với Section 4 (Alabaster Cream)
+   ========================================================================== */
+.pain-points-section {
+  padding: 5.5rem 0 5rem;
+  background: radial-gradient(circle at 50% 30%, #fdfcf9 0%, #f7f4ed 60%, #eee8de 100%);
+  border-bottom: 1px solid rgba(18, 19, 22, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.4s ease;
+}
+
+.pain-part-block,
+.solutions-part-block {
+  position: relative;
+}
+
+.section-phase-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c49735;
+  background: rgba(196, 151, 53, 0.1);
+  padding: 0.38rem 1.05rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(196, 151, 53, 0.3);
+  margin-bottom: 0.85rem;
+}
+
+.section-phase-eyebrow.emerald {
+  color: #059669;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.section-block-subtitle {
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  max-width: 720px;
+  margin: 0.85rem auto 0;
+  text-align: center;
+}
+
+/* Part 1: Pain Point Cards (Crisp Pure White on Luxury Cream) */
+.pain-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 768px) {
+  .pain-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pain-card-refined {
+  background-color: #ffffff !important;
+  border: 1.5px solid rgba(18, 19, 22, 0.08) !important;
+  border-radius: 18px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(18, 19, 22, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  scroll-margin-top: 100px;
+}
+
+.pain-card-refined::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.pain-card-refined:hover {
+  transform: translateY(-6px);
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 18px 40px rgba(18, 19, 22, 0.1), 0 0 20px rgba(239, 68, 68, 0.08);
+}
+
+.pain-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pain-tag-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #fecaca;
+}
+
+.pain-badge-alert-refined {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #b45309;
+  background: #fffbeb;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #fde68a;
+}
+
+.pain-quote-refined {
+  font-family: var(--font-heading);
+  font-size: 1.18rem;
+  font-weight: 800;
+  line-height: 1.45;
+  color: #111215;
+  margin: 0;
+}
+
+.pain-detail-refined {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #4b5563;
+  margin: 0;
+}
+
+.pain-risk-callout {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.1rem;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #991b1b;
+}
+
+/* FOOTER LIÊN KẾT TRỰC DIỆN TỪ NỖI ĐAU SANG GIẢI PHÁP */
+.pain-linkage-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fcfbf9;
+  border: 1px solid rgba(196, 151, 53, 0.25);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  margin-top: 0.25rem;
+}
+
+.pain-linkage-footer:hover {
+  background: #fffbeb;
+  border-color: #c49735;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(196, 151, 53, 0.15);
+}
+
+.linkage-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+  white-space: nowrap;
+}
+
+.linkage-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.linkage-arrow {
+  color: #c49735;
+  font-weight: 900;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease;
+}
+
+.pain-linkage-footer:hover .linkage-arrow {
+  transform: translateY(2px);
+  color: #059669;
+}
+
+/* ==========================================================================
+   CẦU NỐI CHIẾN LƯỢC: MA TRẬN ĐỐI CHIẾU 1-1 (STRATEGIC LINKAGE MATRIX)
+   ========================================================================== */
+.pain-solution-strategic-bridge {
+  margin: 4.5rem 0 4rem;
+  padding: 2.2rem 1.8rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 244, 237, 0.8) 100%);
+  border: 1.5px solid rgba(196, 151, 53, 0.28);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(18, 19, 22, 0.04);
+  text-align: center;
+}
+
+.bridge-separator-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.bridge-sparkle-dot {
+  color: #c49735;
+  font-size: 0.85rem;
+  animation: sparklePulse 3s ease-in-out infinite;
+}
+
+.bridge-center-tag {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 0.4rem 1.2rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.bridge-pairs-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 992px) {
+  .bridge-pairs-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .bridge-pairs-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bridge-pair-chip {
+  background: #ffffff;
+  border: 1.5px solid rgba(18, 19, 22, 0.08);
+  border-radius: 12px;
+  padding: 0.9rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.bridge-pair-chip:hover {
+  border-color: #059669;
+  background: #f0fdf4;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.12);
+}
+
+.pair-num {
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  color: #b45309;
+  background: #fffbeb;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pair-pain {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dc2626;
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+.pair-arrow {
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.pair-sol {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #059669;
+}
+
+/* ==========================================================================
+   PART 2: BREAKTHROUGH SOLUTIONS (GIẢI PHÁP ĐỘT PHÁ KONTUR)
+   ========================================================================== */
+.solutions-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+}
+
+@media (max-width: 900px) {
+  .solutions-bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.solution-matrix-card {
+  background: #ffffff !important;
+  border: 1.5px solid rgba(18, 19, 22, 0.08) !important;
+  border-radius: 18px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.4rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(18, 19, 22, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  scroll-margin-top: 100px;
+}
+
+.solution-matrix-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  opacity: 0.85;
+}
+
+.solution-matrix-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 18px 40px rgba(18, 19, 22, 0.1), 0 0 25px rgba(16, 185, 129, 0.1);
+}
+
+.solution-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.solution-num-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solution-num {
+  font-family: var(--font-heading);
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #059669;
+  line-height: 1;
+}
+
+.solution-specs-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid #a7f3d0;
+  text-transform: uppercase;
+}
+
+.solution-badge-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f8fafc;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.solution-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: #0f172a;
+  margin: 0;
+}
+
+.solution-subtitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0284c7;
+  margin: 0;
+}
+
+.solution-desc {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0;
+}
+
+.solution-pain-relief {
+  padding: 0.9rem 1.1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #15803d;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.solution-highlights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.solution-highlights-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+  color: #1e293b;
+  font-weight: 550;
+}
+
+.solution-highlights-list li span:first-child {
+  color: #059669;
+  font-weight: 900;
+}
+
+/* ==========================================================================
+   SECTION 10: REFERENCE PRICING & COST ESTIMATOR (BẢNG GIÁ THAM KHẢO)
+   ========================================================================== */
+.pricing-reference-section {
+  padding: 5.5rem 0 5rem;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.4s ease;
+}
+
+.pricing-typologies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .pricing-typologies-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .pricing-typologies-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.typology-rate-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.typology-rate-card.featured {
+  background: rgba(217, 119, 6, 0.04);
+  border-color: rgba(217, 119, 6, 0.35);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35), 0 0 30px rgba(217, 119, 6, 0.12);
+}
+
+.typology-rate-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+}
+
+.typology-tag-ribbon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.typology-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.typology-category {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.typology-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.typology-desc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.typology-price-box {
+  padding: 1.1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.typology-price-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.typology-price-val {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1.2;
+}
+
+.typology-price-unit {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.typology-timeline-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.typology-deliverables-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.typology-deliverables-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.typology-deliverables-list li svg {
+  color: #10b981;
+  shrink: 0;
+  margin-top: 2px;
+}
+
+/* 3D Services Dedicated Grid */
+.pricing-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+}
+
+@media (max-width: 900px) {
+  .pricing-services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.service-3d-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.service-3d-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.service-3d-title {
+  font-size: 1.05rem;
+  font-weight: 750;
+  color: #f8fafc;
+  margin: 0 0 0.4rem 0;
+}
+
+.service-3d-desc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.service-3d-rate-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.service-3d-rate {
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: #38bdf8;
+}
+
+.service-3d-unit {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.service-3d-speed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* Quick Cost Estimator Component */
+.pricing-estimator-container {
+  margin-top: 4.5rem;
+}
+
+.pricing-estimator-card {
+  background: linear-gradient(135deg, rgba(20, 24, 33, 0.85) 0%, rgba(13, 16, 23, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+  .pricing-estimator-card {
+    padding: 2rem 1.5rem;
+  }
+}
+
+.estimator-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.estimator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  margin-bottom: 0.75rem;
+}
+
+.estimator-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+  font-weight: 850;
+  color: #ffffff;
+  margin: 0 0 0.6rem 0;
+}
+
+.estimator-desc {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.estimator-body-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (max-width: 991px) {
+  .estimator-body-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.control-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: #f1f5f9;
+}
+
+.control-label .step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.type-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .type-pills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.type-pill-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.25s ease;
+}
+
+.type-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.type-pill-btn.active {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.type-pill-name {
+  font-size: 0.86rem;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.type-pill-rate {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.type-pill-btn.active .type-pill-rate {
+  color: #93c5fd;
+}
+
+.area-value-display {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.35rem 0.8rem;
+}
+
+.area-number-input {
+  width: 60px;
+  background: transparent;
+  border: none;
+  color: #fbbf24;
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: right;
+  outline: none;
+}
+
+.area-unit {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.slider-wrapper {
+  margin-top: 0.5rem;
+}
+
+.area-slider-range {
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  background: #334155;
+  outline: none;
+  cursor: pointer;
+  accent-color: #f59e0b;
+}
+
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.result-card-inner {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.result-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.result-price-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.result-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.price-num {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+}
+
+.price-separator {
+  font-size: 1.4rem;
+  color: #94a3b8;
+}
+
+.price-unit {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.result-tax-note {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.result-deliverables-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.deliverables-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 750;
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+}
+
+.deliverables-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.deliverables-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
+
+.deliverables-list li span:first-child {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.estimator-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.95rem 1.25rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #000000;
+  font-weight: 800;
+  font-size: 0.88rem;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(217, 119, 6, 0.3);
+  transition: all 0.3s ease;
+}
+
+.estimator-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(217, 119, 6, 0.45);
+  filter: brightness(1.1);
+}
+
+.estimator-disclaimer {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 4 Principles of Transparency */
+.pricing-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 4rem;
+}
+
+@media (max-width: 991px) {
+  .pricing-principles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .pricing-principles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.principle-item-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.principle-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.principle-title {
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: #ffffff;
+  margin: 0;
+}
+
+.principle-desc {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ==========================================================================
+   UNIFIED CHALLENGES & SOLUTIONS SECTION
+   Background matching Section 3 (Warm Architectural Radial Gradient)
+   ========================================================================== */
+.challenges-solutions-unified-section {
+  padding: 5.5rem 0;
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #fcfbf9 0%, #f5f0e8 60%, #ece5da 100%);
+  background-image: 
+    linear-gradient(to right, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 50% 30%, #fcfbf9 0%, #f5f0e8 60%, #ece5da 100%);
+  background-size: 26px 26px, 26px 26px, 100% 100%;
+  border-bottom: 1px solid rgba(18, 19, 22, 0.08);
+}
+
+.unified-section-header {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto 3rem auto;
+}
+
+.unified-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 16px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 9999px;
+  color: #92400e;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.unified-main-heading {
+  font-family: var(--font-heading);
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.85rem;
+}
+
+.unified-sub-heading {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.65;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* 2 Cột riêng biệt đứng trên nền: Trái là các card rời, Phải là card giải pháp */
+.challenges-solutions-grid-layout {
+  display: grid;
+  grid-template-columns: 48% 52%;
+  gap: 2.75rem;
+  align-items: stretch;
+}
+
+/* Cột trái: Standalone Column */
+.challenges-standalone-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.85rem;
+}
+
+.challenges-standalone-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.95rem;
+  max-width: 48%;
+}
+
+.challenges-header-lead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.red-square-icon {
+  color: #dc2626;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.challenges-heading-text {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.challenge-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Các thẻ nỗi đau đứng rời */
+.challenge-interactive-card {
+  padding: 1.15rem 1.35rem;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.challenge-interactive-card:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.challenge-interactive-card.is-active {
+  border-color: #ef4444;
+  background: #fff8f8;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.1);
+  transform: translateY(-2px);
+}
+
+.challenge-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.challenge-tags-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.challenge-tag-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.challenge-subtopic {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.challenge-arrow-btn {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dc2626;
+  transition: transform 0.2s ease;
+}
+
+.challenge-interactive-card:hover .challenge-arrow-btn {
+  transform: translateX(3px);
+}
+
+.challenge-quote-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.45;
+  margin: 0 0 0.35rem 0;
+}
+
+.challenge-detail-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.challenges-risk-warning-bar {
+  padding: 0.8rem 1.1rem;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.04);
+}
+
+/* Cột phải: Card Giải Pháp Độc Lập */
+.solution-standalone-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  padding: 2.3rem 2.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  box-sizing: border-box;
+  animation: solutionFadeIn 0.25s ease-out;
+}
+
+@keyframes solutionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.solution-card-header-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.solution-hero-num-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 0.85rem;
+}
+
+.solution-hero-num {
+  font-family: var(--font-heading);
+  font-size: 2.7rem;
+  font-weight: 800;
+  color: #0d9488;
+  line-height: 1;
+}
+
+.solution-precision-badge {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #0f766e;
+  background: #ccfbf1;
+  border: 1px solid #99f6e4;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.solution-hero-title {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  margin: 0 0 0.45rem 0;
+  white-space: normal;
+}
+
+.solution-hero-subtitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0284c7;
+  margin: 0;
+  white-space: normal;
+}
+
+.solution-card-body-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.15rem 0;
+}
+
+.solution-hero-desc {
+  font-size: 0.94rem;
+  color: #475569;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* Green Resolution Box */
+.solution-resolution-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1.1rem 1.3rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+}
+
+.resolution-check-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.resolution-box-content {
+  font-size: 0.9rem;
+  color: #166534;
+  line-height: 1.55;
+}
+
+.resolution-box-content strong {
+  font-weight: 750;
+}
+
+/* 3 Checklist Items */
+.solution-card-footer-block {
+  padding-top: 1.15rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.solution-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.solution-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.solution-check-item .check-mark {
+  color: #0d9488;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .challenges-standalone-header {
+    max-width: 100%;
+  }
+  .challenges-solutions-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .solution-standalone-card {
+    height: auto;
+  }
+  .solution-checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.solution-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.solution-check-item .check-mark {
+  color: #0d9488;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .challenges-solutions-split-card {
+    grid-template-columns: 1fr;
+  }
+  .challenges-left-col {
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .solution-checklist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   GALLERY PROJECT PRICE ATTACHED DIRECTLY UNDER IMAGE (EXACT IMAGE 2 MATCH)
+   ========================================================================== */
+.gallery-card-price-attached-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(24, 24, 27, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+}
+
+.card-price-pill-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.card-price-pill-val {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: #f8fafc;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+.spotlight-price-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: linear-gradient(90deg, rgba(217, 119, 6, 0.14) 0%, rgba(24, 24, 27, 0.9) 100%);
+  border-top: 1px solid rgba(251, 191, 36, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.price-strip-icon {
+  font-size: 0.95rem;
+}
+
+.price-strip-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.price-strip-val {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   CALL TO ACTION (CTA) SECTION
+   ========================================================================== */
+.cta-direct-section {
+  padding: 5.5rem 0;
+  background: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-banner-card {
+  position: relative;
+  background: radial-gradient(circle at 50% 20%, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 3.5rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.cta-banner-glow {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-content-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.cta-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 16px;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 9999px;
+  color: #fbbf24;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.25rem;
+}
+
+.cta-main-title {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+.cta-main-sub {
+  font-size: 1rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.cta-benefits-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 2.5rem;
+}
+
+.cta-benefit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.benefit-check {
+  color: #10b981;
+  font-weight: 800;
+}
+
+.cta-actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-cta-primary-large {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.4);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-cta-primary-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -5px rgba(217, 119, 6, 0.5);
+}
+
+.btn-cta-secondary-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-cta-secondary-phone:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ==========================================================================
+   SECTION 10: ARCHITECTURAL EDITORIAL CTA (SUSTAINABLE DESIGN)
+   ========================================================================== */
+.cta-architectural-section {
+  padding: 6rem 0;
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #fcfbf9 0%, #f5f0e8 60%, #ece5da 100%);
+  border-top: 1px solid rgba(18, 19, 22, 0.08);
+}
+
+.cta-wide-container {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 4vw, 4.5rem);
+  padding-right: clamp(1rem, 4vw, 4.5rem);
+}
+
+.cta-architectural-grid {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  gap: 3.5rem;
+  align-items: stretch;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* Cột trái: NỘI DUNG (SLOGAN RỘNG SÁT ĐƯỜNG LINE, BUTTON CONTACT CĂN TRÁI, 4 CARD CONTACT) */
+.cta-arch-content-col {
+  padding: 1.5rem 1.25rem 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid rgba(18, 19, 22, 0.12);
+  width: 100%;
+}
+
+.cta-arch-lead-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* CÂU SLOGAN FULL WIDTH RỘNG SÁT TỚI ĐƯỜNG LINE - GIẢM CỠ CHỮ XUỐNG 1 NẤC */
+.cta-arch-slogan-heading {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: clamp(1.95rem, 3.3vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.22;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  text-align: left;
+  margin: 0 0 1.75rem 0;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 45px, 0);
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.cta-arch-slogan-heading.revealed {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Cột phải: ẢNH LỚN FULL ẢNH KHÔNG BO GÓC - HIỆU ỨNG TRƯỢT TỪ PHẢI QUA */
+.cta-arch-photo-col {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: translate3d(60px, 0, 0);
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.cta-arch-photo-col.revealed {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.cta-arch-full-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  overflow: hidden;
+  border-radius: 0;
+  background: #111827;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+.cta-arch-full-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta-arch-full-photo-wrap:hover .cta-arch-full-photo {
+  transform: scale(1.03);
+}
+
+/* NÚT BUTTON CONTACT CĂN TỪ TRÁI QUA - TRƯỢT TỪ DƯỚI LÊN */
+.cta-arch-btn-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  text-align: left;
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.18s,
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.18s !important;
+}
+
+.cta-arch-btn-row.revealed {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.cta-arch-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 44px;
+  background: #18191c;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 0;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.cta-arch-contact-btn:hover {
+  background: #000000;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.cta-btn-arrow {
+  transition: transform 0.25s ease;
+}
+
+.cta-arch-contact-btn:hover .cta-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* MỤC 4 CARD: TĂNG KHOẢNG CÁCH VỚI PHẦN TRÊN */
+.cta-arch-contact-info-block {
+  margin-top: clamp(3rem, 5vw, 4.5rem);
+  width: 100%;
+}
+
+.cta-contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* 4 CARD CONTACT XUẤT HIỆN SO LE 1.4S GIỐNG HỆT SECTION THƯƠNG HIỆU & ĐỐI TÁC (ẢNH 2) */
+.cta-contact-item-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(18, 19, 22, 0.09);
+  border-radius: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
+  user-select: text;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translate3d(0, 50px, 0);
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease !important;
+}
+
+.cta-contact-item-card.delay-0 {
+  transition-delay: 0.1s;
+}
+
+.cta-contact-item-card.delay-1 {
+  transition-delay: 0.28s;
+}
+
+.cta-contact-item-card.delay-2 {
+  transition-delay: 0.46s;
+}
+
+.cta-contact-item-card.delay-3 {
+  transition-delay: 0.64s;
+}
+
+.cta-contact-item-card.revealed,
+.cta-arch-contact-info-block.revealed .cta-contact-item-card {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+.cta-contact-item-card:hover {
+  background: #ffffff;
+  border-color: rgba(18, 19, 22, 0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.cta-contact-icon-box {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.cta-contact-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cta-contact-lbl {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.cta-contact-val {
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: #111827;
+  font-family: var(--font-heading);
+  letter-spacing: 0.01em;
+}
+
+.cta-contact-val-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 960px) {
+  .cta-architectural-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .cta-arch-content-col {
+    padding: 0 0 2.5rem 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(18, 19, 22, 0.12);
+  }
+  .cta-arch-slogan-heading {
+    font-size: 2.3rem;
+  }
+  .cta-contact-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .cta-arch-full-photo-wrap {
+    min-height: 380px;
+  }
+}

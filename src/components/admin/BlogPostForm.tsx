@@ -513,31 +513,30 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
               {isCurrentlyScheduled ? "Đổi lịch đăng" : "Lên lịch..."}
             </button>
 
-            {/* Nếu đang chỉnh sửa bài đã publish hoặc đã lên lịch -> có nút Lưu thay đổi */}
-            {isEdit && (form.isPublished || isCurrentlyScheduled) && (
+            {/* Nút hành động chính */}
+            {isEdit ? (
               <button
                 type="button"
                 onClick={() => handleSave({ actionType: "save" })}
                 disabled={saving}
-                className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 transition-colors shadow-xs cursor-pointer"
-                title="Lưu các nội dung vừa chỉnh sửa mà không đổi ngày đăng"
+                className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
+                title="Lưu toàn bộ nội dung đã sửa và GIỮ NGUYÊN ngày xuất bản cũ"
               >
                 {saving && savingAction === "save" ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 Lưu thay đổi
               </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleSave({ isPublished: true, publishedAt: form.publishedAt || new Date().toISOString(), actionType: "publish" })}
+                disabled={saving}
+                className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3.5 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
+                title="Xuất bản hiển thị ngay lập tức"
+              >
+                {saving && savingAction === "publish" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                Đăng ngay
+              </button>
             )}
-
-            {/* Đăng ngay */}
-            <button
-              type="button"
-              onClick={() => handleSave({ isPublished: true, publishedAt: new Date().toISOString(), actionType: "publish" })}
-              disabled={saving}
-              className="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3.5 py-2 rounded-lg text-xs font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm cursor-pointer"
-              title="Xuất bản hiển thị ngay lập tức"
-            >
-              {saving && savingAction === "publish" ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              {isCurrentlyPublished ? "Cập nhật & Đăng ngay" : "Đăng ngay"}
-            </button>
           </div>,
           document.getElementById("admin-header-actions")!
         )
@@ -909,12 +908,11 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
           <div>
             <label className={labelCls}>Định dạng ảnh bìa (Cover Orientation)</label>
             <select
-              value={form.coverOrientation || "landscape"}
-              onChange={(e) => set("coverOrientation", e.target.value)}
-              className={inputCls}
+              value="landscape"
+              disabled
+              className={`${inputCls} bg-gray-50 text-gray-700 cursor-not-allowed`}
             >
               <option value="landscape">🖼️ Ảnh Ngang (Landscape - 16:9 / 4:3)</option>
-              <option value="portrait">📱 Ảnh Dọc (Portrait - 3:4 / 9:16)</option>
             </select>
           </div>
           <div>
@@ -950,7 +948,10 @@ export default function BlogPostForm({ initial }: { initial?: BlogPostData }) {
                 type="button"
                 onClick={() => {
                   set("isPublished", true);
-                  set("publishedAt", new Date().toISOString());
+                  // Chỉ gán ngày hiện tại nếu chưa từng có ngày xuất bản
+                  if (!form.publishedAt) {
+                    set("publishedAt", new Date().toISOString());
+                  }
                 }}
                 className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                   form.isPublished && new Date(form.publishedAt || "").getTime() <= Date.now()
