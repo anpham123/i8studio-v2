@@ -3,13 +3,19 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageSquare, Phone, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { openInquiryDrawer } from "./QuickInquiryDrawer";
 
 export default function FloatingCTA() {
+  const pathname = usePathname();
   const [hidden, setHidden] = useState(false);
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const t = useTranslations("nav");
   const contactRef = useRef<Element | null>(null);
+
+  if (pathname?.includes("/landingpage")) {
+    return null;
+  }
 
   useEffect(() => {
     const handleScroll = () => {

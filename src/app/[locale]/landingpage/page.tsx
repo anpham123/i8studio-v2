@@ -14,7 +14,7 @@ export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "KONTUR — 建築設計・3DCG空間ビジュアライゼーション",
+    title: "i8 STUDIO — 建築設計・3DCG空間ビジュアライゼーション",
     description:
       "技術基準に準拠した高精度な建築設計と、100%フォトリアルな3DCG空間ビジュアライゼーション。細部まで視覚化し、コストをコントロールし、施工ミスを未然に防ぎます。",
   };
@@ -119,12 +119,84 @@ export default async function LandingPage({
     <LandingChallengesSolutions
       locale={currentLocale}
       painPointsData={t.painPoints}
-      solutionsData={t.solutions}
       title={t.painPoints?.title}
       rawCards={t.painPoints?.cards}
       style={getSectionStyle("pain-points")}
     />
   );
+
+  // Helper ngắt dòng theo <br>, <\br>, <br/> hoặc \n; khi văn bản dài tự động xuống dòng để hiển thị trọn vẹn 100%
+  // không bị dấu 3 chấm (...) cắt bớt và nội dung luôn nằm gọn gàng bên trong padding của card
+  const renderNowrapWithBreaks = (text?: string) => {
+    if (!text) return null;
+    const parts = text.split(/(?:<\\?\/?br\s*\/?>|\n)/gi);
+    return (
+      <>
+        {parts.map((part, i) => (
+          <span
+            key={i}
+            style={{
+              display: "block",
+              whiteSpace: "normal",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            {part}
+          </span>
+        ))}
+      </>
+    );
+  };
+
+  // Helper hiển thị danh sách dạng chấm tròn ・ cho phần mô tả workflow
+  const renderStepBullets = (desc?: string) => {
+    if (!desc) return null;
+    const lines = desc
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    if (lines.length <= 1) {
+      const bulletSplit = desc.split(/[・•]/).map((l) => l.trim()).filter(Boolean);
+      if (bulletSplit.length > 1) {
+        return (
+          <ul className="step-card-bullet-list">
+            {bulletSplit.map((item, idx) => (
+              <li key={idx} className="step-card-bullet-item">
+                <span className="step-bullet-dot">・</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      return (
+        <ul className="step-card-bullet-list">
+          <li className="step-card-bullet-item">
+            <span className="step-bullet-dot">・</span>
+            <span>{desc}</span>
+          </li>
+        </ul>
+      );
+    }
+
+    return (
+      <ul className="step-card-bullet-list">
+        {lines.map((line, idx) => {
+          const cleanLine = line.replace(/^[・•\-*]\s*/, "");
+          return (
+            <li key={idx} className="step-card-bullet-item">
+              <span className="step-bullet-dot">・</span>
+              <span>{cleanLine}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
 
   /* =========================================================================
      SECTION 3: WORKFLOW DIRECT (5 BƯỚC)
@@ -157,7 +229,8 @@ export default async function LandingPage({
           <div
             className="timeline-steps-grid"
             style={{
-              gridTemplateColumns: `repeat(${t.workflow?.steps?.length || 5}, minmax(0, 1fr))`,
+              ["--step-count" as any]: t.workflow?.steps?.length || 6,
+              gridTemplateColumns: `repeat(${t.workflow?.steps?.length || 6}, minmax(0, 1fr))`,
             }}
           >
             {(t.workflow?.steps || []).map((step: any, idx: number) => {
@@ -188,7 +261,7 @@ export default async function LandingPage({
                     <span className="step-badge-pill">{badgeText}</span>
                   </div>
                   <h4 className="step-card-title">{step.stepTitle}</h4>
-                  <p className="step-card-desc">{step.stepDesc}</p>
+                  {renderStepBullets(step.stepDesc)}
                 </div>
               );
 
@@ -199,9 +272,6 @@ export default async function LandingPage({
                     alt={step.stepTitle || `Step ${stepNumStr}`}
                     className="timeline-step-img"
                   />
-                  <div className="timeline-img-overlay">
-                    <span className="img-phase-tag">{stageTag}</span>
-                  </div>
                 </div>
               );
 
@@ -288,16 +358,13 @@ export default async function LandingPage({
             </div>
 
             <div className="deliverables-showcase-layout" id="deliverablesShowcase">
-              {/* CỘT TRÁI: DANH SÁCH BỘ SƯU TẬP */}
+              {/* CỘT TRÁI: DANH SÁCH BỘ SƯU TẬP (ĐÃ XÓA KHỐI CHỮ ĐÈ TRÊN ẢNH THEO YÊU CẦU) */}
               <div className="collections-2x2-grid">
                 {(deliverables || []).map((col: any, idx: number) => {
                   const cardThumb =
                     col.thumbnail ||
                     col.photos?.[0]?.url ||
                     "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=85";
-                  const photoCount = col.photos?.length || 0;
-                  const countLabel = `${photoCount}点（図面・画像）`;
-                  const colNumLabel = `コレクション 0${idx + 1}`;
 
                   return (
                     <div
@@ -311,14 +378,6 @@ export default async function LandingPage({
                           alt={col.name || `Collection ${idx + 1}`}
                           className="col-card-thumb"
                         />
-                      </div>
-                      <div className="col-card-info">
-                        <span className="col-card-num">{colNumLabel}</span>
-                        <h4 className="col-card-title">{col.name}</h4>
-                        <div className="col-card-status">
-                          <span className="col-card-count">{countLabel}</span>
-                          <span className="col-card-active-dot"></span>
-                        </div>
                       </div>
                       <div className="col-card-progress-bar">
                         <div className="col-card-progress-fill"></div>
@@ -346,15 +405,7 @@ export default async function LandingPage({
                   </div>
 
                   <div className="showcase-bottom-caption">
-                    <div className="showcase-title-row">
-                      <span className="photo-category-tag" id="showcasePhotoTag">
-                        {initialTag}
-                      </span>
-                      <h4 className="showcase-photo-title" id="showcasePhotoTitle">
-                        {initialTitle}
-                      </h4>
-                    </div>
-
+                    {/* Đã xóa tiêu đề showcase-title-row đè trên ảnh theo yêu cầu */}
                     <div className="showcase-nav-row">
                       <div className="showcase-dots-wrap" id="showcaseDots">
                         {(firstCol?.photos || [0]).map((_: any, pIdx: number) => (
@@ -670,8 +721,8 @@ export default async function LandingPage({
             ]).map((stat: any, idx: number) => (
               <div key={idx} className={`client-ind-card delay-${idx % 4}`}>
                 <span className="ind-num">{stat.num}</span>
-                <h4 className="ind-name">{stat.name}</h4>
-                <p className="ind-desc">{stat.desc}</p>
+                <h4 className="ind-name">{renderNowrapWithBreaks(stat.name)}</h4>
+                <p className="ind-desc">{renderNowrapWithBreaks(stat.desc)}</p>
               </div>
             ))}
           </div>
@@ -878,7 +929,7 @@ export default async function LandingPage({
       case "deliverables":
         return renderDeliverables();
       case "services-bento":
-        return renderServicesBento();
+        return null; // Đã xóa section theo yêu cầu
       case "clients":
         return null; // Bỏ nội dung Ảnh 1 theo yêu cầu
       case "applications":

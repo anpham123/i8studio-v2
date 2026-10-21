@@ -13,6 +13,8 @@ export async function GET() {
   });
 }
 
+import { revalidatePath } from "next/cache";
+
 export async function PUT(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -27,5 +29,14 @@ export async function PUT(req: NextRequest) {
       })
     )
   );
+
+  try {
+    revalidatePath("/", "layout");
+    revalidatePath("/ja", "layout");
+    revalidatePath("/en", "layout");
+    revalidatePath("/ja/landingpage");
+    revalidatePath("/en/landingpage");
+  } catch {}
+
   return NextResponse.json({ success: true });
 }

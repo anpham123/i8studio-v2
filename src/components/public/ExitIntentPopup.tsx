@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, Mail, ArrowRight } from "lucide-react";
 
 export default function ExitIntentPopup() {
+  const pathname = usePathname();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
 
+  const isLandingPage = pathname?.includes("/landingpage");
+
   useEffect(() => {
+    if (isLandingPage) return;
     if (sessionStorage.getItem("exitPopupShown")) return;
 
     const handleMouseLeave = (e: MouseEvent) => {
@@ -44,6 +49,8 @@ export default function ExitIntentPopup() {
       setStatus("success");
     }
   };
+
+  if (isLandingPage) return null;
 
   return (
     <AnimatePresence>

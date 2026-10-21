@@ -16,9 +16,9 @@ import PageViewTracker from "@/components/public/PageViewTracker";
 import { prisma } from "@/lib/prisma";
 import CustomCursor from "@/components/public/CustomCursor";
 
-// Always fetch fresh settings — never serve a cached layout with stale bg config
-// ISR: regenerate layout data every 120 seconds
-export const revalidate = 120;
+// Always fetch fresh settings — never serve a cached layout with stale header/menu/logo config
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const outfit = Outfit({
   subsets: ["latin"],
