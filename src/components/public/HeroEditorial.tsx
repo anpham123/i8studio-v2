@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import Lightbox from "./Lightbox";
 
@@ -114,6 +115,56 @@ function isVideoFile(url: string) {
   return /\.(mp4|webm|mov)$/i.test(url);
 }
 
+/** Only local raster images go through the Next.js optimizer (resized + cached per device width) */
+function canOptimize(url: string) {
+  return url.startsWith("/") && !/\.(svg|gif)$/i.test(url);
+}
+
+function canHover() {
+  return typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+/**
+ * Hover-preview video that is only mounted (and downloaded) after the first real mouse hover.
+ * Before that, no <video> element exists, so the page doesn't fetch any video data on load.
+ */
+function useHoverVideo(hasVideo: boolean) {
+  const [mounted, setMounted] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const hoveredRef = useRef(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const onEnter = () => {
+    hoveredRef.current = true;
+    setHovered(true);
+    if (!hasVideo || !canHover()) return;
+    if (!mounted) {
+      setMounted(true); // <video autoPlay> starts itself once mounted
+      return;
+    }
+    const v = videoRef.current;
+    if (v) {
+      v.currentTime = 0;
+      v.play().then(() => hoveredRef.current && setPlaying(true)).catch(() => { });
+    }
+  };
+
+  const onLeave = () => {
+    hoveredRef.current = false;
+    setHovered(false);
+    setPlaying(false);
+    videoRef.current?.pause();
+  };
+
+  const onPlaying = () => {
+    if (hoveredRef.current) setPlaying(true);
+    else videoRef.current?.pause();
+  };
+
+  return { mounted, playing, hovered, videoRef, onEnter, onLeave, onPlaying };
+}
+
 function GridTile({
   image,
   index,
@@ -121,6 +172,7 @@ function GridTile({
   aspect,
   maxHeight,
   minHeight,
+  sizes,
   onClick,
 }: {
   image?: HeroImage;
@@ -129,37 +181,14 @@ function GridTile({
   aspect: string;
   maxHeight?: string;
   minHeight?: string;
+  sizes: string;
   onClick?: () => void;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   const hasImage = Boolean(image?.url);
   const hasVideo = Boolean(image?.videoUrl && isVideoFile(image.videoUrl));
   const isFullScreenHeroType = Boolean(minHeight);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    if (hasVideo && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => setIsVideoPlaying(true))
-          .catch(() => { });
-      }
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setIsVideoPlaying(false);
-    if (hasVideo && videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  };
+  const hv = useHoverVideo(hasVideo);
+  const [imgFailed, setImgFailed] = useState(false);
 
   return (
     <div
@@ -168,34 +197,45 @@ function GridTile({
         aspectRatio: aspect,
         maxHeight: maxHeight || undefined,
         minHeight: minHeight || undefined,
-        willChange: "transform, opacity, clip-path",
       }}
     >
-      {/* Card container: static for large full-screen images (like Hero), 3D hover lift for smaller cards */}
+      {/* Card container: static for large full-screen images (like Hero), hover lift for smaller cards */}
       <div
         onClick={onClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onMouseEnter={hv.onEnter}
+        onMouseLeave={hv.onLeave}
         className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
           ? "hover:opacity-95"
-          : "transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
+          : "transition-[transform,box-shadow] duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
           }`}
         style={{
           transformOrigin: "center center",
         }}
       >
         {/* Base Image Poster (always rendered if available) */}
-        {hasImage ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={image!.url}
-            alt={image!.alt || `Work ${index + 1}`}
-            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
-            loading={index < 6 ? "eager" : "lazy"}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
+        {hasImage && !imgFailed ? (
+          canOptimize(image!.url) ? (
+            <Image
+              src={image!.url}
+              alt={image!.alt || `Work ${index + 1}`}
+              fill
+              sizes={sizes}
+              quality={78}
+              loading={index < 4 ? "eager" : "lazy"}
+              className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={image!.url}
+              alt={image!.alt || `Work ${index + 1}`}
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+              loading={index < 4 ? "eager" : "lazy"}
+              decoding="async"
+              onError={() => setImgFailed(true)}
+            />
+          )
         ) : (
           <div
             className="absolute inset-0"
@@ -203,17 +243,19 @@ function GridTile({
           />
         )}
 
-        {/* Hover Video: Only plays when user hovers mouse over the card */}
-        {hasVideo && (
+        {/* Hover Video: mounted & downloaded only after the first mouse hover */}
+        {hasVideo && hv.mounted && (
           <video
-            ref={videoRef}
+            ref={hv.videoRef}
             src={image!.videoUrl}
-            className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${isHovered && isVideoPlaying ? "opacity-100" : "opacity-0"
+            onPlaying={hv.onPlaying}
+            className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${hv.hovered && hv.playing ? "opacity-100" : "opacity-0"
               }`}
+            autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
           />
         )}
       </div>
@@ -230,9 +272,6 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const scrollRowObserverRef = useRef<IntersectionObserver | null>(null);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string; isVideo?: boolean } | null>(null);
-  const [heroHovered, setHeroHovered] = useState(false);
-  const [heroVideoPlaying, setHeroVideoPlaying] = useState(false);
-  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   // Parallax: text moves slightly faster than grid on scroll
   const { scrollYProgress } = useScroll({
@@ -246,6 +285,8 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
   // Hero image = first image, masonry uses the rest
   const heroImage = images[0];
   const masonryImages = images.slice(1);
+  const heroHasVideo = Boolean(heroImage?.videoUrl && isVideoFile(heroImage.videoUrl));
+  const heroHv = useHoverVideo(heroHasVideo);
 
   // Flatten rows to get tile index mapping
   let tileIndex = 0;
@@ -294,21 +335,20 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
 
             const tiles = targetRow.querySelectorAll<HTMLElement>(".hero-tile");
             if (tiles.length > 0) {
+              // transform + opacity only (compositor-friendly, no clip-path repaint)
               gsap.fromTo(
                 tiles,
                 {
                   opacity: 0,
-                  y: 80,
-                  clipPath: "inset(40% 0% 0% 0%)",
+                  y: 60,
                 },
                 {
                   opacity: 1,
                   y: 0,
-                  clipPath: "inset(0% 0% 0% 0%)",
-                  duration: 0.9,
-                  ease: "power4.out",
-                  stagger: 0.08,
-                  clearProps: "clipPath",
+                  duration: 0.8,
+                  ease: "power3.out",
+                  stagger: 0.07,
+                  clearProps: "transform,opacity",
                 }
               );
             }
@@ -337,25 +377,22 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
             tiles,
             {
               opacity: 0,
-              y: 60,
-              clipPath: "inset(35% 0% 0% 0%)",
+              y: 50,
             },
             {
               opacity: 1,
               y: 0,
-              clipPath: "inset(0% 0% 0% 0%)",
-              duration: 0.85,
-              ease: "power4.out",
+              duration: 0.8,
+              ease: "power3.out",
               stagger: 0.06,
-              clearProps: "clipPath",
+              clearProps: "transform,opacity",
             }
           );
         } else {
           // Below the fold: set hidden state and observe
           gsap.set(tiles, {
             opacity: 0,
-            y: 80,
-            clipPath: "inset(40% 0% 0% 0%)",
+            y: 60,
           });
           observer.observe(row);
         }
@@ -381,51 +418,54 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
               });
             }
           }}
-          onMouseEnter={() => {
-            setHeroHovered(true);
-            if (heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && heroVideoRef.current) {
-              heroVideoRef.current.currentTime = 0;
-              const playPromise = heroVideoRef.current.play();
-              if (playPromise !== undefined) {
-                playPromise.then(() => setHeroVideoPlaying(true)).catch(() => { });
-              }
-            }
-          }}
-          onMouseLeave={() => {
-            setHeroHovered(false);
-            setHeroVideoPlaying(false);
-            if (heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && heroVideoRef.current) {
-              heroVideoRef.current.pause();
-              heroVideoRef.current.currentTime = 0;
-            }
-          }}
+          onMouseEnter={heroHv.onEnter}
+          onMouseLeave={heroHv.onLeave}
           className="relative w-full h-full rounded-2xl overflow-hidden cursor-pointer group"
         >
           {/* Base Hero Image */}
           {heroImage?.url ? (
-            <motion.img
-              src={heroImage.url}
-              alt={heroImage.alt}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-              initial={{ scale: 1.05, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-            />
+            <motion.div
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.9, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
+              {canOptimize(heroImage.url) ? (
+                <Image
+                  src={heroImage.url}
+                  alt={heroImage.alt || "i8 STUDIO"}
+                  fill
+                  sizes="100vw"
+                  quality={80}
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={heroImage.url}
+                  alt={heroImage.alt}
+                  decoding="async"
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+              )}
+            </motion.div>
           ) : (
             <div className="absolute inset-0 bg-[#c8c2b8]" />
           )}
 
-          {/* Hover Video Preview for Hero */}
-          {heroImage?.videoUrl && isVideoFile(heroImage.videoUrl) && (
+          {/* Hover Video Preview for Hero (mounted only after first mouse hover) */}
+          {heroHasVideo && heroHv.mounted && (
             <video
-              ref={heroVideoRef}
-              src={heroImage.videoUrl}
-              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out pointer-events-none ${heroHovered && heroVideoPlaying ? "opacity-100" : "opacity-0"
+              ref={heroHv.videoRef}
+              src={heroImage!.videoUrl}
+              onPlaying={heroHv.onPlaying}
+              className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-[opacity,transform] duration-700 ease-out pointer-events-none ${heroHv.hovered && heroHv.playing ? "opacity-100" : "opacity-0"
                 }`}
+              autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
+              preload="auto"
             />
           )}
 
@@ -531,6 +571,15 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
                         aspect={item.aspect}
                         maxHeight={item.maxHeight}
                         minHeight={item.minHeight}
+                        sizes={
+                          item.targetCols === 4
+                            ? "25vw"
+                            : item.targetCols === 3
+                              ? "34vw"
+                              : item.targetCols === 2
+                                ? "50vw"
+                                : "100vw"
+                        }
                         onClick={() => {
                           if (currentImage?.url || currentImage?.videoUrl) {
                             setLightbox({

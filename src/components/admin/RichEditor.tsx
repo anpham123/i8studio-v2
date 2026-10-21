@@ -345,7 +345,7 @@ export default function RichEditor({ value, onChange, label }: RichEditorProps) 
 
     tableRows.forEach((row) => {
       tableHtml += `<tr>`;
-      row.forEach((cell, ci) => {
+      row.forEach((cell) => {
         tableHtml += `<td><p>${cell || ""}</p></td>`;
       });
       tableHtml += `</tr>`;

@@ -8,8 +8,11 @@ RUN apk add --no-cache libc6-compat openssl
 
 COPY package*.json ./
 COPY prisma/schema.prisma ./prisma/schema.prisma
+COPY scripts/patch-next-font.js ./scripts/patch-next-font.js
 
 RUN npm install --prefer-offline
+RUN npm install @next/swc-linux-x64-musl@14.2.33
+RUN node ./scripts/patch-next-font.js
 RUN npx prisma generate
 
 # ============================================================
@@ -23,6 +26,7 @@ RUN apk add --no-cache libc6-compat openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+RUN node ./scripts/patch-next-font.js
 RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -43,11 +47,11 @@ RUN npm install -g prisma@5.22.0
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3003
+ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-RUN (getent group nodejs || addgroup --system --gid 1001 nodejs) && \
-    (getent passwd nextjs || adduser --system --uid 1001 nextjs)
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
 # Next.js standalone server
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -69,6 +73,6 @@ COPY --chown=nextjs:nodejs scripts/start.sh ./scripts/start.sh
 RUN chmod +x ./scripts/start.sh
 
 USER nextjs
-EXPOSE 3003
+EXPOSE 3000
 
 CMD ["sh", "./scripts/start.sh"]

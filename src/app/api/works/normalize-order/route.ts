@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * Normalize homeOrder for all featured works to be sequential (1, 2, 3, ...)
  * This ensures consistency when works were featured before homeOrder was introduced.
  */
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

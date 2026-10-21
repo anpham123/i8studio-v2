@@ -68,7 +68,7 @@ export default async function PricePage({ params }: { params: { locale: string }
     priceLabelJa: item.priceLabelJa ?? "参考価格",
     priceLabelEn: item.priceLabelEn ?? "Starting from",
     bulletsJson: item.bulletsJson ?? "[]",
-    bulletsEnJson: (item as any).bulletsEnJson ?? "[]",
+    bulletsEnJson: (item as unknown as { bulletsEnJson?: string }).bulletsEnJson ?? "[]",
     cardImage: item.cardImage ?? "",
     order: item.order,
   }));

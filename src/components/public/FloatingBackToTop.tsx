@@ -6,8 +6,6 @@ import { useLocale } from "next-intl";
 
 export default function FloatingBackToTop() {
   const [visible, setVisible] = useState(false);
-  const circleRef = useRef<SVGCircleElement>(null);
-  const tooltipRef = useRef<HTMLSpanElement>(null);
   const visibleRef = useRef(false);
   const locale = useLocale();
 
@@ -15,53 +13,31 @@ export default function FloatingBackToTop() {
 
   useEffect(() => {
     let rafId: number | null = null;
-    let lastScrollTop = -1;
 
-    const updateScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      if (Math.abs(scrollTop - lastScrollTop) < 3) {
-        rafId = null;
-        return;
-      }
-      lastScrollTop = scrollTop;
-
-      const isVis = scrollTop > 400;
+    const updateVisibility = () => {
+      rafId = null;
+      const isVis = (window.scrollY || document.documentElement.scrollTop) > 400;
       if (visibleRef.current !== isVis) {
         visibleRef.current = isVis;
         setVisible(isVis);
       }
-
-      if (isVis && circleRef.current) {
-        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
-        circleRef.current.style.strokeDashoffset = `${119.4 - (119.4 * progress) / 100}`;
-        if (tooltipRef.current) {
-          tooltipRef.current.textContent = `${tooltipText} (${Math.round(progress)}%)`;
-        }
-      }
-
-      rafId = null;
     };
 
     const handleScroll = () => {
-      if (rafId === null) {
-        rafId = requestAnimationFrame(updateScroll);
-      }
+      if (rafId === null) rafId = requestAnimationFrame(updateVisibility);
     };
 
-    handleScroll();
+    updateVisibility();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
-  }, [tooltipText]);
+  }, []);
 
+  // Jump straight to the top — no smooth scroll, so the hero sequence doesn't "rewind" on the way up
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
   };
 
   return (
@@ -75,42 +51,15 @@ export default function FloatingBackToTop() {
       <button
         type="button"
         onClick={scrollToTop}
-        className="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-black text-white border border-white/20 backdrop-blur-md shadow-lg shadow-black/25 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+        className="group relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/80 hover:bg-black text-white border border-white/20 shadow-lg shadow-black/25 flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
         aria-label={tooltipText}
       >
-        {/* Circular progress ring indicating page scroll depth */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none p-0.5" viewBox="0 0 48 48">
-          <circle
-            cx="24"
-            cy="24"
-            r="19"
-            className="stroke-white/15"
-            strokeWidth="2"
-            fill="none"
-          />
-          <circle
-            ref={circleRef}
-            cx="24"
-            cy="24"
-            r="19"
-            className="stroke-white"
-            strokeWidth="2.5"
-            strokeDasharray={119.4}
-            strokeDashoffset={119.4}
-            strokeLinecap="round"
-            fill="none"
-          />
-        </svg>
-
         {/* Up arrow icon */}
         <ArrowUp size={18} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
 
         {/* Hover Tooltip (Desktop) */}
-        <span
-          ref={tooltipRef}
-          className="hidden lg:block absolute right-14 px-2.5 py-1 bg-black/90 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg"
-        >
-          {tooltipText} (0%)
+        <span className="hidden lg:block absolute right-14 px-2.5 py-1 bg-black/90 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none border border-white/10 shadow-lg">
+          {tooltipText}
         </span>
       </button>
     </div>
