@@ -13,11 +13,10 @@ export default function FloatingCTA() {
   const t = useTranslations("nav");
   const contactRef = useRef<Element | null>(null);
 
-  if (pathname?.includes("/landingpage")) {
-    return null;
-  }
+  const isLandingPage = pathname?.includes("/landingpage");
 
   useEffect(() => {
+    if (isLandingPage) return;
     const handleScroll = () => {
       // Only show after scrolling down past initial hero (e.g. 600px or 80% viewport)
       const threshold = typeof window !== "undefined" ? window.innerHeight * 0.75 : 500;
@@ -27,9 +26,10 @@ export default function FloatingCTA() {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isLandingPage]);
 
   useEffect(() => {
+    if (isLandingPage) return;
     const contact = document.getElementById("contact");
     if (!contact) return;
     contactRef.current = contact;
@@ -40,7 +40,9 @@ export default function FloatingCTA() {
     );
     observer.observe(contact);
     return () => observer.disconnect();
-  }, []);
+  }, [isLandingPage]);
+
+  if (isLandingPage) return null;
 
   const isVisible = scrolledPastHero && !hidden;
 
