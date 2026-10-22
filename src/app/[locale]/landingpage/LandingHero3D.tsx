@@ -18,7 +18,7 @@ function renderWithBreaks(text?: string, highlightQuotes: boolean = true) {
             content = (
               <>
                 {match[1]}
-                <span className="text-amber-400 border-b border-amber-400/80 pb-0.5 inline-block">{match[2]}</span>
+                <span className="text-amber-400 inline-block">{match[2]}</span>
                 {match[3]}
               </>
             );
