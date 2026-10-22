@@ -574,10 +574,9 @@ export default function LandingPageInteractive({
         showcaseColName.textContent = col.name || "";
       }
       if (showcaseCounter) {
-        const countLabel = locale === "ja" ? "PHOTO" : locale === "en" ? "PHOTO" : "ẢNH";
         const curNum = String(currentDeliverablePhotoIdx + 1).padStart(2, "0");
         const totalNum = String(col.photos.length).padStart(2, "0");
-        showcaseCounter.textContent = `${countLabel} ${curNum} / ${totalNum}`;
+        showcaseCounter.textContent = `${curNum} / ${totalNum}`;
       }
       if (showcaseTag) {
         showcaseTag.textContent = photo.tag || "";

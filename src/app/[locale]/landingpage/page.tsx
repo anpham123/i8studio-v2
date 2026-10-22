@@ -400,7 +400,7 @@ export default async function LandingPage({
 
                   <div className="showcase-top-meta">
                     <div className="showcase-counter-badge" id="showcaseCounter">
-                      {`PHOTO 01 / 0${totalPhotos}`}
+                      {`01 / 0${totalPhotos}`}
                     </div>
                   </div>
 
@@ -787,6 +787,10 @@ export default async function LandingPage({
       key="gallery"
       title={t.gallery?.title}
       subtitle={(t.gallery as any)?.sub || (t.gallery as any)?.subtitle || (t.gallery as any)?.info?.subtitle || (t.gallery as any)?.info?.sub}
+      btnZoom={(t.gallery as any)?.btnZoom || (t.gallery as any)?.info?.btnZoom}
+      btnConsult={(t.gallery as any)?.btnConsult || (t.gallery as any)?.info?.btnConsult}
+      hotlineText={(t.gallery as any)?.hotlineText || (t.gallery as any)?.info?.hotlineText}
+      btnViewDetail={(t.gallery as any)?.btnViewDetail || (t.gallery as any)?.info?.btnViewDetail}
       projects={projectList as any}
       contactHref={contactHref}
       style={getSectionStyle("gallery")}

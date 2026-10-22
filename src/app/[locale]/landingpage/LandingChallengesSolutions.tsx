@@ -195,7 +195,7 @@ export default function LandingChallengesSolutions({
             className="mb-8 sm:mb-10 text-left"
           >
             <h2
-              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.28] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
+              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
               style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}
             >
               {renderWithBreaks(mainTitle)}
@@ -255,7 +255,7 @@ export default function LandingChallengesSolutions({
             className="mb-8 sm:mb-10 text-left"
           >
             <h2
-              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.28] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
+              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
               style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}
             >
               {renderWithBreaks(solTitle)}

@@ -44,6 +44,10 @@ interface LandingGalleryShowcaseProps {
   contactHref?: string;
   style?: React.CSSProperties;
   defaultSpotlightId?: string;
+  btnZoom?: string;
+  btnConsult?: string;
+  hotlineText?: string;
+  btnViewDetail?: string;
 }
 
 /**
@@ -100,6 +104,10 @@ export default function LandingGalleryShowcase({
   contactHref = "/ja/contact",
   style,
   defaultSpotlightId,
+  btnZoom,
+  btnConsult,
+  hotlineText,
+  btnViewDetail,
 }: LandingGalleryShowcaseProps) {
   const INITIAL_GRID_COUNT = 8;
   const isJa = !contactHref.includes("/en");
@@ -433,7 +441,7 @@ export default function LandingGalleryShowcase({
                     >
                       <Maximize2 size={13} />
                       <span className="hidden sm:inline">
-                        {currentSpotlight.fullscreenBtnText || "全画面表示"}
+                        {currentSpotlight.fullscreenBtnText || btnZoom || "拡大表示"}
                       </span>
                     </button>
 
@@ -516,7 +524,7 @@ export default function LandingGalleryShowcase({
                             onClick={() => setIsExpandedDesc(!isExpandedDesc)}
                             className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-xs font-bold transition-colors cursor-pointer select-none"
                           >
-                            <span>{isExpandedDesc ? "Thu gọn ▲" : "Xem thêm ▼"}</span>
+                            <span>{isExpandedDesc ? "閉じる ▲" : (btnViewDetail || "もっと見る ▼")}</span>
                           </button>
                         </div>
                       )}
@@ -599,16 +607,23 @@ export default function LandingGalleryShowcase({
                         href={contactHref}
                         className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 sm:py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-none shadow-lg transition-all"
                       >
-                        <span>このプランについて相談する</span>
+                        <span>{btnConsult || "このプランについて相談する"}</span>
                         <ArrowRight size={15} />
                       </a>
 
-                      <div
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 text-xs text-zinc-300 bg-white/5 border border-white/10 rounded-none shrink-0 cursor-default select-text"
-                      >
-                        <Phone size={13} className="text-amber-500" />
-                        <span>お電話窓口: 0984 384 190</span>
-                      </div>
+                      {(() => {
+                        const rawHotline = hotlineText || "電話番号: 0914 049 090";
+                        const phoneDigits = rawHotline.replace(/[^\d+]/g, "");
+                        return (
+                          <a
+                            href={phoneDigits ? `tel:${phoneDigits}` : "tel:0914049090"}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-3 text-xs text-zinc-300 hover:text-amber-400 bg-white/5 hover:bg-white/10 border border-white/10 rounded-none shrink-0 transition-colors cursor-pointer select-text"
+                          >
+                            <Phone size={13} className="text-amber-500" />
+                            <span>{rawHotline}</span>
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
                 </motion.div>

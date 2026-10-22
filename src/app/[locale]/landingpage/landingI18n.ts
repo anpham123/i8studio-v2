@@ -2021,10 +2021,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $25,000 ($30/m²)"
         : "Chi phí TK & 3D: Từ 85.000.000đ (100.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "25–35 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "25–35 日" : isEn ? "25–35 Days" : "25–35 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "インフィニティプール18m" : isEn ? "18m Horizon Pool" : "Hồ bơi tràn viền 18m" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Bespoke Luxury" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Không sai lệch" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "100% 完全図面一致" : isEn ? "100% As-Built Match" : "0% Không sai lệch" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "850 m²" },
@@ -2066,10 +2066,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $12,500 ($30/m²)"
         : "Chi phí TK & 3D: Từ 45.000.000đ (105.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "20–30 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "20–30 日" : isEn ? "20–30 Days" : "20–30 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "屋上禅ガーデン" : isEn ? "Rooftop Zen Garden" : "Vườn thiền Zen trên mái" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Minimalist High-end" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Chuẩn kỹ thuật" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "100% 技術基準準拠" : isEn ? "100% Code Compliant" : "0% Chuẩn kỹ thuật" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "420 m²" },
@@ -2111,10 +2111,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $10,500 ($30/m²)"
         : "Chi phí TK & 3D: Từ 38.000.000đ (110.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "20–25 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "20–25 日" : isEn ? "20–25 Days" : "20–25 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "吹抜けパノラマ窓" : isEn ? "6.5m Panorama Wall" : "Vách kính thông tầng 6.5m" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Contemporary Luxury" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Không sai lệch" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "100% 完全図面一致" : isEn ? "100% Zero Discrepancy" : "0% Không sai lệch" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "350 m²" },
@@ -2156,10 +2156,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $36,000 ($30/m²)"
         : "Chi phí TK & 3D: Từ 120.000.000đ (100.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "30–45 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "30–45 日" : isEn ? "30–45 Days" : "30–45 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "樹冠キャノピーブリッジ" : isEn ? "Canopy Sky Walkway" : "Cầu gỗ xuyên tán rừng" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Eco Luxury Retreat" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Chuẩn thi công" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "100% 施工検証済み" : isEn ? "100% Build-Ready" : "0% Chuẩn thi công" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "1,200 m²" },
@@ -2201,10 +2201,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $9,000 ($32/m²)"
         : "Chi phí TK & 3D: Từ 32.000.000đ (115.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "15–20 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "15–20 日" : isEn ? "15–20 Days" : "15–20 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "錦鯉ウォーターガーデン" : isEn ? "Koi Zen Sanctuary" : "Hồ cá Koi check-in độc bản" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Authentic Wabi-Sabi" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Đã khai trương" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "実稼働オープン済み" : isEn ? "Operational & Built" : "0% Đã khai trương" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "280 m²" },
@@ -2246,10 +2246,10 @@ export function getGalleryProjectsData(locale: string): Record<string, GalleryPr
         ? "Est. Fee: From $16,500 ($30/m²)"
         : "Chi phí TK & 3D: Từ 55.000.000đ (105.000đ/m²)",
       keyHighlights: [
-        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: "25–35 Ngày" },
+        { label: isJa ? "設計期間" : isEn ? "Timeline" : "Thời Gian TK", value: isJa ? "25–35 日" : isEn ? "25–35 Days" : "25–35 Ngày" },
         { label: isJa ? "特徴" : isEn ? "Highlight" : "Điểm Nhấn", value: isJa ? "熱帯中庭＆プール" : isEn ? "Courtyard Lagoon" : "Sân trong nhiệt đới & hồ bơi" },
         { label: isJa ? "仕上げ" : isEn ? "Spec Grade" : "Hoàn Thiện", value: "Tropical Bespoke" },
-        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: "0% Chuẩn kỹ thuật" },
+        { label: isJa ? "施工整合性" : isEn ? "Accuracy" : "Sai Lệch", value: isJa ? "100% 技術基準準拠" : isEn ? "100% Code Compliant" : "0% Chuẩn kỹ thuật" },
       ],
       specs: [
         { k: isJa ? "延床面積" : isEn ? "Floor Area" : "Diện tích sàn", v: "620 m²" },
