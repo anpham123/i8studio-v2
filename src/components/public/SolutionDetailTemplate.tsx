@@ -104,6 +104,17 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
   const title = isJa ? data.titleJa : data.titleEn;
   const heroTagline = isJa ? data.heroTaglineJa : data.heroTaglineEn;
   const heroDesc = isJa ? data.heroDescJa : data.heroDescEn;
+  const heroCtaText = isJa
+    ? (data.heroCtaTextJa?.trim() || "無料相談する")
+    : (data.heroCtaTextEn?.trim() || "Free Consultation");
+  const rawCtaLink = data.heroCtaLink?.trim();
+  const heroCtaHref = !rawCtaLink
+    ? `/${locale}/contact`
+    : rawCtaLink.startsWith("http://") || rawCtaLink.startsWith("https://") || rawCtaLink.startsWith("mailto:")
+    ? rawCtaLink
+    : rawCtaLink.startsWith(`/${locale}/`) || rawCtaLink === `/${locale}`
+    ? rawCtaLink
+    : `/${locale}${rawCtaLink.startsWith("/") ? "" : "/"}${rawCtaLink}`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -261,10 +272,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
-              href={`/${locale}/contact`}
+              href={heroCtaHref}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
             >
-              <span>{isJa ? "無料相談する" : "Free Consultation"}</span>
+              <span>{heroCtaText}</span>
             </Link>
           </motion.div>
         </div>

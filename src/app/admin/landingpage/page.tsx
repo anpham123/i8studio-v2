@@ -180,11 +180,10 @@ export default function AdminLandingPageOverview() {
     const defaultKeys = [
       "hero",
       "pain-points",
-      "solutions",
+      "partners",
       "workflow",
       "deliverables",
       "applications",
-      "partners",
       "gallery",
       "cta",
     ];

@@ -339,6 +339,11 @@ export default function EditServicePage() {
                 </div>
                 <TextArea form={form} set={set} k="heroDescJa" label="Hero mô tả (JA)" />
                 <TextArea form={form} set={set} k="heroDescEn" label="Hero mô tả (EN)" />
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                  <Field form={form} set={set} k="heroCtaTextJa" label="Nút CTA Banner (JA)" placeholder="無料相談する (để trống sẽ dùng mặc định)" />
+                  <Field form={form} set={set} k="heroCtaTextEn" label="Nút CTA Banner (EN)" placeholder="Free Consultation (để trống sẽ dùng mặc định)" />
+                </div>
+                <Field form={form} set={set} k="heroCtaLink" label="Đường dẫn nút CTA Banner (mặc định: /contact)" placeholder="/contact hoặc link bất kỳ" />
               </div>
 
               {/* Dynamic Features (Issue 1 + 2) */}

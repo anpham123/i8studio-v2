@@ -12,6 +12,9 @@ export interface SolutionService {
   heroTaglineEn: string;
   heroDescJa: string;
   heroDescEn: string;
+  heroCtaTextJa?: string;
+  heroCtaTextEn?: string;
+  heroCtaLink?: string;
   mediaEmbedUrl: string;
   features: {
     titleJa: string;
@@ -145,6 +148,9 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     heroTaglineEn: (db.heroTaglineEn as string) || "",
     heroDescJa: (db.heroDescJa as string) || "",
     heroDescEn: (db.heroDescEn as string) || "",
+    heroCtaTextJa: (db.heroCtaTextJa as string) || "",
+    heroCtaTextEn: (db.heroCtaTextEn as string) || "",
+    heroCtaLink: (db.heroCtaLink as string) || "",
     mediaEmbedUrl: (db.mediaEmbedUrl as string) || "",
     features,
     process,

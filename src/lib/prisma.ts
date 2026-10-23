@@ -5,7 +5,7 @@ const globalForPrisma = globalThis as unknown as {
   __prismaVersion: string | undefined;
 };
 
-const CLIENT_VERSION = "2026_09_26_v3_landing_page";
+const CLIENT_VERSION = "2026_10_23_solution_hero_cta";
 
 function getClient(): PrismaClient {
   if (!globalForPrisma.__prisma || globalForPrisma.__prismaVersion !== CLIENT_VERSION) {
