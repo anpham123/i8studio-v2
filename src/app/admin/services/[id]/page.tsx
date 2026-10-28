@@ -30,6 +30,22 @@ function Field({ k, label, placeholder, wide, form, set }: FieldProps) {
   );
 }
 
+interface ColorFieldProps { k: string; label: string; fallback: string; form: Record<string, string | boolean>; set: (k: string, v: string | boolean) => void; }
+function ColorField({ k, label, fallback, form, set }: ColorFieldProps) {
+  const value = String(form[k] || "");
+  const pickerValue = /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <div className="flex items-center gap-2">
+        <input type="color" value={pickerValue} onChange={(e) => set(k, e.target.value)} className="w-10 h-10 rounded border border-gray-200 cursor-pointer p-0.5 bg-white" />
+        <input value={value} onChange={(e) => set(k, e.target.value)} placeholder={`${fallback} (mặc định)`} className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none" />
+        {value && <button type="button" onClick={() => set(k, "")} className="text-xs text-gray-500 hover:text-red-500">Đặt lại</button>}
+      </div>
+    </div>
+  );
+}
+
 interface TextAreaProps { k: string; label: string; form: Record<string, string | boolean>; set: (k: string, v: string | boolean) => void; }
 function TextArea({ k, label, form, set }: TextAreaProps) {
   return (
@@ -344,6 +360,16 @@ export default function EditServicePage() {
                   <Field form={form} set={set} k="heroCtaTextEn" label="Nút CTA Banner (EN)" placeholder="Free Consultation (để trống sẽ dùng mặc định)" />
                 </div>
                 <Field form={form} set={set} k="heroCtaLink" label="Đường dẫn nút CTA Banner (mặc định: /contact)" placeholder="/contact hoặc link bất kỳ" />
+                <div className="space-y-3 pt-2 border-t border-gray-100">
+                  <p className="text-xs font-semibold text-gray-500">🎨 Màu nội dung Hero (để trống = màu mặc định)</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <ColorField form={form} set={set} k="heroLabelColor" label="Màu nhãn (AR...)" fallback="#c5a666" />
+                    <ColorField form={form} set={set} k="heroTitleColor" label="Màu tiêu đề (Tagline)" fallback="#ffffff" />
+                    <ColorField form={form} set={set} k="heroDescColor" label="Màu mô tả" fallback="#ffffff" />
+                    <ColorField form={form} set={set} k="heroCtaBgColor" label="Màu nền nút CTA" fallback="#ffffff" />
+                    <ColorField form={form} set={set} k="heroCtaTextColor" label="Màu chữ nút CTA" fallback="#111111" />
+                  </div>
+                </div>
               </div>
 
               {/* Dynamic Features (Issue 1 + 2) */}

@@ -15,6 +15,11 @@ export interface SolutionService {
   heroCtaTextJa?: string;
   heroCtaTextEn?: string;
   heroCtaLink?: string;
+  heroLabelColor?: string;
+  heroTitleColor?: string;
+  heroDescColor?: string;
+  heroCtaBgColor?: string;
+  heroCtaTextColor?: string;
   mediaEmbedUrl: string;
   features: {
     titleJa: string;
@@ -151,6 +156,11 @@ export function dbServiceToSolution(db: Record<string, unknown>): SolutionServic
     heroCtaTextJa: (db.heroCtaTextJa as string) || "",
     heroCtaTextEn: (db.heroCtaTextEn as string) || "",
     heroCtaLink: (db.heroCtaLink as string) || "",
+    heroLabelColor: (db.heroLabelColor as string) || "",
+    heroTitleColor: (db.heroTitleColor as string) || "",
+    heroDescColor: (db.heroDescColor as string) || "",
+    heroCtaBgColor: (db.heroCtaBgColor as string) || "",
+    heroCtaTextColor: (db.heroCtaTextColor as string) || "",
     mediaEmbedUrl: (db.mediaEmbedUrl as string) || "",
     features,
     process,

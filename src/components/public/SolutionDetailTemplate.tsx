@@ -149,6 +149,8 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
               || (isHeroImageVideo ? heroSrc : null)
               || (!heroSrc && isMediaVideo ? mediaUrl : null);
             const useImage = !useVideo ? heroSrc : null;
+            const useVideoEmbedUrl = useVideo && !(/\.(mp4|webm|mov)(\?.*)?$/i.test(useVideo) || useVideo.startsWith("/uploads/")) ? getEmbedUrl(useVideo) : null;
+            const isInteractiveEmbed = !!useVideoEmbedUrl && !/youtu|vimeo/i.test(useVideoEmbedUrl);
 
             return (
               <>
@@ -211,8 +213,12 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 )}
 
                 {/* Dark Vignette and Readability Gradient Overlays */}
-                <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/95 via-black/45 to-black/30 pointer-events-none" />
-                <div className="hidden sm:block absolute inset-0 z-[2] bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
+                {!isInteractiveEmbed && (
+                  <>
+                    <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/95 via-black/45 to-black/30 pointer-events-none" />
+                    <div className="hidden sm:block absolute inset-0 z-[2] bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
+                  </>
+                )}
               </>
             );
           })()}
@@ -226,6 +232,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
             className="text-xs sm:text-base md:text-lg uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-2 sm:mb-3 drop-shadow-md"
+            style={data.heroLabelColor ? { color: data.heroLabelColor } : undefined}
           >
             {title}
           </motion.p>
@@ -236,7 +243,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-snug sm:leading-tight mb-3 sm:mb-4 drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:whitespace-nowrap"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif" }}
+            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif", ...(data.heroTitleColor ? { color: data.heroTitleColor } : {}) }}
           >
             {heroTagline}
           </motion.h1>
@@ -262,6 +269,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
                 className="text-white/90 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-4 sm:mb-6 leading-relaxed font-light drop-shadow-md space-y-1"
+                style={data.heroDescColor ? { color: data.heroDescColor } : undefined}
               >
                 {lines.map((line, idx) => (
                   <span key={idx} className="block whitespace-normal md:whitespace-nowrap">
@@ -276,6 +284,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             <Link
               href={heroCtaHref}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
+              style={{ ...(data.heroCtaBgColor ? { backgroundColor: data.heroCtaBgColor } : {}), ...(data.heroCtaTextColor ? { color: data.heroCtaTextColor } : {}) }}
             >
               <span>{heroCtaText}</span>
             </Link>

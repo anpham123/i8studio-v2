@@ -79,6 +79,11 @@ model Service {
   heroCtaTextJa   String @default("")
   heroCtaTextEn   String @default("")
   heroCtaLink     String @default("")
+  heroLabelColor  String @default("")   // Hero text colors (hex). Empty = default
+  heroTitleColor  String @default("")
+  heroDescColor   String @default("")
+  heroCtaBgColor  String @default("")
+  heroCtaTextColor String @default("")
   feature1TitleJa String @default("")
   feature1TitleEn String @default("")
   feature1DescJa  String @default("")
