@@ -137,7 +137,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
         </div>
 
         {/* Media Background Layer with Ken Burns Auto-Panoramic Pan on Mobile */}
-        <div className="absolute inset-0 z-1 overflow-hidden pointer-events-none flex items-center justify-start sm:justify-center">
+        <div className={`absolute inset-0 z-[1] overflow-hidden flex items-center justify-start sm:justify-center ${/youtu|vimeo/i.test(data.heroVideo || "") || !getEmbedUrl(data.heroVideo) ? "pointer-events-none" : ""}`}>
           {(() => {
             const heroVideoUrl = data.heroVideo || "";
             const heroSrc = data.heroImage || "";
@@ -176,14 +176,16 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                         />
                       );
                     }
+                    const isBackgroundVideoEmbed = /youtu|vimeo/i.test(embed);
                     const fullEmbed = embed.includes("?")
                       ? `${embed}&autoplay=1&mute=1&loop=1&controls=0`
                       : `${embed}?autoplay=1&mute=1&loop=1&controls=0`;
                     return (
                       <iframe
-                        src={fullEmbed}
-                        className="w-full h-full min-w-[140%] min-h-[140%] pointer-events-none scale-110 object-cover border-0"
-                        allow="autoplay; fullscreen; encrypted-media"
+                        src={isBackgroundVideoEmbed ? fullEmbed : embed}
+                        className={isBackgroundVideoEmbed ? "w-full h-full min-w-[140%] min-h-[140%] pointer-events-none scale-110 object-cover border-0" : "absolute inset-0 w-full h-full border-0 pointer-events-auto"}
+                        allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; xr-spatial-tracking"
+                        title={title}
                       />
                     );
                   })()
@@ -209,15 +211,15 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                 )}
 
                 {/* Dark Vignette and Readability Gradient Overlays */}
-                <div className="absolute inset-0 z-2 bg-gradient-to-t from-black/95 via-black/45 to-black/30" />
-                <div className="hidden sm:block absolute inset-0 z-2 bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/95 via-black/45 to-black/30 pointer-events-none" />
+                <div className="hidden sm:block absolute inset-0 z-[2] bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
               </>
             );
           })()}
         </div>
 
         {/* Content overlay */}
-        <div className="relative z-10 text-center px-5 sm:px-6 max-w-5xl md:max-w-6xl mx-auto">
+        <div className="relative z-10 text-center px-5 sm:px-6 max-w-5xl md:max-w-6xl mx-auto pointer-events-none">
           {/* Category / Sub-badge */}
           <motion.p
             initial={{ opacity: 0, y: 15 }}
@@ -270,7 +272,7 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
             );
           })()}
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+          <motion.div className="pointer-events-auto inline-block" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Link
               href={heroCtaHref}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
