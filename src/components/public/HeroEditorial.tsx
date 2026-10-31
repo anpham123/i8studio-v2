@@ -192,29 +192,74 @@ function GridTile({
 
   return (
     <div
-      className="hero-tile w-full relative"
-      style={{
-        aspectRatio: aspect,
-        maxHeight: maxHeight || undefined,
-        minHeight: minHeight || undefined,
-      }}
+      className={`hero-tile w-full relative ${
+        isFullScreenHeroType
+          ? "h-auto md:aspect-[16/9] md:min-h-[calc(100vh-48px)]"
+          : ""
+      }`}
+      style={
+        isFullScreenHeroType
+          ? { maxHeight: maxHeight || undefined }
+          : {
+              aspectRatio: aspect,
+              maxHeight: maxHeight || undefined,
+              minHeight: minHeight || undefined,
+            }
+      }
     >
       {/* Card container: static for large full-screen images (like Hero), hover lift for smaller cards */}
       <div
         onClick={onClick}
         onMouseEnter={hv.onEnter}
         onMouseLeave={hv.onLeave}
-        className={`group relative w-full h-full cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md ${isFullScreenHeroType
-          ? "hover:opacity-95"
-          : "transition-[transform,box-shadow] duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
-          }`}
+        className={`group relative w-full ${
+          isFullScreenHeroType ? "h-auto md:h-full hover:opacity-95" : "h-full transition-[transform,box-shadow] duration-500 ease-out hover:scale-105 hover:-translate-y-3 hover:shadow-[0_25px_50px_rgba(0,0,0,0.35)] hover:z-30 border border-black/5"
+        } cursor-pointer rounded-2xl sm:rounded-3xl overflow-hidden bg-neutral-100 shadow-md`}
         style={{
           transformOrigin: "center center",
         }}
       >
         {/* Base Image Poster (always rendered if available) */}
         {hasImage && !imgFailed ? (
-          canOptimize(image!.url) ? (
+          isFullScreenHeroType ? (
+            <>
+              {/* Mobile (< 768px): Natural uncropped full image */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image!.url}
+                alt={image!.alt || `Work ${index + 1}`}
+                className="block md:hidden w-full h-auto"
+                loading={index < 4 ? "eager" : "lazy"}
+                decoding="async"
+                onError={() => setImgFailed(true)}
+              />
+              {/* Desktop (>= 768px): Original full-viewport cover layout untouched */}
+              <div className="hidden md:block absolute inset-0 w-full h-full">
+                {canOptimize(image!.url) ? (
+                  <Image
+                    src={image!.url}
+                    alt={image!.alt || `Work ${index + 1}`}
+                    fill
+                    sizes={sizes}
+                    quality={78}
+                    loading={index < 4 ? "eager" : "lazy"}
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                    onError={() => setImgFailed(true)}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={image!.url}
+                    alt={image!.alt || `Work ${index + 1}`}
+                    className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                    loading={index < 4 ? "eager" : "lazy"}
+                    decoding="async"
+                    onError={() => setImgFailed(true)}
+                  />
+                )}
+              </div>
+            </>
+          ) : canOptimize(image!.url) ? (
             <Image
               src={image!.url}
               alt={image!.alt || `Work ${index + 1}`}
@@ -238,7 +283,7 @@ function GridTile({
           )
         ) : (
           <div
-            className="absolute inset-0"
+            className={isFullScreenHeroType ? "aspect-[16/9] md:aspect-auto md:absolute md:inset-0" : "absolute inset-0"}
             style={{ backgroundColor: fallbackColor }}
           />
         )}
@@ -406,8 +451,8 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
 
   return (
     <section ref={sectionRef} id="hero-section" className="bg-white relative overflow-hidden">
-      {/* ========== FULL-VIEWPORT HERO ========== */}
-      <div className="relative w-full px-3 pt-3" style={{ height: "calc(100vh - var(--header-h, 76px))" }}>
+      {/* ========== FULL-VIEWPORT HERO (Uncropped natural full-frame on Mobile, 100vh on Desktop) ========== */}
+      <div className="relative w-full px-3 pt-3 h-auto md:h-[calc(100vh-var(--header-h,76px))]">
         <div
           onClick={() => {
             if (heroImage?.url || heroImage?.videoUrl) {
@@ -420,37 +465,49 @@ export default function HeroEditorial({ images = [], limit = 11, showOverlayText
           }}
           onMouseEnter={heroHv.onEnter}
           onMouseLeave={heroHv.onLeave}
-          className="relative w-full h-full rounded-2xl overflow-hidden cursor-pointer group"
+          className="relative w-full h-auto md:h-full rounded-2xl overflow-hidden cursor-pointer group"
         >
           {/* Base Hero Image */}
           {heroImage?.url ? (
             <motion.div
-              className="absolute inset-0"
+              className="relative w-full md:absolute md:inset-0 md:h-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.9, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
-              {canOptimize(heroImage.url) ? (
-                <Image
-                  src={heroImage.url}
-                  alt={heroImage.alt || "i8 STUDIO"}
-                  fill
-                  sizes="100vw"
-                  quality={80}
-                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={heroImage.url}
-                  alt={heroImage.alt}
-                  decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-              )}
+              {/* Mobile (< 768px): Full uncropped image matching natural proportions */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage.url}
+                alt={heroImage.alt || "i8 STUDIO"}
+                decoding="async"
+                className="block md:hidden w-full h-auto"
+              />
+
+              {/* Desktop (>= 768px): Original full-viewport cover layout untouched */}
+              <div className="hidden md:block absolute inset-0 w-full h-full">
+                {canOptimize(heroImage.url) ? (
+                  <Image
+                    src={heroImage.url}
+                    alt={heroImage.alt || "i8 STUDIO"}
+                    fill
+                    sizes="100vw"
+                    quality={80}
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={heroImage.url}
+                    alt={heroImage.alt}
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                )}
+              </div>
             </motion.div>
           ) : (
-            <div className="absolute inset-0 bg-[#c8c2b8]" />
+            <div className="aspect-[16/9] md:aspect-auto md:absolute md:inset-0 bg-[#c8c2b8]" />
           )}
 
           {/* Hover Video Preview for Hero (mounted only after first mouse hover) */}
