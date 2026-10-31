@@ -47,6 +47,9 @@ import {
   getDefaultPartnerBrands,
   getGalleryProjectsData,
   getDefaultPricingTiers,
+  getDefaultPricingStackPages,
+  type PricingStackPageItem,
+  type PricingStackMediaItem,
 } from "@/app/[locale]/landingpage/landingI18n";
 
 interface SectionMeta {
@@ -104,7 +107,7 @@ const SECTION_META: Record<string, SectionMeta> = {
     key: "gallery",
     order: 7,
     label: "07. Giá cả",
-    subLabel: "Showcase các dự án thực tế tiêu biểu",
+    subLabel: "5 Trang thẻ lật 3D (View Std/HQ, Movie, VR360, VR SS), Nền Background & Báo giá",
     anchor: "#du-an",
   },
   cta: {
@@ -142,6 +145,7 @@ export default function SectionEditorPage() {
   const [contentEn, setContentEn] = useState<any>(null);
   const [contentJa, setContentJa] = useState<any>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [sectionBgColor, setSectionBgColor] = useState<string>("#F4F3EF");
 
   const fetchSectionData = useCallback(async () => {
     setLoading(true);
@@ -152,6 +156,7 @@ export default function SectionEditorPage() {
         setContentEn(data.data.contentEn);
         setContentJa(data.data.contentJa);
         setUpdatedAt(data.data.updatedAt || null);
+        if (data.backgroundColor) setSectionBgColor(data.backgroundColor);
       } else {
         toast("Không thể tải dữ liệu section này", "error");
       }
@@ -175,6 +180,7 @@ export default function SectionEditorPage() {
         body: JSON.stringify({
           contentEn,
           contentJa,
+          backgroundColor: sectionBgColor || undefined,
         }),
       });
       const data = await res.json();
@@ -396,6 +402,8 @@ export default function SectionEditorPage() {
               contentJa={contentJa}
               contentEn={contentEn}
               updateField={updateField}
+              sectionBgColor={sectionBgColor}
+              setSectionBgColor={setSectionBgColor}
             />
           )}
 
@@ -1693,9 +1701,9 @@ function WorkflowForm({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-5">
         <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          Tiêu đề Section Quy trình thực hiện
+          1. Tiêu đề, Màu chữ &amp; Nút bấm Section Quy trình làm việc
         </h2>
         <BilingualField
           label="Tiêu đề chính của Section"
@@ -1705,6 +1713,231 @@ function WorkflowForm({
           updateField={updateField}
           activeLang={lang}
         />
+
+        {/* Màu chữ Tiêu đề bước & Mô tả tóm tắt */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          {/* Màu chữ Tiêu đề bước */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                🎨 Màu chữ Tiêu đề bước (Áp dụng cho tất cả các bước)
+              </label>
+              {(contentJa?.stepTitleColor || contentEn?.stepTitleColor) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField("ja", ["stepTitleColor"], "");
+                    updateField("en", ["stepTitleColor"], "");
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                >
+                  Đặt về mặc định
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: "Trắng sáng", hex: "#FFFFFF" },
+                { label: "Kem ngà", hex: "#FAF3E3" },
+                { label: "Vàng Gold", hex: "#F4C977" },
+                { label: "Đen than", hex: "#15171C" },
+                { label: "Nâu trầm", hex: "#3B2D23" },
+              ].map((sw) => {
+                const cur = contentJa?.stepTitleColor || contentEn?.stepTitleColor || "";
+                const active = cur.toLowerCase() === sw.hex.toLowerCase();
+                return (
+                  <button
+                    key={sw.hex}
+                    type="button"
+                    onClick={() => {
+                      updateField("ja", ["stepTitleColor"], sw.hex);
+                      updateField("en", ["stepTitleColor"], sw.hex);
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
+                      active
+                        ? "border-blue-600 bg-blue-50 text-blue-900 ring-1 ring-blue-500/30"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0"
+                      style={{ backgroundColor: sw.hex }}
+                    />
+                    <span>{sw.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={
+                  /^#[0-9a-fA-F]{6}$/.test(contentJa?.stepTitleColor || "")
+                    ? contentJa.stepTitleColor
+                    : "#FFFFFF"
+                }
+                onChange={(e) => {
+                  updateField("ja", ["stepTitleColor"], e.target.value);
+                  updateField("en", ["stepTitleColor"], e.target.value);
+                }}
+                className="w-9 h-8 rounded border border-slate-300 bg-white p-0.5 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={contentJa?.stepTitleColor || ""}
+                onChange={(e) => {
+                  updateField("ja", ["stepTitleColor"], e.target.value);
+                  updateField("en", ["stepTitleColor"], e.target.value);
+                }}
+                placeholder="Mặc định (#FFFFFF)"
+                className="flex-1 px-2.5 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg"
+              />
+            </div>
+          </div>
+
+          {/* Màu chữ Mô tả tóm tắt */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-800">
+                🎨 Màu chữ Mô tả tóm tắt (Áp dụng cho tất cả các bước)
+              </label>
+              {(contentJa?.stepDescColor || contentEn?.stepDescColor) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateField("ja", ["stepDescColor"], "");
+                    updateField("en", ["stepDescColor"], "");
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                >
+                  Đặt về mặc định
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: "Xám sáng", hex: "#E2E6EE" },
+                { label: "Trắng sáng", hex: "#FFFFFF" },
+                { label: "Kem ấm", hex: "#EFE4CE" },
+                { label: "Vàng nhạt", hex: "#F6D899" },
+                { label: "Xám đậm", hex: "#334155" },
+              ].map((sw) => {
+                const cur = contentJa?.stepDescColor || contentEn?.stepDescColor || "";
+                const active = cur.toLowerCase() === sw.hex.toLowerCase();
+                return (
+                  <button
+                    key={sw.hex}
+                    type="button"
+                    onClick={() => {
+                      updateField("ja", ["stepDescColor"], sw.hex);
+                      updateField("en", ["stepDescColor"], sw.hex);
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition cursor-pointer ${
+                      active
+                        ? "border-blue-600 bg-blue-50 text-blue-900 ring-1 ring-blue-500/30"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                    }`}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0"
+                      style={{ backgroundColor: sw.hex }}
+                    />
+                    <span>{sw.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={
+                  /^#[0-9a-fA-F]{6}$/.test(contentJa?.stepDescColor || "")
+                    ? contentJa.stepDescColor
+                    : "#E2E6EE"
+                }
+                onChange={(e) => {
+                  updateField("ja", ["stepDescColor"], e.target.value);
+                  updateField("en", ["stepDescColor"], e.target.value);
+                }}
+                className="w-9 h-8 rounded border border-slate-300 bg-white p-0.5 cursor-pointer"
+              />
+              <input
+                type="text"
+                value={contentJa?.stepDescColor || ""}
+                onChange={(e) => {
+                  updateField("ja", ["stepDescColor"], e.target.value);
+                  updateField("en", ["stepDescColor"], e.target.value);
+                }}
+                placeholder="Mặc định (#E2E6EE)"
+                className="flex-1 px-2.5 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Nút Button dưới mô tả tóm tắt */}
+        <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-3">
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+            🔘 Nút Button nằm dưới phần Mô tả tóm tắt
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <BilingualField
+              label="Nội dung chữ trên nút Button"
+              subLabel="Để trống sẽ hiển thị mặc định: 無料相談・お問い合わせ"
+              path={["ctaText"]}
+              contentJa={contentJa}
+              contentEn={contentEn}
+              updateField={updateField}
+              activeLang={lang}
+            />
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">
+                Đường dẫn khi khách bấm vào nút Button:
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: "Trang liên hệ (/ja/contact)", href: "/ja/contact" },
+                  { label: "Cuộn xuống form cuối trang (#dang-ky-tu-van)", href: "#dang-ky-tu-van" },
+                ].map((opt) => {
+                  const curHref = contentJa?.ctaHref || "/ja/contact";
+                  const active = curHref === opt.href;
+                  return (
+                    <button
+                      key={opt.href}
+                      type="button"
+                      onClick={() => {
+                        updateField("ja", ["ctaHref"], opt.href);
+                        updateField("en", ["ctaHref"], opt.href);
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition cursor-pointer ${
+                        active
+                          ? "bg-amber-600 text-white border-amber-600"
+                          : "bg-white text-slate-700 border-slate-300 hover:border-amber-400"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <input
+                type="text"
+                value={contentJa?.ctaHref || ""}
+                onChange={(e) => {
+                  updateField("ja", ["ctaHref"], e.target.value);
+                  updateField("en", ["ctaHref"], e.target.value);
+                }}
+                placeholder="/ja/contact hoặc #dang-ky-tu-van"
+                className="w-full px-3 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Header bar with total steps & Add Step button */}
@@ -1733,6 +1966,7 @@ function WorkflowForm({
           const curJa = stepsJa[idx] || {};
           const curEn = stepsEn[idx] || {};
           const stepImg = curJa.stepImage || curEn.stepImage || "";
+          const stepBgImg = curJa.stepBgImage || curEn.stepBgImage || "";
           const stageTag = curJa.stepStageTag || curEn.stepStageTag || "";
 
           return (
@@ -1884,6 +2118,106 @@ function WorkflowForm({
                 </div>
               </div>
 
+              {/* Step Background Image Upload & URL */}
+              <div className="p-3.5 bg-amber-50/40 rounded-xl border border-amber-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>🌄 Ảnh nền của bước (Step Background Image)</span>
+                  </label>
+                  {stepBgImg ? (
+                    <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold border border-emerald-300">
+                      ✓ Đã có ảnh nền riêng
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded font-semibold border border-amber-200">
+                      Mặc định dùng ảnh bước
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
+                  {/* Background Thumbnail preview */}
+                  <div className="relative w-full h-24 rounded-lg overflow-hidden border border-slate-300 bg-slate-200/60 flex items-center justify-center shrink-0">
+                    {stepBgImg ? (
+                      <img src={stepBgImg} alt="Step background preview" className="w-full h-full object-cover" />
+                    ) : stepImg ? (
+                      <div className="relative w-full h-full">
+                        <img src={stepImg} alt="Fallback background preview" className="w-full h-full object-cover opacity-70" />
+                        <span className="absolute inset-x-1 bottom-1 text-center text-[9px] font-semibold bg-black/65 text-white rounded px-1 py-0.5">
+                          Đang lấy từ ảnh bước
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400">Chưa có ảnh nền</span>
+                    )}
+                  </div>
+
+                  {/* Background Image Inputs */}
+                  <div className="sm:col-span-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={stepBgImg}
+                        placeholder="URL ảnh nền riêng của bước (để trống sẽ tự lấy ảnh minh họa bước)..."
+                        onChange={(e) => {
+                          updateField("ja", ["steps", idx.toString(), "stepBgImage"], e.target.value);
+                          updateField("en", ["steps", idx.toString(), "stepBgImage"], e.target.value);
+                        }}
+                        className="w-full px-3 py-1.5 text-xs text-slate-800 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                      />
+
+                      <label className="shrink-0 cursor-pointer">
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all">
+                          <Upload size={13} />
+                          <span>Tải ảnh nền</span>
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const fd = new FormData();
+                            fd.append("file", file);
+                            try {
+                              const res = await fetch("/api/upload", { method: "POST", body: fd });
+                              const data = await res.json();
+                              if (res.ok && data.url) {
+                                updateField("ja", ["steps", idx.toString(), "stepBgImage"], data.url);
+                                updateField("en", ["steps", idx.toString(), "stepBgImage"], data.url);
+                                toast("Tải ảnh nền bước thành công!", "success");
+                              } else {
+                                toast(data.error || "Tải ảnh nền thất bại", "error");
+                              }
+                            } catch {
+                              toast("Lỗi tải ảnh nền", "error");
+                            }
+                          }}
+                        />
+                      </label>
+
+                      {stepBgImg && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateField("ja", ["steps", idx.toString(), "stepBgImage"], "");
+                            updateField("en", ["steps", idx.toString(), "stepBgImage"], "");
+                          }}
+                          className="shrink-0 px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 border border-red-200 rounded-lg font-semibold transition-all cursor-pointer"
+                          title="Xóa ảnh nền riêng để dùng lại ảnh bước"
+                        >
+                          Xóa
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Hiển thị làm nền toàn khung khi chuyển tới bước 0{idx + 1}. Khuyến nghị ảnh ngang chất lượng cao (16:9).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Step Title - Spans full width matching Description */}
               <div className="w-full">
                 <BilingualField
@@ -1908,6 +2242,83 @@ function WorkflowForm({
                   isTextArea
                   rows={2}
                 />
+              </div>
+
+              {/* Tùy chọn màu chữ riêng cho bước này */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-700">
+                    Màu riêng Tiêu đề Bước 0{idx + 1} (tùy chọn):
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      value={
+                        /^#[0-9a-fA-F]{6}$/.test(curJa.titleColor || "")
+                          ? curJa.titleColor
+                          : /^#[0-9a-fA-F]{6}$/.test(contentJa?.stepTitleColor || "")
+                          ? contentJa.stepTitleColor
+                          : "#FFFFFF"
+                      }
+                      onChange={(e) => {
+                        updateField("ja", ["steps", idx.toString(), "titleColor"], e.target.value);
+                        updateField("en", ["steps", idx.toString(), "titleColor"], e.target.value);
+                      }}
+                      className="w-7 h-7 rounded border border-slate-300 bg-white p-0.5 cursor-pointer"
+                    />
+                    {curJa.titleColor ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateField("ja", ["steps", idx.toString(), "titleColor"], "");
+                          updateField("en", ["steps", idx.toString(), "titleColor"], "");
+                        }}
+                        className="text-[10px] font-semibold text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Dùng màu chung
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-slate-400">Đang dùng màu chung</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-700">
+                    Màu riêng Mô tả Bước 0{idx + 1} (tùy chọn):
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      value={
+                        /^#[0-9a-fA-F]{6}$/.test(curJa.descColor || "")
+                          ? curJa.descColor
+                          : /^#[0-9a-fA-F]{6}$/.test(contentJa?.stepDescColor || "")
+                          ? contentJa.stepDescColor
+                          : "#E2E6EE"
+                      }
+                      onChange={(e) => {
+                        updateField("ja", ["steps", idx.toString(), "descColor"], e.target.value);
+                        updateField("en", ["steps", idx.toString(), "descColor"], e.target.value);
+                      }}
+                      className="w-7 h-7 rounded border border-slate-300 bg-white p-0.5 cursor-pointer"
+                    />
+                    {curJa.descColor ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateField("ja", ["steps", idx.toString(), "descColor"], "");
+                          updateField("en", ["steps", idx.toString(), "descColor"], "");
+                        }}
+                        className="text-[10px] font-semibold text-rose-600 hover:underline cursor-pointer"
+                      >
+                        Dùng màu chung
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-slate-400">Đang dùng màu chung</span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -2607,12 +3018,28 @@ function DeliverablesForm({
     }
   };
 
+  const handleUpdateCollectionName = (
+    cIdx: number,
+    langKey: "ja" | "en",
+    val: string
+  ) => {
+    if (langKey === "ja") {
+      const updatedJa = [...collectionsJa];
+      updatedJa[cIdx] = { ...(updatedJa[cIdx] || {}), name: val };
+      updateField("ja", ["collections"], updatedJa);
+    } else {
+      const updatedEn = [...collectionsEn];
+      updatedEn[cIdx] = { ...(updatedEn[cIdx] || {}), name: val };
+      updateField("en", ["collections"], updatedEn);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Tiêu đề Section */}
+      {/* Tiêu đề Section & Chữ trên nút bấm điều hướng */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          1. Tiêu đề Section Hồ sơ bàn giao (Ảnh 1)
+          1. Tiêu đề Section &amp; Chữ Nút Quay Lại Danh Sách
         </h2>
 
         <BilingualField
@@ -2624,6 +3051,28 @@ function DeliverablesForm({
           updateField={updateField}
           activeLang={lang}
         />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+          <BilingualField
+            label="Chữ trên nút Quay lại danh sách ở giữa phía trên (← 一覧へ戻る)"
+            subLabel="Hiển thị khi khách bấm vào 1 bộ sưu tập. Để trống mặc định: 一覧へ戻る"
+            path={["info", "backBtnText"]}
+            contentJa={contentJa}
+            contentEn={contentEn}
+            updateField={updateField}
+            activeLang={lang}
+          />
+
+          <BilingualField
+            label="Chữ trên nút Đóng chế độ phóng to ảnh (× 拡大表示を閉じる)"
+            subLabel="Hiển thị khi khách bấm phóng lớn 1 ảnh. Để trống mặc định: 拡大表示を閉じる"
+            path={["info", "closeZoomBtnText"]}
+            contentJa={contentJa}
+            contentEn={contentEn}
+            updateField={updateField}
+            activeLang={lang}
+          />
+        </div>
       </div>
 
       {/* 2. Quản lý Bộ sưu tập tài liệu chi tiết */}
@@ -2631,16 +3080,16 @@ function DeliverablesForm({
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-              2. Quản lý các Bộ sưu tập Bản vẽ & Hình ảnh bàn giao
+              2. Quản lý các Bộ sưu tập Bản vẽ &amp; Hình ảnh bàn giao
             </h2>
             <p className="text-xs text-slate-500 font-normal mt-0.5">
-              Hiển thị trong Showcase Viewer & lưới thẻ bộ sưu tập ngoài Landing Page
+              Chỉnh sửa Tên bộ sưu tập (chữ dọc chính giữa &amp; thanh chọn bên dưới) cùng danh sách hình ảnh bên trong
             </p>
           </div>
           <button
             type="button"
             onClick={handleAddCollection}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition cursor-pointer"
           >
             <Plus size={14} />
             <span>Thêm bộ sưu tập</span>
@@ -2669,7 +3118,7 @@ function DeliverablesForm({
                     type="button"
                     onClick={() => handleDeleteCollection(cIdx)}
                     disabled={collectionsJa.length <= 1}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-transparent text-xs font-medium rounded-lg transition"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-transparent text-xs font-medium rounded-lg transition cursor-pointer"
                     title="Xóa bộ sưu tập này"
                   >
                     <Trash2 size={13} />
@@ -2677,7 +3126,48 @@ function DeliverablesForm({
                   </button>
                 </div>
 
+                {/* Tên bộ sưu tập (Hiển thị chữ dọc lớn ở giữa và thanh tab dưới cùng) */}
+                <div className="bg-white p-3.5 rounded-xl border border-blue-200/80 shadow-xs space-y-2.5">
+                  <label className="block text-xs font-bold text-slate-800">
+                    🏷️ Tên Bộ Sưu Tập 0{cIdx + 1} (Hiển thị chữ dọc chính giữa &amp; thanh danh mục bên dưới):
+                  </label>
 
+                  <div className={`grid grid-cols-1 ${lang === "both" ? "md:grid-cols-2" : ""} gap-3`}>
+                    {(lang === "ja" || lang === "both") && (
+                      <div>
+                        {lang === "both" && (
+                          <span className="block text-[10px] font-bold text-blue-700 mb-1">
+                            🇯🇵 Tiếng Nhật (JA):
+                          </span>
+                        )}
+                        <input
+                          type="text"
+                          value={cJa.name || ""}
+                          onChange={(e) => handleUpdateCollectionName(cIdx, "ja", e.target.value)}
+                          placeholder="Ví dụ: 実施設計図面一式 / 8Kフォトリアル3Dパース..."
+                          className="w-full px-3 py-2 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                    )}
+
+                    {(lang === "en" || lang === "both") && (
+                      <div>
+                        {lang === "both" && (
+                          <span className="block text-[10px] font-bold text-emerald-700 mb-1">
+                            🇺🇸 Tiếng Anh (EN):
+                          </span>
+                        )}
+                        <input
+                          type="text"
+                          value={cEn.name || ""}
+                          onChange={(e) => handleUpdateCollectionName(cIdx, "en", e.target.value)}
+                          placeholder="Example: Full Construction Drawings / 8K 3D Renders..."
+                          className="w-full px-3 py-2 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Photos in this collection */}
                 <div className="space-y-3 pt-2">
@@ -2968,6 +3458,16 @@ function ApplicationsForm({
 
     const updatedEn = [...normalizedCardsEn];
     updatedEn[idx] = { ...updatedEn[idx], [field]: val };
+    updateField("en", ["cards"], updatedEn);
+  };
+
+  const handlePatchBothLangs = (idx: number, patch: Record<string, any>) => {
+    const updatedJa = [...normalizedCardsJa];
+    updatedJa[idx] = { ...updatedJa[idx], ...patch };
+    updateField("ja", ["cards"], updatedJa);
+
+    const updatedEn = [...normalizedCardsEn];
+    updatedEn[idx] = { ...updatedEn[idx], ...patch };
     updateField("en", ["cards"], updatedEn);
   };
 
@@ -3268,62 +3768,316 @@ function ApplicationsForm({
 
                 {/* Image and Basic Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Image Preview & Upload */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700">
-                      {lang === "ja" ? "アイキャッチ画像" : lang === "en" ? "Card Image" : "Hình ảnh đại diện thẻ"}
-                    </label>
-                    <div className="w-full h-36 rounded-lg overflow-hidden border border-slate-200 bg-slate-200 flex items-center justify-center relative group">
-                      {cardImg ? (
-                        <img
-                          src={cardImg}
-                          alt="Application preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs text-slate-400">Chưa có ảnh</span>
-                      )}
-                    </div>
+                  {/* Media Preview & Upload (Image / Video / VR·AR Link) */}
+                  {(() => {
+                    const cardVideoUrl = cJa.videoUrl || cEn.videoUrl || "";
+                    const cardVrUrl = cJa.vrUrl || cEn.vrUrl || "";
+                    const imgIsVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(cardImg);
+                    const currentMediaType: "image" | "video" | "vr" =
+                      cJa.mediaType ||
+                      cEn.mediaType ||
+                      (cardVrUrl && !cardVideoUrl ? "vr" : cardVideoUrl || imgIsVideo ? "video" : "image");
+                    const activeVideoPreview = cardVideoUrl || (imgIsVideo ? cardImg : "");
 
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={cardImg}
-                        placeholder="Dán link ảnh (URL)..."
-                        onChange={(e) => handleUpdateBothLangs(idx, "image", e.target.value)}
-                        className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
-                      />
-                      <label className="shrink-0 cursor-pointer">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-md">
-                          <Upload size={12} />
-                          <span>{lang === "ja" ? "UP" : lang === "en" ? "Upload" : "Tải"}</span>
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            const fd = new FormData();
-                            fd.append("file", file);
-                            try {
-                              const res = await fetch("/api/upload", { method: "POST", body: fd });
-                              const data = await res.json();
-                              if (res.ok && data.url) {
-                                handleUpdateBothLangs(idx, "image", data.url);
-                                toast("Tải ảnh thẻ ứng dụng thành công!", "success");
-                              } else {
-                                toast(data.error || "Tải ảnh thất bại", "error");
+                    return (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between gap-1.5 flex-wrap">
+                          <label className="block text-xs font-bold text-slate-700">
+                            {lang === "ja"
+                              ? "アイキャッチ (画像 / 動画 / VR・AR)"
+                              : lang === "en"
+                                ? "Card Media (Image / Video / VR·AR)"
+                                : "Media thẻ (Ảnh / Video / Link VR·AR)"}
+                          </label>
+                          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBothLangs(idx, "mediaType", "image")}
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md transition ${
+                                currentMediaType === "image"
+                                  ? "bg-slate-800 text-white"
+                                  : "text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              🖼️ Ảnh
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBothLangs(idx, "mediaType", "video")}
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md transition ${
+                                currentMediaType === "video"
+                                  ? "bg-amber-600 text-white"
+                                  : "text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              🎬 Video
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBothLangs(idx, "mediaType", "vr")}
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md transition ${
+                                currentMediaType === "vr"
+                                  ? "bg-emerald-600 text-white"
+                                  : "text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              🌐 VR/AR
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="w-full h-36 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 flex items-center justify-center relative group">
+                          {currentMediaType === "video" && activeVideoPreview && /\.(mp4|webm|mov)(\?.*)?$/i.test(activeVideoPreview) ? (
+                            <video
+                              src={activeVideoPreview}
+                              poster={!imgIsVideo && cardImg ? cardImg : undefined}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              autoPlay
+                              playsInline
+                            />
+                          ) : cardImg && !imgIsVideo && (/\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i.test(cardImg) || /images\.unsplash\.com/i.test(cardImg)) ? (
+                            <img
+                              src={cardImg}
+                              alt="Application preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (cardVrUrl || cardImg) ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center px-3 text-center bg-slate-900 text-emerald-300">
+                              <Compass size={22} className="mb-1 text-emerald-400" />
+                              <span className="text-[11px] font-bold">Đã gắn Link Web VR / AR</span>
+                              <span className="text-[10px] text-slate-400 truncate max-w-full mt-0.5 font-mono">
+                                {cardVrUrl || cardImg}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-400">
+                              {currentMediaType === "video" ? "Chưa có video / ảnh bìa" : "Chưa có ảnh"}
+                            </span>
+                          )}
+
+                          <div className="absolute top-2 right-2 flex items-center gap-1">
+                            {(currentMediaType === "video" || Boolean(cardVideoUrl)) && (
+                              <span className="px-2 py-0.5 rounded bg-amber-600/95 text-white text-[10px] font-bold shadow">
+                                VIDEO
+                              </span>
+                            )}
+                            {(currentMediaType === "vr" || Boolean(cardVrUrl)) && (
+                              <span className="px-2 py-0.5 rounded bg-emerald-600/95 text-white text-[10px] font-bold shadow">
+                                VR / AR
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 1. Ảnh đại diện / Ảnh bìa (luôn hỗ trợ tải ảnh hoặc tải nhanh video) */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                            {currentMediaType === "video"
+                              ? "Ảnh bìa thu nhỏ (Poster) hoặc tải trực tiếp ảnh/video:"
+                              : "Link ảnh đại diện (hoặc bấm Tải ảnh / video):"}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={cardImg}
+                              placeholder="Dán link ảnh (URL)..."
+                              onChange={(e) => handleUpdateBothLangs(idx, "image", e.target.value)}
+                              className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
+                            />
+                            <label className="shrink-0 cursor-pointer">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-md">
+                                <Upload size={12} />
+                                <span>{lang === "ja" ? "UP" : lang === "en" ? "Upload" : "Tải"}</span>
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*,video/mp4,video/webm,video/quicktime"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const isVid = file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name);
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  try {
+                                    const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                    const data = await res.json();
+                                    if (res.ok && data.url) {
+                                      if (isVid) {
+                                        handlePatchBothLangs(idx, {
+                                          videoUrl: data.url,
+                                          mediaType: "video",
+                                        });
+                                        toast("Tải video thẻ ứng dụng thành công!", "success");
+                                      } else {
+                                        handleUpdateBothLangs(idx, "image", data.url);
+                                        toast("Tải ảnh thẻ ứng dụng thành công!", "success");
+                                      }
+                                    } else {
+                                      toast(data.error || "Tải tệp thất bại", "error");
+                                    }
+                                  } catch {
+                                    toast("Lỗi tải tệp lên máy chủ", "error");
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* 2. Video Upload / Link (hiển thị nổi bật khi chọn tab Video hoặc đã có videoUrl) */}
+                        {(currentMediaType === "video" || Boolean(cardVideoUrl)) && (
+                          <div className="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bold text-amber-900">
+                                🎬 Link Video (MP4 / YouTube / Vimeo) hoặc Tải Video:
+                              </label>
+                              {cardVideoUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handlePatchBothLangs(idx, {
+                                      videoUrl: "",
+                                      mediaType: cardVrUrl ? "vr" : "image",
+                                    })
+                                  }
+                                  className="text-[10px] text-red-600 hover:underline"
+                                >
+                                  Xóa video
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                value={cardVideoUrl}
+                                placeholder="https://... (.mp4, YouTube, Vimeo)"
+                                onChange={(e) =>
+                                  handlePatchBothLangs(idx, {
+                                    videoUrl: e.target.value,
+                                    mediaType: e.target.value.trim() ? "video" : currentMediaType,
+                                  })
+                                }
+                                className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-amber-300 rounded-md font-mono"
+                              />
+                              <label className="shrink-0 cursor-pointer">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-md">
+                                  <Upload size={12} />
+                                  <span>Video</span>
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="video/mp4,video/webm,video/quicktime"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const fd = new FormData();
+                                    fd.append("file", file);
+                                    try {
+                                      const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                      const data = await res.json();
+                                      if (res.ok && data.url) {
+                                        handlePatchBothLangs(idx, {
+                                          videoUrl: data.url,
+                                          mediaType: "video",
+                                        });
+                                        toast("Tải video thành công!", "success");
+                                      } else {
+                                        toast(data.error || "Tải video thất bại", "error");
+                                      }
+                                    } catch {
+                                      toast("Lỗi tải video", "error");
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 3. Link VR / AR (luôn hiển thị gọn hoặc nổi bật khi chọn tab VR/AR) */}
+                        <div
+                          className={`p-2.5 rounded-lg border space-y-1.5 ${
+                            currentMediaType === "vr" || Boolean(cardVrUrl)
+                              ? "bg-emerald-50/80 border-emerald-200"
+                              : "bg-white border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <label className="block text-[11px] font-bold text-emerald-900">
+                              🌐 Link VR / AR (VD: vr.i8studio.vn/.../index.html, Matterport, Kuula, 360°):
+                            </label>
+                            {cardVrUrl && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handlePatchBothLangs(idx, {
+                                    vrUrl: "",
+                                    mediaType: cardVideoUrl ? "video" : "image",
+                                  })
+                                }
+                                className="text-[10px] text-red-600 hover:underline"
+                              >
+                                Xóa VR/AR
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={cardVrUrl}
+                              placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html"
+                              onChange={(e) =>
+                                handlePatchBothLangs(idx, {
+                                  vrUrl: e.target.value,
+                                  mediaType:
+                                    e.target.value.trim() && currentMediaType === "image" && !cardVideoUrl
+                                      ? "vr"
+                                      : currentMediaType,
+                                })
                               }
-                            } catch {
-                              toast("Lỗi tải ảnh", "error");
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
+                              className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
+                            />
+                            <label className="shrink-0 cursor-pointer" title="Tải ảnh Panorama 360°">
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-medium rounded-md">
+                                <Upload size={11} />
+                                <span>360°</span>
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  const fd = new FormData();
+                                  fd.append("file", file);
+                                  try {
+                                    const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                    const data = await res.json();
+                                    if (res.ok && data.url) {
+                                      handlePatchBothLangs(idx, {
+                                        vrUrl: data.url,
+                                        mediaType: "vr",
+                                      });
+                                      toast("Tải ảnh Panorama 360° thành công!", "success");
+                                    } else {
+                                      toast(data.error || "Tải ảnh 360° thất bại", "error");
+                                    }
+                                  } catch {
+                                    toast("Lỗi tải ảnh 360°", "error");
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Settings: Category & Number */}
                   <div className="md:col-span-2 space-y-3">
@@ -3623,1654 +4377,2654 @@ function ApplicationsForm({
 }
 
 /* -------------------------------------------------------------------------
-   08. GALLERY SECTION FORM
+   07. PRICING STACK & GALLERY SECTION FORM (THIẾT KẾ THÂN THIỆN CHO NGƯỜI KHÔNG RÀNH IT)
    ------------------------------------------------------------------------- */
 function GalleryForm({
   lang,
   contentJa,
   contentEn,
   updateField,
+  sectionBgColor,
+  setSectionBgColor,
 }: {
   lang: "ja" | "en" | "both";
   contentJa: any;
   contentEn: any;
   updateField: (lang: "en" | "ja", path: string[], value: any) => void;
+  sectionBgColor: string;
+  setSectionBgColor: (hex: string) => void;
 }) {
   const { toast } = useToast();
 
-  // 1. Quản lý Thể loại Project (Filter Projects / Categories)
-  // 2. Quản lý Danh sách Card Dự án (Project Showcase Cards)
+  // Trạng thái chọn Trang thẻ đang chỉnh sửa (0..4)
+  const [selectedPageIdx, setSelectedPageIdx] = useState<number>(0);
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+  const [showProjectsEditor, setShowProjectsEditor] = useState<boolean>(false);
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
 
+  const infoJa = contentJa?.info || {};
+  const infoEn = contentEn?.info || {};
+
+  // Giá trị mặc định hiển thị sẵn để người không rành IT thấy rõ nội dung đang có trên trang
+  const defaultHeaderJa = {
+    title: "制作料金・ビジュアライゼーションメニュー",
+    subtitle: "建築パース（Standard / High Quality）・CGアニメーション・VR360・VR SSの5つの制作ラインナップ",
+    btnViewDetail: "詳細を見る",
+    btnConsult: "このプランで無料相談・見積依頼",
+    consultHref: "/ja/contact",
+    hotlineText: "お急ぎの方: 0984 384 190",
+    deliverablesHeading: "標準納品物・サービス内容",
+    projectsHeading: "建築・3DCG 実績リファレンス & 概算目安",
+    projectsSubheading: "クリックで各プロジェクトの詳細仕様・拡大画像を確認できます",
+    btnZoom: "フルサイズで拡大表示",
+  };
+
+  const defaultHeaderEn = {
+    title: "3D Visualization & Production Pricing",
+    subtitle: "5 specialized architectural visualization packages: View (Standard / 8K High Quality), Movie, VR360 & VR SS",
+    btnViewDetail: "View Details",
+    btnConsult: "Request Free Consultation & Quote",
+    consultHref: "/en/contact",
+    hotlineText: "Hotline: 0984 384 190",
+    deliverablesHeading: "Standard Deliverables & Scope",
+    projectsHeading: "Reference Architectural Projects & Estimates",
+    projectsSubheading: "Click any project card to inspect specifications and full-size renders",
+    btnZoom: "View Full Size",
+  };
+
+  // Helper cập nhật thông tin chung (info.*)
+  const setInfoField = (field: string, target: "ja" | "en" | "shared", val: any) => {
+    if (target === "shared") {
+      updateField("ja", ["info", field], val);
+      updateField("en", ["info", field], val);
+    } else if (target === "ja") {
+      updateField("ja", ["info", field], val);
+      if (lang === "both" && !infoEn?.[field]) {
+        updateField("en", ["info", field], val);
+      }
+    } else {
+      updateField("en", ["info", field], val);
+    }
+  };
+
+  // Upload tệp dùng chung (cho Ảnh nền tổng, Ảnh nền thẻ, Ảnh/Video minh họa, Ảnh dự án)
+  const uploadFileToServer = async (file: File, keyId: string): Promise<{ url: string; isVideo: boolean } | null> => {
+    setUploadingKey(keyId);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast(err?.error || "Không tải được tệp lên máy chủ", "error");
+        return null;
+      }
+      const data = await res.json();
+      if (data?.url) {
+        const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(data.url);
+        return { url: data.url, isVideo };
+      }
+      return null;
+    } catch {
+      toast("Lỗi kết nối mạng khi tải tệp lên", "error");
+      return null;
+    } finally {
+      setUploadingKey(null);
+    }
+  };
+
+  /* -----------------------------------------------------------------------
+     QUẢN LÝ 5 TRANG THẺ GIÁ CẢ XẾP CHỒNG 3D
+     ----------------------------------------------------------------------- */
+  const defaultPagesJa = getDefaultPricingStackPages("ja");
+  const defaultPagesEn = getDefaultPricingStackPages("en");
+
+  const pagesJa: PricingStackPageItem[] =
+    Array.isArray(contentJa?.pricingPages) && contentJa.pricingPages.length > 0
+      ? contentJa.pricingPages
+      : defaultPagesJa;
+
+  const pagesEn: PricingStackPageItem[] =
+    Array.isArray(contentEn?.pricingPages) && contentEn.pricingPages.length > 0
+      ? contentEn.pricingPages
+      : defaultPagesEn;
+
+  const pageCount = Math.max(pagesJa.length, pagesEn.length);
+  const safeSelectedIdx = Math.min(Math.max(0, selectedPageIdx), Math.max(0, pageCount - 1));
+
+  const syncPages = (nextJa: PricingStackPageItem[], nextEn: PricingStackPageItem[]) => {
+    updateField("ja", ["pricingPages"], nextJa);
+    updateField("en", ["pricingPages"], nextEn);
+  };
+
+  const handleUpdatePageField = (
+    idx: number,
+    field: keyof PricingStackPageItem,
+    langTarget: "ja" | "en" | "shared",
+    val: any
+  ) => {
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    const baseJa = nextJa[idx] || defaultPagesJa[idx] || defaultPagesJa[0];
+    const baseEn = nextEn[idx] || defaultPagesEn[idx] || defaultPagesEn[0];
+
+    if (langTarget === "shared") {
+      nextJa[idx] = { ...baseJa, [field]: val };
+      nextEn[idx] = { ...baseEn, [field]: val };
+      syncPages(nextJa, nextEn);
+    } else if (langTarget === "ja") {
+      nextJa[idx] = { ...baseJa, [field]: val };
+      updateField("ja", ["pricingPages"], nextJa);
+      if (lang === "both" && (!baseEn[field] || baseEn[field] === baseJa[field])) {
+        nextEn[idx] = { ...baseEn, [field]: val };
+        updateField("en", ["pricingPages"], nextEn);
+      }
+    } else {
+      nextEn[idx] = { ...baseEn, [field]: val };
+      updateField("en", ["pricingPages"], nextEn);
+    }
+  };
+
+  const handleAddNewPage = () => {
+    const nextNum = String(pageCount + 1).padStart(2, "0");
+    const newId = `page-custom-${Date.now().toString().slice(-5)}`;
+    const newPageJa: PricingStackPageItem = {
+      id: newId,
+      pageNumber: nextNum,
+      tabLabel: `プラン ${nextNum}`,
+      mediaMode: "gallery",
+      qualityBadge: "CUSTOM PACKAGE · カスタムプラン",
+      categoryName: `PLAN ${nextNum}`,
+      title: "新規ビジュアライゼーションプラン",
+      description: "プロジェクトの規模や用途に合わせた最適な3DCG制作プランをご提案いたします。",
+      priceLabel: "参考目安費用",
+      priceValue: "¥30,000〜 / カット",
+      priceUnit: "納期目安: 3〜5営業日",
+      cardBgColor: "#DDEFF9",
+      cardBgImage: "",
+      cardBgOverlay: "none",
+      specs: ["4K 高精細出力", "無償修正2回込", "短納期対応"],
+      deliverables: ["高解像度JPG/PNGデータ", "カメラアングル事前確認", "色調補正仕上げ"],
+      detailSummary: "ご要望に応じて柔軟にカスタマイズ可能なパッケージです。",
+      btnDetailText: "詳細を見る",
+      mediaItems: [
+        {
+          id: `m-${Date.now()}-1`,
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85",
+          caption: "サンプルイメージ 01",
+        },
+        {
+          id: `m-${Date.now()}-2`,
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85",
+          caption: "サンプルイメージ 02",
+        },
+        {
+          id: `m-${Date.now()}-3`,
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1400&q=85",
+          caption: "サンプルイメージ 03",
+        },
+      ],
+    };
+
+    const newPageEn: PricingStackPageItem = {
+      ...newPageJa,
+      tabLabel: `Plan ${nextNum}`,
+      qualityBadge: "CUSTOM PACKAGE",
+      title: "New Architectural Visualization Package",
+      description: "Tailored 3D visualization package customized to your project scale and presentation goals.",
+      priceLabel: "Reference Fee",
+      priceValue: "From $220 / View",
+      priceUnit: "Turnaround: 3–5 Business Days",
+      specs: ["4K High-Res Output", "2 Free Revisions", "Fast Turnaround"],
+      deliverables: ["High-Res JPG/PNG", "Camera Angle Preview", "Color Grading"],
+      detailSummary: "Flexible visualization package tailored to your architectural requirements.",
+      btnDetailText: "View Details",
+    };
+
+    const nextJa = [...pagesJa, newPageJa];
+    const nextEn = [...pagesEn, newPageEn];
+    syncPages(nextJa, nextEn);
+    setSelectedPageIdx(nextJa.length - 1);
+    toast(`Đã thêm Trang #${nextNum} mới!`, "success");
+  };
+
+  const handleMovePage = (idx: number, dir: -1 | 1) => {
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= pageCount) return;
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    [nextJa[idx], nextJa[targetIdx]] = [nextJa[targetIdx], nextJa[idx]];
+    [nextEn[idx], nextEn[targetIdx]] = [nextEn[targetIdx], nextEn[idx]];
+    // Tự động đánh lại số thứ tự 01, 02... cho gọn
+    nextJa.forEach((p, i) => {
+      if (p) p.pageNumber = String(i + 1).padStart(2, "0");
+    });
+    nextEn.forEach((p, i) => {
+      if (p) p.pageNumber = String(i + 1).padStart(2, "0");
+    });
+    syncPages(nextJa, nextEn);
+    setSelectedPageIdx(targetIdx);
+    toast("Đã đổi vị trí trang thẻ!", "success");
+  };
+
+  const handleDeletePage = (idx: number) => {
+    if (pageCount <= 1) {
+      toast("Cần giữ lại ít nhất 1 trang dịch vụ", "info");
+      return;
+    }
+    if (!confirm(`Bạn có chắc muốn xóa Trang (${pagesJa[idx]?.pageNumber || idx + 1}) "${pagesJa[idx]?.title}" không?`)) {
+      return;
+    }
+    const nextJa = pagesJa.filter((_, i) => i !== idx);
+    const nextEn = pagesEn.filter((_, i) => i !== idx);
+    syncPages(nextJa, nextEn);
+    setSelectedPageIdx(Math.max(0, idx - 1));
+    toast("Đã xóa trang dịch vụ", "info");
+  };
+
+  const handleResetDefault5Pages = () => {
+    if (!confirm("Khôi phục lại bộ 5 trang gốc (View Standard, View High Quality, Movie, VR360, VR SS)?")) {
+      return;
+    }
+    syncPages(getDefaultPricingStackPages("ja"), getDefaultPricingStackPages("en"));
+    setSelectedPageIdx(0);
+    toast("Đã khôi phục bộ 5 trang chuẩn thành công!", "success");
+  };
+
+  // Quản lý Media Items trong từng trang
+  const handleUpdateMediaItem = (
+    pageIdx: number,
+    mediaIdx: number,
+    patch: Partial<PricingStackMediaItem>,
+    captionLang?: "ja" | "en"
+  ) => {
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    const pJa = { ...(nextJa[pageIdx] || defaultPagesJa[0]) };
+    const pEn = { ...(nextEn[pageIdx] || defaultPagesEn[0]) };
+    const listJa = Array.isArray(pJa.mediaItems) ? [...pJa.mediaItems] : [];
+    const listEn = Array.isArray(pEn.mediaItems) ? [...pEn.mediaItems] : [];
+
+    const curItemJa = listJa[mediaIdx] || { id: `m-${Date.now()}`, type: "image" as const, url: "" };
+    const curItemEn = listEn[mediaIdx] || { ...curItemJa };
+
+    if (captionLang === "ja") {
+      listJa[mediaIdx] = { ...curItemJa, ...patch };
+      pJa.mediaItems = listJa;
+      nextJa[pageIdx] = pJa;
+      updateField("ja", ["pricingPages"], nextJa);
+    } else if (captionLang === "en") {
+      listEn[mediaIdx] = { ...curItemEn, ...patch };
+      pEn.mediaItems = listEn;
+      nextEn[pageIdx] = pEn;
+      updateField("en", ["pricingPages"], nextEn);
+    } else {
+      listJa[mediaIdx] = { ...curItemJa, ...patch };
+      listEn[mediaIdx] = { ...curItemEn, ...patch };
+      pJa.mediaItems = listJa;
+      pEn.mediaItems = listEn;
+      nextJa[pageIdx] = pJa;
+      nextEn[pageIdx] = pEn;
+      syncPages(nextJa, nextEn);
+    }
+  };
+
+  const handleAddMediaItem = (pageIdx: number) => {
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    const pJa = { ...(nextJa[pageIdx] || defaultPagesJa[0]) };
+    const pEn = { ...(nextEn[pageIdx] || defaultPagesEn[0]) };
+    const isMov = pJa.mediaMode === "movie";
+    const isVr = pJa.mediaMode === "vr360";
+    const newId = `m-${Date.now()}`;
+    const newItemJa: PricingStackMediaItem = {
+      id: newId,
+      type: isMov ? "video" : isVr ? "vr360" : "image",
+      url: isMov
+        ? "/uploads/videos/1781842835877-Ocen_Resort_final.mp4"
+        : isVr
+        ? "/uploads/1782292102986-vr360_01_1.webp"
+        : "/uploads/1786950469846-1722_vr01.webp",
+      caption: isMov ? "新規ムービークリップ" : isVr ? "新規 360° シーン" : "新規サンプルカット",
+    };
+    const newItemEn: PricingStackMediaItem = {
+      ...newItemJa,
+      caption: isMov ? "New Movie Clip" : isVr ? "New 360° Scene" : "New Sample Shot",
+    };
+    pJa.mediaItems = [...(pJa.mediaItems || []), newItemJa];
+    pEn.mediaItems = [...(pEn.mediaItems || []), newItemEn];
+    nextJa[pageIdx] = pJa;
+    nextEn[pageIdx] = pEn;
+    syncPages(nextJa, nextEn);
+    toast("Đã thêm mục hình ảnh / video mới!", "success");
+  };
+
+  const handleMoveMediaItem = (pageIdx: number, mediaIdx: number, dir: -1 | 1) => {
+    const listJa = [...(pagesJa[pageIdx]?.mediaItems || [])];
+    const listEn = [...(pagesEn[pageIdx]?.mediaItems || [])];
+    const target = mediaIdx + dir;
+    if (target < 0 || target >= listJa.length) return;
+    [listJa[mediaIdx], listJa[target]] = [listJa[target], listJa[mediaIdx]];
+    if (listEn[mediaIdx] && listEn[target]) {
+      [listEn[mediaIdx], listEn[target]] = [listEn[target], listEn[mediaIdx]];
+    }
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    nextJa[pageIdx] = { ...nextJa[pageIdx], mediaItems: listJa };
+    nextEn[pageIdx] = { ...(nextEn[pageIdx] || nextJa[pageIdx]), mediaItems: listEn };
+    syncPages(nextJa, nextEn);
+  };
+
+  const handleRemoveMediaItem = (pageIdx: number, mediaIdx: number) => {
+    const pJa = pagesJa[pageIdx];
+    if ((pJa?.mediaItems?.length || 0) <= 1) {
+      toast("Mỗi trang cần giữ ít nhất 1 hình ảnh hoặc video minh họa", "info");
+      return;
+    }
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    nextJa[pageIdx] = {
+      ...nextJa[pageIdx],
+      mediaItems: (nextJa[pageIdx]?.mediaItems || []).filter((_, i) => i !== mediaIdx),
+    };
+    nextEn[pageIdx] = {
+      ...(nextEn[pageIdx] || nextJa[pageIdx]),
+      mediaItems: (nextEn[pageIdx]?.mediaItems || []).filter((_, i) => i !== mediaIdx),
+    };
+    syncPages(nextJa, nextEn);
+    toast("Đã xóa mục minh họa", "info");
+  };
+
+  const handleAddSpecOrDeliv = (pageIdx: number, key: "specs" | "deliverables") => {
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    const pJa = { ...(nextJa[pageIdx] || defaultPagesJa[0]) };
+    const pEn = { ...(nextEn[pageIdx] || defaultPagesEn[0]) };
+    pJa[key] = [...(pJa[key] || []), key === "specs" ? "新規仕様項目" : "新規納品項目"];
+    pEn[key] = [...(pEn[key] || []), key === "specs" ? "New Spec" : "New Deliverable"];
+    nextJa[pageIdx] = pJa;
+    nextEn[pageIdx] = pEn;
+    syncPages(nextJa, nextEn);
+  };
+
+  const handleUpdateSpecOrDeliv = (
+    pageIdx: number,
+    itemIdx: number,
+    key: "specs" | "deliverables",
+    targetLang: "ja" | "en",
+    val: string
+  ) => {
+    if (targetLang === "ja") {
+      const nextJa = [...pagesJa];
+      const pJa = { ...(nextJa[pageIdx] || defaultPagesJa[0]) };
+      const arr = [...(pJa[key] || [])];
+      arr[itemIdx] = val;
+      pJa[key] = arr;
+      nextJa[pageIdx] = pJa;
+      updateField("ja", ["pricingPages"], nextJa);
+    } else {
+      const nextEn = [...pagesEn];
+      const pEn = { ...(nextEn[pageIdx] || defaultPagesEn[0]) };
+      const arr = [...(pEn[key] || [])];
+      arr[itemIdx] = val;
+      pEn[key] = arr;
+      nextEn[pageIdx] = pEn;
+      updateField("en", ["pricingPages"], nextEn);
+    }
+  };
+
+  const handleDeleteSpecOrDeliv = (
+    pageIdx: number,
+    itemIdx: number,
+    key: "specs" | "deliverables"
+  ) => {
+    const nextJa = [...pagesJa];
+    const nextEn = [...pagesEn];
+    nextJa[pageIdx] = {
+      ...nextJa[pageIdx],
+      [key]: (nextJa[pageIdx]?.[key] || []).filter((_, i) => i !== itemIdx),
+    };
+    nextEn[pageIdx] = {
+      ...(nextEn[pageIdx] || nextJa[pageIdx]),
+      [key]: (nextEn[pageIdx]?.[key] || []).filter((_, i) => i !== itemIdx),
+    };
+    syncPages(nextJa, nextEn);
+  };
+
+  /* -----------------------------------------------------------------------
+     QUẢN LÝ DANH SÁCH DỰ ÁN MẪU THAM KHẢO (TRONG POPUP CHI TIẾT)
+     ----------------------------------------------------------------------- */
   const defaultProjectsJa = getGalleryProjectsData("ja");
   const defaultProjectsEn = getGalleryProjectsData("en");
 
-  const rawProjectsJa: Record<string, any> = contentJa?.projects && typeof contentJa.projects === "object"
-    ? (Array.isArray(contentJa.projects) ? contentJa.projects.reduce((acc: any, p: any) => ({ ...acc, [p.id]: p }), {}) : contentJa.projects)
-    : defaultProjectsJa;
-  const rawProjectsEn: Record<string, any> = contentEn?.projects && typeof contentEn.projects === "object"
-    ? (Array.isArray(contentEn.projects) ? contentEn.projects.reduce((acc: any, p: any) => ({ ...acc, [p.id]: p }), {}) : contentEn.projects)
-    : defaultProjectsEn;
+  const rawProjectsJa: Record<string, any> =
+    contentJa?.projects && typeof contentJa.projects === "object"
+      ? Array.isArray(contentJa.projects)
+        ? contentJa.projects.reduce((acc: any, p: any) => ({ ...acc, [p.id]: p }), {})
+        : contentJa.projects
+      : defaultProjectsJa;
 
-  const allProjectKeys = Array.from(new Set([...Object.keys(rawProjectsJa), ...Object.keys(rawProjectsEn)]));
+  const rawProjectsEn: Record<string, any> =
+    contentEn?.projects && typeof contentEn.projects === "object"
+      ? Array.isArray(contentEn.projects)
+        ? contentEn.projects.reduce((acc: any, p: any) => ({ ...acc, [p.id]: p }), {})
+        : contentEn.projects
+      : defaultProjectsEn;
 
-  // Helper chuẩn hóa danh sách thông số chân card (specs)
-  const getNormalizedSpecs = (specsRaw: any): Array<{ k: string; v: string }> => {
-    if (!Array.isArray(specsRaw)) return [];
-    return specsRaw.map((sp: any) => {
-      if (typeof sp === "string") return { k: "Thông số", v: sp };
-      return { k: sp?.k || "Thông số", v: sp?.v || sp?.value || "" };
-    });
-  };
+  const allProjectKeys = Array.from(
+    new Set([...Object.keys(rawProjectsJa), ...Object.keys(rawProjectsEn)])
+  );
 
   const handleUpdateProject = (
     projId: string,
     field: string,
-    langKey: "ja" | "en",
-    val: any,
-    forceSync: boolean = false
+    langKey: "ja" | "en" | "shared",
+    val: any
   ) => {
     const curJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
     const curEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
 
-    if (langKey === "ja") {
-      const updatedJa = { ...rawProjectsJa, [projId]: { ...curJa, id: projId, [field]: val } };
-      updateField("ja", ["projects"], updatedJa);
-
-      // Cập nhật đồng bộ sang EN nếu forceSync, hoặc đang ở chế độ song ngữ, hoặc các trường dùng chung
-      const isShared = forceSync || lang === "both" || field === "category" || field === "img" || field === "title" || field === "style" || field === "priceValue" || field === "priceEstimate";
-      // Nếu dự án đang là Spotlight, cập nhật cả spotlight
-      if (projId === selectedSpotlightSourceId || projId === spotlightJa?.id || projId === "p-lakeside") {
-        updateField("ja", ["spotlight"], { ...spotlightJa, [field]: val, ...(field === "priceValue" ? { priceEstimate: val } : {}) });
-        updateField("ja", ["projects", "p-lakeside"], { ...spotlightJa, [field]: val, ...(field === "priceValue" ? { priceEstimate: val } : {}) });
-      }
-      if (isShared) {
-        const updatedEn = { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } };
-        updateField("en", ["projects"], updatedEn);
-      } else {
-        // Nếu EN vẫn còn giá trị mặc định hoặc chưa từng sửa, tự động đồng bộ để Landing Page tiếng Anh không bị giữ giá trị cũ
-        const defaultVal = (defaultProjectsEn[projId] as any)?.[field];
-        if (!curEn[field] || curEn[field] === defaultVal || curEn[field] === curJa[field]) {
-          const updatedEn = { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } };
-          updateField("en", ["projects"], updatedEn);
-        }
+    if (langKey === "shared") {
+      updateField("ja", ["projects"], { ...rawProjectsJa, [projId]: { ...curJa, id: projId, [field]: val } });
+      updateField("en", ["projects"], { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } });
+    } else if (langKey === "ja") {
+      updateField("ja", ["projects"], { ...rawProjectsJa, [projId]: { ...curJa, id: projId, [field]: val } });
+      if (lang === "both" && !curEn[field]) {
+        updateField("en", ["projects"], { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } });
       }
     } else {
-      const updatedEn = { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } };
-      updateField("en", ["projects"], updatedEn);
-
-      const isShared = forceSync || lang === "both" || field === "category" || field === "img" || field === "title" || field === "style";
-      if (isShared) {
-        const updatedJa = { ...rawProjectsJa, [projId]: { ...curJa, id: projId, [field]: val } };
-        updateField("ja", ["projects"], updatedJa);
-      } else {
-        const defaultVal = (defaultProjectsJa[projId] as any)?.[field];
-        if (!curJa[field] || curJa[field] === defaultVal || curJa[field] === curEn[field]) {
-          const updatedJa = { ...rawProjectsJa, [projId]: { ...curJa, id: projId, [field]: val } };
-          updateField("ja", ["projects"], updatedJa);
-        }
-      }
+      updateField("en", ["projects"], { ...rawProjectsEn, [projId]: { ...curEn, id: projId, [field]: val } });
     }
   };
 
-  // Quản lý THÊM / XÓA / SỬA thông số chân card (Specs Chips)
-  const handleAddProjectSpec = (projId: string) => {
-    const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
-    const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
-    const curSpecsJa = getNormalizedSpecs(pJa.specs);
-    const curSpecsEn = getNormalizedSpecs(pEn.specs);
-
-    const nextSpecsJa = [...curSpecsJa, { k: "Thông số", v: "Thông số mới" }];
-    const nextSpecsEn = [...curSpecsEn, { k: "Spec", v: "New Spec" }];
-
-    handleUpdateProject(projId, "specs", "ja", nextSpecsJa, true);
-    handleUpdateProject(projId, "specs", "en", nextSpecsEn, true);
-    toast("Đã thêm thông số chân card mới", "success");
-  };
-
-  const handleDeleteProjectSpec = (projId: string, specIdx: number) => {
-    const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
-    const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
-    const curSpecsJa = getNormalizedSpecs(pJa.specs);
-    const curSpecsEn = getNormalizedSpecs(pEn.specs);
-
-    if (curSpecsJa.length <= 1) {
-      toast("Phải giữ lại ít nhất 1 thông số chân card", "info");
-      return;
-    }
-
-    const nextSpecsJa = curSpecsJa.filter((_, i) => i !== specIdx);
-    const nextSpecsEn = curSpecsEn.filter((_, i) => i !== specIdx);
-
-    handleUpdateProject(projId, "specs", "ja", nextSpecsJa, true);
-    handleUpdateProject(projId, "specs", "en", nextSpecsEn, true);
-    toast("Đã xóa thông số chân card", "info");
-  };
-
-  const handleUpdateProjectSpecValue = (projId: string, specIdx: number, langKey: "ja" | "en", val: string) => {
-    const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
-    const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
-    const curSpecsJa = getNormalizedSpecs(pJa.specs);
-    const curSpecsEn = getNormalizedSpecs(pEn.specs);
-
-    if (langKey === "ja") {
-      const nextSpecsJa = [...curSpecsJa];
-      nextSpecsJa[specIdx] = { ...(nextSpecsJa[specIdx] || {}), v: val };
-      handleUpdateProject(projId, "specs", "ja", nextSpecsJa);
-
-      // Nếu đang sửa JA mà EN chưa có hoặc trùng hoặc đang chọn both thì đồng bộ sang EN
-      if (lang === "both" || !curSpecsEn[specIdx]?.v || curSpecsEn[specIdx]?.v === curSpecsJa[specIdx]?.v) {
-        const nextSpecsEn = [...curSpecsEn];
-        nextSpecsEn[specIdx] = { ...(nextSpecsEn[specIdx] || {}), v: val };
-        handleUpdateProject(projId, "specs", "en", nextSpecsEn);
-      }
-    } else {
-      const nextSpecsEn = [...curSpecsEn];
-      nextSpecsEn[specIdx] = { ...(nextSpecsEn[specIdx] || {}), v: val };
-      handleUpdateProject(projId, "specs", "en", nextSpecsEn);
-
-      if (lang === "both" || !curSpecsJa[specIdx]?.v || curSpecsJa[specIdx]?.v === curSpecsEn[specIdx]?.v) {
-        const nextSpecsJa = [...curSpecsJa];
-        nextSpecsJa[specIdx] = { ...(nextSpecsJa[specIdx] || {}), v: val };
-        handleUpdateProject(projId, "specs", "ja", nextSpecsJa);
-      }
-    }
+  const handlePatchProjectShared = (projId: string, patch: Record<string, any>) => {
+    const curJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
+    const curEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
+    updateField("ja", ["projects"], {
+      ...rawProjectsJa,
+      [projId]: { ...curJa, id: projId, ...patch },
+    });
+    updateField("en", ["projects"], {
+      ...rawProjectsEn,
+      [projId]: { ...curEn, id: projId, ...patch },
+    });
   };
 
   const handleAddProject = () => {
-    const newId = `p-proj-${Date.now().toString().slice(-6)}`;
-    const cat = "villa";
+    const newId = `p-proj-${Date.now().toString().slice(-5)}`;
     const newProjJa = {
       id: newId,
-      category: cat,
+      category: "villa",
       catTag: "高級リゾートヴィラ",
-      title: "NEW PROJECT VILLA",
-      loc: "Hồ Tràm • 750 m²",
-      style: "Modern Tropical Zen",
-      narrative: "打ち放しコンクリートと天然木ルーバーが調和する上質な空間設計...",
+      title: "NEW ARCHITECTURAL PROJECT",
+      loc: "ホーチャム · 750 m²",
+      priceValue: "設計・3D目安: ¥2,800,000〜",
+      priceEstimate: "設計・3D目安: ¥2,800,000〜",
+      narrative: "自然光と素材の質感を最大限に引き出した建築空間ビジュアライゼーション。",
       img: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80",
-      specs: [
-        { k: "Quy mô", v: "3 Tầng • 4 PN" },
-        { k: "Diện tích", v: "750 m²" },
-        { k: "Bàn giao", v: "Bàn Giao 2026" }
-      ],
-      solution: "Giải pháp thiết kế kiến trúc thông gió vi khí hậu tự nhiên...",
-      materials: "Bê tông trần, đá bazan tự nhiên, gỗ ngoài trời...",
-      deliverables: ["8K CG Perspectives", "Bản vẽ kỹ thuật thi công"],
-      keyHighlights: [
-        { label: "Timeline", value: "20–30 Ngày" },
-        { label: "Highlight", value: "Hồ bơi tràn viền" }
-      ],
+      deliverables: ["8K CGパース", "実施設計図書"],
     };
     const newProjEn = {
       ...newProjJa,
-      catTag: "LUXURY RETREAT VILLA",
-      title: "NEW PROJECT VILLA",
-      narrative: "Lakeside villa balancing raw concrete and natural timber louvers...",
-      specs: [
-        { k: "Scale", v: "3 Levels • 4 Suites" },
-        { k: "Area", v: "750 m²" },
-        { k: "Delivery", v: "2026 Delivery" }
-      ],
-      solution: "Architectural microclimatic ventilation solution...",
-      materials: "Board-formed concrete, natural stone, outdoor teak...",
-      deliverables: ["8K CGI Perspectives", "Working Blueprints"],
-      keyHighlights: [
-        { label: "Timeline", value: "20–30 Days" },
-        { label: "Highlight", value: "Horizon Pool" }
-      ],
+      catTag: "LUXURY VILLA",
+      loc: "Ho Tram · 750 m²",
+      priceValue: "Est. Fee: $19,500~",
+      priceEstimate: "Est. Fee: $19,500~",
+      narrative: "Architectural visualization highlighting natural daylight and bespoke materials.",
     };
-
-    const updatedJa = { ...rawProjectsJa, [newId]: newProjJa };
-    const updatedEn = { ...rawProjectsEn, [newId]: newProjEn };
-    updateField("ja", ["projects"], updatedJa);
-    updateField("en", ["projects"], updatedEn);
+    updateField("ja", ["projects"], { ...rawProjectsJa, [newId]: newProjJa });
+    updateField("en", ["projects"], { ...rawProjectsEn, [newId]: newProjEn });
+    setShowProjectsEditor(true);
     setExpandedProjectId(newId);
-    toast("Đã thêm card dự án mới thành công!", "success");
+    toast("Đã thêm dự án mẫu tham khảo mới!", "success");
   };
 
   const handleDeleteProject = (projId: string) => {
-    if (allProjectKeys.length <= 1) {
-      toast("Phải giữ lại ít nhất 1 card dự án", "info");
-      return;
-    }
-    const updatedJa = { ...rawProjectsJa };
-    delete updatedJa[projId];
-    const updatedEn = { ...rawProjectsEn };
-    delete updatedEn[projId];
-    updateField("ja", ["projects"], updatedJa);
-    updateField("en", ["projects"], updatedEn);
-    toast("Đã xóa card dự án", "info");
+    if (!confirm("Bạn có chắc muốn xóa dự án tham khảo này?")) return;
+    const nextJa = { ...rawProjectsJa };
+    const nextEn = { ...rawProjectsEn };
+    delete nextJa[projId];
+    delete nextEn[projId];
+    updateField("ja", ["projects"], nextJa);
+    updateField("en", ["projects"], nextEn);
+    toast("Đã xóa dự án tham khảo", "info");
   };
 
-  const handleUploadProjectImage = async (projId: string, file: File) => {
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.url) {
-          handleUpdateProject(projId, "img", "ja", data.url, true);
-          toast("Tải ảnh dự án thành công!", "success");
-        }
-      } else {
-        toast("Lỗi tải ảnh", "error");
-      }
-    } catch {
-      toast("Có lỗi xảy ra khi tải ảnh", "error");
-    }
-  };
-
-  // 3. Quản lý Dự án Tiêu điểm (Card lớn bên trái - Spotlight Project)
-  const defaultSpotlightJa = defaultProjectsJa["p-lakeside"] || Object.values(defaultProjectsJa)[0];
-  const defaultSpotlightEn = defaultProjectsEn["p-lakeside"] || Object.values(defaultProjectsEn)[0];
-
-  const spotlightJa = contentJa?.projects?.["p-lakeside"] || contentJa?.spotlight || defaultSpotlightJa;
-  const spotlightEn = contentEn?.projects?.["p-lakeside"] || contentEn?.spotlight || defaultSpotlightEn;
-
-  const [selectedSpotlightSourceId, setSelectedSpotlightSourceId] = useState<string | null>(spotlightJa?.id || "p-lakeside");
-
-  const handleEditLargeCardForProject = (projId: string) => {
-    const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId];
-    const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId];
-    if (pJa) {
-      const targetJa = { ...pJa, id: projId };
-      updateField("ja", ["spotlight"], targetJa);
-      updateField("ja", ["projects", "p-lakeside"], targetJa);
-      updateField("ja", ["projects", projId], targetJa);
-    }
-    if (pEn) {
-      const targetEn = { ...pEn, id: projId };
-      updateField("en", ["spotlight"], targetEn);
-      updateField("en", ["projects", "p-lakeside"], targetEn);
-      updateField("en", ["projects", projId], targetEn);
-    }
-    setSelectedSpotlightSourceId(projId);
-    toast(`Đã nạp dự án "${pJa?.title || projId}" vào Card lớn! Đang cuộn xuống phần chỉnh sửa...`, "success");
-    if (typeof window !== "undefined") {
-      setTimeout(() => {
-        const el = document.getElementById("admin-spotlight-section");
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
-    }
-  };
-
-  const handleSetProjectAsSpotlight = (projId: string) => {
-    handleEditLargeCardForProject(projId);
-  };
-
-  const handleUpdateSpotlightField = (field: string, langKey: "ja" | "en", val: any) => {
-    const targetSourceId = selectedSpotlightSourceId || spotlightJa?.id || "p-lakeside";
-    const extraFields = (field === "priceValue") ? { priceValue: val, priceEstimate: val } : { [field]: val };
-
-    if (langKey === "ja") {
-      const updatedJa = { ...spotlightJa, ...extraFields };
-      updateField("ja", ["projects", "p-lakeside"], updatedJa);
-      updateField("ja", ["spotlight"], updatedJa);
-      if (targetSourceId) {
-        const curProj = rawProjectsJa[targetSourceId] || {};
-        updateField("ja", ["projects", targetSourceId], { ...curProj, ...extraFields });
-      }
-      if (field === "img" || field === "category" || field === "priceValue" || lang === "both") {
-        const updatedEn = { ...spotlightEn, ...extraFields };
-        updateField("en", ["projects", "p-lakeside"], updatedEn);
-        updateField("en", ["spotlight"], updatedEn);
-        if (targetSourceId) {
-          const curProjEn = rawProjectsEn[targetSourceId] || {};
-          updateField("en", ["projects", targetSourceId], { ...curProjEn, ...extraFields });
-        }
-      }
-    } else {
-      const updatedEn = { ...spotlightEn, ...extraFields };
-      updateField("en", ["projects", "p-lakeside"], updatedEn);
-      updateField("en", ["spotlight"], updatedEn);
-      if (targetSourceId) {
-        const curProjEn = rawProjectsEn[targetSourceId] || {};
-        updateField("en", ["projects", targetSourceId], { ...curProjEn, ...extraFields });
-      }
-      if (field === "img" || field === "category" || field === "priceValue" || lang === "both") {
-        const updatedJa = { ...spotlightJa, ...extraFields };
-        updateField("ja", ["projects", "p-lakeside"], updatedJa);
-        updateField("ja", ["spotlight"], updatedJa);
-        if (targetSourceId) {
-          const curProj = rawProjectsJa[targetSourceId] || {};
-          updateField("ja", ["projects", targetSourceId], { ...curProj, ...extraFields });
-        }
-      }
-    }
-  };
-
-  const handleUploadSpotlightImage = async (file: File) => {
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.url) {
-          handleUpdateSpotlightField("img", "ja", data.url);
-          toast("Tải ảnh dự án tiêu điểm thành công!", "success");
-        }
-      } else {
-        toast("Lỗi tải ảnh lên máy chủ", "error");
-      }
-    } catch {
-      toast("Có lỗi xảy ra khi tải ảnh", "error");
-    }
-  };
-
-  // Quản lý các khối nội dung đặc tính (Ảnh 4 - Giải pháp kiến trúc / Vật liệu / Tiêu đề khối tùy chỉnh, có Thêm / Xóa)
-  const defaultFeatureBlocksJa: Array<{ id: string; title: string; content: string }> = [
-    {
-      id: "fb-sol",
-      title: "☗ 建築ソリューション",
-      content: spotlightJa?.solution || "打ち放しコンクリートと天然木ルーバーが調和する上質な空間設計...",
-    },
-    {
-      id: "fb-mat",
-      title: "🧱 マテリアル仕様",
-      content: spotlightJa?.materials || "天然木ルーバー、打ち放しコンクリート、Low-E複層ガラス...",
-    },
+  // Bảng màu mẫu đẹp & dễ chọn cho người không chuyên IT
+  const sectionBgSwatches = [
+    { label: "Kem sáng hiện đại (Mặc định)", hex: "#F4F3EF" },
+    { label: "Trắng ngà ấm", hex: "#FAF9F5" },
+    { label: "Trắng tinh khiết", hex: "#FFFFFF" },
+    { label: "Xám bạc nhạt", hex: "#EEF0F4" },
+    { label: " Kem Cát Vàng", hex: "#F7F1E5" },
+    { label: "Đen Tuyền Sang Trọng", hex: "#0B0D11" },
+    { label: "Than Chì Kiến Trúc", hex: "#14171F" },
+    { label: "Xanh Đêm Đậm", hex: "#0F172A" },
   ];
 
-  const defaultFeatureBlocksEn: Array<{ id: string; title: string; content: string }> = [
-    {
-      id: "fb-sol",
-      title: "☗ Architectural Solution",
-      content: spotlightEn?.solution || "Lakeside villa balancing raw concrete and natural timber louvers...",
-    },
-    {
-      id: "fb-mat",
-      title: "🧱 Material Specifications",
-      content: spotlightEn?.materials || "Natural timber louvers, board-formed concrete, Low-E glass...",
-    },
+  const cardBgSwatches = [
+    { label: "Xanh Da Trời Nhạt (Trang 1)", hex: "#DDEFF9" },
+    { label: "Tím Lavender Nhạt (Trang 2)", hex: "#EFE8FB" },
+    { label: "Cam Đào Kem (Trang 3)", hex: "#FBE9DE" },
+    { label: "Xanh Ngọc Mint (Trang 4)", hex: "#DFF3EA" },
+    { label: "Vàng Cát Ấm (Trang 5)", hex: "#F6EFDC" },
+    { label: "Hồng Phấn Nhẹ", hex: "#FCE7F3" },
+    { label: "Xanh Navy Đậm (Chữ trắng)", hex: "#1E2640" },
+    { label: "Đen Than Sang Trọng (Chữ trắng)", hex: "#181A20" },
   ];
 
-  const featureBlocksJa: Array<{ id: string; title: string; content: string }> =
-    Array.isArray(spotlightJa?.featureBlocks) && spotlightJa.featureBlocks.length > 0
-      ? spotlightJa.featureBlocks
-      : defaultFeatureBlocksJa;
+  const overlayOptions: Array<{ value: "none" | "light" | "dark-soft" | "dark-medium" | "dark-strong"; label: string }> = [
+    { value: "none", label: "Không phủ mờ (Giữ nguyên ảnh gốc)" },
+    { value: "light", label: "Phủ sáng trắng mờ (Dùng chữ màu tối)" },
+    { value: "dark-soft", label: "Phủ tối nhẹ 35% (Dùng chữ màu trắng)" },
+    { value: "dark-medium", label: "Phủ tối vừa 58% (Khuyên dùng - Chữ trắng rất rõ)" },
+    { value: "dark-strong", label: "Phủ tối đậm 75% (Nổi bật chữ tối đa)" },
+  ];
 
-  const featureBlocksEn: Array<{ id: string; title: string; content: string }> =
-    Array.isArray(spotlightEn?.featureBlocks) && spotlightEn.featureBlocks.length > 0
-      ? spotlightEn.featureBlocks
-      : defaultFeatureBlocksEn;
+  const curPageJa = pagesJa[safeSelectedIdx] || defaultPagesJa[0];
+  const curPageEn = pagesEn[safeSelectedIdx] || defaultPagesEn[0];
+  const curMediaListJa = Array.isArray(curPageJa.mediaItems) ? curPageJa.mediaItems : [];
+  const curMediaListEn = Array.isArray(curPageEn.mediaItems) ? curPageEn.mediaItems : [];
 
-  const featureBlocksCount = Math.max(featureBlocksJa.length, featureBlocksEn.length);
+  const activeSectionBgHex = infoJa.sectionBgColor || sectionBgColor || "#F4F3EF";
+  const handleSelectSectionBgColor = (hex: string) => {
+    setSectionBgColor(hex);
+    setInfoField("sectionBgColor", "shared", hex);
+  };
 
-  const handleUpdateFeatureBlock = (
-    idx: number,
-    field: "title" | "content",
-    langKey: "ja" | "en",
-    val: string
-  ) => {
-    if (langKey === "ja") {
-      const nextJa = [...featureBlocksJa];
-      nextJa[idx] = {
-        id: nextJa[idx]?.id || `fb-${idx}`,
-        title: field === "title" ? val : (nextJa[idx]?.title || ""),
-        content: field === "content" ? val : (nextJa[idx]?.content || "")
-      };
-      handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
-      if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "ja", val);
-      if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "ja", val);
-
-      if (lang === "both") {
-        const nextEn = [...featureBlocksEn];
-        nextEn[idx] = {
-          id: nextEn[idx]?.id || nextJa[idx].id,
-          title: field === "title" ? val : (nextEn[idx]?.title || nextJa[idx].title),
-          content: field === "content" ? val : (nextEn[idx]?.content || nextJa[idx].content)
-        };
-        handleUpdateSpotlightField("featureBlocks", "en", nextEn);
-        if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "en", val);
-        if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "en", val);
-      }
-    } else {
-      const nextEn = [...featureBlocksEn];
-      nextEn[idx] = {
-        id: nextEn[idx]?.id || `fb-${idx}`,
-        title: field === "title" ? val : (nextEn[idx]?.title || ""),
-        content: field === "content" ? val : (nextEn[idx]?.content || "")
-      };
-      handleUpdateSpotlightField("featureBlocks", "en", nextEn);
-      if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "en", val);
-      if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "en", val);
-
-      if (lang === "both") {
-        const nextJa = [...featureBlocksJa];
-        nextJa[idx] = {
-          id: nextJa[idx]?.id || nextEn[idx].id,
-          title: field === "title" ? val : (nextJa[idx]?.title || nextEn[idx].title),
-          content: field === "content" ? val : (nextJa[idx]?.content || nextEn[idx].content)
-        };
-        handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
-        if (idx === 0 && field === "content") handleUpdateSpotlightField("solution", "ja", val);
-        if (idx === 1 && field === "content") handleUpdateSpotlightField("materials", "ja", val);
-      }
+  // Kiểm tra độ sáng màu thẻ cho khung Live Preview
+  const isPreviewCardDark = (() => {
+    if (curPageJa.cardBgImage) {
+      return curPageJa.cardBgOverlay !== "light";
     }
-  };
-
-  const handleAddFeatureBlock = () => {
-    const newId = `fb-${Date.now()}`;
-    const nextJa = [
-      ...featureBlocksJa,
-      { id: newId, title: "✨ Khối nội dung mới", content: "Nội dung giải pháp hoặc thông số chi tiết..." }
-    ];
-    const nextEn = [
-      ...featureBlocksEn,
-      { id: newId, title: "✨ New Feature Block", content: "Detailed architectural or technical description..." }
-    ];
-    handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
-    handleUpdateSpotlightField("featureBlocks", "en", nextEn);
-    toast("Đã thêm khối nội dung mới cho Card lớn!", "success");
-  };
-
-  const handleDeleteFeatureBlock = (idx: number) => {
-    if (featureBlocksCount <= 1) {
-      toast("Phải giữ lại ít nhất 1 khối nội dung", "info");
-      return;
-    }
-    const nextJa = featureBlocksJa.filter((_, i) => i !== idx);
-    const nextEn = featureBlocksEn.filter((_, i) => i !== idx);
-    handleUpdateSpotlightField("featureBlocks", "ja", nextJa);
-    handleUpdateSpotlightField("featureBlocks", "en", nextEn);
-    if (nextJa[0]?.content) handleUpdateSpotlightField("solution", "ja", nextJa[0].content);
-    if (nextJa[1]?.content) handleUpdateSpotlightField("materials", "ja", nextJa[1].content);
-    if (nextEn[0]?.content) handleUpdateSpotlightField("solution", "en", nextEn[0].content);
-    if (nextEn[1]?.content) handleUpdateSpotlightField("materials", "en", nextEn[1].content);
-    toast("Đã xóa khối nội dung", "info");
-  };
-
-  // Quản lý gói hồ sơ bàn giao (Deliverables) của card lớn
-  const deliverablesJa: string[] = Array.isArray(spotlightJa?.deliverables)
-    ? spotlightJa.deliverables
-    : (defaultSpotlightJa.deliverables || []);
-  const deliverablesEn: string[] = Array.isArray(spotlightEn?.deliverables)
-    ? spotlightEn.deliverables
-    : (defaultSpotlightEn.deliverables || []);
-
-  const delivCount = Math.max(deliverablesJa.length, deliverablesEn.length);
-
-  const handleUpdateDeliverable = (idx: number, langKey: "ja" | "en", val: string) => {
-    if (langKey === "ja") {
-      const next = [...deliverablesJa];
-      next[idx] = val;
-      handleUpdateSpotlightField("deliverables", "ja", next);
-    } else {
-      const next = [...deliverablesEn];
-      next[idx] = val;
-      handleUpdateSpotlightField("deliverables", "en", next);
-    }
-  };
-
-  const handleAddDeliverable = () => {
-    const nextJa = [...deliverablesJa, "新しい成果物項目"];
-    const nextEn = [...deliverablesEn, "New Deliverable Item"];
-    handleUpdateSpotlightField("deliverables", "ja", nextJa);
-    handleUpdateSpotlightField("deliverables", "en", nextEn);
-    toast("Đã thêm mục hồ sơ bàn giao!", "success");
-  };
-
-  const handleDeleteDeliverable = (idx: number) => {
-    if (delivCount <= 1) {
-      toast("Phải giữ lại ít nhất 1 mục hồ sơ bàn giao", "info");
-      return;
-    }
-    const nextJa = deliverablesJa.filter((_, i) => i !== idx);
-    const nextEn = deliverablesEn.filter((_, i) => i !== idx);
-    handleUpdateSpotlightField("deliverables", "ja", nextJa);
-    handleUpdateSpotlightField("deliverables", "en", nextEn);
-    toast("Đã xóa mục hồ sơ bàn giao", "info");
-  };
-
-  // Quản lý thông số kỹ thuật chân card lớn (Key Highlights)
-  const keyHighlightsJa: any[] = Array.isArray(spotlightJa?.keyHighlights)
-    ? spotlightJa.keyHighlights
-    : (defaultSpotlightJa.keyHighlights || []);
-  const keyHighlightsEn: any[] = Array.isArray(spotlightEn?.keyHighlights)
-    ? spotlightEn.keyHighlights
-    : (defaultSpotlightEn.keyHighlights || []);
-
-  const highlightsCount = Math.max(keyHighlightsJa.length, keyHighlightsEn.length);
-
-  const handleUpdateHighlight = (idx: number, field: "label" | "value", langKey: "ja" | "en", val: string) => {
-    if (langKey === "ja") {
-      const next = [...keyHighlightsJa];
-      next[idx] = { ...(next[idx] || {}), [field]: val };
-      handleUpdateSpotlightField("keyHighlights", "ja", next);
-    } else {
-      const next = [...keyHighlightsEn];
-      next[idx] = { ...(next[idx] || {}), [field]: val };
-      handleUpdateSpotlightField("keyHighlights", "en", next);
-    }
-  };
-
-  const handleAddHighlight = () => {
-    const nextJa = [...keyHighlightsJa, { label: "Thông số mới", value: "Giá trị" }];
-    const nextEn = [...keyHighlightsEn, { label: "New Spec", value: "Value" }];
-    handleUpdateSpotlightField("keyHighlights", "ja", nextJa);
-    handleUpdateSpotlightField("keyHighlights", "en", nextEn);
-    toast("Đã thêm thông số kỹ thuật mới thành công!", "success");
-  };
-
-  const handleDeleteHighlight = (idx: number) => {
-    if (highlightsCount <= 1) {
-      toast("Phải giữ lại ít nhất 1 thông số kỹ thuật", "info");
-      return;
-    }
-    const nextJa = keyHighlightsJa.filter((_, i) => i !== idx);
-    const nextEn = keyHighlightsEn.filter((_, i) => i !== idx);
-    handleUpdateSpotlightField("keyHighlights", "ja", nextJa);
-    handleUpdateSpotlightField("keyHighlights", "en", nextEn);
-    toast("Đã xóa thông số kỹ thuật", "info");
-  };
+    const m = String(curPageJa.cardBgColor || "#DDEFF9").match(/#([0-9a-fA-F]{6})/);
+    if (!m) return false;
+    const r = parseInt(m[1].slice(0, 2), 16);
+    const g = parseInt(m[1].slice(2, 4), 16);
+    const b = parseInt(m[1].slice(4, 6), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.48;
+  })();
 
   return (
     <div className="space-y-8">
-      {/* 1. Header Architectural Projects Gallery */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+      {/* HƯỚNG DẪN NHANH CHO NGƯỜI CHỈNH SỬA */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 flex items-start gap-3">
+        <Sparkles className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+        <div className="text-xs text-slate-700 leading-relaxed">
+          <p className="font-bold text-slate-900 text-sm mb-0.5">
+            Hướng dẫn chỉnh sửa nhanh Mục 07 — Giá Cả (5 Trang Thẻ Lật 3D)
+          </p>
+          <p>
+            Giao diện bên dưới được chia đúng theo thứ tự từ trên xuống dưới giống hệt ngoài trang web: <strong>(1) Nền chung &amp; Tiêu đề đầu mục</strong> → <strong>(2) Từng trang thẻ dịch vụ (01 đến 05) kèm màu nền / ảnh nền riêng</strong> → <strong>(3) Nút liên hệ tư vấn &amp; Hotline</strong> → <strong>(4) Dự án tham khảo trong cửa sổ chi tiết</strong>. Chỉnh xong bạn chỉ cần bấm nút <strong>&quot;Lưu thay đổi&quot;</strong> màu xanh ở góc trên hoặc dưới cùng.
+          </p>
+        </div>
+      </div>
+
+      {/* =====================================================================
+          PHẦN 1: NỀN BACKGROUND TỔNG & TIÊU ĐỀ ĐẦU MỤC GIÁ CẢ
+          ===================================================================== */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
-            <span>1. Tiêu đề Showcase (Architectural Projects Gallery)</span>
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-extrabold inline-flex items-center justify-center">
+              1
+            </span>
+            <span>Nền Background Chung &amp; Tiêu Đề Đầu Mục Giá Cả</span>
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Quản lý tiêu đề Showcase hiển thị trên trang triển lãm dự án kiến trúc.
+            Tùy chỉnh màu nền hoặc ảnh nền bao quanh toàn bộ khu vực Giá cả và dòng tiêu đề lớn nằm phía trên các thẻ.
           </p>
         </div>
 
-        <BilingualField
-          label="Tiêu đề chính Section Showcase"
-          path={["info", "title"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-        />
-
-        <BilingualField
-          label="Mô tả phụ dưới tiêu đề Showcase (Sub-title)"
-          path={["info", "subtitle"]}
-          contentJa={contentJa}
-          contentEn={contentEn}
-          updateField={updateField}
-          activeLang={lang}
-          subLabel="Đoạn văn ngắn nằm ngay dưới tiêu đề chính showcase (Ví dụ: 左側に選択したプロジェクトの詳細、右側に全作品リストを表示しています)"
-        />
-      </div>
-
-      {/* 2. Quản lý Danh sách Card Dự án (Project Showcase Cards) */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-              <span>2. Quản lý Danh sách Dự án ({allProjectKeys.length} dự án)</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Thêm, xóa và chỉnh sửa thông tin chi tiết từng dự án (ảnh, chi phí, giải pháp, vật liệu, hồ sơ bàn giao...).
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleAddProject}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition shrink-0"
-          >
-            <Plus size={15} />
-            <span>+ Thêm Card Dự án mới</span>
-          </button>
-        </div>
-
-        {/* DANH SÁCH CÁC CARD DỰ ÁN */}
-        {allProjectKeys.length === 0 ? (
-          <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300">
-            <p className="text-xs text-slate-500">Chưa có dự án nào trong hệ thống.</p>
-            <button
-              type="button"
-              onClick={handleAddProject}
-              className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold hover:underline"
-            >
-              <Plus size={13} />
-              <span>Thêm dự án đầu tiên</span>
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {allProjectKeys.map((projId) => {
-              const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
-              const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
-              const isExpanded = expandedProjectId === projId;
-              const isSpotlight = spotlightJa?.id === projId || spotlightJa?.title === pJa?.title;
-
-              const specsJa = getNormalizedSpecs(pJa.specs);
-              const specsEn = getNormalizedSpecs(pEn.specs);
-              const maxSpecs = Math.max(specsJa.length, specsEn.length);
-
-              return (
-                <div
-                  key={projId}
-                  className={`rounded-xl border bg-white shadow-sm transition overflow-hidden space-y-4 ${isSpotlight
-                      ? "border-amber-400 ring-2 ring-amber-400/20"
-                      : "border-slate-200 hover:border-slate-300"
+        {/* 1A. Màu nền & Ảnh nền tổng của cả Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 p-4 rounded-xl bg-slate-50 border border-slate-200">
+          {/* Cột trái: Màu nền khu vực */}
+          <div className="space-y-3">
+            <label className="block text-xs font-bold text-slate-800">
+              🎨 Màu nền bao quanh toàn khu vực Giá cả (Bấm chọn màu mẫu hoặc tự phối màu):
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {sectionBgSwatches.map((sw) => {
+                const isSelected = activeSectionBgHex.toLowerCase() === sw.hex.toLowerCase();
+                return (
+                  <button
+                    key={sw.hex}
+                    type="button"
+                    onClick={() => handleSelectSectionBgColor(sw.hex)}
+                    className={`flex items-center gap-2 p-2 rounded-lg border text-left transition cursor-pointer ${
+                      isSelected
+                        ? "border-blue-600 ring-2 ring-blue-500/25 bg-white font-bold"
+                        : "border-slate-200 bg-white hover:border-slate-300"
                     }`}
-                >
-                  {/* Card Header & Controls */}
-                  <div className="p-4 pb-0 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
-                        #{projId}
-                      </span>
-                      {isSpotlight && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
-                          ★ Đang là Tiêu điểm (Card lớn)
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleEditLargeCardForProject(projId)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg shadow-sm transition cursor-pointer ${
-                          isSpotlight
-                            ? "bg-amber-600 text-white hover:bg-amber-700 ring-2 ring-amber-400"
-                            : "bg-amber-400 hover:bg-amber-500 text-slate-950"
-                        }`}
-                        title="Bấm để nạp và điền nội dung của dự án này vào Card lớn bên trái"
-                      >
-                        <Sparkles size={13} className={isSpotlight ? "text-amber-200" : "text-slate-900"} />
-                        <span>{isSpotlight ? "✎ Đang sửa Card lớn" : "✎ Sửa nội dung Card lớn"}</span>
-                      </button>
+                  >
+                    <span
+                      className="w-5 h-5 rounded-full border border-slate-300 shrink-0 shadow-inner"
+                      style={{ backgroundColor: sw.hex }}
+                    />
+                    <span className="text-[11px] text-slate-700 leading-tight line-clamp-2">
+                      {sw.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProject(projId)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        title="Xóa card dự án này"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </div>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-xs text-slate-600 font-medium">Hoặc tự chọn màu bất kỳ:</span>
+              <input
+                type="color"
+                value={/^#[0-9a-fA-F]{6}$/.test(activeSectionBgHex) ? activeSectionBgHex : "#F4F3EF"}
+                onChange={(e) => handleSelectSectionBgColor(e.target.value)}
+                className="w-10 h-9 rounded border border-slate-300 cursor-pointer p-0.5 bg-white"
+              />
+              <input
+                type="text"
+                value={activeSectionBgHex}
+                onChange={(e) => handleSelectSectionBgColor(e.target.value)}
+                className="w-28 px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white"
+              />
+            </div>
+          </div>
 
-                  {/* Ảnh đại diện & Tên & Thể loại */}
-                  <div className="px-4">
-                    <div className="flex gap-3 items-start">
-                      <div className="w-28 h-20 rounded-lg overflow-hidden bg-slate-900 border border-slate-200 shrink-0 relative group">
-                        {pJa.img ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={pJa.img} alt={pJa.title || "Project"} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-500">
-                            <Eye size={20} />
-                          </div>
-                        )}
-                        <label className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition text-[10px]">
-                          <Upload size={14} />
-                          <span>Đổi ảnh</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f) handleUploadProjectImage(projId, f);
-                            }}
-                          />
-                        </label>
-                      </div>
+          {/* Cột phải: Ảnh nền khu vực (Tùy chọn) */}
+          <div className="space-y-3 border-t lg:border-t-0 lg:border-l border-slate-200 pt-4 lg:pt-0 lg:pl-5">
+            <label className="block text-xs font-bold text-slate-800">
+              🖼️ Ảnh nền (Background Image) cho toàn khu vực Giá cả (Không bắt buộc):
+            </label>
 
-                      <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-slate-500 uppercase">
-                          Tên dự án (Title):
-                        </label>
-                        <input
-                          type="text"
-                          value={pJa.title || pEn.title || ""}
-                          onChange={(e) => {
-                            handleUpdateProject(projId, "title", "ja", e.target.value, true);
-                          }}
-                          className="w-full px-2 py-1 text-xs font-bold text-slate-800 border border-slate-300 rounded bg-white mt-1"
-                          placeholder="THE LAKESIDE HORIZON VILLA"
-                        />
-                      </div>
-                    </div>
-                  </div>
+            <div className="flex items-start gap-3">
+              <div
+                className="w-28 h-20 rounded-xl border border-slate-300 overflow-hidden shrink-0 flex items-center justify-center relative"
+                style={{ backgroundColor: activeSectionBgHex }}
+              >
+                {infoJa.sectionBgImage ? (
+                  <img
+                    src={infoJa.sectionBgImage}
+                    alt="Section Background"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[10px] text-slate-500 text-center px-2 font-medium">
+                    Đang dùng màu nền đơn sắc
+                  </span>
+                )}
+              </div>
 
-                  {/* Các trường thông tin chính của Card Dự án */}
-                  <div className="px-4 space-y-2.5">
-                    {/* Huy hiệu Card (Badge Tag) - Hỗ trợ song ngữ đầy đủ */}
-                    <div>
-                      <label className="block text-[10px] text-slate-500 font-medium">Huy hiệu Card (Badge Tag):</label>
-                      {lang === "both" ? (
-                        <div className="grid grid-cols-2 gap-2 mt-0.5">
-                          <input
-                            type="text"
-                            value={pJa.catTag || ""}
-                            onChange={(e) => handleUpdateProject(projId, "catTag", "ja", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[JA / VI] 高級リゾートヴィラ"
-                          />
-                          <input
-                            type="text"
-                            value={pEn.catTag || ""}
-                            onChange={(e) => handleUpdateProject(projId, "catTag", "en", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[EN] LUXURY RETREAT VILLA"
-                          />
-                        </div>
-                      ) : (
-                        <input
-                          type="text"
-                          value={(lang === "en" ? pEn.catTag : pJa.catTag) || ""}
-                          onChange={(e) => handleUpdateProject(projId, "catTag", lang === "en" ? "en" : "ja", e.target.value)}
-                          className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                          placeholder="LUXURY RETREAT VILLA"
-                        />
-                      )}
-                    </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white hover:bg-slate-900 cursor-pointer transition shadow-sm">
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>
+                      {uploadingKey === "sec-bg" ? "Đang tải ảnh..." : "Tải ảnh nền từ máy tính"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingKey === "sec-bg"}
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!f) return;
+                        const res = await uploadFileToServer(f, "sec-bg");
+                        if (res?.url) {
+                          setInfoField("sectionBgImage", "shared", res.url);
+                          if (!infoJa.sectionBgOverlay || infoJa.sectionBgOverlay === "none") {
+                            setInfoField("sectionBgOverlay", "shared", "dark-medium");
+                          }
+                          toast("Đã cập nhật ảnh nền khu vực Giá cả!", "success");
+                        }
+                      }}
+                    />
+                  </label>
 
-                    {/* Địa điểm & Diện tích (Loc) - Hỗ trợ song ngữ đầy đủ */}
-                    <div>
-                      <label className="block text-[10px] text-slate-500 font-medium">Địa điểm &amp; Diện tích (Loc):</label>
-                      {lang === "both" ? (
-                        <div className="grid grid-cols-2 gap-2 mt-0.5">
-                          <input
-                            type="text"
-                            value={pJa.loc || ""}
-                            onChange={(e) => handleUpdateProject(projId, "loc", "ja", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[JA / VI] Hồ Tràm • 850 m²"
-                          />
-                          <input
-                            type="text"
-                            value={pEn.loc || ""}
-                            onChange={(e) => handleUpdateProject(projId, "loc", "en", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[EN] Ho Tram • 850 m²"
-                          />
-                        </div>
-                      ) : (
-                        <input
-                          type="text"
-                          value={(lang === "en" ? pEn.loc : pJa.loc) || ""}
-                          onChange={(e) => handleUpdateProject(projId, "loc", lang === "en" ? "en" : "ja", e.target.value)}
-                          className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                          placeholder="Ho Tram • 850 m²"
-                        />
-                      )}
-                    </div>
-
-                    {/* Giá tiền hiển thị trên card nhỏ (Price) */}
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-600">
-                        Giá tiền hiển thị (Price - Cả chữ và số tiền):
-                      </label>
-                      <input
-                        type="text"
-                        value={pJa.priceValue || pJa.priceEstimate || pEn.priceValue || pEn.priceEstimate || ""}
-                        onChange={(e) => {
-                          handleUpdateProject(projId, "priceValue", "ja", e.target.value, true);
-                          handleUpdateProject(projId, "priceEstimate", "ja", e.target.value, true);
-                        }}
-                        className="w-full px-2 py-1 text-xs font-bold text-amber-700 border border-slate-300 rounded bg-white mt-0.5 focus:ring-1 focus:ring-amber-500"
-                        placeholder="¥2,500,000〜 (¥3,800/m²)"
-                      />
-                    </div>
-
-                    {/* Phong cách kiến trúc */}
-                    <div>
-                      <label className="block text-[10px] text-slate-500 font-medium">Phong cách kiến trúc (Style):</label>
-                      <input
-                        type="text"
-                        value={pJa.style || pEn.style || ""}
-                        onChange={(e) => {
-                          handleUpdateProject(projId, "style", "ja", e.target.value, true);
-                        }}
-                        className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                        placeholder="Modern Tropical Zen, Minimalist Zen..."
-                      />
-                    </div>
-
-                    {/* Mô tả tóm tắt của Card (Narrative) - Hỗ trợ song ngữ */}
-                    <div>
-                      <label className="block text-[10px] text-slate-500 font-medium">Mô tả tóm tắt (Narrative):</label>
-                      {lang === "both" ? (
-                        <div className="grid grid-cols-2 gap-2 mt-0.5">
-                          <textarea
-                            rows={2}
-                            value={pJa.narrative || ""}
-                            onChange={(e) => handleUpdateProject(projId, "narrative", "ja", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[JA / VI] Biệt thự ven hồ kết hợp tinh tế..."
-                          />
-                          <textarea
-                            rows={2}
-                            value={pEn.narrative || ""}
-                            onChange={(e) => handleUpdateProject(projId, "narrative", "en", e.target.value)}
-                            className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                            placeholder="[EN] Lakeside villa balancing raw concrete..."
-                          />
-                        </div>
-                      ) : (
-                        <textarea
-                          rows={2}
-                          value={(lang === "en" ? pEn.narrative : pJa.narrative) || ""}
-                          onChange={(e) => handleUpdateProject(projId, "narrative", lang === "en" ? "en" : "ja", e.target.value)}
-                          className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                          placeholder="Lakeside villa balancing raw concrete..."
-                        />
-                      )}
-                    </div>
-
-                    {/* THÔNG SỐ CHÂN CARD (SPECS CHIPS) - CÓ THỂ THÊM HOẶC XÓA THEO YÊU CẦU */}
-                    <div className="pt-2 border-t border-slate-100 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="block text-[11px] font-bold text-slate-700">
-                          Thông số chân card ({maxSpecs} thông số):
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => handleAddProjectSpec(projId)}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200 transition"
-                        >
-                          <Plus size={12} />
-                          <span>Thêm thông số</span>
-                        </button>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        {Array.from({ length: maxSpecs }).map((_, sIdx) => {
-                          const valJa = specsJa[sIdx]?.v || "";
-                          const valEn = specsEn[sIdx]?.v || "";
-
-                          return (
-                            <div key={`spec-${sIdx}`} className="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded-lg border border-slate-200">
-                              <span className="text-[10px] font-bold text-slate-500 w-5 shrink-0 text-center">
-                                #{sIdx + 1}
-                              </span>
-
-                              {lang === "both" ? (
-                                <div className="grid grid-cols-2 gap-1.5 flex-1">
-                                  <input
-                                    type="text"
-                                    value={valJa}
-                                    onChange={(e) => handleUpdateProjectSpecValue(projId, sIdx, "ja", e.target.value)}
-                                    className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                    placeholder="[JA] 3 Tầng • 4 PN"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={valEn}
-                                    onChange={(e) => handleUpdateProjectSpecValue(projId, sIdx, "en", e.target.value)}
-                                    className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                    placeholder="[EN] 3 Levels • 4 Suites"
-                                  />
-                                </div>
-                              ) : (
-                                <input
-                                  type="text"
-                                  value={lang === "en" ? valEn : valJa}
-                                  onChange={(e) => handleUpdateProjectSpecValue(projId, sIdx, lang === "en" ? "en" : "ja", e.target.value)}
-                                  className="flex-1 px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                  placeholder={sIdx === 0 ? "3 Tầng • 4 PN" : sIdx === 1 ? "750 m²" : "Bàn Giao 2026"}
-                                />
-                              )}
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteProjectSpec(projId, sIdx)}
-                                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition shrink-0"
-                                title="Xóa thông số này"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nút bấm thu gọn/mở rộng chi tiết kỹ thuật */}
-                  <div className="px-4 pb-4 pt-1">
+                  {infoJa.sectionBgImage && (
                     <button
                       type="button"
-                      onClick={() => setExpandedProjectId(isExpanded ? null : projId)}
-                      className="w-full py-1.5 text-[11px] font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 transition"
+                      onClick={() => {
+                        setInfoField("sectionBgImage", "shared", "");
+                        setInfoField("sectionBgOverlay", "shared", "none");
+                        toast("Đã gỡ ảnh nền khu vực, quay về dùng màu nền", "info");
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200"
                     >
-                      {isExpanded ? "▲ Thu gọn chi tiết kỹ thuật" : "▼ Chi tiết kiến trúc & giải pháp kỹ thuật"}
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Gỡ ảnh nền</span>
                     </button>
-
-                    {isExpanded && (
-                      <div className="mt-3 p-3 bg-slate-50/80 rounded-lg border border-slate-200 space-y-2 text-xs">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 font-medium">Giải pháp kiến trúc (Solution):</label>
-                          {lang === "both" ? (
-                            <div className="grid grid-cols-2 gap-2 mt-0.5">
-                              <textarea
-                                rows={2}
-                                value={pJa.solution || ""}
-                                onChange={(e) => handleUpdateProject(projId, "solution", "ja", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                placeholder="[JA / VI]..."
-                              />
-                              <textarea
-                                rows={2}
-                                value={pEn.solution || ""}
-                                onChange={(e) => handleUpdateProject(projId, "solution", "en", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                placeholder="[EN]..."
-                              />
-                            </div>
-                          ) : (
-                            <textarea
-                              rows={2}
-                              value={(lang === "en" ? pEn.solution : pJa.solution) || ""}
-                              onChange={(e) => handleUpdateProject(projId, "solution", lang === "en" ? "en" : "ja", e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                            />
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-[10px] text-slate-500 font-medium">Vật liệu chủ đạo (Materials):</label>
-                          {lang === "both" ? (
-                            <div className="grid grid-cols-2 gap-2 mt-0.5">
-                              <textarea
-                                rows={2}
-                                value={pJa.materials || ""}
-                                onChange={(e) => handleUpdateProject(projId, "materials", "ja", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                placeholder="[JA / VI]..."
-                              />
-                              <textarea
-                                rows={2}
-                                value={pEn.materials || ""}
-                                onChange={(e) => handleUpdateProject(projId, "materials", "en", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                                placeholder="[EN]..."
-                              />
-                            </div>
-                          ) : (
-                            <textarea
-                              rows={2}
-                              value={(lang === "en" ? pEn.materials : pJa.materials) || ""}
-                              onChange={(e) => handleUpdateProject(projId, "materials", lang === "en" ? "en" : "ja", e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white mt-0.5"
-                            />
-                          )}
-                        </div>
-
-                        {/* MỤC ĐIỀN NỘI DUNG CARD LỚN CỦA DỰ ÁN NÀY (KHI BẤM XEM THÊM TRÊN CARD LỚN) */}
-                        <div className="pt-2 border-t border-slate-200">
-                          <label className="block text-[11px] font-bold text-amber-800 flex items-center gap-1">
-                            <Sparkles size={12} className="text-amber-600" />
-                            <span>Mục điền nội dung Card lớn (Hiển thị khi mở dự án này):</span>
-                          </label>
-                          <p className="text-[10px] text-slate-500 mb-1">
-                            Nội dung chi tiết mở rộng xuất hiện trên card lớn bên trái khi bấm chữ &quot;Xem thêm&quot;.
-                          </p>
-                          {lang === "both" ? (
-                            <div className="grid grid-cols-2 gap-2 mt-0.5">
-                              <textarea
-                                rows={3}
-                                value={pJa.detailContent || ""}
-                                onChange={(e) => handleUpdateProject(projId, "detailContent", "ja", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                                placeholder="Nội dung chi tiết Card lớn [JA / VI]..."
-                              />
-                              <textarea
-                                rows={3}
-                                value={pEn.detailContent || ""}
-                                onChange={(e) => handleUpdateProject(projId, "detailContent", "en", e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                                placeholder="Large Card Content [EN]..."
-                              />
-                            </div>
-                          ) : (
-                            <textarea
-                              rows={3}
-                              value={(lang === "en" ? pEn.detailContent : pJa.detailContent) || ""}
-                              onChange={(e) => handleUpdateProject(projId, "detailContent", lang === "en" ? "en" : "ja", e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-amber-300 rounded bg-white mt-0.5 focus:ring-1 focus:ring-amber-500"
-                              placeholder="Nội dung chi tiết Card lớn khi bấm Xem thêm..."
-                            />
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
-      {/* 3. Dự án Tiêu điểm (Card lớn bên trái - Spotlight Project) */}
-      <div id="admin-spotlight-section" className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6 scroll-mt-6">
-        <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-              <span>3. Dự án Tiêu điểm Showcase (Card lớn bên trái)</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Tùy chỉnh toàn bộ thông tin chi tiết dự án nổi bật hiển thị ở cột bên trái của khu vực triển lãm.
-            </p>
-          </div>
-          {spotlightJa?.title && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-lg text-xs font-bold text-amber-900 shrink-0">
-              <span>✦ Đang sửa Card lớn:</span>
-              <span className="underline">{spotlightJa.title}</span>
+                {infoJa.sectionBgImage && (
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                      Độ phủ mờ trên ảnh nền (giúp chữ tiêu đề dễ đọc hơn):
+                    </label>
+                    <select
+                      value={infoJa.sectionBgOverlay || "dark-medium"}
+                      onChange={(e) => setInfoField("sectionBgOverlay", "shared", e.target.value)}
+                      className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                    >
+                      {overlayOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Tên dự án & Thể loại */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            Tên dự án tiêu điểm (Ví dụ: THE LAKESIDE HORIZON VILLA):
-          </label>
-          <input
-            type="text"
-            value={spotlightJa?.title || spotlightEn?.title || ""}
-            onChange={(e) => {
-              handleUpdateSpotlightField("title", "ja", e.target.value);
-              handleUpdateSpotlightField("title", "en", e.target.value);
-            }}
-            className="w-full px-3 py-2 text-sm font-bold uppercase tracking-wide border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-            placeholder="THE LAKESIDE HORIZON VILLA"
-          />
-        </div>
-
-        {/* Nhãn thể loại & Địa điểm song ngữ */}
+        {/* 1B. Tiêu đề chính & Mô tả phụ đầu mục */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(lang === "ja" || lang === "both") && (
-            <div className="space-y-3 p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[11px] font-bold text-slate-500 uppercase">Tiếng Nhật / Tiếng Việt [JA]</span>
+            <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-[11px] font-bold uppercase text-blue-700">
+                🇯🇵 Nội dung hiển thị trên trang Tiếng Nhật
+              </span>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Nhãn thể loại (Tag):</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tiêu đề lớn đầu mục Giá cả:
+                </label>
                 <input
                   type="text"
-                  value={spotlightJa?.catTag || ""}
-                  onChange={(e) => handleUpdateSpotlightField("catTag", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="高級リゾートヴィラ"
+                  value={infoJa.title ?? defaultHeaderJa.title}
+                  onChange={(e) => setInfoField("title", "ja", e.target.value)}
+                  className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Địa điểm &amp; Diện tích:</label>
-                <input
-                  type="text"
-                  value={spotlightJa?.loc || ""}
-                  onChange={(e) => handleUpdateSpotlightField("loc", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="ホーチャム · 850 m²"
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Dòng mô tả nhỏ ngay dưới tiêu đề:
+                </label>
+                <textarea
+                  rows={2}
+                  value={infoJa.subtitle ?? infoJa.sub ?? defaultHeaderJa.subtitle}
+                  onChange={(e) => {
+                    setInfoField("subtitle", "ja", e.target.value);
+                    setInfoField("sub", "ja", e.target.value);
+                  }}
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
                 />
               </div>
             </div>
           )}
 
           {(lang === "en" || lang === "both") && (
-            <div className="space-y-3 p-3.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-[11px] font-bold text-slate-500 uppercase">Tiếng Anh [EN]</span>
+            <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-[11px] font-bold uppercase text-emerald-700">
+                🇬🇧 Nội dung hiển thị trên trang Tiếng Anh
+              </span>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Nhãn thể loại (Tag):</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tiêu đề lớn đầu mục (EN):
+                </label>
                 <input
                   type="text"
-                  value={spotlightEn?.catTag || ""}
-                  onChange={(e) => handleUpdateSpotlightField("catTag", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="LUXURY RETREAT VILLA"
+                  value={infoEn.title ?? defaultHeaderEn.title}
+                  onChange={(e) => setInfoField("title", "en", e.target.value)}
+                  className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Địa điểm &amp; Diện tích:</label>
-                <input
-                  type="text"
-                  value={spotlightEn?.loc || ""}
-                  onChange={(e) => handleUpdateSpotlightField("loc", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="Ho Tram • 850 m²"
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Dòng mô tả nhỏ dưới tiêu đề (EN):
+                </label>
+                <textarea
+                  rows={2}
+                  value={infoEn.subtitle ?? infoEn.sub ?? defaultHeaderEn.subtitle}
+                  onChange={(e) => {
+                    setInfoField("subtitle", "en", e.target.value);
+                    setInfoField("sub", "en", e.target.value);
+                  }}
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
                 />
               </div>
             </div>
           )}
         </div>
+      </div>
 
-        {/* MỤC MÔ TẢ TÓM TẮT CHO CARD LỚN */}
-        <div className="space-y-2 p-4 bg-slate-50 rounded-xl border border-slate-200">
-          <label className="block text-xs font-bold text-slate-800">
-            Mục Mô tả tóm tắt cho Card lớn (Project Narrative - 2 dòng đầu):
-          </label>
-          <p className="text-[11px] text-slate-500">
-            Đoạn văn giới thiệu không gian ban đầu xuất hiện trực tiếp dưới tên dự án trên Card lớn.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-            {(lang === "ja" || lang === "both") && (
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả tóm tắt [JA / VI]:</label>
-                <textarea
-                  rows={3}
-                  value={spotlightJa?.narrative || ""}
-                  onChange={(e) => handleUpdateSpotlightField("narrative", "ja", e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Biệt thự ven hồ kết hợp tinh tế giữa bê tông trần mộc mạc và hệ lam gỗ thông gió tự nhiên..."
-                />
-              </div>
-            )}
-            {(lang === "en" || lang === "both") && (
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Mô tả tóm tắt [EN]:</label>
-                <textarea
-                  rows={3}
-                  value={spotlightEn?.narrative || ""}
-                  onChange={(e) => handleUpdateSpotlightField("narrative", "en", e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Lakeside villa balancing raw board-formed concrete and natural timber louvers..."
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* MỤC ĐIỀN NỘI DUNG CARD LỚN (NỘI DUNG CHI TIẾT MỞ RỘNG KHI BẤM XEM THÊM) */}
-        <div className="space-y-2 p-4 bg-amber-50/70 rounded-xl border-2 border-amber-300 shadow-sm">
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={16} className="text-amber-600" />
-            <label className="block text-xs font-bold text-amber-950 uppercase tracking-wide">
-              ★ Mục điền nội dung Card lớn (Nội dung chi tiết khi bấm &quot;Xem thêm&quot;):
-            </label>
-          </div>
-          <p className="text-[11px] text-amber-800 leading-relaxed">
-            Điền nội dung chi tiết mở rộng về giải pháp thiết kế, công năng kiến trúc và phân tích chuyên sâu. Khi khách hàng bấm chữ &quot;Xem thêm&quot; ở Card lớn, nội dung này sẽ bung ra đầy đủ.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-            {(lang === "ja" || lang === "both") && (
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Nội dung chi tiết Card lớn [JA / VI]:</label>
-                <textarea
-                  rows={4}
-                  value={spotlightJa?.detailContent || ""}
-                  onChange={(e) => handleUpdateSpotlightField("detailContent", "ja", e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Nhập nội dung chi tiết đầy đủ cho Card lớn: giải pháp vi khí hậu, hướng nắng gió, chi tiết phân khu chức năng..."
-                />
-              </div>
-            )}
-            {(lang === "en" || lang === "both") && (
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">Nội dung chi tiết Card lớn [EN]:</label>
-                <textarea
-                  rows={4}
-                  value={spotlightEn?.detailContent || ""}
-                  onChange={(e) => handleUpdateSpotlightField("detailContent", "en", e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Detailed architectural and engineering narrative for the expanded large card..."
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Hình ảnh chính của Card lớn */}
-        <div className="space-y-2">
-          <label className="block text-xs font-bold text-slate-700">
-            Hình ảnh phối cảnh chính của Card lớn:
-          </label>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-36 h-24 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 shrink-0 relative flex items-center justify-center">
-              {spotlightJa?.img ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={spotlightJa.img}
-                  alt={spotlightJa.title || "Project"}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Eye size={24} className="text-slate-500" />
-              )}
-            </div>
-            <div className="flex-1 space-y-2 w-full">
-              <input
-                type="text"
-                value={spotlightJa?.img || spotlightEn?.img || ""}
-                onChange={(e) => {
-                  handleUpdateSpotlightField("img", "ja", e.target.value);
-                  handleUpdateSpotlightField("img", "en", e.target.value);
-                }}
-                className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="https://... hoặc bấm tải ảnh bên dưới"
-              />
-              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg cursor-pointer transition shadow-sm">
-                <Upload size={13} />
-                <span>Tải ảnh dự án lên</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleUploadSpotlightImage(file);
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-
-                {/* CẤU HÌNH HUY HIỆU GÓC ẢNH & NÚT TOÀN MÀN HÌNH (NỘI DUNG ẢNH 3) */}
-        <div className="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-            <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <span>🖼️ Nội dung góc trên ảnh Card lớn (Ảnh 3):</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={spotlightJa?.showSpotlightBadge !== false}
-                onChange={(e) => {
-                  handleUpdateSpotlightField("showSpotlightBadge", "ja", e.target.checked);
-                  handleUpdateSpotlightField("showSpotlightBadge", "en", e.target.checked);
-                }}
-                className="rounded text-amber-600 focus:ring-amber-500"
-              />
-              <span>Hiển thị huy hiệu góc ảnh</span>
-            </label>
+      {/* =====================================================================
+          PHẦN 2: CHỈNH SỬA CHI TIẾT TỪNG TRANG THẺ GIÁ CẢ XẾP CHỒNG (01 -> 05)
+          ===================================================================== */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-extrabold inline-flex items-center justify-center">
+                2
+              </span>
+              <span>
+                Chỉnh Sửa Từng Trang Thẻ Giá Cả Xếp Chồng ({pageCount} Trang)
+              </span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Bấm chọn từng trang bên dưới (View Standard, View High Quality, Movie, VR360, VR SS) để đổi màu nền/ảnh nền thẻ, giá tiền, nội dung và tải ảnh/video minh họa.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Chữ Huy hiệu góc trái (Mặc định: ✦ 選択中のプロジェクト):
-              </label>
-              {(lang === "ja" || lang === "both") && (
-                <input
-                  type="text"
-                  value={spotlightJa?.spotlightBadgeText || ""}
-                  onChange={(e) => handleUpdateSpotlightField("spotlightBadgeText", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="✦ 選択中のプロジェクト"
-                />
-              )}
-              {lang === "en" && (
-                <input
-                  type="text"
-                  value={spotlightEn?.spotlightBadgeText || ""}
-                  onChange={(e) => handleUpdateSpotlightField("spotlightBadgeText", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="✦ SELECTED PROJECT"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Chữ Nút phóng to toàn màn hình góc phải:
-              </label>
-              {(lang === "ja" || lang === "both") && (
-                <input
-                  type="text"
-                  value={spotlightJa?.fullscreenBtnText || ""}
-                  onChange={(e) => handleUpdateSpotlightField("fullscreenBtnText", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="全画面表示"
-                />
-              )}
-              {lang === "en" && (
-                <input
-                  type="text"
-                  value={spotlightEn?.fullscreenBtnText || ""}
-                  onChange={(e) => handleUpdateSpotlightField("fullscreenBtnText", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="Fullscreen View"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* CẤU HÌNH PHẦN GIÁ (GIÁ CẢ CHỮ VÀ SỐ TIỀN) */}
-        <div className="space-y-3 p-4 bg-amber-50/60 rounded-xl border border-amber-200">
-          <div className="flex items-center justify-between border-b border-amber-200/80 pb-2">
-            <div>
-              <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                <span>💰 Phần giá (Cả chữ nhãn và số tiền hiển thị trên ảnh):</span>
-              </label>
-              <p className="text-[11px] text-amber-800/80 mt-0.5">
-                Khung viền vàng nổi bật hiển thị ở góc dưới ảnh chính của Card lớn (hoặc tắt đi nếu không muốn hiển thị giá).
-              </p>
-            </div>
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-900 shrink-0">
-              <input
-                type="checkbox"
-                checked={spotlightJa?.showPrice !== false}
-                onChange={(e) => {
-                  handleUpdateSpotlightField("showPrice", "ja", e.target.checked);
-                  handleUpdateSpotlightField("showPrice", "en", e.target.checked);
-                }}
-                className="rounded text-amber-600 focus:ring-amber-500"
-              />
-              <span>Bật hiển thị khung giá</span>
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Chữ nhãn giá (Price Label - Ví dụ: 設計・3D目安費用:):
-              </label>
-              {(lang === "ja" || lang === "both") && (
-                <input
-                  type="text"
-                  value={spotlightJa?.priceLabel || ""}
-                  onChange={(e) => handleUpdateSpotlightField("priceLabel", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="設計・3D目安費用:"
-                />
-              )}
-              {lang === "en" && (
-                <input
-                  type="text"
-                  value={spotlightEn?.priceLabel || ""}
-                  onChange={(e) => handleUpdateSpotlightField("priceLabel", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="Est. Design & 3D Fee:"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                Số tiền (Price Value - Ví dụ: ¥2,500,000〜 (¥3,800/m²)):
-              </label>
-              {(lang === "ja" || lang === "both") && (
-                <input
-                  type="text"
-                  value={spotlightJa?.priceValue || ""}
-                  onChange={(e) => handleUpdateSpotlightField("priceValue", "ja", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-bold text-amber-700 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="¥2,500,000〜 (¥3,800/m²)"
-                />
-              )}
-              {lang === "en" && (
-                <input
-                  type="text"
-                  value={spotlightEn?.priceValue || ""}
-                  onChange={(e) => handleUpdateSpotlightField("priceValue", "en", e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-bold text-amber-700 border border-slate-300 rounded-lg bg-white focus:ring-1 focus:ring-amber-500"
-                  placeholder="$18,500~ ($28/m²)"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* NỘI DUNG TIÊU ĐỀ ẢNH 4 (CÓ TÍNH NĂNG THÊM / XÓA KHỐI) */}
-        <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <span>🧩 Các khối nội dung đặc tính Card lớn (Ảnh 4 - {featureBlocksCount} khối):</span>
-              </label>
-              <p className="text-[11px] text-slate-500">
-                Cho phép thêm, xóa và đổi tiêu đề linh hoạt (Giải pháp kiến trúc, Vật liệu, v.v.).
-              </p>
-            </div>
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              onClick={handleAddFeatureBlock}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md border border-emerald-200 transition shrink-0"
+              onClick={handleAddNewPage}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition cursor-pointer"
             >
-              <Plus size={13} />
-              <span>+ Thêm khối nội dung mới</span>
+              <Plus className="w-4 h-4" />
+              <span>Thêm trang mới</span>
             </button>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.from({ length: featureBlocksCount }).map((_, fIdx) => {
-              const fbJa = featureBlocksJa[fIdx] || { title: "", content: "" };
-              const fbEn = featureBlocksEn[fIdx] || { title: "", content: "" };
-
-              return (
-                <div key={`fb-${fIdx}`} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2 relative group">
-                  <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
-                    <span className="text-[11px] font-bold text-amber-700">
-                      Khối #{fIdx + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteFeatureBlock(fIdx)}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] text-red-600 hover:text-red-700 hover:bg-red-50 rounded border border-transparent hover:border-red-200 transition"
-                      title="Xóa khối nội dung này"
-                    >
-                      <Trash2 size={12} />
-                      <span>Xóa khối</span>
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-600 mb-0.5">
-                      Tiêu đề khối (Ví dụ: ☗ 建築ソリューション, 🧱 マテリアル仕様...):
-                    </label>
-                    {(lang === "ja" || lang === "both") && (
-                      <input
-                        type="text"
-                        value={fbJa.title || ""}
-                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "title", "ja", e.target.value)}
-                        className="w-full px-2 py-1 text-xs font-bold border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                        placeholder="Tiêu đề khối [JA / VI]"
-                      />
-                    )}
-                    {lang === "en" && (
-                      <input
-                        type="text"
-                        value={fbEn.title || ""}
-                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "title", "en", e.target.value)}
-                        className="w-full px-2 py-1 text-xs font-bold border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                        placeholder="Block Title [EN]"
-                      />
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] text-slate-500 mb-0.5">
-                      Nội dung chi tiết của khối:
-                    </label>
-                    {(lang === "ja" || lang === "both") && (
-                      <textarea
-                        rows={2}
-                        value={fbJa.content || ""}
-                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "content", "ja", e.target.value)}
-                        className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                        placeholder="Nội dung giải pháp, mô tả chi tiết..."
-                      />
-                    )}
-                    {lang === "en" && (
-                      <textarea
-                        rows={2}
-                        value={fbEn.content || ""}
-                        onChange={(e) => handleUpdateFeatureBlock(fIdx, "content", "en", e.target.value)}
-                        className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:ring-1 focus:ring-amber-500"
-                        placeholder="Detailed block content description..."
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            <button
+              type="button"
+              onClick={handleResetDefault5Pages}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Khôi phục 5 trang gốc</span>
+            </button>
           </div>
         </div>
 
-        {/* Gói hồ sơ bàn giao (Deliverables Checklist) */}
-        <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold text-slate-700">
-              ✓ Gói hồ sơ bàn giao của Card lớn ({delivCount} mục):
-            </label>
-            <button
-              type="button"
-              onClick={handleAddDeliverable}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md border border-emerald-200 transition"
-            >
-              <Plus size={13} />
-              <span>Thêm mục hồ sơ</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {Array.from({ length: delivCount }).map((_, idx) => (
-              <div
-                key={`deliv-${idx}`}
-                className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex items-start gap-2"
+        {/* THANH CHỌN TRANG TRỰC QUAN GIỐNG GIAO DIỆN THẬT */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          {Array.from({ length: pageCount }).map((_, idx) => {
+            const p = pagesJa[idx] || defaultPagesJa[idx] || defaultPagesJa[0];
+            const isSelected = safeSelectedIdx === idx;
+            return (
+              <button
+                key={p.id || idx}
+                type="button"
+                onClick={() => setSelectedPageIdx(idx)}
+                className={`p-3 rounded-xl border text-left transition cursor-pointer relative ${
+                  isSelected
+                    ? "border-indigo-600 ring-2 ring-indigo-500/25 bg-indigo-50/40 shadow-sm"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
               >
-                <div className="flex-1 space-y-1.5">
-                  {(lang === "ja" || lang === "both") && (
-                    <input
-                      type="text"
-                      value={deliverablesJa[idx] || ""}
-                      onChange={(e) => handleUpdateDeliverable(idx, "ja", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      placeholder="Mục hồ sơ [JA / VI]"
-                    />
-                  )}
-                  {(lang === "en" || lang === "both") && (
-                    <input
-                      type="text"
-                      value={deliverablesEn[idx] || ""}
-                      onChange={(e) => handleUpdateDeliverable(idx, "en", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      placeholder="Deliverable item [EN]"
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span
+                    className="px-2 py-0.5 rounded-md text-[11px] font-extrabold border border-black/10"
+                    style={{
+                      backgroundColor: p.cardBgColor || "#DDEFF9",
+                      color: "#15171C",
+                    }}
+                  >
+                    ({String(p.pageNumber || `0${idx + 1}`).replace(/[()]/g, "")})
+                  </span>
+                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                    {p.mediaMode === "movie"
+                      ? "🎬 Video"
+                      : p.mediaMode === "vr360"
+                      ? "🌐 VR 360°"
+                      : p.mediaMode === "vrss"
+                      ? "📸 VR SS"
+                      : "🖼️ Bộ ảnh"}
+                  </span>
+                </div>
+                <p className="text-xs font-extrabold text-slate-900 truncate">
+                  {p.tabLabel || p.categoryName}
+                </p>
+                <p className="text-[11px] text-slate-500 truncate mt-0.5">{p.title}</p>
+                <p className="text-[11px] font-bold text-indigo-700 mt-1 truncate">
+                  {p.priceValue}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* KHUNG XEM TRƯỚC TRỰC QUAN (LIVE PREVIEW) + THANH CÔNG CỤ SẮP XẾP TRANG ĐANG CHỌN */}
+        <div className="rounded-2xl border-2 border-indigo-100 bg-slate-50/70 p-4 sm:p-5 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-extrabold">
+                Đang chỉnh sửa Trang ({String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")})
+              </span>
+              <span className="text-sm font-bold text-slate-800">
+                {curPageJa.categoryName} — {curPageJa.title}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                disabled={safeSelectedIdx === 0}
+                onClick={() => handleMovePage(safeSelectedIdx, -1)}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                title="Đưa trang này lên trước"
+              >
+                ◀ Đưa lên trước
+              </button>
+              <button
+                type="button"
+                disabled={safeSelectedIdx >= pageCount - 1}
+                onClick={() => handleMovePage(safeSelectedIdx, 1)}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                title="Đưa trang này ra sau"
+              >
+                Đưa ra sau ▶
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePage(safeSelectedIdx)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Xóa trang này</span>
+              </button>
+            </div>
+          </div>
+
+          {/* MINI LIVE PREVIEW CỦA THẺ */}
+          <div>
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              👁️ Xem trước màu sắc &amp; bố cục Trang ({String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")}):
+            </p>
+            <div
+              className="relative rounded-2xl p-5 overflow-hidden border border-black/10 shadow-md transition-all"
+              style={{
+                backgroundColor: curPageJa.cardBgColor || "#DDEFF9",
+                color: isPreviewCardDark ? "#F8FAFC" : "#15171C",
+              }}
+            >
+              {curPageJa.cardBgImage && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <img
+                    src={curPageJa.cardBgImage}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                  {curPageJa.cardBgOverlay && curPageJa.cardBgOverlay !== "none" && (
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundColor:
+                          curPageJa.cardBgOverlay === "light"
+                            ? "rgba(248,247,243,0.78)"
+                            : curPageJa.cardBgOverlay === "dark-soft"
+                            ? "rgba(14,16,22,0.36)"
+                            : curPageJa.cardBgOverlay === "dark-strong"
+                            ? "rgba(14,16,22,0.76)"
+                            : "rgba(14,16,22,0.58)",
+                      }}
                     />
                   )}
                 </div>
+              )}
+
+              <div className="relative z-10 flex flex-col gap-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                      <span
+                        className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase"
+                        style={{
+                          backgroundColor: isPreviewCardDark ? "#FFFFFF" : "#16181D",
+                          color: isPreviewCardDark ? "#16181D" : "#FFFFFF",
+                        }}
+                      >
+                        {curPageJa.categoryName}
+                      </span>
+                      {curPageJa.qualityBadge && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/40 backdrop-blur-sm border border-current/15">
+                          ✦ {curPageJa.qualityBadge}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-lg font-extrabold leading-snug">{curPageJa.title}</h4>
+                    <p className="text-xs opacity-80 line-clamp-1 mt-0.5">{curPageJa.description}</p>
+                  </div>
+                  <span className="text-xl font-bold opacity-80 shrink-0">
+                    ({String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")})
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-end justify-between gap-4 pt-1">
+                  <div className="px-3.5 py-2 rounded-xl bg-white/55 backdrop-blur-sm border border-black/10 text-slate-900">
+                    <span className="block text-[10px] font-bold text-slate-600">
+                      {curPageJa.priceLabel}
+                    </span>
+                    <span className="text-base font-extrabold text-slate-900">
+                      {curPageJa.priceValue}
+                    </span>{" "}
+                    <span className="text-[11px] font-semibold text-slate-700">
+                      {curPageJa.priceUnit}
+                    </span>
+                  </div>
+
+                  <span
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow"
+                    style={{
+                      backgroundColor: isPreviewCardDark ? "#FFFFFF" : "#16181D",
+                      color: isPreviewCardDark ? "#16181D" : "#FFFFFF",
+                    }}
+                  >
+                    {curPageJa.btnDetailText || infoJa.btnViewDetail || defaultHeaderJa.btnViewDetail} →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* HỘP 2.1: NỀN BACKGROUND RIÊNG CỦA TRANG THẺ NÀY */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-2.5">
+              <span>🎨 Bước 2.1 — Nền Background riêng của Trang thẻ này (Màu nền &amp; Ảnh nền)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Màu nền thẻ */}
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-700">
+                  Chọn màu nền thẻ (Nhấp 1 chạm vào ô màu bên dưới):
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {cardBgSwatches.map((sw) => {
+                    const isCurr =
+                      (curPageJa.cardBgColor || "").toLowerCase() === sw.hex.toLowerCase();
+                    return (
+                      <button
+                        key={sw.hex}
+                        type="button"
+                        onClick={() =>
+                          handleUpdatePageField(safeSelectedIdx, "cardBgColor", "shared", sw.hex)
+                        }
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-left transition cursor-pointer ${
+                          isCurr
+                            ? "border-indigo-600 ring-2 ring-indigo-500/25 bg-indigo-50/30 font-bold"
+                            : "border-slate-200 hover:border-slate-300 bg-white"
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-full border border-slate-300 shrink-0"
+                          style={{ backgroundColor: sw.hex }}
+                        />
+                        <span className="text-[11px] text-slate-700 leading-tight line-clamp-2">
+                          {sw.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-xs text-slate-600 font-medium">Hoặc tự chọn màu khác:</span>
+                  <input
+                    type="color"
+                    value={
+                      /^#[0-9a-fA-F]{6}$/.test(curPageJa.cardBgColor || "")
+                        ? curPageJa.cardBgColor
+                        : "#DDEFF9"
+                    }
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "cardBgColor",
+                        "shared",
+                        e.target.value
+                      )
+                    }
+                    className="w-10 h-9 rounded border border-slate-300 cursor-pointer p-0.5 bg-white"
+                  />
+                  <input
+                    type="text"
+                    value={curPageJa.cardBgColor || "#DDEFF9"}
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "cardBgColor",
+                        "shared",
+                        e.target.value
+                      )
+                    }
+                    className="w-28 px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              {/* Ảnh nền riêng của thẻ */}
+              <div className="space-y-3 border-t lg:border-t-0 lg:border-l border-slate-200 pt-4 lg:pt-0 lg:pl-5">
+                <label className="block text-xs font-bold text-slate-700">
+                  Ảnh nền (Background Image) riêng cho Trang thẻ này (Không bắt buộc):
+                </label>
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-28 h-20 rounded-xl border border-slate-300 overflow-hidden shrink-0 flex items-center justify-center"
+                    style={{ backgroundColor: curPageJa.cardBgColor || "#DDEFF9" }}
+                  >
+                    {curPageJa.cardBgImage ? (
+                      <img
+                        src={curPageJa.cardBgImage}
+                        alt="Card Background"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-[10px] text-slate-600 text-center px-2 font-medium">
+                        Chưa dùng ảnh nền
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white hover:bg-slate-900 cursor-pointer transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>
+                          {uploadingKey === `card-bg-${safeSelectedIdx}`
+                            ? "Đang tải..."
+                            : "Tải ảnh nền cho thẻ này"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingKey === `card-bg-${safeSelectedIdx}`}
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!f) return;
+                            const res = await uploadFileToServer(f, `card-bg-${safeSelectedIdx}`);
+                            if (res?.url) {
+                              handleUpdatePageField(
+                                safeSelectedIdx,
+                                "cardBgImage",
+                                "shared",
+                                res.url
+                              );
+                              if (!curPageJa.cardBgOverlay || curPageJa.cardBgOverlay === "none") {
+                                handleUpdatePageField(
+                                  safeSelectedIdx,
+                                  "cardBgOverlay",
+                                  "shared",
+                                  "dark-medium"
+                                );
+                              }
+                              toast("Đã tải ảnh nền riêng cho thẻ!", "success");
+                            }
+                          }}
+                        />
+                      </label>
+
+                      {curPageJa.cardBgImage && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleUpdatePageField(safeSelectedIdx, "cardBgImage", "shared", "");
+                            handleUpdatePageField(
+                              safeSelectedIdx,
+                              "cardBgOverlay",
+                              "shared",
+                              "none"
+                            );
+                            toast("Đã gỡ ảnh nền của thẻ", "info");
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Gỡ ảnh nền</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {curPageJa.cardBgImage && (
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Lớp phủ giúp đọc rõ chữ trên ảnh nền thẻ:
+                        </label>
+                        <select
+                          value={curPageJa.cardBgOverlay || "dark-medium"}
+                          onChange={(e) =>
+                            handleUpdatePageField(
+                              safeSelectedIdx,
+                              "cardBgOverlay",
+                              "shared",
+                              e.target.value
+                            )
+                          }
+                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                        >
+                          {overlayOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* HỘP 2.2: TIÊU ĐỀ, NHÃN CHẤT LƯỢNG, SỐ THỨ TỰ & NÚT BẤM TRÊN MẶT THẺ */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2.5">
+              📌 Bước 2.2 — Phần Đầu Thẻ &amp; Nút Bấm Cạnh Phải (Góc trên trái, góc trên phải &amp; nút Xem chi tiết)
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Số thứ tự góc trên phải (Ví dụ: 01, 02):
+                </label>
+                <input
+                  type="text"
+                  value={curPageJa.pageNumber || ""}
+                  onChange={(e) =>
+                    handleUpdatePageField(safeSelectedIdx, "pageNumber", "shared", e.target.value)
+                  }
+                  className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg"
+                  placeholder="01"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tên trên huy hiệu đen (Ví dụ: VIEW — STANDARD):
+                </label>
+                <input
+                  type="text"
+                  value={curPageJa.categoryName || ""}
+                  onChange={(e) =>
+                    handleUpdatePageField(
+                      safeSelectedIdx,
+                      "categoryName",
+                      "shared",
+                      e.target.value
+                    )
+                  }
+                  className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tên ngắn trên thanh nút chuyển nhanh phía trên (Tùy chọn):
+                </label>
+                <input
+                  type="text"
+                  value={curPageJa.tabLabel || ""}
+                  onChange={(e) =>
+                    handleUpdatePageField(safeSelectedIdx, "tabLabel", "ja", e.target.value)
+                  }
+                  placeholder={curPageJa.categoryName || "Để trống sẽ lấy theo tên huy hiệu"}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(lang === "ja" || lang === "both") && (
+                <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-bold uppercase text-indigo-700">
+                    🇯🇵 Nội dung trên mặt thẻ (Tiếng Nhật)
+                  </span>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Nhãn chất lượng (Ô bên cạnh tên huy hiệu):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageJa.qualityBadge || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(
+                          safeSelectedIdx,
+                          "qualityBadge",
+                          "ja",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Tiêu đề lớn của trang thẻ:
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageJa.title || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(safeSelectedIdx, "title", "ja", e.target.value)
+                      }
+                      className="w-full px-3 py-1.5 text-sm font-bold border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Đoạn giới thiệu ngắn bên dưới tiêu đề (2 dòng):
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={curPageJa.description || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(safeSelectedIdx, "description", "ja", e.target.value)
+                      }
+                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Chữ trên nút bấm tròn ở cạnh phải thẻ (Mặc định: 詳細を見る):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageJa.btnDetailText || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(
+                          safeSelectedIdx,
+                          "btnDetailText",
+                          "ja",
+                          e.target.value
+                        )
+                      }
+                      placeholder="詳細を見る"
+                      className="w-full px-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {(lang === "en" || lang === "both") && (
+                <div className="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-bold uppercase text-emerald-700">
+                    🇬🇧 Nội dung trên mặt thẻ (Tiếng Anh)
+                  </span>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Nhãn chất lượng (EN):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageEn.qualityBadge || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(
+                          safeSelectedIdx,
+                          "qualityBadge",
+                          "en",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Tiêu đề lớn của trang thẻ (EN):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageEn.title || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(safeSelectedIdx, "title", "en", e.target.value)
+                      }
+                      className="w-full px-3 py-1.5 text-sm font-bold border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Đoạn giới thiệu ngắn (EN):
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={curPageEn.description || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(safeSelectedIdx, "description", "en", e.target.value)
+                      }
+                      className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Chữ trên nút cạnh phải thẻ (EN):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageEn.btnDetailText || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(
+                          safeSelectedIdx,
+                          "btnDetailText",
+                          "en",
+                          e.target.value
+                        )
+                      }
+                      placeholder="View Details"
+                      className="w-full px-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg bg-white"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* HỘP 2.3: KHUNG GIÁ TIỀN & THÔNG SỐ TÍCH XANH GÓC DƯỚI BÊN TRÁI */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2.5">
+              💰 Bước 2.3 — Khung Giá Tiền &amp; Các Dòng Thông Số Tích Xanh (Góc dưới bên trái thẻ)
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl bg-amber-50/60 border border-amber-200">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Dòng chữ nhỏ phía trên giá:
+                </label>
+                <input
+                  type="text"
+                  value={
+                    lang === "en" ? curPageEn.priceLabel || "" : curPageJa.priceLabel || ""
+                  }
+                  onChange={(e) =>
+                    handleUpdatePageField(
+                      safeSelectedIdx,
+                      "priceLabel",
+                      lang === "en" ? "en" : "ja",
+                      e.target.value
+                    )
+                  }
+                  placeholder="参考目安費用"
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Mức giá chính nổi bật (Chữ to đậm):
+                </label>
+                <input
+                  type="text"
+                  value={
+                    lang === "en" ? curPageEn.priceValue || "" : curPageJa.priceValue || ""
+                  }
+                  onChange={(e) =>
+                    handleUpdatePageField(
+                      safeSelectedIdx,
+                      "priceValue",
+                      lang === "en" ? "en" : "ja",
+                      e.target.value
+                    )
+                  }
+                  placeholder="¥18,000〜 / カット"
+                  className="w-full px-3 py-2 text-sm font-extrabold text-amber-900 border border-amber-300 rounded-lg bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Ghi chú phụ / Thời gian giao bài cạnh giá:
+                </label>
+                <input
+                  type="text"
+                  value={lang === "en" ? curPageEn.priceUnit || "" : curPageJa.priceUnit || ""}
+                  onChange={(e) =>
+                    handleUpdatePageField(
+                      safeSelectedIdx,
+                      "priceUnit",
+                      lang === "en" ? "en" : "ja",
+                      e.target.value
+                    )
+                  }
+                  placeholder="納期目安: 2〜4営業日 · 軽微修正2回込"
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Danh sách thông số tích xanh dưới khung giá */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ✓ Các ô thông số ngắn hiển thị bên dưới khung giá ({(curPageJa.specs || []).length} mục):
+                </label>
                 <button
                   type="button"
-                  onClick={() => handleDeleteDeliverable(idx)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                  title="Xóa mục này"
+                  onClick={() => handleAddSpecOrDeliv(safeSelectedIdx, "specs")}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer"
                 >
-                  <Trash2 size={14} />
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm dòng thông số</span>
                 </button>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* THÔNG SỐ KỸ THUẬT CHÂN CARD LỚN - CÓ TÍNH NĂNG THÊM / XÓA THÔNG SỐ */}
-        <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold text-slate-700">
-              📊 Chỉ số kỹ thuật nổi bật chân Card lớn ({highlightsCount} thông số):
-            </label>
-            <button
-              type="button"
-              onClick={handleAddHighlight}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md border border-emerald-200 transition"
-            >
-              <Plus size={13} />
-              <span>Thêm thông số</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {Array.from({ length: highlightsCount }).map((_, idx) => {
-              const hJa = keyHighlightsJa[idx] || {};
-              const hEn = keyHighlightsEn[idx] || {};
-
-              return (
-                <div key={`hl-${idx}`} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2 relative group">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-700">Thông số #{idx + 1}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(curPageJa.specs || []).map((sp, sIdx) => (
+                  <div
+                    key={sIdx}
+                    className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200"
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <input
+                      type="text"
+                      value={lang === "en" ? curPageEn.specs?.[sIdx] || "" : sp}
+                      onChange={(e) =>
+                        handleUpdateSpecOrDeliv(
+                          safeSelectedIdx,
+                          sIdx,
+                          "specs",
+                          lang === "en" ? "en" : "ja",
+                          e.target.value
+                        )
+                      }
+                      className="flex-1 px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
+                    />
                     <button
                       type="button"
-                      onClick={() => handleDeleteHighlight(idx)}
-                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                      title="Xóa thông số này"
+                      onClick={() => handleDeleteSpecOrDeliv(safeSelectedIdx, sIdx, "specs")}
+                      className="p-1 text-slate-400 hover:text-rose-600 rounded"
+                      title="Xóa dòng này"
                     >
-                      <Trash2 size={13} />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-500">Tên nhãn:</label>
-                    <input
-                      type="text"
-                      value={(lang === "en" ? hEn.label : hJa.label) || ""}
-                      onChange={(e) => handleUpdateHighlight(idx, "label", lang === "en" ? "en" : "ja", e.target.value)}
-                      className="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white"
-                      placeholder="Thiết kế, Đặc trưng..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] text-slate-500">Giá trị nổi bật:</label>
-                    <input
-                      type="text"
-                      value={(lang === "en" ? hEn.value : hJa.value) || ""}
-                      onChange={(e) => handleUpdateHighlight(idx, "value", lang === "en" ? "en" : "ja", e.target.value)}
-                      className="w-full px-2 py-1 text-xs font-bold text-emerald-600 border border-slate-300 rounded bg-white"
-                      placeholder="25-35 Ngày, 18m..."
-                    />
-                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* HỘP 2.4: HÌNH ẢNH / VIDEO / KHÔNG GIAN XOAY 360° GÓC DƯỚI BÊN PHẢI */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  🖼️ Bước 2.4 — Hình Ảnh / Video / Xoay 360° Minh Họa (Góc dưới bên phải thẻ)
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Chọn kiểu trình chiếu phù hợp rồi tải ảnh / video từ máy tính lên.
+                </p>
+              </div>
+            </div>
+
+            {/* 4 nút chọn kiểu trình chiếu dễ hiểu */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {[
+                {
+                  mode: "gallery",
+                  title: "🖼️ Bộ ảnh minh họa",
+                  desc: "Hiện 3 khung ảnh cạnh nhau, bấm vào phóng to full ảnh (View)",
+                },
+                {
+                  mode: "movie",
+                  title: "🎬 Phát Video / Phim",
+                  desc: "Khung phát phim tự động chạy kèm nút bật tiếng & phóng to (Movie)",
+                },
+                {
+                  mode: "vr360",
+                  title: "🌐 Không gian xoay 360°",
+                  desc: "Khách kéo chuột xoay 360° trực tiếp quanh phòng (VR360)",
+                },
+                {
+                  mode: "vrss",
+                  title: "📸 Bộ ảnh / clip VR SS",
+                  desc: "Hiện bộ ảnh hoặc clip trích xuất đa góc từ không gian VR",
+                },
+              ].map((opt) => {
+                const active = (curPageJa.mediaMode || "gallery") === opt.mode;
+                return (
+                  <button
+                    key={opt.mode}
+                    type="button"
+                    onClick={() =>
+                      handleUpdatePageField(safeSelectedIdx, "mediaMode", "shared", opt.mode)
+                    }
+                    className={`p-3 rounded-xl border text-left transition cursor-pointer ${
+                      active
+                        ? "border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20"
+                        : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                    }`}
+                  >
+                    <p className="text-xs font-extrabold text-slate-900">{opt.title}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{opt.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Cài đặt chữ hiển thị riêng trên khung Video hoặc khung VR360 */}
+            {(curPageJa.mediaMode === "movie" || curPageJa.mediaMode === "vr360") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3.5 rounded-xl bg-sky-50/60 border border-sky-200">
+                <div>
+                  <label className="block text-xs font-bold text-sky-950 mb-1">
+                    {curPageJa.mediaMode === "vr360"
+                      ? "Dòng chữ hướng dẫn góc trái khung 360°:"
+                      : "Nhãn chữ góc trên trái khung Video:"}
+                  </label>
+                  <input
+                    type="text"
+                    value={curPageJa.mediaBadgeText || ""}
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "mediaBadgeText",
+                        "ja",
+                        e.target.value
+                      )
+                    }
+                    placeholder={
+                      curPageJa.mediaMode === "vr360"
+                        ? "360° ドラッグして視点回転"
+                        : "4K ARCHITECTURAL FILM"
+                    }
+                    className="w-full px-3 py-1.5 text-xs border border-sky-200 rounded-lg bg-white"
+                  />
                 </div>
-              );
-            })}
+
+                <div>
+                  <label className="block text-xs font-bold text-sky-950 mb-1">
+                    Chữ trên nút Mở toàn màn hình:
+                  </label>
+                  <input
+                    type="text"
+                    value={curPageJa.expandBtnText || ""}
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "expandBtnText",
+                        "ja",
+                        e.target.value
+                      )
+                    }
+                    placeholder={curPageJa.mediaMode === "vr360" ? "全画面VR体験" : "全画面再生"}
+                    className="w-full px-3 py-1.5 text-xs border border-sky-200 rounded-lg bg-white"
+                  />
+                </div>
+
+                {curPageJa.mediaMode === "vr360" && (
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold text-sky-950 mb-1">
+                      🌐 Đường dẫn Link Web VR / AR (Hỗ trợ link vr.i8studio.vn/.../index.html, Matterport, Kuula, Panoee — Bỏ trống nếu dùng ảnh Panorama 360° bên dưới):
+                    </label>
+                    <input
+                      type="text"
+                      value={curPageJa.vrEmbedUrl || ""}
+                      onChange={(e) =>
+                        handleUpdatePageField(
+                          safeSelectedIdx,
+                          "vrEmbedUrl",
+                          "shared",
+                          e.target.value
+                        )
+                      }
+                      placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html (hoặc bỏ trống để dùng danh sách bên dưới)"
+                      className="w-full px-3 py-1.5 text-xs font-mono border border-sky-200 rounded-lg bg-white"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Danh sách các tệp Ảnh / Video của trang */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800">
+                  Danh sách Ảnh / Video đang hiển thị trên trang này ({curMediaListJa.length} mục):
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleAddMediaItem(safeSelectedIdx)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm Ảnh / Video</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {curMediaListJa.map((mItem, mIdx) => {
+                  const uploadKey = `media-${safeSelectedIdx}-${mIdx}`;
+                  const posterKey = `poster-${safeSelectedIdx}-${mIdx}`;
+                  const isVid =
+                    mItem.type === "video" || /\.(mp4|webm|mov)$/i.test(mItem.url || "");
+                  const mEn = curMediaListEn[mIdx] || mItem;
+
+                  return (
+                    <div
+                      key={mItem.id || mIdx}
+                      className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2.5"
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                        <span>Mục #{mIdx + 1}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={mIdx === 0}
+                            onClick={() => handleMoveMediaItem(safeSelectedIdx, mIdx, -1)}
+                            className="px-1.5 py-0.5 rounded bg-white border border-slate-200 disabled:opacity-40"
+                            title="Sang trái"
+                          >
+                            ◀
+                          </button>
+                          <button
+                            type="button"
+                            disabled={mIdx >= curMediaListJa.length - 1}
+                            onClick={() => handleMoveMediaItem(safeSelectedIdx, mIdx, 1)}
+                            className="px-1.5 py-0.5 rounded bg-white border border-slate-200 disabled:opacity-40"
+                            title="Sang phải"
+                          >
+                            ▶
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMediaItem(safeSelectedIdx, mIdx)}
+                            className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100"
+                            title="Xóa mục này"
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </div>
+
+                      {(() => {
+                        const isImgUrl =
+                          /\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i.test(mItem.url || "") ||
+                          /images\.unsplash\.com/i.test(mItem.url || "");
+                        const isWebVrItem =
+                          !isVid && !isImgUrl && Boolean(mItem.url && /^(https?:\/\/|\/)/i.test(mItem.url.trim()));
+                        return (
+                          <div className="relative h-36 rounded-lg overflow-hidden bg-slate-900 border border-slate-200">
+                            {isVid ? (
+                              <video
+                                src={mItem.url}
+                                poster={mItem.poster || mItem.thumbnail}
+                                muted
+                                loop
+                                playsInline
+                                controls
+                                className="w-full h-full object-cover"
+                              />
+                            ) : isWebVrItem ? (
+                              mItem.poster || mItem.thumbnail ? (
+                                <img
+                                  src={mItem.poster || mItem.thumbnail}
+                                  alt={mItem.caption || "VR Preview"}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center px-3 text-center text-emerald-300">
+                                  <Compass className="w-6 h-6 mb-1 text-emerald-400" />
+                                  <span className="text-[11px] font-bold">Link Web VR / AR</span>
+                                  <span className="text-[10px] text-slate-400 truncate max-w-full mt-0.5 font-mono">
+                                    {mItem.url}
+                                  </span>
+                                </div>
+                              )
+                            ) : (
+                              <img
+                                src={mItem.url}
+                                alt={mItem.caption || "Preview"}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                            {isWebVrItem && (
+                              <span className="absolute top-2 right-2 px-2 py-0.5 rounded bg-emerald-600/95 text-white text-[10px] font-bold shadow">
+                                VR / AR
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Nút tải file từ máy tính to rõ */}
+                      <label className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white hover:bg-slate-900 cursor-pointer transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>
+                          {uploadingKey === uploadKey
+                            ? "Đang tải tệp lên..."
+                            : "📁 Chọn Ảnh / Video từ máy tính"}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*,video/mp4,video/webm,video/quicktime"
+                          className="hidden"
+                          disabled={uploadingKey === uploadKey}
+                          onChange={async (e) => {
+                            const f = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!f) return;
+                            const res = await uploadFileToServer(f, uploadKey);
+                            if (res?.url) {
+                              handleUpdateMediaItem(safeSelectedIdx, mIdx, {
+                                url: res.url,
+                                type: res.isVideo
+                                  ? "video"
+                                  : curPageJa.mediaMode === "vr360"
+                                  ? "vr360"
+                                  : "image",
+                              });
+                              toast(
+                                res.isVideo
+                                  ? "Đã tải video lên thành công!"
+                                  : "Đã tải ảnh lên thành công!",
+                                "success"
+                              );
+                            }
+                          }}
+                        />
+                      </label>
+
+                      {(isVid || (!(/\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$/i.test(mItem.url || "") || /images\.unsplash\.com/i.test(mItem.url || "")) && Boolean(mItem.url && /^(https?:\/\/|\/)/i.test(mItem.url.trim())))) && (
+                        <label className="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 cursor-pointer">
+                          <Upload className="w-3 h-3" />
+                          <span>
+                            {uploadingKey === posterKey
+                              ? "Đang tải ảnh bìa..."
+                              : isVid
+                              ? "🖼️ Đổi ảnh bìa (Poster) cho Video"
+                              : "🖼️ Đổi ảnh bìa đại diện cho Link VR / AR"}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={uploadingKey === posterKey}
+                            onChange={async (e) => {
+                              const f = e.target.files?.[0];
+                              e.target.value = "";
+                              if (!f) return;
+                              const res = await uploadFileToServer(f, posterKey);
+                              if (res?.url) {
+                                handleUpdateMediaItem(safeSelectedIdx, mIdx, { poster: res.url });
+                                toast("Đã cập nhật ảnh bìa cho video!", "success");
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">
+                          Chú thích hiển thị dưới góc ảnh / video:
+                        </label>
+                        <input
+                          type="text"
+                          value={lang === "en" ? mEn.caption || "" : mItem.caption || ""}
+                          onChange={(e) =>
+                            handleUpdateMediaItem(
+                              safeSelectedIdx,
+                              mIdx,
+                              { caption: e.target.value },
+                              lang === "en" ? "en" : "ja"
+                            )
+                          }
+                          placeholder="Ví dụ: 外観パース（昼景）..."
+                          className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 mb-0.5">
+                          Hoặc dán đường dẫn (Link Ảnh / Video / Link VR·AR index.html):
+                        </label>
+                        <input
+                          type="text"
+                          value={mItem.url || ""}
+                          onChange={(e) =>
+                            handleUpdateMediaItem(safeSelectedIdx, mIdx, { url: e.target.value })
+                          }
+                          placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html"
+                          className="w-full px-2.5 py-1 text-[11px] font-mono border border-slate-200 rounded-lg bg-white text-slate-700"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* HỘP 2.5: NỘI DUNG BÊN TRONG CỬA SỔ KHI BẤM "XEM CHI TIẾT" */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2.5">
+              📋 Bước 2.5 — Nội Dung Trong Cửa Sổ Popup Khi Khách Bấm &quot;詳細を見る&quot; (Xem chi tiết)
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Đoạn giới thiệu chi tiết đầu cửa sổ Popup:
+                </label>
+                <textarea
+                  rows={3}
+                  value={
+                    lang === "en"
+                      ? curPageEn.detailSummary || ""
+                      : curPageJa.detailSummary || ""
+                  }
+                  onChange={(e) =>
+                    handleUpdatePageField(
+                      safeSelectedIdx,
+                      "detailSummary",
+                      lang === "en" ? "en" : "ja",
+                      e.target.value
+                    )
+                  }
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Chữ trên nút Xem mẫu toàn màn hình trong cửa sổ Popup (Để trống tự động theo loại):
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      lang === "en"
+                        ? curPageEn.modalPreviewBtnText || ""
+                        : curPageJa.modalPreviewBtnText || ""
+                    }
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "modalPreviewBtnText",
+                        lang === "en" ? "en" : "ja",
+                        e.target.value
+                      )
+                    }
+                    placeholder={
+                      curPageJa.mediaMode === "vr360"
+                        ? "360° VRを全画面で体験"
+                        : curPageJa.mediaMode === "movie"
+                        ? "サンプル映像を全画面再生"
+                        : "サンプル画像をフルサイズで見る"
+                    }
+                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Tiêu đề danh mục bàn giao của trang này (Để trống dùng tiêu đề chung):
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      lang === "en"
+                        ? curPageEn.deliverablesHeading || ""
+                        : curPageJa.deliverablesHeading || ""
+                    }
+                    onChange={(e) =>
+                      handleUpdatePageField(
+                        safeSelectedIdx,
+                        "deliverablesHeading",
+                        lang === "en" ? "en" : "ja",
+                        e.target.value
+                      )
+                    }
+                    placeholder={infoJa.deliverablesHeading || defaultHeaderJa.deliverablesHeading}
+                    className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-800">
+                  ✓ Danh sách Hạng mục bàn giao chi tiết ({(curPageJa.deliverables || []).length} hạng mục):
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleAddSpecOrDeliv(safeSelectedIdx, "deliverables")}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm hạng mục bàn giao</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(curPageJa.deliverables || []).map((dlv, dIdx) => (
+                  <div
+                    key={dIdx}
+                    className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200"
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <input
+                      type="text"
+                      value={lang === "en" ? curPageEn.deliverables?.[dIdx] || "" : dlv}
+                      onChange={(e) =>
+                        handleUpdateSpecOrDeliv(
+                          safeSelectedIdx,
+                          dIdx,
+                          "deliverables",
+                          lang === "en" ? "en" : "ja",
+                          e.target.value
+                        )
+                      }
+                      className="flex-1 px-2.5 py-1 text-xs border border-slate-300 rounded bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleDeleteSpecOrDeliv(safeSelectedIdx, dIdx, "deliverables")
+                      }
+                      className="p-1 text-slate-400 hover:text-rose-600 rounded"
+                      title="Xóa hạng mục"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 4. Buttons & Hotline */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span>
-          <span>4. Các nút bấm &amp; Hotline tương tác Showcase</span>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <BilingualField
-            label="Nút phóng to ảnh (Zoom)"
-            path={["info", "btnZoom"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Nút tư vấn dự án (Consult)"
-            path={["info", "btnConsult"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Text Hotline tư vấn"
-            path={["info", "hotlineText"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-          <BilingualField
-            label="Nút xem chi tiết (View Detail)"
-            path={["info", "btnViewDetail"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
+      {/* =====================================================================
+          PHẦN 3: CÀI ĐẶT NÚT ĐĂNG KÝ TƯ VẤN & HOTLINE DÙNG CHUNG
+          ===================================================================== */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+        <div className="border-b border-slate-100 pb-3">
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-extrabold inline-flex items-center justify-center">
+              3
+            </span>
+            <span>Nút Đăng Ký Tư Vấn, Đường Dẫn Liên Hệ &amp; Số Hotline</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Chỉnh sửa nội dung nút kêu gọi tư vấn và số điện thoại hiển thị bên phải cửa sổ Xem chi tiết của mọi gói giá.
+          </p>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Chữ trên nút Đăng ký tư vấn / Báo giá:
+            </label>
+            <input
+              type="text"
+              value={
+                lang === "en"
+                  ? infoEn.btnConsult ?? defaultHeaderEn.btnConsult
+                  : infoJa.btnConsult ?? defaultHeaderJa.btnConsult
+              }
+              onChange={(e) =>
+                setInfoField("btnConsult", lang === "en" ? "en" : "ja", e.target.value)
+              }
+              className="w-full px-3 py-2 text-xs font-bold border border-slate-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Dòng số điện thoại / Hotline dưới nút tư vấn:
+            </label>
+            <input
+              type="text"
+              value={
+                lang === "en"
+                  ? infoEn.hotlineText ?? defaultHeaderEn.hotlineText
+                  : infoJa.hotlineText ?? defaultHeaderJa.hotlineText
+              }
+              onChange={(e) =>
+                setInfoField("hotlineText", lang === "en" ? "en" : "ja", e.target.value)
+              }
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Khi khách bấm nút Tư vấn sẽ chuyển tới đâu?
+            </label>
+            <div className="flex flex-wrap gap-1.5 mb-1.5">
+              <button
+                type="button"
+                onClick={() => setInfoField("consultHref", "shared", "/ja/contact")}
+                className={`px-2.5 py-1 rounded text-[11px] font-semibold border cursor-pointer ${
+                  (infoJa.consultHref || "/ja/contact") === "/ja/contact"
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "bg-slate-50 text-slate-700 border-slate-200"
+                }`}
+              >
+                Trang Liên hệ (/ja/contact)
+              </button>
+              <button
+                type="button"
+                onClick={() => setInfoField("consultHref", "shared", "#dang-ky-tu-van")}
+                className={`px-2.5 py-1 rounded text-[11px] font-semibold border cursor-pointer ${
+                  infoJa.consultHref === "#dang-ky-tu-van"
+                    ? "bg-emerald-600 text-white border-emerald-600"
+                    : "bg-slate-50 text-slate-700 border-slate-200"
+                }`}
+              >
+                Cuộn xuống cuối trang (#dang-ky-tu-van)
+              </button>
+            </div>
+            <input
+              type="text"
+              value={infoJa.consultHref ?? "/ja/contact"}
+              onChange={(e) => setInfoField("consultHref", "shared", e.target.value)}
+              className="w-full px-3 py-1.5 text-xs font-mono border border-slate-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Chữ mặc định nút Xem chi tiết (詳細を見る):
+            </label>
+            <input
+              type="text"
+              value={
+                lang === "en"
+                  ? infoEn.btnViewDetail ?? defaultHeaderEn.btnViewDetail
+                  : infoJa.btnViewDetail ?? defaultHeaderJa.btnViewDetail
+              }
+              onChange={(e) =>
+                setInfoField("btnViewDetail", lang === "en" ? "en" : "ja", e.target.value)
+              }
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Tiêu đề mặc định của mục Hạng mục bàn giao:
+            </label>
+            <input
+              type="text"
+              value={
+                lang === "en"
+                  ? infoEn.deliverablesHeading ?? defaultHeaderEn.deliverablesHeading
+                  : infoJa.deliverablesHeading ?? defaultHeaderJa.deliverablesHeading
+              }
+              onChange={(e) =>
+                setInfoField("deliverablesHeading", lang === "en" ? "en" : "ja", e.target.value)
+              }
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Chữ nút Phóng to ảnh dự án:
+            </label>
+            <input
+              type="text"
+              value={
+                lang === "en"
+                  ? infoEn.btnZoom ?? defaultHeaderEn.btnZoom
+                  : infoJa.btnZoom ?? defaultHeaderJa.btnZoom
+              }
+              onChange={(e) =>
+                setInfoField("btnZoom", lang === "en" ? "en" : "ja", e.target.value)
+              }
+              className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* =====================================================================
+          PHẦN 4: DANH SÁCH DỰ ÁN MẪU THAM KHẢO (HIỂN THỊ CUỐI POPUP XEM CHI TIẾT)
+          ===================================================================== */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-extrabold inline-flex items-center justify-center">
+                4
+              </span>
+              <span>
+                Danh Sách Dự Án Thực Tế Tham Khảo Trong Cửa Sổ Chi Tiết ({allProjectKeys.length} dự án)
+              </span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Phần danh sách công trình thực tế xuất hiện bên dưới cửa sổ khi khách bấm &quot;詳細を見る&quot;. Có thể bật/tắt tùy ý.
+            </p>
+          </div>
+
+          <label className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 cursor-pointer text-xs font-bold text-amber-950 shrink-0">
+            <input
+              type="checkbox"
+              checked={infoJa.showReferenceProjects !== false}
+              onChange={(e) => setInfoField("showReferenceProjects", "shared", e.target.checked)}
+              className="rounded text-amber-600"
+            />
+            <span>Hiển thị khu vực dự án tham khảo này</span>
+          </label>
+        </div>
+
+        {infoJa.showReferenceProjects !== false && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Tiêu đề khu vực Dự án tham khảo:
+                </label>
+                <input
+                  type="text"
+                  value={
+                    lang === "en"
+                      ? infoEn.projectsHeading ?? defaultHeaderEn.projectsHeading
+                      : infoJa.projectsHeading ?? defaultHeaderJa.projectsHeading
+                  }
+                  onChange={(e) =>
+                    setInfoField("projectsHeading", lang === "en" ? "en" : "ja", e.target.value)
+                  }
+                  className="w-full px-3 py-2 text-xs font-bold border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Dòng hướng dẫn nhỏ bên cạnh:
+                </label>
+                <input
+                  type="text"
+                  value={
+                    lang === "en"
+                      ? infoEn.projectsSubheading ?? defaultHeaderEn.projectsSubheading
+                      : infoJa.projectsSubheading ?? defaultHeaderJa.projectsSubheading
+                  }
+                  onChange={(e) =>
+                    setInfoField(
+                      "projectsSubheading",
+                      lang === "en" ? "en" : "ja",
+                      e.target.value
+                    )
+                  }
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <button
+                type="button"
+                onClick={() => setShowProjectsEditor(!showProjectsEditor)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer"
+              >
+                <span>
+                  {showProjectsEditor
+                    ? "▲ Thu gọn danh sách thẻ dự án mẫu"
+                    : `▼ Bấm để mở & chỉnh sửa ${allProjectKeys.length} thẻ dự án mẫu`}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddProject}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Thêm dự án mẫu</span>
+              </button>
+            </div>
+
+            {showProjectsEditor && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                {allProjectKeys.map((projId) => {
+                  const pJa = rawProjectsJa[projId] || defaultProjectsJa[projId] || {};
+                  const pEn = rawProjectsEn[projId] || defaultProjectsEn[projId] || {};
+                  const isExp = expandedProjectId === projId;
+                  const pUploadKey = `proj-${projId}`;
+                  const pPosterKey = `proj-poster-${projId}`;
+                  const projMediaType: "image" | "video" | "vr360" =
+                    pJa.mediaType === "vr360" || Boolean(pJa.vrEmbedUrl && pJa.vrEmbedUrl.trim())
+                      ? "vr360"
+                      : pJa.mediaType === "video" || /\.(mp4|webm|mov)(\?.*)?$/i.test(pJa.img || "")
+                      ? "video"
+                      : "image";
+                  const isDirectVideoFile = /\.(mp4|webm|mov)(\?.*)?$/i.test(pJa.img || "");
+
+                  return (
+                    <div
+                      key={projId}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3"
+                    >
+                      {/* Bộ chọn định dạng dự án: Ảnh / Movie / VR 360° */}
+                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200/80 flex-wrap">
+                        <span className="text-[11px] font-bold text-slate-600">
+                          Định dạng hiển thị:
+                        </span>
+                        <div className="inline-flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200">
+                          {[
+                            { id: "image", label: "🖼️ Ảnh tĩnh" },
+                            { id: "video", label: "🎬 Movie" },
+                            { id: "vr360", label: "🌐 VR / AR" },
+                          ].map((mOpt) => {
+                            const active = projMediaType === mOpt.id;
+                            return (
+                              <button
+                                key={mOpt.id}
+                                type="button"
+                                onClick={() =>
+                                  handlePatchProjectShared(projId, { mediaType: mOpt.id })
+                                }
+                                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition cursor-pointer ${
+                                  active
+                                    ? "bg-amber-500 text-white shadow-xs"
+                                    : "text-slate-600 hover:bg-slate-100"
+                                }`}
+                              >
+                                {mOpt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <div className="w-28 shrink-0 space-y-1.5">
+                          <div className="w-28 h-20 rounded-lg overflow-hidden bg-slate-900 border border-slate-200 relative group">
+                            {projMediaType === "video" && isDirectVideoFile ? (
+                              <video
+                                src={pJa.img}
+                                poster={pJa.poster}
+                                muted
+                                loop
+                                playsInline
+                                autoPlay
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (pJa.img || pJa.poster) && (/(\.(jpe?g|png|webp|gif|avif|svg)(\?.*)?$|images\.unsplash\.com)/i.test((projMediaType === "video" && pJa.poster ? pJa.poster : pJa.img) || "")) ? (
+                              <img
+                                src={projMediaType === "video" && pJa.poster ? pJa.poster : pJa.img}
+                                alt={pJa.title || "Project"}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (pJa.vrEmbedUrl || pJa.img) ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-[9px] text-emerald-300 text-center px-1">
+                                <Compass className="w-4 h-4 mb-0.5 text-emerald-400" />
+                                <span className="font-bold">Web VR/AR</span>
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+                                Chưa có tệp
+                              </div>
+                            )}
+
+                            {projMediaType === "video" && (
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-rose-600/90 text-white text-[9px] font-extrabold">
+                                MOVIE
+                              </span>
+                            )}
+                            {projMediaType === "vr360" && (
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-sky-600/90 text-white text-[9px] font-extrabold">
+                                VR 360°
+                              </span>
+                            )}
+
+                            <label className="absolute inset-0 bg-black/60 text-white opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-[10px] font-bold cursor-pointer transition text-center px-1">
+                              <Upload className="w-3.5 h-3.5 mb-0.5" />
+                              <span>
+                                {uploadingKey === pUploadKey
+                                  ? "Đang tải..."
+                                  : projMediaType === "video"
+                                  ? "Đổi Movie"
+                                  : projMediaType === "vr360"
+                                  ? "Đổi ảnh 360°"
+                                  : "Đổi ảnh / Movie"}
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*,video/mp4,video/webm,video/quicktime"
+                                className="hidden"
+                                disabled={uploadingKey === pUploadKey}
+                                onChange={async (e) => {
+                                  const f = e.target.files?.[0];
+                                  e.target.value = "";
+                                  if (!f) return;
+                                  const res = await uploadFileToServer(f, pUploadKey);
+                                  if (res?.url) {
+                                    const nextType = res.isVideo
+                                      ? "video"
+                                      : projMediaType === "vr360"
+                                      ? "vr360"
+                                      : "image";
+                                    handlePatchProjectShared(projId, {
+                                      img: res.url,
+                                      mediaType: nextType,
+                                    });
+                                    toast(
+                                      res.isVideo
+                                        ? "Đã tải Movie cho dự án!"
+                                        : nextType === "vr360"
+                                        ? "Đã tải ảnh VR 360° cho dự án!"
+                                        : "Đã đổi ảnh dự án tham khảo!",
+                                      "success"
+                                    );
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          <label className="w-full inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold cursor-pointer transition">
+                            <Upload className="w-3 h-3" />
+                            <span>
+                              {uploadingKey === pUploadKey
+                                ? "Đang tải..."
+                                : projMediaType === "video"
+                                ? "Tải Movie"
+                                : projMediaType === "vr360"
+                                ? "Tải VR 360°"
+                                : "Đổi tệp"}
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*,video/mp4,video/webm,video/quicktime"
+                              className="hidden"
+                              disabled={uploadingKey === pUploadKey}
+                              onChange={async (e) => {
+                                const f = e.target.files?.[0];
+                                e.target.value = "";
+                                if (!f) return;
+                                const res = await uploadFileToServer(f, pUploadKey);
+                                if (res?.url) {
+                                  const nextType = res.isVideo
+                                    ? "video"
+                                    : projMediaType === "vr360"
+                                    ? "vr360"
+                                    : "image";
+                                  handlePatchProjectShared(projId, {
+                                    img: res.url,
+                                    mediaType: nextType,
+                                  });
+                                  toast(
+                                    res.isVideo
+                                      ? "Đã tải Movie cho dự án!"
+                                      : nextType === "vr360"
+                                      ? "Đã tải ảnh VR 360° cho dự án!"
+                                      : "Đã đổi ảnh dự án tham khảo!",
+                                    "success"
+                                  );
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <input
+                              type="text"
+                              value={pJa.title || ""}
+                              onChange={(e) =>
+                                handleUpdateProject(projId, "title", "shared", e.target.value)
+                              }
+                              className="flex-1 px-2.5 py-1 text-xs font-extrabold border border-slate-300 rounded bg-white"
+                              placeholder="Tên dự án..."
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProject(projId)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 rounded cursor-pointer"
+                              title="Xóa dự án"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <input
+                              type="text"
+                              value={(lang === "en" ? pEn.catTag : pJa.catTag) || ""}
+                              onChange={(e) =>
+                                handleUpdateProject(
+                                  projId,
+                                  "catTag",
+                                  lang === "en" ? "en" : "ja",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Loại hình (VD: 高級ヴィラ)"
+                              className="px-2 py-1 text-[11px] border border-slate-300 rounded bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={(lang === "en" ? pEn.loc : pJa.loc) || ""}
+                              onChange={(e) =>
+                                handleUpdateProject(
+                                  projId,
+                                  "loc",
+                                  lang === "en" ? "en" : "ja",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Địa điểm · Diện tích"
+                              className="px-2 py-1 text-[11px] border border-slate-300 rounded bg-white"
+                            />
+                          </div>
+
+                          <input
+                            type="text"
+                            value={pJa.priceValue || pJa.priceEstimate || ""}
+                            onChange={(e) => {
+                              handlePatchProjectShared(projId, {
+                                priceValue: e.target.value,
+                                priceEstimate: e.target.value,
+                              });
+                            }}
+                            placeholder="Giá tham khảo (VD: ¥2,500,000〜)"
+                            className="w-full px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-300 rounded bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cài đặt bổ sung khi chọn Movie hoặc VR 360° */}
+                      {projMediaType === "video" && (
+                        <div className="p-2.5 rounded-lg bg-rose-50/60 border border-rose-200 space-y-2">
+                          <div>
+                            <label className="block text-[10px] font-bold text-rose-900 mb-0.5">
+                              🎬 Đường dẫn Video / YouTube / Vimeo (Hoặc bấm nút &quot;Tải Movie&quot; ở trên để chọn file MP4 từ máy):
+                            </label>
+                            <input
+                              type="text"
+                              value={pJa.img || ""}
+                              onChange={(e) =>
+                                handlePatchProjectShared(projId, {
+                                  img: e.target.value,
+                                  mediaType: "video",
+                                })
+                              }
+                              placeholder="https://... (.mp4, YouTube, Vimeo)"
+                              className="w-full px-2.5 py-1 text-[11px] font-mono bg-white border border-rose-200 rounded"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-semibold text-slate-600">
+                              Ảnh bìa (Poster) cho Movie (tùy chọn):
+                            </span>
+                            <label className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white border border-slate-300 text-[10px] font-bold text-slate-700 hover:bg-slate-100 cursor-pointer">
+                              <Upload className="w-3 h-3" />
+                              <span>
+                                {uploadingKey === pPosterKey ? "Đang tải..." : "🖼️ Tải ảnh bìa"}
+                              </span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={uploadingKey === pPosterKey}
+                                onChange={async (e) => {
+                                  const f = e.target.files?.[0];
+                                  e.target.value = "";
+                                  if (!f) return;
+                                  const res = await uploadFileToServer(f, pPosterKey);
+                                  if (res?.url) {
+                                    handlePatchProjectShared(projId, { poster: res.url });
+                                    toast("Đã cập nhật ảnh bìa Movie!", "success");
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {projMediaType === "vr360" && (
+                        <div className="p-2.5 rounded-lg bg-sky-50/70 border border-sky-200 space-y-2">
+                          <div>
+                            <label className="block text-[10px] font-bold text-sky-950 mb-0.5">
+                              🌐 Link Web VR / AR (Hỗ trợ vr.i8studio.vn/.../index.html, Matterport, Kuula — Hoặc bỏ trống nếu dùng ảnh Panorama 360° ở trên):
+                            </label>
+                            <input
+                              type="text"
+                              value={pJa.vrEmbedUrl || ""}
+                              onChange={(e) =>
+                                handlePatchProjectShared(projId, {
+                                  vrEmbedUrl: e.target.value,
+                                  mediaType: "vr360",
+                                })
+                              }
+                              placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html"
+                              className="w-full px-2.5 py-1 text-[11px] font-mono bg-white border border-sky-200 rounded"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setExpandedProjectId(isExp ? null : projId)}
+                        className="w-full py-1 text-[11px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 cursor-pointer"
+                      >
+                        {isExp ? "▲ Thu gọn mô tả chi tiết" : "▼ Sửa thêm mô tả chi tiết dự án"}
+                      </button>
+
+                      {isExp && (
+                        <div className="space-y-2 pt-1">
+                          <label className="block text-[11px] font-semibold text-slate-600">
+                            Mô tả dự án khi khách bấm vào xem:
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={
+                              (lang === "en"
+                                ? pEn.detailContent || pEn.narrative
+                                : pJa.detailContent || pJa.narrative) || ""
+                            }
+                            onChange={(e) => {
+                              const k = lang === "en" ? "en" : "ja";
+                              handleUpdateProject(projId, "narrative", k, e.target.value);
+                              handleUpdateProject(projId, "detailContent", k, e.target.value);
+                            }}
+                            className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg bg-white"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------
-   08. PRICING SECTION FORM
-   ------------------------------------------------------------------------- */
+
 /* -------------------------------------------------------------------------
    10. CTA SECTION FORM (Kêu gọi hành động / Sustainable Design)
    ------------------------------------------------------------------------- */
@@ -5726,11 +7480,12 @@ function PartnersForm({
   });
 
   const handleUpdateBrandField = (idx: number, field: string, langKey: "ja" | "en", val: any) => {
+    const syncAcrossLangs = field === "img" || field === "name" || field === "textColor";
     if (langKey === "ja") {
       const updated = [...normalizedBrandsJa];
       updated[idx] = { ...updated[idx], [field]: val };
       updateField("ja", ["brands"], updated);
-      if (field === "img" || field === "name") {
+      if (syncAcrossLangs) {
         const updatedEn = [...normalizedBrandsEn];
         updatedEn[idx] = { ...updatedEn[idx], [field]: val };
         updateField("en", ["brands"], updatedEn);
@@ -5739,12 +7494,22 @@ function PartnersForm({
       const updated = [...normalizedBrandsEn];
       updated[idx] = { ...updated[idx], [field]: val };
       updateField("en", ["brands"], updated);
-      if (field === "img" || field === "name") {
+      if (syncAcrossLangs) {
         const updatedJa = [...normalizedBrandsJa];
         updatedJa[idx] = { ...updatedJa[idx], [field]: val };
         updateField("ja", ["brands"], updatedJa);
       }
     }
+  };
+
+  const globalBrandNameColor =
+    contentJa?.info?.brandNameColor ??
+    contentEn?.info?.brandNameColor ??
+    "";
+
+  const handleUpdateGlobalBrandColor = (val: string) => {
+    updateField("ja", ["info", "brandNameColor"], val);
+    updateField("en", ["info", "brandNameColor"], val);
   };
 
   const handleAddBrand = () => {
@@ -5956,7 +7721,7 @@ function PartnersForm({
               <span>Dải Marquee Thương hiệu Đối tác ({brandsCount} đối tác)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Danh sách các thương hiệu chuyển động ngang vô tận. Bạn có thể thêm, sửa tên, phân khúc và tải ảnh nền/dự án của từng đối tác.
+              Danh sách các thương hiệu chuyển động ngang vô tận. Bạn có thể thêm, sửa tên, đổi màu chữ và tải ảnh nền/dự án của từng đối tác.
             </p>
           </div>
           <button
@@ -5967,6 +7732,55 @@ function PartnersForm({
             <Plus size={15} />
             <span>Thêm thương hiệu đối tác</span>
           </button>
+        </div>
+
+        {/* Cài đặt Màu chữ Tên thương hiệu mặc định (Áp dụng chung) */}
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-800">
+              🎨 Màu chữ Tên thương hiệu mặc định (Áp dụng chung cho các thẻ):
+            </label>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Nhập mã màu Hex (ví dụ: <code className="font-mono text-slate-700">#000000</code> hoặc <code className="font-mono text-slate-700">#FFFFFF</code>) hoặc chọn trên bảng màu. Từng đối tác bên dưới cũng có thể đổi màu riêng.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="color"
+              value={/^#([0-9a-fA-F]{6})$/.test(globalBrandNameColor.trim()) ? globalBrandNameColor.trim() : "#ffffff"}
+              onChange={(e) => handleUpdateGlobalBrandColor(e.target.value)}
+              className="w-9 h-8 p-0.5 rounded border border-slate-300 bg-white cursor-pointer"
+              title="Chọn màu chữ tên thương hiệu"
+            />
+            <input
+              type="text"
+              value={globalBrandNameColor}
+              onChange={(e) => handleUpdateGlobalBrandColor(e.target.value)}
+              placeholder="#FFFFFF hoặc #000000"
+              className="w-40 px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            />
+            <div className="flex items-center gap-1">
+              {["#FFFFFF", "#000000", "#F59E0B", "#1E293B"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => handleUpdateGlobalBrandColor(preset)}
+                  className="w-6 h-6 rounded-md border border-slate-300 shadow-2xs transition hover:scale-105"
+                  style={{ backgroundColor: preset }}
+                  title={`Chọn nhanh ${preset}`}
+                />
+              ))}
+              {globalBrandNameColor && (
+                <button
+                  type="button"
+                  onClick={() => handleUpdateGlobalBrandColor("")}
+                  className="px-2 py-1 text-[11px] text-slate-600 hover:text-red-600 bg-white border border-slate-200 rounded-md"
+                >
+                  Mặc định
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -6050,37 +7864,43 @@ function PartnersForm({
                   />
                 </div>
 
-                {/* Lĩnh vực phụ đề */}
-                <div className="grid grid-cols-1 gap-2">
-                  {(lang === "ja" || lang === "both") && (
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Lĩnh vực / Phân loại [JA / VI]:
-                      </label>
-                      <input
-                        type="text"
-                        value={jaItem.sub || ""}
-                        onChange={(e) => handleUpdateBrandField(idx, "sub", "ja", e.target.value)}
-                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        placeholder="Luxury Real Estate"
-                      />
-                    </div>
-                  )}
-                  {(lang === "en" || lang === "both") && (
-                    <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Lĩnh vực / Phân loại [EN]:
-                      </label>
-                      <input
-                        type="text"
-                        value={enItem.sub || ""}
-                        onChange={(e) => handleUpdateBrandField(idx, "sub", "en", e.target.value)}
-                        className="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        placeholder="Luxury Real Estate"
-                      />
-                    </div>
-                  )}
+                {/* Màu chữ Tên thương hiệu riêng cho đối tác */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Màu chữ Tên thương hiệu (Ví dụ: #000000):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={
+                        /^#([0-9a-fA-F]{6})$/.test(String(jaItem.textColor || enItem.textColor || globalBrandNameColor || "").trim())
+                          ? String(jaItem.textColor || enItem.textColor || globalBrandNameColor).trim()
+                          : "#ffffff"
+                      }
+                      onChange={(e) => handleUpdateBrandField(idx, "textColor", "ja", e.target.value)}
+                      className="w-8 h-8 p-0.5 rounded border border-slate-300 bg-white cursor-pointer shrink-0"
+                      title="Chọn màu chữ cho tên thương hiệu này"
+                    />
+                    <input
+                      type="text"
+                      value={jaItem.textColor ?? enItem.textColor ?? ""}
+                      onChange={(e) => handleUpdateBrandField(idx, "textColor", "ja", e.target.value)}
+                      placeholder={globalBrandNameColor ? `Mặc định chung (${globalBrandNameColor})` : "Ví dụ: #000000 hoặc #FFFFFF"}
+                      className="flex-1 px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    {(jaItem.textColor || enItem.textColor) && (
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateBrandField(idx, "textColor", "ja", "")}
+                        className="px-2 py-1 text-[10px] text-slate-500 hover:text-red-600 bg-white border border-slate-200 rounded"
+                        title="Xóa màu riêng, dùng màu chung"
+                      >
+                        Xóa
+                      </button>
+                    )}
+                  </div>
                 </div>
+
               </div>
             );
           })}

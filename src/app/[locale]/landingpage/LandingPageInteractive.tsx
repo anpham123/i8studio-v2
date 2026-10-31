@@ -513,7 +513,7 @@ export default function LandingPageInteractive({
           btn.addEventListener("click", () => {
             currentDeliverablePhotoIdx = i;
             renderShowcase(true);
-            startDeliverablesTimer();
+                  startDeliverablesTimer();
           });
           showcaseDotsWrap.appendChild(btn);
         }
@@ -622,6 +622,7 @@ export default function LandingPageInteractive({
     };
 
     const startDeliverablesTimer = () => {
+      if (!showcaseImg) return;
       if (deliverableTimer) clearInterval(deliverableTimer);
       // Tự động sau 2s sẽ chạy 1 ảnh của bộ sưu tập
       deliverableTimer = setInterval(advanceShowcase, 2000);
@@ -635,7 +636,7 @@ export default function LandingPageInteractive({
           currentDeliverableColIdx = idx;
           currentDeliverablePhotoIdx = 0;
           renderShowcase(true);
-          startDeliverablesTimer();
+                startDeliverablesTimer();
         }
       });
     });
@@ -652,7 +653,7 @@ export default function LandingPageInteractive({
 
     // Start initially
     renderShowcase(true);
-    startDeliverablesTimer();
+          startDeliverablesTimer();
 
     // 6. Floating Lead Widget Toggle
     const floatToggleBtn = document.getElementById("floatingLeadToggleBtn");

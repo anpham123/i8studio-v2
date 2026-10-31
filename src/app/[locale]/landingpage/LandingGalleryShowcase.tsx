@@ -19,6 +19,9 @@ export interface ProjectItem {
   loc?: string;
   style?: string;
   img: string;
+  mediaType?: "image" | "video" | "vr360";
+  vrEmbedUrl?: string;
+  poster?: string;
   showPrice?: boolean;
   priceLabel?: string;
   priceValue?: string;

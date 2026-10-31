@@ -14,6 +14,8 @@ import {
   getDefaultPricing3DServices,
   getDefaultPricingPrinciples,
   getDefaultPricingEstimator,
+  getDefaultPricingStackPages,
+  type PricingStackPageItem,
   type PricingTierItem,
   type SolutionItem,
   type PricingTypologyItem,
@@ -84,8 +86,8 @@ export const LANDING_SECTIONS: SectionMeta[] = [
     key: "gallery",
     order: 7,
     label: "07. Giá cả",
-    subLabel: "Showcase các dự án thực tế tiêu biểu",
-    description: "Tiêu đề triển lãm, danh mục tab bộ lọc kiến trúc (Villa, Townhouse, Penthouse, Resort, F&B) và thông điệp tương tác.",
+    subLabel: "5 Trang thẻ lật 3D: View (Std / HQ), Movie, VR360 & VR SS",
+    description: "Quản lý nền Background chung, nền từng thẻ và nội dung chi tiết 5 trang giá cả (View Standard, View High Quality, Movie, VR360, VR SS) kèm ảnh/video/360°.",
     anchor: "#du-an",
   },
   {
@@ -185,6 +187,7 @@ export function getDefaultSectionData(sectionKey: string): { en: any; ja: any } 
             filterTabs: getDefaultGalleryTabs("en"),
           },
           projects: getGalleryProjectsData("en"),
+          pricingPages: getDefaultPricingStackPages("en"),
         },
         ja: {
           info: {
@@ -192,6 +195,7 @@ export function getDefaultSectionData(sectionKey: string): { en: any; ja: any } 
             filterTabs: getDefaultGalleryTabs("ja"),
           },
           projects: getGalleryProjectsData("ja"),
+          pricingPages: getDefaultPricingStackPages("ja"),
         },
       };
     case "cta":
@@ -481,6 +485,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
   partnerBrands: import("@/app/[locale]/landingpage/landingI18n").PartnerBrandItem[];
   galleryTabs: import("@/app/[locale]/landingpage/landingI18n").GalleryFilterTab[];
   pricingTiers: import("@/app/[locale]/landingpage/landingI18n").PricingTierItem[];
+  pricingStackPages: import("@/app/[locale]/landingpage/landingI18n").PricingStackPageItem[];
 }> {
   const isEn = locale === "en";
   const { getLandingContent } = await import("@/app/[locale]/landingpage/landingI18n");
@@ -610,6 +615,10 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
         : getDefaultPricing3DServices(locale);
 
     const mergedEstimator = pricing?.estimator || getDefaultPricingEstimator(locale);
+    const mergedPricingStackPages: PricingStackPageItem[] =
+      Array.isArray(galleryData?.pricingPages) && galleryData.pricingPages.length > 0
+        ? galleryData.pricingPages
+        : getDefaultPricingStackPages(locale);
 
     const mergedPrinciples =
       Array.isArray(pricing?.principles) && pricing.principles.length > 0
@@ -661,6 +670,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
       galleryProjects: baseProjects,
       galleryTabs: mergedGalleryTabs,
       pricingTiers: mergedPricingTiers,
+      pricingStackPages: mergedPricingStackPages,
       deliverableCollections:
         Array.isArray(deliverablesData?.collections) && deliverablesData.collections.length > 0
           ? deliverablesData.collections
@@ -682,6 +692,7 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
       galleryProjects: galleryBase,
       galleryTabs: getDefaultGalleryTabs(locale),
       pricingTiers: getDefaultPricingTiers(locale),
+      pricingStackPages: getDefaultPricingStackPages(locale),
       deliverableCollections: deliverablesBase,
       applicationCards: getApplicationCards(locale),
       applicationCategories: getDefaultApplicationCategories(locale),

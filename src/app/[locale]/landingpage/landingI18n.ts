@@ -182,6 +182,7 @@ export interface LandingContent {
       stepDesc?: string;
       points?: string[];
       stepImage?: string;
+      stepBgImage?: string;
       stepStageTag?: string;
       step?: string;
       title?: string;
@@ -2805,4 +2806,261 @@ export function getDefaultPricingPrinciples(locale: string): PricingPrincipleIte
 export function getDefaultPricingEstimator(locale: string) {
   const content = getLandingContent(locale);
   return content.pricing?.estimator || contentJa.pricing?.estimator;
+}
+
+
+export interface PricingStackMediaItem {
+  id?: string;
+  type: "image" | "video" | "vr360";
+  url: string;
+  caption?: string;
+  poster?: string;
+  thumbnail?: string;
+}
+
+export interface PricingStackPageItem {
+  id: string;
+  pageNumber: string;
+  tabLabel?: string;
+  mediaMode: "gallery" | "movie" | "vr360" | "vrss";
+  qualityBadge: string;
+  categoryName: string;
+  title: string;
+  description: string;
+  priceLabel: string;
+  priceValue: string;
+  priceUnit?: string;
+  cardBgColor: string;
+  cardBgImage?: string;
+  cardBgOverlay?: "none" | "light" | "dark-soft" | "dark-medium" | "dark-strong";
+  mediaBadgeText?: string;
+  expandBtnText?: string;
+  modalPreviewBtnText?: string;
+  deliverablesHeading?: string;
+  specs: string[];
+  deliverables: string[];
+  detailSummary?: string;
+  btnDetailText?: string;
+  vrEmbedUrl?: string;
+  mediaItems: PricingStackMediaItem[];
+}
+
+export function getDefaultPricingStackPages(locale: string): PricingStackPageItem[] {
+  const isJa = locale !== "en";
+
+  return [
+    {
+      id: "page-view-standard",
+      pageNumber: "01",
+      mediaMode: "gallery",
+      qualityBadge: isJa ? "STANDARD QUALITY · スタンダード品質" : "STANDARD QUALITY",
+      categoryName: "VIEW — STANDARD",
+      title: isJa
+        ? "建築CGパース（スタンダード品質）"
+        : "Architectural CG Perspective — Standard Quality",
+      description: isJa
+        ? "初期設計の方向性確認・社内検討・基本プラン提案に最適なスピード＆コスト重視の建築CGパース。正確な空間スケールと自然光バランスを短納期で視覚化します。"
+        : "Fast, cost-effective architectural still renders tailored for concept validation, massing studies, and client design reviews with accurate lighting and proportions.",
+      priceLabel: isJa ? "参考目安費用" : "Reference Fee",
+      priceValue: isJa ? "¥18,000〜 / カット" : "From $130 / View",
+      priceUnit: isJa ? "納期目安: 2〜4営業日 · 軽微修正2回込" : "Turnaround: 2–4 Business Days · 2 Revisions",
+      cardBgColor: "#DDEFF9",
+      specs: isJa
+        ? ["2K〜4K 高精細出力", "納期 2〜4営業日", "内外観対応", "修正2回無料"]
+        : ["2K–4K Output", "2–4 Business Days", "Interior & Exterior", "2 Free Revisions"],
+      deliverables: isJa
+        ? ["高解像度JPG/PNGデータ", "基本マテリアル・配灯設定", "カメラアングル事前確認", "色調補正仕上げ"]
+        : ["High-Res JPG/PNG", "Base Material & Lighting Setup", "Camera Angle Preview", "Post-Production Grading"],
+      detailSummary: isJa
+        ? "基本設計フェーズや複数案の比較検討において、迅速かつ明瞭なビジュアル共有を実現するスタンダードプランです。"
+        : "Designed for schematic design stages and rapid architectural option comparisons with reliable precision.",
+      btnDetailText: isJa ? "詳細を見る" : "View Details",
+      mediaItems: [
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "外観パース（昼景スタンダード）" : "Exterior Daylight — Standard",
+        },
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "都市型住宅ファサード検証" : "Urban Residence Facade Study",
+        },
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "LDK内観ボリューム・採光確認" : "Interior Living Volume & Daylight",
+        },
+      ],
+    },
+    {
+      id: "page-view-high",
+      pageNumber: "02",
+      mediaMode: "gallery",
+      qualityBadge: isJa ? "HIGH QUALITY 8K · ハイクオリティ品質" : "HIGH QUALITY 8K",
+      categoryName: "VIEW — HIGH QUALITY",
+      title: isJa
+        ? "8K フォトリアル建築CGパース（高品質）"
+        : "8K Photorealistic Architectural CGI — High Quality",
+      description: isJa
+        ? "広告販促・コンペ・最終施主プレゼン向け最高峰クオリティ。素材の微細な凹凸、植栽の揺らぎ、時間帯別の大気光まで写真と見紛う精度で描き出します。"
+        : "Flagship 8K photorealism crafted for real estate marketing, competitions, and luxury presentations—capturing micro-textures, foliage, and atmospheric lighting.",
+      priceLabel: isJa ? "参考目安費用" : "Reference Fee",
+      priceValue: isJa ? "¥32,000〜 / カット" : "From $230 / View",
+      priceUnit: isJa ? "納期目安: 4〜7営業日 · 8K印刷・大判対応" : "Turnaround: 4–7 Business Days · 8K Print-Ready",
+      cardBgColor: "#EFE8FB",
+      specs: isJa
+        ? ["8K 超高解像度対応", "PBR実物素材再現", "昼景・夕景ライティング", "広告・大判印刷品質"]
+        : ["True 8K Resolution", "PBR Bespoke Textures", "Day / Dusk Atmosphere", "Billboard & Print Grade"],
+      deliverables: isJa
+        ? ["8K 非圧縮TIFF / PNG納品", "特注家具・造作ディテール再現", "植栽・人物・周辺環境作り込み", "レタッチ＆カラーグレーディング"]
+        : ["8K Lossless TIFF / PNG", "Custom Joinery & Furniture", "Bespoke Landscaping & Context", "Master Color Grading"],
+      detailSummary: isJa
+        ? "不動産分譲パンフレット、看板、設計コンペティションで圧倒的な訴求力を発揮するフラッグシップ8K静止画パッケージです。"
+        : "Exhibition-grade 8K still renderings engineered to maximize buyer conversion and competition impact.",
+      btnDetailText: isJa ? "詳細を見る" : "View Details",
+      mediaItems: [
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=90",
+          caption: isJa ? "8K ハイエンド内観パース" : "8K Luxury Penthouse Interior",
+        },
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=90",
+          caption: isJa ? "夕景・夜景ライティング演出" : "Twilight Architectural Illumination",
+        },
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=90",
+          caption: isJa ? "リゾートヴィラ水盤・植栽表現" : "Resort Villa Water & Foliage",
+        },
+      ],
+    },
+    {
+      id: "page-movie-high",
+      pageNumber: "03",
+      mediaMode: "movie",
+      qualityBadge: isJa ? "HIGH QUALITY MOVIE · 高品質CGムービー" : "HIGH QUALITY MOVIE",
+      categoryName: "MOVIE — HIGH QUALITY",
+      title: isJa
+        ? "シネマティック3D建築アニメーション動画"
+        : "Cinematic 3D Architectural Walkthrough Movie",
+      description: isJa
+        ? "映画のようなカメラワーク、光と影の移ろい、水面や木々の揺らぎを4K高フレームレートで映像化。プロジェクトの世界観と空間ストーリーを鮮烈に伝えます。"
+        : "4K cinematic camera choreography with dynamic daylight transitions, water & foliage simulation, and sound design to tell your architectural story.",
+      priceLabel: isJa ? "参考目安費用" : "Reference Fee",
+      priceValue: isJa ? "¥80,000〜 / クリップ" : "From $580 / Clip",
+      priceUnit: isJa ? "4K 60fps対応 · 15秒〜120秒プロモーション" : "4K 60fps · 15s–120s Promotional Film",
+      cardBgColor: "#FBE9DE",
+      specs: isJa
+        ? ["4K UHD シネマ品質", "絵コンテ・カメラ構成込", "環境音・BGM編集対応", "SNS・展示映像最適化"]
+        : ["4K UHD Cinema Grade", "Storyboard & Camera Path", "BGM & Ambient Sound", "Web & Exhibition Ready"],
+      deliverables: isJa
+        ? ["4K MP4 / MOV マスターデータ", "事前アニマティクス（動き確認）", "タイムラプス日照演出", "カラーグレーディング＆音響編集"]
+        : ["4K MP4 / MOV Master", "Pre-vis Camera Animatics", "Dynamic Sun-Path Sequence", "Color Grading & Sound Mix"],
+      detailSummary: isJa
+        ? "静止画だけでは伝わりにくい空間の奥行きや動線の心地よさを、シネマティックな映像美で体感いただけます。"
+        : "Captures spatial flow, scale, and emotional atmosphere through fluid cinema-grade 3D motion.",
+      btnDetailText: isJa ? "詳細を見る" : "View Details",
+      mediaItems: [
+        {
+          type: "video",
+          url: "/uploads/videos/1781842835877-Ocen_Resort_final.mp4",
+          poster: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "オーシャンリゾート 3DCGウォークスルー映像" : "Ocean Resort 3DCG Walkthrough",
+        },
+        {
+          type: "video",
+          url: "/uploads/videos/1781596992506-Apartment_--_Behance.mp4",
+          poster: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "レジデンス内観シネマティックムービー" : "Luxury Residence Interior Film",
+        },
+      ],
+    },
+    {
+      id: "page-vr360-high",
+      pageNumber: "04",
+      mediaMode: "vr360",
+      qualityBadge: isJa ? "HIGH QUALITY VR360 · 高品質パノラマ" : "HIGH QUALITY VR360",
+      categoryName: "VR360 — HIGH QUALITY",
+      title: isJa
+        ? "インタラクティブ VR 360° 空間パノラマ"
+        : "Interactive VR 360° Architectural Panorama",
+      description: isJa
+        ? "PC・スマートフォン・タブレット・VRゴーグルから360°全方位を自由に見渡せる高精細バーチャル内覧。着工前に天井高や視線の抜けを直感的に検証できます。"
+        : "High-precision 360° equirectangular panoramas viewable across desktop, mobile, and VR headsets—inspect ceiling heights and sightlines before construction.",
+      priceLabel: isJa ? "参考目安費用" : "Reference Fee",
+      priceValue: isJa ? "¥15,000〜 / 視点" : "From $110 / Panorama",
+      priceUnit: isJa ? "8K Equirectangular · Webリンク即時共有" : "8K Equirectangular · Instant Web Sharing",
+      cardBgColor: "#DFF3EA",
+      specs: isJa
+        ? ["360° 全方位ドラッグ操作", "スマホ・PC・VR対応", "ホットスポット移動対応", "高精細8Kパノラマ"]
+        : ["360° Drag & Gyro Control", "Mobile, Web & VR Ready", "Room-to-Room Hotspots", "8K Equirectangular"],
+      deliverables: isJa
+        ? ["8K 360°パノラマ画像データ", "Webブラウザ閲覧用URL発行", "複数部屋間の移動リンク設定", "VRヘッドセット対応フォーマット"]
+        : ["8K 360° Equirectangular File", "Hosted Web Viewer Link", "Multi-Room Hotspot Tour", "VR Headset Ready"],
+      detailSummary: isJa
+        ? "遠隔地の施主様とのオンライン打ち合わせや、バーチャルモデルルームとして高い成約率を実現します。"
+        : "Ideal for remote client walkthroughs and interactive virtual showrooms without installing any app.",
+      btnDetailText: isJa ? "詳細を見る" : "View Details",
+      vrEmbedUrl: "",
+      mediaItems: [
+        {
+          type: "vr360",
+          url: "/uploads/1782292102986-vr360_01_1.webp",
+          caption: isJa ? "LDK 360°パノラマ（ドラッグして回転）" : "Living & Dining 360° (Drag to Rotate)",
+        },
+        {
+          type: "vr360",
+          url: "/uploads/1782292066639-vr360_02.webp",
+          caption: isJa ? "プライベートルーム 360°パノラマ" : "Suite Interior 360° Panorama",
+        },
+      ],
+    },
+    {
+      id: "page-vr-ss",
+      pageNumber: "05",
+      mediaMode: "vrss",
+      qualityBadge: isJa ? "VR SS · バーチャル空間システム" : "VR SS · REALTIME SPACE",
+      categoryName: "VR SS",
+      title: isJa
+        ? "VR SS（リアルタイム空間ウォーク＆マルチカット）"
+        : "VR SS — Realtime Walkthrough & Multi-Angle Capture",
+      description: isJa
+        ? "構築したVR空間モデルから自由なアングル切り出し（VRスクリーンショット）とリアルタイム移動を両立。設計変更の確認や多アングル資料作成を圧倒的に効率化します。"
+        : "Realtime navigable VR model enabling unlimited multi-angle captures (VR Screenshots), material switching, and rapid design verification in a single unified scene.",
+      priceLabel: isJa ? "参考目安費用" : "Reference Fee",
+      priceValue: isJa ? "¥45,000〜 / シーン一式" : "From $320 / Scene",
+      priceUnit: isJa ? "マルチアングル切り出し · リアルタイム検証" : "Multi-Angle Captures · Realtime Review",
+      cardBgColor: "#F6EFDC",
+      specs: isJa
+        ? ["自由アングル複数切り出し", "リアルタイム空間移動", "素材・配色バリエーション", "高コスパ一括制作"]
+        : ["Unlimited Angle Captures", "Realtime Navigation", "Material Variations", "All-in-One Efficiency"],
+      deliverables: isJa
+        ? ["VR SS マルチカット画像一式", "ウォークスループレビュー共有", "主要動線・視線チェックシート", "プレゼン資料用高解像度出力"]
+        : ["Complete VR SS Multi-Shot Pack", "Walkthrough Preview Access", "Sightline & Circulation Check", "Presentation-Ready Exports"],
+      detailSummary: isJa
+        ? "1つの空間データから多数の視点カットとウォークスルー体験を同時に得られる、コストパフォーマンスに優れた次世代パッケージです。"
+        : "Maximizes value by generating dozens of presentation views and interactive walkthroughs from a single realtime scene.",
+      btnDetailText: isJa ? "詳細を見る" : "View Details",
+      mediaItems: [
+        {
+          type: "image",
+          url: "/uploads/1786950469846-1722_vr01.webp",
+          caption: isJa ? "VR SS 空間キャプチャ 01" : "VR SS Scene Capture 01",
+        },
+        {
+          type: "image",
+          url: "/uploads/1786950471671-1722_vr02-2.webp",
+          caption: isJa ? "VR SS 空間キャプチャ 02" : "VR SS Scene Capture 02",
+        },
+        {
+          type: "image",
+          url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85",
+          caption: isJa ? "VR SS 外観マルチアングル出力" : "VR SS Exterior Multi-Angle",
+        },
+      ],
+    },
+  ];
 }

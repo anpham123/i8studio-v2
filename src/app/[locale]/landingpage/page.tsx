@@ -5,6 +5,10 @@ import LandingPageInteractive from "./LandingPageInteractive";
 import LandingHero3D from "./LandingHero3D";
 import LandingChallengesSolutions from "./LandingChallengesSolutions";
 import LandingGalleryShowcase from "./LandingGalleryShowcase";
+import LandingPricingStackShowcase from "./LandingPricingStackShowcase";
+import LandingWorkflowShowcase from "./LandingWorkflowShowcase";
+import LandingDeliverablesShowcase from "./LandingDeliverablesShowcase";
+import LandingApplicationCardMedia from "./LandingApplicationCardMedia";
 import { getLandingContent, getGalleryProjectsData, getDeliverableCollections } from "./landingI18n";
 import { getMergedLandingContent, DEFAULT_SECTION_ORDER } from "@/lib/landingpage-data";
 import { Phone, Mail, Clock, MapPin } from "lucide-react";
@@ -53,6 +57,7 @@ export default async function LandingPage({
     layoutConfig,
     galleryProjects: galleryData,
     galleryTabs,
+    pricingStackPages,
     deliverableCollections: deliverables,
     applicationCards,
     applicationCategories,
@@ -202,236 +207,32 @@ export default async function LandingPage({
      SECTION 3: WORKFLOW DIRECT (5 BƯỚC)
      ========================================================================= */
   const renderWorkflow = () => (
-    <section
+    <LandingWorkflowShowcase
       key="workflow"
-      className="workflow-direct-section"
-      id="quy-trinh-thuc-hien"
+      title={t.workflow?.title}
+      steps={t.workflow?.steps}
+      stepTitleColor={(t.workflow as any)?.stepTitleColor}
+      stepDescColor={(t.workflow as any)?.stepDescColor}
+      ctaText={(t.workflow as any)?.ctaText}
+      ctaHref={(t.workflow as any)?.ctaHref}
+      contactHref={contactHref}
       style={getSectionStyle("workflow")}
-    >
-      <div className="workflow-fullwidth-container">
-        <div className="workflow-title-center-wrap reveal-item">
-          <h2 className="workflow-single-line-title">
-            {t.workflow?.title}
-          </h2>
-          <div className="workflow-title-decor" aria-hidden="true">
-            <span className="workflow-decor-line left"></span>
-            <span className="workflow-decor-sparkle">✦</span>
-            <span className="workflow-decor-line right"></span>
-          </div>
-        </div>
-
-        <div className="alternating-timeline-container" id="alternatingTimeline">
-          <div className="timeline-horizontal-axis">
-            <div className="timeline-axis-track"></div>
-            <div className="timeline-axis-beam"></div>
-          </div>
-
-          <div
-            className="timeline-steps-grid"
-            style={{
-              ["--step-count" as any]: t.workflow?.steps?.length || 6,
-              gridTemplateColumns: `repeat(${t.workflow?.steps?.length || 6}, minmax(0, 1fr))`,
-            }}
-          >
-            {(t.workflow?.steps || []).map((step: any, idx: number) => {
-              const stepNumStr = String(idx + 1).padStart(2, "0");
-              const isEvenSlot = idx % 2 === 0;
-              const defaultImages = [
-                "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=85",
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=85",
-                "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=85",
-                "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=900&q=85",
-                "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=900&q=85",
-              ];
-              const defaultStageTags = [
-                "STAGE 01 • 現況調査",
-                "STAGE 02 • WHITEBOX",
-                "STAGE 03 • RENDER 8K",
-                "STAGE 04 • CINEMA & VR",
-                "STAGE 05 • 図面＆積算",
-              ];
-
-              const imgSrc = step.stepImage || defaultImages[idx % defaultImages.length];
-              const stageTag = step.stepStageTag || defaultStageTags[idx % defaultStageTags.length] || `STAGE ${stepNumStr}`;
-              const badgeText = `ステップ ${stepNumStr}`;
-
-              const contentBlock = (
-                <div className="timeline-content-frameless">
-                  <div className="step-frameless-header">
-                    <span className="step-badge-pill">{badgeText}</span>
-                  </div>
-                  <h4 className="step-card-title">{step.stepTitle}</h4>
-                  {renderStepBullets(step.stepDesc)}
-                </div>
-              );
-
-              const imageBlock = (
-                <div className="timeline-image-card">
-                  <img
-                    src={imgSrc}
-                    alt={step.stepTitle || `Step ${stepNumStr}`}
-                    className="timeline-step-img"
-                  />
-                </div>
-              );
-
-              const centerNode = (
-                <div className="step-node-center">
-                  <div className="step-node-pulse"></div>
-                  <div className="step-node-dot">
-                    <span>{stepNumStr}</span>
-                  </div>
-                </div>
-              );
-
-              return (
-                <div
-                  key={idx}
-                  className={`timeline-step-col ${isEvenSlot ? "step-odd" : "step-even"} step-${idx + 1}`}
-                  data-step={idx + 1}
-                  style={{ transitionDelay: `${0.08 + idx * 0.12}s` }}
-                >
-                  {isEvenSlot ? (
-                    <>
-                      <div className="step-slot-top">
-                        {contentBlock}
-                        <div className="step-stem-connector to-node"></div>
-                      </div>
-                      {centerNode}
-                      <div className="step-slot-bottom">
-                        <div className="step-stem-connector from-node"></div>
-                        {imageBlock}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="step-slot-top">
-                        {imageBlock}
-                        <div className="step-stem-connector to-node"></div>
-                      </div>
-                      {centerNode}
-                      <div className="step-slot-bottom">
-                        <div className="step-stem-connector from-node"></div>
-                        {contentBlock}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </section>
+    />
   );
 
   /* =========================================================================
      SECTION 4: DELIVERABLES (BỘ SƯU TẬP HỒ SƠ)
      ========================================================================= */
-  const renderDeliverables = () => {
-    const firstCol = deliverables?.[0];
-    const firstPhoto = firstCol?.photos?.[0];
-    const totalPhotos = firstCol?.photos?.length || 1;
-    const initialSrc =
-      firstPhoto?.url ||
-      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85";
-    const initialAlt = firstPhoto?.title || "Showcase Preview";
-    const initialTag = firstPhoto?.tag || "A3総合平面図";
-    const initialTitle = firstPhoto?.title || "01. 建築意匠平面図＆全体機能レイアウト";
-
-    return (
-      <section
-        key="deliverables"
-        className="deliverables-compare-section"
-        id="bo-suu-tap"
-        style={getSectionStyle("deliverables")}
-      >
-        <div className="showcase-fullwidth-container">
-          <div className="deliverables-gallery-block reveal-item">
-            <div className="deliverables-block-header">
-              <h2 className="deliverables-block-title">{t.deliverables?.title}</h2>
-              <div className="workflow-title-decor" aria-hidden="true">
-                <span className="workflow-decor-line left"></span>
-                <span className="workflow-decor-sparkle">✦</span>
-                <span className="workflow-decor-line right"></span>
-              </div>
-            </div>
-
-            <div className="deliverables-showcase-layout" id="deliverablesShowcase">
-              {/* CỘT TRÁI: DANH SÁCH BỘ SƯU TẬP (ĐÃ XÓA KHỐI CHỮ ĐÈ TRÊN ẢNH THEO YÊU CẦU) */}
-              <div className="collections-2x2-grid">
-                {(deliverables || []).map((col: any, idx: number) => {
-                  const cardThumb =
-                    col.thumbnail ||
-                    col.photos?.[0]?.url ||
-                    "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=900&q=85";
-
-                  return (
-                    <div
-                      key={col.id || idx}
-                      className={`collection-card-item ${idx === 0 ? "active" : ""} delay-${idx % 4}`}
-                      data-col-idx={idx.toString()}
-                    >
-                      <div className="col-card-thumb-wrap">
-                        <img
-                          src={cardThumb}
-                          alt={col.name || `Collection ${idx + 1}`}
-                          className="col-card-thumb"
-                        />
-                      </div>
-                      <div className="col-card-progress-bar">
-                        <div className="col-card-progress-fill"></div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* CỘT PHẢI: KHUNG ẢNH LỚN TỰ ĐỘNG CHẠY */}
-              <div className="collection-showcase-viewer showcase-zoom-in">
-                <div className="showcase-img-stage" id="showcaseStage">
-                  <img
-                    src={initialSrc}
-                    alt={initialAlt}
-                    className="showcase-main-img"
-                    id="showcaseMainImg"
-                  />
-                  <div className="showcase-gradient-overlay"></div>
-
-                  <div className="showcase-top-meta">
-                    <div className="showcase-counter-badge" id="showcaseCounter">
-                      {`01 / 0${totalPhotos}`}
-                    </div>
-                  </div>
-
-                  <div className="showcase-bottom-caption">
-                    {/* Đã xóa tiêu đề showcase-title-row đè trên ảnh theo yêu cầu */}
-                    <div className="showcase-nav-row">
-                      <div className="showcase-dots-wrap" id="showcaseDots">
-                        {(firstCol?.photos || [0]).map((_: any, pIdx: number) => (
-                          <button
-                            key={pIdx}
-                            type="button"
-                            className={`showcase-dot ${pIdx === 0 ? "active" : ""}`}
-                            data-p-idx={pIdx.toString()}
-                            aria-label={`Photo ${pIdx + 1}`}
-                          ></button>
-                        ))}
-                      </div>
-                      <div className="showcase-timer-bar">
-                        <div className="showcase-timer-fill" id="showcaseTimerFill"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  };
+  const renderDeliverables = () => (
+    <LandingDeliverablesShowcase
+      key="deliverables"
+      title={t.deliverables?.title}
+      collections={deliverables}
+      backBtnText={(t.deliverables as any)?.backBtnText}
+      closeZoomBtnText={(t.deliverables as any)?.closeZoomBtnText}
+      style={getSectionStyle("deliverables")}
+    />
+  );
 
   /* =========================================================================
      SECTION 5: SERVICES BENTO GRID
@@ -602,17 +403,16 @@ export default async function LandingPage({
                   className={`usecase-card reveal-item ${delayClass}`}
                   data-category={card.category}
                 >
-                  <div className="usecase-img-wrap">
-                    <img
-                      src={card.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"}
-                      alt={card.title}
-                      className="usecase-img"
-                    />
-                    <div className="usecase-badge-row">
-                      <span className="usecase-target-tag">{card.targetTag}</span>
-                      <span className="usecase-num">{card.num || String(idx + 1).padStart(2, "0")}</span>
-                    </div>
-                  </div>
+                  <LandingApplicationCardMedia
+                    image={card.image}
+                    videoUrl={card.videoUrl}
+                    vrUrl={card.vrUrl}
+                    poster={card.poster}
+                    mediaType={card.mediaType}
+                    title={card.title}
+                    targetTag={card.targetTag}
+                    num={card.num || String(idx + 1).padStart(2, "0")}
+                  />
                   <div className="usecase-body">
                     <h3 className="usecase-title">{card.title}</h3>
                     <div className="usecase-problem-box">
@@ -692,6 +492,29 @@ export default async function LandingPage({
 
     const repeatCount = Math.max(2, Math.ceil(18 / Math.max(1, displayBrands.length)));
     const marqueeGroupCards = Array.from({ length: repeatCount }).flatMap(() => displayBrands);
+    const defaultBrandColor = String((t.partners as any)?.brandNameColor || "").trim();
+
+    const getBrandTitleStyle = (rawColor?: string): React.CSSProperties | undefined => {
+      const chosen = String(rawColor || defaultBrandColor || "").trim();
+      if (!chosen) return undefined;
+      const hexMatch = chosen.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+      let isDarkText = false;
+      if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        isDarkText = lum < 0.45;
+      }
+      return {
+        color: chosen,
+        textShadow: isDarkText
+          ? "0 1px 6px rgba(255, 255, 255, 0.35)"
+          : "0 2px 10px rgba(0, 0, 0, 0.65)",
+      };
+    };
 
     return (
       <section
@@ -740,12 +563,15 @@ export default async function LandingPage({
                       className="partner-bg-img"
                       loading="lazy"
                     />
-                    <div className="partner-card-overlay"></div>
                   </div>
                   <div className="story-card-inner">
                     <div className="story-brand-center">
-                      <h3 className="story-brand-name">{partner.name}</h3>
-                      <span className="story-brand-sub">{partner.sub}</span>
+                      <h3
+                        className="story-brand-name"
+                        style={getBrandTitleStyle(partner.textColor)}
+                      >
+                        {partner.name}
+                      </h3>
                     </div>
                   </div>
                 </article>
@@ -762,12 +588,15 @@ export default async function LandingPage({
                       className="partner-bg-img"
                       loading="lazy"
                     />
-                    <div className="partner-card-overlay"></div>
                   </div>
                   <div className="story-card-inner">
                     <div className="story-brand-center">
-                      <h3 className="story-brand-name">{partner.name}</h3>
-                      <span className="story-brand-sub">{partner.sub}</span>
+                      <h3
+                        className="story-brand-name"
+                        style={getBrandTitleStyle(partner.textColor)}
+                      >
+                        {partner.name}
+                      </h3>
                     </div>
                   </div>
                 </article>
@@ -783,7 +612,7 @@ export default async function LandingPage({
      SECTION 9: GALLERY EXHIBITION
      ========================================================================= */
   const renderGallery = () => (
-    <LandingGalleryShowcase
+    <LandingPricingStackShowcase
       key="gallery"
       title={t.gallery?.title}
       subtitle={(t.gallery as any)?.sub || (t.gallery as any)?.subtitle || (t.gallery as any)?.info?.subtitle || (t.gallery as any)?.info?.sub}
@@ -794,7 +623,8 @@ export default async function LandingPage({
       projects={projectList as any}
       contactHref={contactHref}
       style={getSectionStyle("gallery")}
-      defaultSpotlightId={pLakeside?.id}
+      pricingPages={pricingStackPages}
+      galleryInfo={t.gallery as any}
     />
   );
 
