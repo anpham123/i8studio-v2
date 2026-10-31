@@ -142,7 +142,6 @@ export default function LandingWorkflowShowcase({
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [isPaused, setIsPaused] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
@@ -157,7 +156,7 @@ export default function LandingWorkflowShowcase({
     }
   }, [activeIndex, totalSteps]);
 
-  // Observe viewport visibility with low threshold so step transitions & first-time reveal begin promptly
+  // Observe viewport visibility with pre-detection margin so step transitions begin promptly as user scrolls near/into section
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -170,7 +169,7 @@ export default function LandingWorkflowShowcase({
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.02, rootMargin: "60px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -243,14 +242,14 @@ export default function LandingWorkflowShowcase({
     setActiveIndex((prev) => (prev - 1 + totalSteps) % totalSteps);
   }, [totalSteps]);
 
-  // Fast 3.0s autoplay cycle when visible and not hovered
+  // Continuous 1.5s autoplay cycle immediately when scrolled into view
   useEffect(() => {
-    if (!isInView || isPaused || totalSteps <= 1) return;
+    if (!isInView || totalSteps <= 1) return;
     const timer = setInterval(() => {
       handleNext();
     }, AUTOPLAY_MS);
     return () => clearInterval(timer);
-  }, [isInView, isPaused, totalSteps, handleNext, activeIndex]);
+  }, [isInView, totalSteps, handleNext, activeIndex]);
 
   if (totalSteps === 0) {
     return null;
@@ -324,8 +323,6 @@ export default function LandingWorkflowShowcase({
       }`}
       id="quy-trinh-thuc-hien"
       style={style}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onKeyDown={handleKeyDown}
