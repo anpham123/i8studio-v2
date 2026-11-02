@@ -45,6 +45,8 @@ import {
   getDeliverableCollections,
   getApplicationCards,
   getDefaultApplicationCategories,
+  normalizeApplicationCategories,
+  normalizeApplicationCards,
   getDefaultPartnerStats,
   getDefaultPartnerBrands,
   getGalleryProjectsData,
@@ -2961,6 +2963,25 @@ function DeliverablesForm({
     }
   };
 
+  const globalCollectionNameColor = String(
+    contentJa?.info?.collectionNameColor ??
+      contentEn?.info?.collectionNameColor ??
+      ""
+  );
+
+  const handleUpdateGlobalCollectionColor = (val: string) => {
+    updateField("ja", ["info", "collectionNameColor"], val);
+    updateField("en", ["info", "collectionNameColor"], val);
+  };
+
+  const handleUpdateCollectionColor = (cIdx: number, val: string) => {
+    const updatedJa = [...collectionsJa];
+    const updatedEn = [...collectionsEn];
+    updatedJa[cIdx] = { ...(updatedJa[cIdx] || {}), nameColor: val };
+    updatedEn[cIdx] = { ...(updatedEn[cIdx] || {}), nameColor: val };
+    saveCollections(updatedJa, updatedEn);
+  };
+
   const handleUpdateCollectionName = (
     cIdx: number,
     langKey: "ja" | "en",
@@ -3039,6 +3060,59 @@ function DeliverablesForm({
           </button>
         </div>
 
+        {/* Cài đặt Màu chữ Tên bộ sưu tập mặc định (Áp dụng chung) */}
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-800">
+              🎨 Màu chữ Tên bộ sưu tập mặc định (Áp dụng chung cho chữ dọc chính giữa):
+            </label>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Nhập mã màu Hex (ví dụ: <code className="font-mono text-slate-700">#121316</code>, <code className="font-mono text-slate-700">#F59E0B</code> hoặc <code className="font-mono text-slate-700">#FFFFFF</code>) hoặc chọn trên bảng màu. Từng bộ sưu tập bên dưới cũng có thể đổi màu riêng.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
+              type="color"
+              value={
+                /^#([0-9a-fA-F]{6})$/.test(globalCollectionNameColor.trim())
+                  ? globalCollectionNameColor.trim()
+                  : "#ffffff"
+              }
+              onChange={(e) => handleUpdateGlobalCollectionColor(e.target.value)}
+              className="w-9 h-8 p-0.5 rounded border border-slate-300 bg-white cursor-pointer"
+              title="Chọn màu chữ tên bộ sưu tập mặc định"
+            />
+            <input
+              type="text"
+              value={globalCollectionNameColor}
+              onChange={(e) => handleUpdateGlobalCollectionColor(e.target.value)}
+              placeholder="#FFFFFF hoặc #121316"
+              className="w-40 px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="flex items-center gap-1">
+              {["#FFFFFF", "#121316", "#F59E0B", "#1E293B"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => handleUpdateGlobalCollectionColor(preset)}
+                  className="w-6 h-6 rounded-md border border-slate-300 shadow-2xs transition hover:scale-105 cursor-pointer"
+                  style={{ backgroundColor: preset }}
+                  title={`Chọn nhanh ${preset}`}
+                />
+              ))}
+              {globalCollectionNameColor && (
+                <button
+                  type="button"
+                  onClick={() => handleUpdateGlobalCollectionColor("")}
+                  className="px-2 py-1 text-[11px] text-slate-600 hover:text-red-600 bg-white border border-slate-200 rounded-md cursor-pointer"
+                >
+                  Mặc định
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-6">
           {collectionsJa.map((cJa: any, cIdx: number) => {
             const cEn = collectionsEn[cIdx] || {};
@@ -3109,6 +3183,59 @@ function DeliverablesForm({
                         />
                       </div>
                     )}
+                  </div>
+
+                  {/* Màu chữ riêng cho Tên Bộ Sưu Tập này */}
+                  <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-[11px] font-semibold text-slate-600">
+                      🎨 Màu chữ riêng cho Tên Bộ Sưu Tập 0{cIdx + 1}:
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <input
+                        type="color"
+                        value={
+                          /^#([0-9a-fA-F]{6})$/.test(
+                            String(cJa.nameColor || cEn.nameColor || globalCollectionNameColor || "").trim()
+                          )
+                            ? String(cJa.nameColor || cEn.nameColor || globalCollectionNameColor).trim()
+                            : "#ffffff"
+                        }
+                        onChange={(e) => handleUpdateCollectionColor(cIdx, e.target.value)}
+                        className="w-8 h-7 p-0.5 rounded border border-slate-300 bg-white cursor-pointer shrink-0"
+                        title="Chọn màu chữ riêng cho bộ sưu tập này"
+                      />
+                      <input
+                        type="text"
+                        value={cJa.nameColor ?? cEn.nameColor ?? ""}
+                        onChange={(e) => handleUpdateCollectionColor(cIdx, e.target.value)}
+                        placeholder={
+                          globalCollectionNameColor
+                            ? `Mặc định chung (${globalCollectionNameColor})`
+                            : "Mặc định (#FFFFFF)"
+                        }
+                        className="w-40 px-2.5 py-1 text-xs font-mono border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {["#FFFFFF", "#121316", "#F59E0B"].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => handleUpdateCollectionColor(cIdx, preset)}
+                          className="w-5 h-5 rounded border border-slate-300 shadow-2xs transition hover:scale-105 cursor-pointer"
+                          style={{ backgroundColor: preset }}
+                          title={`Chọn nhanh ${preset}`}
+                        />
+                      ))}
+                      {(cJa.nameColor || cEn.nameColor) && (
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateCollectionColor(cIdx, "")}
+                          className="px-2 py-1 text-[10px] text-slate-500 hover:text-red-600 bg-white border border-slate-200 rounded cursor-pointer"
+                          title="Xóa màu riêng, dùng màu mặc định chung"
+                        >
+                          Xóa
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -3321,9 +3448,32 @@ function ApplicationsForm({
     ? contentEn.categories
     : getDefaultApplicationCategories("en");
 
-  const catCount = Math.max(rawCategoriesJa.length, rawCategoriesEn.length);
-  const normalizedCategoriesJa = Array.from({ length: catCount }, (_, i) => rawCategoriesJa[i] || { key: `cat-${i + 1}`, label: `カテゴリー ${i + 1}` });
-  const normalizedCategoriesEn = Array.from({ length: catCount }, (_, i) => rawCategoriesEn[i] || { key: normalizedCategoriesJa[i]?.key || `cat-${i + 1}`, label: `Category ${i + 1}` });
+  const tabsReordered = Boolean(contentJa?.info?.tabsReordered || contentEn?.info?.tabsReordered);
+  const baseCatCount = Math.max(rawCategoriesJa.length, rawCategoriesEn.length);
+  const paddedCatsJa = Array.from({ length: baseCatCount }, (_, i) => rawCategoriesJa[i] || { key: `cat-${i + 1}`, label: `カテゴリー ${i + 1}` });
+  const normalizedCategoriesJa = normalizeApplicationCategories(paddedCatsJa, tabsReordered);
+  const catCount = normalizedCategoriesJa.length;
+  const normalizedCategoriesEn = normalizedCategoriesJa.map((catJa, i) => {
+    const matchedEn = rawCategoriesEn.find((e) => e?.key && e.key === catJa.key) || rawCategoriesEn[i] || {};
+    return {
+      ...matchedEn,
+      key: catJa.key,
+      label: matchedEn.label || `Category ${i + 1}`,
+    };
+  });
+
+  const handleMoveCategory = (idx: number, dir: "up" | "down") => {
+    const targetIdx = dir === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= catCount) return;
+    const nextJa = [...normalizedCategoriesJa];
+    [nextJa[idx], nextJa[targetIdx]] = [nextJa[targetIdx], nextJa[idx]];
+    const nextEn = [...normalizedCategoriesEn];
+    [nextEn[idx], nextEn[targetIdx]] = [nextEn[targetIdx], nextEn[idx]];
+    updateField("ja", ["categories"], nextJa);
+    updateField("en", ["categories"], nextEn);
+    updateField("ja", ["info", "tabsReordered"], true);
+    updateField("en", ["info", "tabsReordered"], true);
+  };
 
   const handleUpdateCategoryLabel = (idx: number, langKey: "ja" | "en", val: string) => {
     if (langKey === "ja") {
@@ -3379,8 +3529,10 @@ function ApplicationsForm({
     : getApplicationCards("en");
 
   const count = Math.max(cardsJa.length, cardsEn.length);
-  const normalizedCardsJa = Array.from({ length: count }, (_, i) => cardsJa[i] || { ...cardsJa[0], id: `app-${Date.now()}-${i}` });
-  const normalizedCardsEn = Array.from({ length: count }, (_, i) => cardsEn[i] || { ...cardsEn[0], id: `app-${Date.now()}-${i}` });
+  const paddedCardsJa = Array.from({ length: count }, (_, i) => cardsJa[i] || { ...cardsJa[0], id: `app-${Date.now()}-${i}` });
+  const paddedCardsEn = Array.from({ length: count }, (_, i) => cardsEn[i] || { ...cardsEn[0], id: `app-${Date.now()}-${i}` });
+  const normalizedCardsJa: any[] = normalizeApplicationCards(paddedCardsJa, normalizedCategoriesJa);
+  const normalizedCardsEn: any[] = normalizeApplicationCards(paddedCardsEn, normalizedCategoriesEn);
 
   const handleUpdateCardField = (idx: number, field: string, langKey: "ja" | "en", val: any) => {
     if (langKey === "ja") {
@@ -3602,16 +3754,36 @@ function ApplicationsForm({
               >
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                   <span className="text-xs font-bold text-slate-600">#{cIdx + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCategory(cIdx)}
-                    disabled={catCount <= 1}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-30 px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1 transition"
-                    title="Xóa mục bộ lọc này"
-                  >
-                    <Trash2 size={12} />
-                    <span>{lang === "ja" ? "削除" : lang === "en" ? "Delete" : "Xóa"}</span>
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCategory(cIdx, "up")}
+                      disabled={cIdx === 0}
+                      className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 rounded border border-slate-200 bg-white transition"
+                      title="Chuyển lên trước"
+                    >
+                      <ArrowUp size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCategory(cIdx, "down")}
+                      disabled={cIdx === catCount - 1}
+                      className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 rounded border border-slate-200 bg-white transition"
+                      title="Chuyển xuống sau"
+                    >
+                      <ArrowDown size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cIdx)}
+                      disabled={catCount <= 1}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-30 px-2 py-0.5 rounded text-[11px] inline-flex items-center gap-1 transition"
+                      title="Xóa mục bộ lọc này"
+                    >
+                      <Trash2 size={12} />
+                      <span>{lang === "ja" ? "削除" : lang === "en" ? "Delete" : "Xóa"}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -3705,8 +3877,8 @@ function ApplicationsForm({
                       <h3 className="text-xs font-bold text-slate-800 uppercase">
                         {cJa.title || cEn.title || `Thẻ #${idx + 1}`}
                       </h3>
-                      <p className="text-[11px] text-slate-500 font-mono">
-                        ID: {cJa.id || idx} · Danh mục: {cJa.category || "bds"}
+                      <p className="text-[11px] text-slate-500">
+                        Danh mục: {normalizedCategoriesJa.find((cat) => cat.key === cJa.category)?.label || normalizedCategoriesJa[0]?.label || ""}
                       </p>
                     </div>
                   </div>
@@ -4287,7 +4459,7 @@ function ApplicationsForm({
                             }
                             return (
                               <option key={catJa.key || catIdx} value={catJa.key}>
-                                {displayLabel} ({catJa.key})
+                                {displayLabel}
                               </option>
                             );
                           })}
@@ -5336,20 +5508,6 @@ function GalleryForm({
                   className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Dòng mô tả nhỏ ngay dưới tiêu đề:
-                </label>
-                <textarea
-                  rows={2}
-                  value={infoJa.subtitle ?? infoJa.sub ?? defaultHeaderJa.subtitle}
-                  onChange={(e) => {
-                    setInfoField("subtitle", "ja", e.target.value);
-                    setInfoField("sub", "ja", e.target.value);
-                  }}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
-                />
-              </div>
             </div>
           )}
 
@@ -5367,20 +5525,6 @@ function GalleryForm({
                   value={infoEn.title ?? defaultHeaderEn.title}
                   onChange={(e) => setInfoField("title", "en", e.target.value)}
                   className="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-lg bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Dòng mô tả nhỏ dưới tiêu đề (EN):
-                </label>
-                <textarea
-                  rows={2}
-                  value={infoEn.subtitle ?? infoEn.sub ?? defaultHeaderEn.subtitle}
-                  onChange={(e) => {
-                    setInfoField("subtitle", "en", e.target.value);
-                    setInfoField("sub", "en", e.target.value);
-                  }}
-                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
                 />
               </div>
             </div>
@@ -5568,17 +5712,12 @@ function GalleryForm({
                       >
                         {curPageJa.categoryName}
                       </span>
-                      {curPageJa.qualityBadge && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/40 backdrop-blur-sm border border-current/15">
-                          ✦ {curPageJa.qualityBadge}
-                        </span>
-                      )}
                     </div>
                     <h4 className="text-lg font-extrabold leading-snug">{curPageJa.title}</h4>
                     <p className="text-xs opacity-80 line-clamp-1 mt-0.5">{curPageJa.description}</p>
                   </div>
-                  <span className="text-xl font-bold opacity-80 shrink-0">
-                    ({String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")})
+                  <span className="text-2xl font-extrabold opacity-85 shrink-0">
+                    {String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")}
                   </span>
                 </div>
 
@@ -5865,24 +6004,6 @@ function GalleryForm({
                   </span>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Nhãn chất lượng (Ô bên cạnh tên huy hiệu):
-                    </label>
-                    <input
-                      type="text"
-                      value={curPageJa.qualityBadge || ""}
-                      onChange={(e) =>
-                        handleUpdatePageField(
-                          safeSelectedIdx,
-                          "qualityBadge",
-                          "ja",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Tiêu đề lớn của trang thẻ:
                     </label>
                     <input
@@ -5934,24 +6055,6 @@ function GalleryForm({
                   <span className="text-[11px] font-bold uppercase text-emerald-700">
                     🇬🇧 Nội dung trên mặt thẻ (Tiếng Anh)
                   </span>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Nhãn chất lượng (EN):
-                    </label>
-                    <input
-                      type="text"
-                      value={curPageEn.qualityBadge || ""}
-                      onChange={(e) =>
-                        handleUpdatePageField(
-                          safeSelectedIdx,
-                          "qualityBadge",
-                          "en",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
-                    />
-                  </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Tiêu đề lớn của trang thẻ (EN):

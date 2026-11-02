@@ -172,7 +172,7 @@ export default function LandingChallengesSolutions({
 
   return (
     <section
-      className={`challenges-solutions-list-section relative py-16 sm:py-20 lg:py-24 ${isLightBg ? "text-slate-900" : "text-white"} border-b border-slate-800/20 overflow-hidden transition-colors duration-300`}
+      className={`challenges-solutions-list-section relative py-12 sm:py-20 lg:py-24 ${isLightBg ? "text-slate-900" : "text-white"} border-b border-slate-800/20 overflow-hidden transition-colors duration-300`}
       id="noi-dau-giai-phap"
       style={sectionBgStyle}
     >
@@ -180,7 +180,7 @@ export default function LandingChallengesSolutions({
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16 sm:space-y-20">
+      <div className="max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12 sm:space-y-20">
         
         {/* =========================================================================
             1. CHECKLIST NỖI ĐAU & THÁCH THỨC
@@ -195,7 +195,7 @@ export default function LandingChallengesSolutions({
             className="mb-8 sm:mb-10 text-left"
           >
             <h2
-              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
+              className={`w-full max-w-full text-xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
               style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}
             >
               {renderWithBreaks(mainTitle)}
@@ -208,7 +208,7 @@ export default function LandingChallengesSolutions({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full bg-[#fdfcf9] border border-slate-300/80 border-l-4 border-l-amber-500 rounded-none shadow-[0_15px_40px_rgba(0,0,0,0.08)] p-6 sm:p-8 lg:p-10"
+            className="w-full bg-[#fdfcf9] border border-slate-300/80 border-l-4 border-l-amber-500 rounded-none shadow-[0_15px_40px_rgba(0,0,0,0.08)] p-4 sm:p-8 lg:p-10"
           >
             <div className="divide-y divide-slate-200">
               {cardsList.map((card, idx) => {
@@ -231,7 +231,7 @@ export default function LandingChallengesSolutions({
 
                     {/* Nội dung nỗi đau lớn */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 text-base sm:text-lg leading-relaxed group-hover:text-amber-700 transition-colors">
+                      <h4 className="font-bold text-slate-900 text-sm sm:text-lg leading-relaxed break-words group-hover:text-amber-700 transition-colors">
                         {renderWithBreaks(cleanQuote)}
                       </h4>
                     </div>
@@ -255,7 +255,7 @@ export default function LandingChallengesSolutions({
             className="mb-8 sm:mb-10 text-left"
           >
             <h2
-              className={`w-full max-w-full text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
+              className={`w-full max-w-full text-xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-tight leading-[1.6] md:leading-[1.65] ${isLightBg ? "text-slate-900 drop-shadow-sm" : "text-white drop-shadow-md"}`}
               style={{ fontFamily: "var(--font-heading), 'Plus Jakarta Sans', sans-serif" }}
             >
               {renderWithBreaks(solTitle)}
@@ -268,7 +268,7 @@ export default function LandingChallengesSolutions({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full bg-[#fdfcf9] border border-slate-300/80 border-l-4 border-l-amber-500 rounded-none shadow-[0_15px_40px_rgba(0,0,0,0.08)] p-6 sm:p-8 lg:p-10"
+            className="w-full bg-[#fdfcf9] border border-slate-300/80 border-l-4 border-l-amber-500 rounded-none shadow-[0_15px_40px_rgba(0,0,0,0.08)] p-4 sm:p-8 lg:p-10"
           >
             <div className="divide-y divide-slate-200">
               {solutionsList.map((sol, idx) => {
@@ -291,7 +291,7 @@ export default function LandingChallengesSolutions({
 
                     {/* Nội dung giải pháp lớn */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 text-base sm:text-lg leading-relaxed group-hover:text-amber-700 transition-colors">
+                      <h4 className="font-bold text-slate-900 text-sm sm:text-lg leading-relaxed break-words group-hover:text-amber-700 transition-colors">
                         {renderWithBreaks(cleanQuote)}
                       </h4>
                     </div>

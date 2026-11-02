@@ -2574,6 +2574,106 @@ export function getDefaultApplicationCategories(locale: string): ApplicationCate
   ];
 }
 
+export function normalizeApplicationCategories(
+  rawCategories: any[],
+  tabsReordered?: boolean
+): ApplicationCategoryItem[] {
+  if (!Array.isArray(rawCategories) || rawCategories.length === 0) {
+    return [];
+  }
+
+  const usedKeys = new Set<string>();
+  rawCategories.forEach((c) => {
+    const k = String(c?.key || "").trim();
+    if (k) usedKeys.add(k);
+  });
+
+  const withValidKeys: ApplicationCategoryItem[] = rawCategories.map((c, idx) => {
+    let key = String(c?.key || "").trim();
+    if (!key) {
+      if (idx === 0 && !usedKeys.has("bds")) {
+        key = "bds";
+      } else {
+        let candidate = `cat-${idx + 1}`;
+        let suffix = 1;
+        while (usedKeys.has(candidate)) {
+          suffix += 1;
+          candidate = `cat-${idx + 1}-${suffix}`;
+        }
+        key = candidate;
+      }
+      usedKeys.add(key);
+    }
+    return {
+      ...c,
+      key,
+      label: String(c?.label || "").trim() || `Category ${idx + 1}`,
+    };
+  });
+
+  if (!tabsReordered) {
+    const idxVS = withValidKeys.findIndex((c) =>
+      /バーチャルステージング|virtual\s*staging/i.test(c.label)
+    );
+    const idxVR360 = withValidKeys.findIndex((c) =>
+      /vr\s*360/i.test(c.label)
+    );
+    const idxVRWalk = withValidKeys.findIndex((c) =>
+      /ウォークスルー|walkthrough/i.test(c.label)
+    );
+
+    if (
+      idxVS !== -1 &&
+      idxVR360 !== -1 &&
+      idxVRWalk !== -1 &&
+      idxVR360 < idxVS
+    ) {
+      const slots = [idxVS, idxVR360, idxVRWalk].sort((a, b) => a - b);
+      const reordered = [...withValidKeys];
+      reordered[slots[0]] = withValidKeys[idxVS];
+      reordered[slots[1]] = withValidKeys[idxVR360];
+      reordered[slots[2]] = withValidKeys[idxVRWalk];
+      return reordered;
+    }
+  }
+
+  return withValidKeys;
+}
+
+export function normalizeApplicationCards(
+  rawCards: any[],
+  categories: ApplicationCategoryItem[]
+): ApplicationCard[] {
+  if (!Array.isArray(rawCards)) return [];
+  const validKeySet = new Set(categories.map((c) => c.key));
+
+  return rawCards.map((card, idx) => {
+    const rawCat = String(card?.category || "").trim();
+    if (rawCat && validKeySet.has(rawCat)) {
+      return card;
+    }
+
+    const tagNorm = String(card?.targetTag || "").trim().toLowerCase();
+    if (tagNorm) {
+      const matchedByLabel = categories.find(
+        (c) => String(c.label || "").trim().toLowerCase() === tagNorm
+      );
+      if (matchedByLabel) {
+        return { ...card, category: matchedByLabel.key };
+      }
+    }
+
+    if (!rawCat) {
+      return {
+        ...card,
+        category: categories[idx]?.key || categories[0]?.key || "bds",
+      };
+    }
+
+    return card;
+  });
+}
+
 export function getDefaultPartnerStats(locale: string): PartnerStatCard[] {
   const isJa = locale === "ja";
   const isEn = locale === "en";

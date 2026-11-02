@@ -3,11 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useLocale } from "next-intl";
+import { usePathname } from "next/navigation";
 
 export default function FloatingBackToTop() {
   const [visible, setVisible] = useState(false);
   const visibleRef = useRef(false);
   const locale = useLocale();
+  const pathname = usePathname();
+  const isLandingPage = pathname?.includes("/landingpage");
 
   const tooltipText = locale === "ja" ? "トップへ戻る" : "Back to top";
 
@@ -42,7 +45,12 @@ export default function FloatingBackToTop() {
 
   return (
     <div
-      className={`fixed bottom-22 sm:bottom-24 right-4 sm:right-8 z-40 transition-all duration-300 ${
+      style={{ marginBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className={`fixed ${
+        isLandingPage
+          ? "bottom-6 right-4 sm:bottom-24 sm:right-8"
+          : "bottom-20 right-4 sm:bottom-24 sm:right-8"
+      } z-50 transition-all duration-300 ${
         visible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 translate-y-4 pointer-events-none"

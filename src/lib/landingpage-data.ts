@@ -5,6 +5,8 @@ import {
   getDeliverableCollections,
   getApplicationCards,
   getDefaultApplicationCategories,
+  normalizeApplicationCategories,
+  normalizeApplicationCards,
   getDefaultPartnerStats,
   getDefaultPartnerBrands,
   getDefaultGalleryTabs,
@@ -529,15 +531,25 @@ export async function getMergedLandingContent(locale: string = "ja"): Promise<{
     const pricing = parseLang("pricing");
     const ctaData = parseLang("cta");
 
-    const mergedApplicationsCards =
+    const rawApplicationCategories =
+      Array.isArray(applicationsData?.categories) && applicationsData.categories.length > 0
+        ? applicationsData.categories
+        : getDefaultApplicationCategories(locale);
+
+    const mergedApplicationCategories = normalizeApplicationCategories(
+      rawApplicationCategories,
+      Boolean(applicationsData?.info?.tabsReordered)
+    );
+
+    const rawApplicationsCards =
       Array.isArray(applicationsData?.cards) && applicationsData.cards.length > 0
         ? applicationsData.cards
         : getApplicationCards(locale);
 
-    const mergedApplicationCategories =
-      Array.isArray(applicationsData?.categories) && applicationsData.categories.length > 0
-        ? applicationsData.categories
-        : getDefaultApplicationCategories(locale);
+    const mergedApplicationsCards = normalizeApplicationCards(
+      rawApplicationsCards,
+      mergedApplicationCategories
+    );
 
     const mergedPartnerStats =
       Array.isArray(partnersData?.stats) && partnersData.stats.length > 0

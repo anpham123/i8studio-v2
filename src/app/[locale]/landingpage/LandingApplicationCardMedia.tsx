@@ -306,7 +306,7 @@ const BeforeAfterSlider: React.FC<{
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      style={{ touchAction: "none", cursor: "ew-resize" }}
+      style={{ touchAction: "pan-y", cursor: "ew-resize" }}
     >
       {/* Base After Image */}
       <img

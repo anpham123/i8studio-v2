@@ -136,6 +136,11 @@ function formatPageNumber(raw?: string, fallbackIdx: number = 0): string {
   return `(${cleaned || `0${fallbackIdx + 1}`})`;
 }
 
+function formatCleanStepNumber(raw?: string, fallbackIdx: number = 0): string {
+  const cleaned = String(raw || `0${fallbackIdx + 1}`).replace(/[()]/g, "").trim();
+  return cleaned || `0${fallbackIdx + 1}`;
+}
+
 /* ============================================================================
    INTERACTIVE 360° EQUIRECTANGULAR WEBGL VIEWER (Three.js)
    ============================================================================ */
@@ -555,8 +560,10 @@ const InlineVR360Showcase: React.FC<InlineVR360ShowcaseProps> = ({
 
         <div className="pricing-stack-v2-vr-hud-top">
           <span className="pricing-stack-v2-vr-drag-hint">
-            <Compass className="w-3.5 h-3.5" />
-            <span>{page.mediaBadgeText || "360° ドラッグして視点回転"}</span>
+            <Compass className="w-3.5 h-3.5 shrink-0" />
+            <span className="pricing-stack-v2-vr-drag-text">
+              {page.mediaBadgeText || "360° ドラッグして視点回転"}
+            </span>
           </span>
 
           <button
@@ -564,26 +571,26 @@ const InlineVR360Showcase: React.FC<InlineVR360ShowcaseProps> = ({
             onClick={() => onOpenFullscreenVR(sceneIdx)}
             className="pricing-stack-v2-vr-expand-btn"
           >
-            <Expand className="w-3.5 h-3.5" />
+            <Expand className="w-3.5 h-3.5 shrink-0" />
             <span>{page.expandBtnText || "全画面VR体験"}</span>
           </button>
         </div>
-
-        {!hasExternalEmbed && scenes.length > 1 && (
-          <div className="pricing-stack-v2-vr-scenes">
-            {scenes.map((sc, sIdx) => (
-              <button
-                key={sc.id || sIdx}
-                type="button"
-                onClick={() => setSceneIdx(sIdx)}
-                className={`pricing-stack-v2-vr-scene-btn ${sceneIdx === sIdx ? "is-active" : ""}`}
-              >
-                {sc.caption || `Scene 0${sIdx + 1}`}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
+
+      {!hasExternalEmbed && scenes.length > 1 && (
+        <div className="pricing-stack-v2-vr-scenes">
+          {scenes.map((sc, sIdx) => (
+            <button
+              key={sc.id || sIdx}
+              type="button"
+              onClick={() => setSceneIdx(sIdx)}
+              className={`pricing-stack-v2-vr-scene-btn ${sceneIdx === sIdx ? "is-active" : ""}`}
+            >
+              {sc.caption || `Scene 0${sIdx + 1}`}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -647,6 +654,7 @@ export default function LandingPricingStackShowcase({
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const runwayRef = useRef<HTMLDivElement | null>(null);
+  const navPillsRef = useRef<HTMLElement | null>(null);
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const foldShadeRefs = useRef<Array<HTMLDivElement | null>>([]);
   const progressRef = useRef<number>(0);
@@ -678,13 +686,20 @@ export default function LandingPricingStackShowcase({
 
   useEffect(() => {
     setPortalMounted(true);
-    const checkViewport = () => {
-      setIsMobileStack(window.innerWidth < 920);
-    };
-    checkViewport();
-    window.addEventListener("resize", checkViewport);
-    return () => window.removeEventListener("resize", checkViewport);
+    // Keep 60fps scroll-pinned 3D folding card stack active on both Desktop and Mobile
+    setIsMobileStack(false);
   }, []);
+
+  useEffect(() => {
+    const navEl = navPillsRef.current;
+    if (!navEl || navEl.scrollWidth <= navEl.clientWidth) return;
+    const btns = navEl.querySelectorAll<HTMLElement>(".pricing-stack-v2-nav-pill");
+    const activeBtn = btns[activeIndex];
+    if (!activeBtn) return;
+    const targetLeft =
+      activeBtn.offsetLeft - navEl.clientWidth / 2 + activeBtn.offsetWidth / 2;
+    navEl.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+  }, [activeIndex]);
 
   // First-time viewport entrance observer (latches once, never interferes with 3D scroll loop)
   useEffect(() => {
@@ -780,7 +795,8 @@ export default function LandingPricingStackShowcase({
           const clampedDepth = Math.min(depth, 3.3);
           const sc = 1 - clampedDepth * 0.042;
           // Push lower cards slightly downward so their rounded bottom edge peeks cleanly below the active card
-          const tyPx = clampedDepth * 26;
+          const isPhone = typeof window !== "undefined" && window.innerWidth <= 768;
+          const tyPx = clampedDepth * (isPhone ? 14 : 26);
           const op = depth > 3.15 ? Math.max(0, 1 - (depth - 3.15) * 1.6) : 1;
 
           el.style.transform = `perspective(1350px) translate3d(0, ${tyPx.toFixed(1)}px, 0) rotateX(0deg) scale(${sc.toFixed(4)})`;
@@ -892,7 +908,7 @@ export default function LandingPricingStackShowcase({
 
   const runwayHeightStyle: React.CSSProperties | undefined = isMobileStack
     ? undefined
-    : { height: `calc(100vh + ${(count - 1) * 80}vh)` };
+    : { height: `calc(100svh + ${(count - 1) * 80}svh)` };
 
   const resolveProjectMediaType = (proj: ProjectItem): "image" | "video" | "vr360" => {
     if (
@@ -946,10 +962,13 @@ export default function LandingPricingStackShowcase({
           <div className="pricing-stack-v2-topbar">
             <div className="pricing-stack-v2-heading-group">
               <h2 className="pricing-stack-v2-section-title">{title}</h2>
-              {subtitle && <p className="pricing-stack-v2-section-sub">{subtitle}</p>}
             </div>
 
-            <nav className="pricing-stack-v2-nav-pills" aria-label="Pricing Service Pages">
+            <nav
+              ref={navPillsRef}
+              className="pricing-stack-v2-nav-pills"
+              aria-label="Pricing Service Pages"
+            >
               {pages.map((pg, idx) => {
                 const isCurr = activeIndex === idx;
                 return (
@@ -1017,12 +1036,6 @@ export default function LandingPricingStackShowcase({
                       <div className="pricing-stack-v2-card-title-col">
                         <div className="pricing-stack-v2-badge-row">
                           <span className="pricing-stack-v2-cat-chip">{pg.categoryName}</span>
-                          {pg.qualityBadge && (
-                            <span className="pricing-stack-v2-quality-chip">
-                              <Sparkles className="w-3 h-3" />
-                              {pg.qualityBadge}
-                            </span>
-                          )}
                         </div>
 
                         <h3 className="pricing-stack-v2-card-title">{pg.title}</h3>
@@ -1034,7 +1047,7 @@ export default function LandingPricingStackShowcase({
 
                       <div className="pricing-stack-v2-card-index-col">
                         <span className="pricing-stack-v2-step-num">
-                          {formatPageNumber(pg.pageNumber, idx)}
+                          {formatCleanStepNumber(pg.pageNumber, idx)}
                         </span>
                       </div>
                     </header>
@@ -1424,7 +1437,7 @@ export default function LandingPricingStackShowcase({
               <div className="pricing-stack-v2-modal-header">
                 <div className="pricing-stack-v2-modal-header-left">
                   <span className="pricing-stack-v2-modal-step">
-                    {formatPageNumber(detailPage.pageNumber, 0)}
+                    {formatCleanStepNumber(detailPage.pageNumber, 0)}
                   </span>
                   <div>
                     <div className="pricing-stack-v2-modal-badges">

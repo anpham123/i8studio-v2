@@ -13,7 +13,34 @@ export default function LandingPageInteractive({
   galleryProjects?: Record<string, any>;
 }) {
   useEffect(() => {
+    // 0. Sync sticky top offset (--lp-sticky-top) with Header auto-hide/show behavior
+    let lastHeaderScrollY = window.scrollY;
+    let headerTicking = false;
+    const updateStickyHeaderOffset = () => {
+      headerTicking = false;
+      const curY = window.scrollY;
+      if (curY < 100) {
+        document.documentElement.style.setProperty("--lp-sticky-top", "76px");
+      } else if (curY > lastHeaderScrollY + 5) {
+        document.documentElement.style.setProperty("--lp-sticky-top", "0px");
+      } else if (curY < lastHeaderScrollY - 5) {
+        document.documentElement.style.setProperty("--lp-sticky-top", "76px");
+      }
+      lastHeaderScrollY = curY;
+    };
+    updateStickyHeaderOffset();
+    const onWindowScrollForSticky = () => {
+      if (!headerTicking) {
+        headerTicking = true;
+        requestAnimationFrame(updateStickyHeaderOffset);
+      }
+    };
+    window.addEventListener("scroll", onWindowScrollForSticky, { passive: true });
+
     // 1. Reveal-on-scroll: CHỈ XUẤT HIỆN KHI CUỘN ĐẾN GIỮA PHẦN NỘI DUNG (rootMargin: -38%)
+    const isMobileViewport = window.innerWidth <= 768;
+    const revealRootMargin = isMobileViewport ? "0px 0px -12% 0px" : "0px 0px -38% 0px";
+    const revealThreshold = isMobileViewport ? 0.08 : 0.15;
     const generalRevealEls = document.querySelectorAll(".reveal-item, .reveal-left-up, .reveal-right-up");
     const observer = new IntersectionObserver(
       (entries) => {
@@ -23,7 +50,7 @@ export default function LandingPageInteractive({
           }
         });
       },
-      { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+      { threshold: revealThreshold, rootMargin: revealRootMargin }
     );
     generalRevealEls.forEach((el) => {
       if (
@@ -48,7 +75,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       painObserver.observe(painSection);
     }
@@ -67,7 +94,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       timelineObserver.observe(targetToObserve);
     }
@@ -85,7 +112,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       showcaseObserver.observe(boSuuTapSection);
     }
@@ -103,7 +130,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       bentoObserver.observe(dichVuSection);
     }
@@ -122,7 +149,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       trustObserver.observe(trustSection);
     }
@@ -140,7 +167,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       appObserver.observe(appSection);
     }
@@ -160,7 +187,7 @@ export default function LandingPageInteractive({
             }
           });
         },
-        { threshold: 0.15, rootMargin: "0px 0px -38% 0px" }
+        { threshold: revealThreshold, rootMargin: revealRootMargin }
       );
       clientsObserver.observe(clientsSection);
     }
@@ -727,16 +754,43 @@ export default function LandingPageInteractive({
       tab.addEventListener("click", () => {
         usecaseTabs.forEach((t) => t.classList.remove("active"));
         tab.classList.add("active");
-        const filterVal = tab.getAttribute("data-filter") || "all";
+        const rawFilter = tab.getAttribute("data-filter");
+        const filterVal = rawFilter === null ? "all" : rawFilter.trim();
+        const filterLabel = (tab.getAttribute("data-filter-label") || "").trim().toLowerCase();
         const cards = document.querySelectorAll<HTMLElement>(".usecase-card");
         cards.forEach((card) => {
-          const cardCat = card.getAttribute("data-category");
-          if (filterVal === "all" || cardCat === filterVal) {
-            card.style.display = "";
-          } else {
-            card.style.display = "none";
+          const cardCat = (card.getAttribute("data-category") || "").trim();
+          const cardTag = (card.getAttribute("data-target-tag") || "").trim().toLowerCase();
+          const isMatch =
+            filterVal === "all" ||
+            (Boolean(filterVal) && cardCat === filterVal) ||
+            (Boolean(filterLabel) && Boolean(cardTag) && cardTag === filterLabel);
+          card.style.display = isMatch ? "" : "none";
+          if (isMatch) {
+            card.classList.add("revealed");
           }
         });
+
+        // Smoothly center active filter pill & scroll back to top of cards when sticky on mobile
+        if (window.innerWidth <= 768) {
+          const barEl = tab.closest(".usecase-filter-bar") as HTMLElement | null;
+          if (barEl && barEl.scrollWidth > barEl.clientWidth) {
+            const targetLeft =
+              tab.offsetLeft - barEl.clientWidth / 2 + tab.offsetWidth / 2;
+            barEl.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+          }
+
+          const cardsContainer = document.getElementById("usecasesScrollContainer");
+          if (cardsContainer && barEl) {
+            const barRect = barEl.getBoundingClientRect();
+            const containerRect = cardsContainer.getBoundingClientRect();
+            if (containerRect.top < barRect.bottom) {
+              const targetDocY =
+                window.scrollY + containerRect.top - (barRect.bottom + 12);
+              window.scrollTo({ top: Math.max(0, targetDocY), behavior: "smooth" });
+            }
+          }
+        }
       });
     });
 
@@ -959,6 +1013,7 @@ export default function LandingPageInteractive({
     });
 
     return () => {
+      window.removeEventListener("scroll", onWindowScrollForSticky);
       observer.disconnect();
       if (slideInterval) clearInterval(slideInterval);
       if (deliverableTimer) clearInterval(deliverableTimer);

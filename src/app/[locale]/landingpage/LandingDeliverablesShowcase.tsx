@@ -19,6 +19,7 @@ export interface DeliverablePhotoItem {
 export interface DeliverableCollectionItem {
   id?: string | number;
   name?: string;
+  nameColor?: string;
   badge?: string;
   thumbnail?: string;
   photos?: DeliverablePhotoItem[];
@@ -27,6 +28,7 @@ export interface DeliverableCollectionItem {
 interface LandingDeliverablesShowcaseProps {
   title?: string;
   collections?: DeliverableCollectionItem[];
+  collectionNameColor?: string;
   backBtnText?: string;
   closeZoomBtnText?: string;
   style?: React.CSSProperties;
@@ -58,20 +60,91 @@ function extractShortCollectionTitle(rawName?: string, idx: number = 0): string 
   return cleaned || rawName.trim();
 }
 
+function renderVerticalTitleSegments(rawText: string) {
+  const trimmed = (rawText || "").trim();
+  if (!trimmed) return null;
+  const parts = trimmed
+    .split(/(\s*\d+[A-Za-z]*[:：]?|\s*[A-Za-z]{2,4}[:：]?)/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return parts.map((part, idx) => {
+    const isHorizToken = /^(?:\d+[A-Za-z]*[:：]?|[A-Za-z]{2,4}[:：]?)$/.test(part);
+    if (isHorizToken) {
+      return (
+        <span key={idx} className="deliv-v2-vertical-horiz-token">
+          {part}
+        </span>
+      );
+    }
+    return (
+      <span key={idx} className="deliv-v2-vertical-upright-run">
+        {part}
+      </span>
+    );
+  });
+}
+
+function countVerticalTitleRows(rawText: string): number {
+  const trimmed = (rawText || "").trim();
+  if (!trimmed) return 0;
+  const parts = trimmed
+    .split(/(\s*\d+[A-Za-z]*[:：]?|\s*[A-Za-z]{2,4}[:：]?)/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  let rows = 0;
+  for (const part of parts) {
+    const isHorizToken = /^(?:\d+[A-Za-z]*[:：]?|[A-Za-z]{2,4}[:：]?)$/.test(part);
+    if (isHorizToken) {
+      rows += 1;
+    } else {
+      rows += Array.from(part.replace(/\s+/g, "")).length;
+    }
+  }
+  return rows;
+}
+
 const verticalTitleVariants = {
   enter: (dir: number) => ({
-    y: dir >= 0 ? "75%" : "-75%",
+    x: dir >= 0 ? "65%" : "-65%",
     opacity: 0,
   }),
   center: {
-    y: "0%",
+    x: "0%",
     opacity: 1,
   },
   exit: (dir: number) => ({
-    y: dir >= 0 ? "-75%" : "75%",
+    x: dir >= 0 ? "-65%" : "65%",
     opacity: 0,
   }),
 };
+
+function getVerticalTitleColorStyle(
+  rawColor?: string
+): React.CSSProperties | undefined {
+  const chosen = String(rawColor || "").trim();
+  if (!chosen) return undefined;
+  const hexMatch = chosen.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+  let isDarkText = false;
+  if (hexMatch) {
+    let hex = hexMatch[1];
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    isDarkText = lum < 0.45;
+  }
+  return {
+    color: chosen,
+    textShadow: isDarkText
+      ? "0 2px 14px rgba(255, 255, 255, 0.72), 0 1px 4px rgba(255, 255, 255, 0.55)"
+      : "0 3px 18px rgba(0, 0, 0, 0.52), 0 1px 5px rgba(0, 0, 0, 0.38)",
+  };
+}
 
 function detectLightBackground(style?: React.CSSProperties): boolean {
   const raw = String(style?.background || style?.backgroundColor || "").trim();
@@ -105,6 +178,7 @@ function detectLightBackground(style?: React.CSSProperties): boolean {
 export default function LandingDeliverablesShowcase({
   title,
   collections = [],
+  collectionNameColor,
   backBtnText,
   closeZoomBtnText,
   style,
@@ -120,6 +194,7 @@ export default function LandingDeliverablesShowcase({
   const [isDraggingUI, setIsDraggingUI] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
+  const [isMobileStage, setIsMobileStage] = useState(false);
   const [failedUrls, setFailedUrls] = useState<Record<string, boolean>>({});
   const [imgRatios, setImgRatios] = useState<Record<string, number>>({});
 
@@ -178,14 +253,21 @@ export default function LandingDeliverablesShowcase({
   // Compute current stride in pixels for responsive 1:1 pointer tracking
   const getStridePx = useCallback((forMode: GalleryMode) => {
     const w = stageRef.current?.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 1440);
-    const isMobile = w <= 960;
+    const isPhone = w <= 768;
+    const isTablet = w > 768 && w <= 960;
     if (forMode === "cylinder") {
-      return w * (isMobile ? 0.65 : 0.342);
+      return w * (isPhone ? 0.565 : isTablet ? 0.63 : 0.342);
     }
     if (forMode === "zoom") {
-      return w * (isMobile ? 0.92 : 0.64);
+      return w * (w <= 960 ? 0.92 : 0.64);
     }
-    return Math.max(w * (isMobile ? 0.66 : 0.32), isMobile ? 290 : 440);
+    if (isPhone) {
+      return w * 0.665;
+    }
+    if (isTablet) {
+      return Math.max(w * 0.68, 320);
+    }
+    return Math.max(w * 0.32, 440);
   }, []);
 
   // Synchronous frame painter for State 1 (Concave 3D Cylinder)
@@ -193,8 +275,9 @@ export default function LandingDeliverablesShowcase({
     const stageEl = stageRef.current;
     if (!stageEl) return;
     const w = stageEl.clientWidth || 1440;
-    const isMobile = w <= 960;
-    const stride = w * (isMobile ? 0.65 : 0.342);
+    const isPhone = w <= 768;
+    const isTablet = w > 768 && w <= 960;
+    const stride = w * (isPhone ? 0.565 : isTablet ? 0.63 : 0.342);
     const pos = colPosRef.current;
 
     cylCardMapRef.current.forEach((el, vIdx) => {
@@ -210,11 +293,16 @@ export default function LandingDeliverablesShowcase({
 
       const imgEl = cylImgMapRef.current.get(vIdx);
       if (imgEl) {
-        // Parabolic vertical expansion matching the outer cylinder flare
-        const normD = Math.min(1.25, absD);
-        const scaleY = 0.61 + 0.41 * Math.pow(normD, 1.35);
-        const parallaxX = Math.max(-7, Math.min(7, -d * 4.2));
-        imgEl.style.transform = `translate3d(${parallaxX.toFixed(2)}%, 0, 0) scale(1.12, ${scaleY.toFixed(4)})`;
+        if (isPhone) {
+          // Keep 1:1 natural image geometry on mobile so swiping never causes wavy vertical distortion
+          imgEl.style.transform = "none";
+        } else {
+          // Parabolic vertical expansion matching the outer cylinder flare on desktop
+          const normD = Math.min(1.25, absD);
+          const scaleY = 0.61 + 0.41 * Math.pow(normD, 1.35);
+          const parallaxX = Math.max(-7, Math.min(7, -d * 4.2));
+          imgEl.style.transform = `translate3d(${parallaxX.toFixed(2)}%, 0, 0) scale(1.12, ${scaleY.toFixed(4)})`;
+        }
       }
     });
   }, []);
@@ -224,10 +312,16 @@ export default function LandingDeliverablesShowcase({
     const stageEl = stageRef.current;
     if (!stageEl) return;
     const w = stageEl.clientWidth || 1440;
+    const isPhone = w <= 768;
+    const isTablet = w > 768 && w <= 960;
     const isMobile = w <= 960;
     const mix = zoomMixRef.current;
 
-    const baseStride = Math.max(w * (isMobile ? 0.66 : 0.32), isMobile ? 290 : 440);
+    const baseStride = isPhone
+      ? w * 0.665
+      : isTablet
+      ? Math.max(w * 0.68, 320)
+      : Math.max(w * 0.32, 440);
     const zoomStride = w * (isMobile ? 0.92 : 0.64);
     const stride = baseStride + (zoomStride - baseStride) * mix;
     const pos = photoPosRef.current;
@@ -239,7 +333,7 @@ export default function LandingDeliverablesShowcase({
 
       // Artistic editorial vertical wave in State 2 -> centers smoothly in State 3
       const patternIdx = ((vIdx % 4) + 4) % 4;
-      const baseStaggerY = (isMobile ? 0.55 : 1) * STAGGER_Y_PATTERN[patternIdx];
+      const baseStaggerY = (isPhone ? 0.38 : isMobile ? 0.55 : 1) * STAGGER_Y_PATTERN[patternIdx];
       const yPx = baseStaggerY * (1 - mix * Math.max(0, 1 - absD * 0.65));
 
       const neighborDim = mix > 0.05 && absD > 0.45 ? 1 - 0.22 * mix : 1;
@@ -319,6 +413,15 @@ export default function LandingDeliverablesShowcase({
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
   }, [paintCylinderFrame, paintPhotosFrame]);
+
+  useEffect(() => {
+    const syncMobileStage = () => {
+      setIsMobileStage(window.innerWidth <= 768);
+    };
+    syncMobileStage();
+    window.addEventListener("resize", syncMobileStage, { passive: true });
+    return () => window.removeEventListener("resize", syncMobileStage);
+  }, []);
 
   // Observe section visibility & first-time entrance reveal
   useEffect(() => {
@@ -560,6 +663,22 @@ export default function LandingDeliverablesShowcase({
     }
     const ratio = imgRatios[src];
     if (!ratio) return undefined;
+    if (isMobileStage) {
+      const stageW =
+        stageRef.current?.clientWidth ||
+        (typeof window !== "undefined" ? window.innerWidth : 393);
+      const stageH =
+        stageRef.current?.clientHeight ||
+        (typeof window !== "undefined" ? window.innerHeight * 0.45 : 340);
+      const maxCardW = stageW * 0.58;
+      const maxCardH = Math.min(Math.max(145, stageH * 0.52), 195);
+      const fitW = Math.min(maxCardW, maxCardH * ratio);
+      const fitH = fitW / ratio;
+      return {
+        width: `${Math.round(fitW)}px`,
+        height: `${Math.round(fitH)}px`,
+      };
+    }
     return {
       aspectRatio: `${ratio}`,
       height: "clamp(195px, 28vh, 285px)",
@@ -657,7 +776,19 @@ export default function LandingDeliverablesShowcase({
     activeCollection.name,
     activeColIdx
   );
-  const isLongVerticalTitle = activeVerticalTitle.length > 13;
+  const verticalTitleRows = countVerticalTitleRows(activeVerticalTitle);
+  const verticalTitleSizeClass =
+    verticalTitleRows >= 13
+      ? "is-extra-compact"
+      : verticalTitleRows >= 9
+      ? "is-compact"
+      : "";
+  const activeCylinderClipUrl = isMobileStage
+    ? "url(#delivConcaveCylinderClipMobile)"
+    : "url(#delivConcaveCylinderClip)";
+  const activeVerticalTitleStyle = getVerticalTitleColorStyle(
+    activeCollection.nameColor || collectionNameColor
+  );
 
   return (
     <section
@@ -683,6 +814,12 @@ export default function LandingDeliverablesShowcase({
             clipPathUnits="objectBoundingBox"
           >
             <path d="M -0.01,-0.01 Q 0.5,0.47 1.01,-0.01 L 1.01,1.01 Q 0.5,0.53 -0.01,1.01 Z" />
+          </clipPath>
+          <clipPath
+            id="delivConcaveCylinderClipMobile"
+            clipPathUnits="objectBoundingBox"
+          >
+            <path d="M -0.01,-0.01 Q 0.5,0.13 1.01,-0.01 L 1.01,1.01 Q 0.5,0.87 -0.01,1.01 Z" />
           </clipPath>
         </defs>
       </svg>
@@ -758,9 +895,7 @@ export default function LandingDeliverablesShowcase({
           {/* GIANT VERTICAL ROTATED DISPLAY TITLE FOR STATE 1 (COLLECTIONS - GIỐNG ẢNH 2) */}
           {mode === "cylinder" && (
             <div
-              className={`deliv-v2-vertical-title-layer layer-front ${
-                isLongVerticalTitle ? "is-compact" : ""
-              }`}
+              className={`deliv-v2-vertical-title-layer layer-front ${verticalTitleSizeClass}`}
               aria-hidden="true"
             >
               <div className="deliv-v2-vertical-rotator">
@@ -775,8 +910,9 @@ export default function LandingDeliverablesShowcase({
                       exit="exit"
                       transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
                       className="deliv-v2-vertical-text"
+                      style={activeVerticalTitleStyle}
                     >
-                      {activeVerticalTitle}
+                      {renderVerticalTitleSegments(activeVerticalTitle)}
                     </motion.span>
                   </AnimatePresence>
                 </div>
@@ -798,8 +934,8 @@ export default function LandingDeliverablesShowcase({
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                 className="deliv-v2-cylinder-clip"
                 style={{
-                  clipPath: "url(#delivConcaveCylinderClip)",
-                  WebkitClipPath: "url(#delivConcaveCylinderClip)",
+                  clipPath: activeCylinderClipUrl,
+                  WebkitClipPath: activeCylinderClipUrl,
                 }}
               >
                 <div className="deliv-v2-cylinder-scene">

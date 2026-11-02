@@ -250,6 +250,7 @@ export default function LandingWorkflowShowcase({
     let lastStepTime = 0;
 
     const handleWheel = (e: WheelEvent) => {
+      if (window.innerWidth <= 1024) return;
       if (Math.abs(e.deltaY) < 15) return;
       const now = Date.now();
       const timeSinceLast = now - lastStepTime;
@@ -367,7 +368,7 @@ export default function LandingWorkflowShowcase({
       tabIndex={0}
       aria-label={title || "プロジェクト進行プロセス"}
     >
-      {/* FULL-BLEED PER-STEP BACKGROUND STAGE (No overlay so background image is 100% clear) */}
+      {/* FULL-BLEED PER-STEP BACKGROUND STAGE + 1 SUBTLE OVERLAY FOR READABLE TEXT & CLEAR IMAGE */}
       <div className="wf-v2-bg-stage" aria-hidden="true">
         <AnimatePresence initial={false}>
           <motion.div
@@ -386,6 +387,7 @@ export default function LandingWorkflowShowcase({
             />
           </motion.div>
         </AnimatePresence>
+        <div className="wf-v2-bg-dark-overlay" />
       </div>
 
       <div className="workflow-fullwidth-container wf-v2-container">
@@ -552,25 +554,13 @@ export default function LandingWorkflowShowcase({
                         }
                       }}
                     >
-                      {/* Top Header Above Card (Title + Indicator Dots like Video) */}
+                      {/* Top Header Above Card */}
                       <motion.div
                         layout="position"
                         className="wf-v2-card-top-meta"
                       >
                         <div className="wf-v2-card-top-label" title={cardTitle}>
                           {cardTitle}
-                        </div>
-                        <div className="wf-v2-card-stars" aria-hidden="true">
-                          {safeSteps.map((_, dotIdx) => (
-                            <span
-                              key={dotIdx}
-                              className={`wf-v2-card-star-dot ${
-                                dotIdx <= item.stepIdx ? "filled" : ""
-                              }`}
-                            >
-                              ★
-                            </span>
-                          ))}
                         </div>
                       </motion.div>
 

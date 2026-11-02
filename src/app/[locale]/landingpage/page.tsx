@@ -228,6 +228,7 @@ export default async function LandingPage({
       key="deliverables"
       title={t.deliverables?.title}
       collections={deliverables}
+      collectionNameColor={(t.deliverables as any)?.collectionNameColor}
       backBtnText={(t.deliverables as any)?.backBtnText}
       closeZoomBtnText={(t.deliverables as any)?.closeZoomBtnText}
       style={getSectionStyle("deliverables")}
@@ -381,16 +382,20 @@ export default async function LandingPage({
           <button type="button" className="usecase-tab-btn active" data-filter="all">
             {`全応用分野 (${String((applicationCards || t.applications?.cards || []).length).padStart(2, "0")})`}
           </button>
-          {(applicationCategories || t.applications?.categories || []).map((cat: any) => (
-            <button
-              key={cat.key}
-              type="button"
-              className="usecase-tab-btn"
-              data-filter={cat.key}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {(applicationCategories || t.applications?.categories || []).map((cat: any, cIdx: number) => {
+            const safeKey = String(cat?.key || "").trim() || (cIdx === 0 ? "bds" : `cat-${cIdx + 1}`);
+            return (
+              <button
+                key={safeKey}
+                type="button"
+                className="usecase-tab-btn"
+                data-filter={safeKey}
+                data-filter-label={String(cat?.label || "").trim().toLowerCase()}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
         <div className="usecases-scroll-container" id="usecasesScrollContainer">
@@ -401,7 +406,8 @@ export default async function LandingPage({
                 <article
                   key={card.id || idx}
                   className={`usecase-card reveal-item ${delayClass}`}
-                  data-category={card.category}
+                  data-category={String(card.category || "").trim()}
+                  data-target-tag={String(card.targetTag || "").trim().toLowerCase()}
                 >
                   <LandingApplicationCardMedia
                     image={card.image}
@@ -617,7 +623,6 @@ export default async function LandingPage({
     <LandingPricingStackShowcase
       key="gallery"
       title={t.gallery?.title}
-      subtitle={(t.gallery as any)?.sub || (t.gallery as any)?.subtitle || (t.gallery as any)?.info?.subtitle || (t.gallery as any)?.info?.sub}
       btnZoom={(t.gallery as any)?.btnZoom || (t.gallery as any)?.info?.btnZoom}
       btnConsult={(t.gallery as any)?.btnConsult || (t.gallery as any)?.info?.btnConsult}
       hotlineText={(t.gallery as any)?.hotlineText || (t.gallery as any)?.info?.hotlineText}
