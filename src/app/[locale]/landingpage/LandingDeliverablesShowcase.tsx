@@ -44,7 +44,7 @@ const FALLBACK_ARCHITECTURAL_IMAGES = [
 ];
 
 const VIRTUAL_SLOTS = [-3, -2, -1, 0, 1, 2, 3];
-const STAGGER_Y_PATTERN = [-24, 48, -38, 42];
+const STAGGER_Y_PATTERN = [-16, 28, -24, 26];
 const AUTO_ROTATE_MS = 3200;
 
 
@@ -185,7 +185,7 @@ export default function LandingDeliverablesShowcase({
     if (forMode === "zoom") {
       return w * (isMobile ? 0.92 : 0.64);
     }
-    return w * (isMobile ? 0.64 : 0.305);
+    return Math.max(w * (isMobile ? 0.72 : 0.39), isMobile ? 320 : 520);
   }, []);
 
   // Synchronous frame painter for State 1 (Concave 3D Cylinder)
@@ -227,7 +227,7 @@ export default function LandingDeliverablesShowcase({
     const isMobile = w <= 960;
     const mix = zoomMixRef.current;
 
-    const baseStride = w * (isMobile ? 0.64 : 0.305);
+    const baseStride = Math.max(w * (isMobile ? 0.72 : 0.39), isMobile ? 320 : 520);
     const zoomStride = w * (isMobile ? 0.92 : 0.64);
     const stride = baseStride + (zoomStride - baseStride) * mix;
     const pos = photoPosRef.current;
@@ -562,7 +562,7 @@ export default function LandingDeliverablesShowcase({
     if (!ratio) return undefined;
     return {
       aspectRatio: `${ratio}`,
-      height: "clamp(210px, 34vh, 330px)",
+      height: "clamp(195px, 28vh, 285px)",
       width: "auto",
     };
   };

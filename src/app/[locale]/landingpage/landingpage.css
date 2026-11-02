@@ -11857,7 +11857,7 @@
   inset: 0;
   margin: auto;
   width: auto;
-  height: clamp(210px, 34vh, 330px);
+  height: clamp(195px, 28vh, 285px);
   overflow: hidden;
   background: transparent;
   cursor: pointer;
@@ -11932,7 +11932,7 @@
 
   .deliv-v2-photo-card {
     width: auto;
-    height: clamp(180px, 32vh, 260px);
+    height: clamp(165px, 28vh, 230px);
     max-width: 86vw;
   }
 

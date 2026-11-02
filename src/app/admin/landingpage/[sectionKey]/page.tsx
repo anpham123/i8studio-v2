@@ -38,6 +38,8 @@ import {
   Clock,
   MapPin,
   Megaphone,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import {
   getDeliverableCollections,
@@ -3494,6 +3496,31 @@ function ApplicationsForm({
     toast("Đã thêm thẻ ứng dụng mới!", "success");
   };
 
+  const handleMoveCard = (idx: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= count) return;
+
+    const newCardsJa = [...normalizedCardsJa];
+    const newCardsEn = [...normalizedCardsEn];
+
+    const tempJa = newCardsJa[idx];
+    newCardsJa[idx] = newCardsJa[targetIdx];
+    newCardsJa[targetIdx] = tempJa;
+
+    const tempEn = newCardsEn[idx];
+    newCardsEn[idx] = newCardsEn[targetIdx];
+    newCardsEn[targetIdx] = tempEn;
+
+    updateField("ja", ["cards"], newCardsJa);
+    updateField("en", ["cards"], newCardsEn);
+    toast(
+      direction === "up"
+        ? `Đã chuyển thẻ lên vị trí #${targetIdx + 1}`
+        : `Đã chuyển thẻ xuống vị trí #${targetIdx + 1}`,
+      "success"
+    );
+  };
+
   const handleDeleteCard = (idx: number) => {
     if (count <= 1) {
       toast("Phải giữ lại ít nhất 1 thẻ ứng dụng", "info");
@@ -3684,12 +3711,32 @@ function ApplicationsForm({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCard(idx, "up")}
+                      disabled={idx === 0}
+                      className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded-md border border-slate-200 bg-white transition cursor-pointer"
+                      title={lang === "ja" ? "上に移動" : "Di chuyển thẻ lên trên"}
+                      aria-label="Di chuyển thẻ lên trên"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCard(idx, "down")}
+                      disabled={idx === count - 1}
+                      className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded-md border border-slate-200 bg-white transition cursor-pointer"
+                      title={lang === "ja" ? "下に移動" : "Di chuyển thẻ xuống dưới"}
+                      aria-label="Di chuyển thẻ xuống dưới"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteCard(idx)}
                       disabled={count <= 1}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-40 rounded-md border border-red-200 transition"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-40 rounded-md border border-red-200 transition ml-1"
                       title="Xóa thẻ này"
                     >
                       <Trash2 size={13} />
