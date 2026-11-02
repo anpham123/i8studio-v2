@@ -185,7 +185,7 @@ export default function LandingDeliverablesShowcase({
     if (forMode === "zoom") {
       return w * (isMobile ? 0.92 : 0.64);
     }
-    return Math.max(w * (isMobile ? 0.72 : 0.39), isMobile ? 320 : 520);
+    return Math.max(w * (isMobile ? 0.66 : 0.32), isMobile ? 290 : 440);
   }, []);
 
   // Synchronous frame painter for State 1 (Concave 3D Cylinder)
@@ -227,7 +227,7 @@ export default function LandingDeliverablesShowcase({
     const isMobile = w <= 960;
     const mix = zoomMixRef.current;
 
-    const baseStride = Math.max(w * (isMobile ? 0.72 : 0.39), isMobile ? 320 : 520);
+    const baseStride = Math.max(w * (isMobile ? 0.66 : 0.32), isMobile ? 290 : 440);
     const zoomStride = w * (isMobile ? 0.92 : 0.64);
     const stride = baseStride + (zoomStride - baseStride) * mix;
     const pos = photoPosRef.current;

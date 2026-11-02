@@ -10,7 +10,9 @@ export interface LandingApplicationCardMediaProps {
   videoUrl?: string;
   vrUrl?: string;
   poster?: string;
-  mediaType?: "image" | "video" | "vr" | string;
+  mediaType?: "image" | "video" | "vr" | "beforeAfter" | string;
+  beforeImage?: string;
+  afterImage?: string;
   title?: string;
   targetTag?: string;
   num?: string;
@@ -253,12 +255,136 @@ const Panorama360ModalViewer: React.FC<{ imageUrl: string }> = ({ imageUrl }) =>
   return <div ref={mountRef} style={{ width: "100%", height: "100%" }} />;
 };
 
+/* ============================================================================
+   Interactive Before / After Image Split Slider (like Image 4)
+   ============================================================================ */
+const BeforeAfterSlider: React.FC<{
+  beforeImage: string;
+  afterImage: string;
+  title?: string;
+  targetTag?: string;
+  num?: string;
+}> = ({ beforeImage, afterImage, title, targetTag, num }) => {
+  const [sliderPos, setSliderPos] = useState(50);
+  const isDraggingRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const updatePosFromClientX = (clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPos(pct);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    isDraggingRef.current = true;
+    updatePosFromClientX(e.clientX);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    updatePosFromClientX(e.clientX);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    isDraggingRef.current = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="usecase-img-wrap is-before-after-wrap"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{ touchAction: "none", cursor: "ew-resize" }}
+    >
+      {/* Base After Image */}
+      <img
+        src={afterImage || beforeImage}
+        alt={title ? `${title} (After)` : "After"}
+        className="usecase-img usecase-img-after"
+        draggable={false}
+      />
+
+      {/* Clipped Before Image */}
+      <div
+        className="usecase-bfaf-overlay"
+        style={{
+          clipPath: `inset(0 ${100 - sliderPos}% 0 0)`,
+        }}
+      >
+        <img
+          src={beforeImage || afterImage}
+          alt={title ? `${title} (Before)` : "Before"}
+          className="usecase-img usecase-img-before"
+          draggable={false}
+        />
+      </div>
+
+      {/* Badges */}
+      <div className="usecase-bfaf-badge before">Before</div>
+      <div className="usecase-bfaf-badge after">After</div>
+
+      {/* Draggable Divider Line & Knob */}
+      <div
+        className="usecase-bfaf-divider"
+        style={{ left: `${sliderPos}%` }}
+      >
+        <div className="usecase-bfaf-handle" aria-label="So sánh Trước / Sau">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Tag & Number Badge */}
+      <div className="usecase-badge-row">
+        <span className="usecase-target-tag">{targetTag}</span>
+        <span className="usecase-num">{num}</span>
+      </div>
+    </div>
+  );
+};
+
 export default function LandingApplicationCardMedia({
   image,
   videoUrl,
   vrUrl,
   poster,
   mediaType,
+  beforeImage,
+  afterImage,
   title,
   targetTag,
   num,
@@ -324,6 +450,21 @@ export default function LandingApplicationCardMedia({
       setActiveModal("vr");
     }
   };
+
+  const isBfAf =
+    mediaType === "beforeAfter" || (Boolean(beforeImage) && Boolean(afterImage));
+
+  if (isBfAf && (beforeImage || afterImage)) {
+    return (
+      <BeforeAfterSlider
+        beforeImage={beforeImage || afterImage || ""}
+        afterImage={afterImage || beforeImage || ""}
+        title={title}
+        targetTag={targetTag}
+        num={num}
+      />
+    );
+  }
 
   const isInteractiveCardMedia = hasVideo || hasVr;
 

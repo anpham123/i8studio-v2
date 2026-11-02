@@ -3747,15 +3747,23 @@ function ApplicationsForm({
 
                 {/* Image and Basic Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Media Preview & Upload (Image / Video / VR·AR Link) */}
+                  {/* Media Preview & Upload (Image / Video / VR·AR Link / Before & After) */}
                   {(() => {
                     const cardVideoUrl = cJa.videoUrl || cEn.videoUrl || "";
                     const cardVrUrl = cJa.vrUrl || cEn.vrUrl || "";
+                    const cardBeforeImg = cJa.beforeImage || cEn.beforeImage || "";
+                    const cardAfterImg = cJa.afterImage || cEn.afterImage || "";
                     const imgIsVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(cardImg);
-                    const currentMediaType: "image" | "video" | "vr" =
+                    const currentMediaType: "image" | "video" | "vr" | "beforeAfter" =
                       cJa.mediaType ||
                       cEn.mediaType ||
-                      (cardVrUrl && !cardVideoUrl ? "vr" : cardVideoUrl || imgIsVideo ? "video" : "image");
+                      (cardBeforeImg || cardAfterImg
+                        ? "beforeAfter"
+                        : cardVrUrl && !cardVideoUrl
+                          ? "vr"
+                          : cardVideoUrl || imgIsVideo
+                            ? "video"
+                            : "image");
                     const activeVideoPreview = cardVideoUrl || (imgIsVideo ? cardImg : "");
 
                     return (
@@ -3763,10 +3771,10 @@ function ApplicationsForm({
                         <div className="flex items-center justify-between gap-1.5 flex-wrap">
                           <label className="block text-xs font-bold text-slate-700">
                             {lang === "ja"
-                              ? "アイキャッチ (画像 / 動画 / VR・AR)"
+                              ? "アイキャッチ (画像 / 動画 / VR・AR / BF・AF)"
                               : lang === "en"
-                                ? "Card Media (Image / Video / VR·AR)"
-                                : "Media thẻ (Ảnh / Video / Link VR·AR)"}
+                                ? "Card Media (Image / Video / VR·AR / BF·AF)"
+                                : "Media thẻ (Ảnh / Video / VR·AR / Trước·Sau)"}
                           </label>
                           <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
                             <button
@@ -3802,11 +3810,61 @@ function ApplicationsForm({
                             >
                               🌐 VR/AR
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateBothLangs(idx, "mediaType", "beforeAfter")}
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md transition ${
+                                currentMediaType === "beforeAfter"
+                                  ? "bg-purple-600 text-white"
+                                  : "text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              🌓 BF / AF
+                            </button>
                           </div>
                         </div>
 
                         <div className="w-full h-36 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 flex items-center justify-center relative group">
-                          {currentMediaType === "video" && activeVideoPreview && /\.(mp4|webm|mov)(\?.*)?$/i.test(activeVideoPreview) ? (
+                          {currentMediaType === "beforeAfter" ? (
+                            cardBeforeImg || cardAfterImg ? (
+                              <div className="w-full h-full flex relative overflow-hidden bg-slate-950">
+                                <div className="w-1/2 h-full relative border-r border-white/20 overflow-hidden">
+                                  {cardBeforeImg ? (
+                                    <img
+                                      src={cardBeforeImg}
+                                      alt="Before"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-800 text-[10px] text-slate-400">
+                                      Chưa có Before
+                                    </div>
+                                  )}
+                                  <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold">
+                                    BEFORE
+                                  </span>
+                                </div>
+                                <div className="w-1/2 h-full relative overflow-hidden">
+                                  {cardAfterImg ? (
+                                    <img
+                                      src={cardAfterImg}
+                                      alt="After"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-800 text-[10px] text-slate-400">
+                                      Chưa có After
+                                    </div>
+                                  )}
+                                  <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold">
+                                    AFTER
+                                  </span>
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-400">Chưa có ảnh Before / After</span>
+                            )
+                          ) : currentMediaType === "video" && activeVideoPreview && /\.(mp4|webm|mov)(\?.*)?$/i.test(activeVideoPreview) ? (
                             <video
                               src={activeVideoPreview}
                               poster={!imgIsVideo && cardImg ? cardImg : undefined}
@@ -3837,6 +3895,11 @@ function ApplicationsForm({
                           )}
 
                           <div className="absolute top-2 right-2 flex items-center gap-1">
+                            {currentMediaType === "beforeAfter" && (
+                              <span className="px-2 py-0.5 rounded bg-purple-600/95 text-white text-[10px] font-bold shadow">
+                                BF / AF
+                              </span>
+                            )}
                             {(currentMediaType === "video" || Boolean(cardVideoUrl)) && (
                               <span className="px-2 py-0.5 rounded bg-amber-600/95 text-white text-[10px] font-bold shadow">
                                 VIDEO
@@ -3850,64 +3913,200 @@ function ApplicationsForm({
                           </div>
                         </div>
 
-                        {/* 1. Ảnh đại diện / Ảnh bìa (luôn hỗ trợ tải ảnh hoặc tải nhanh video) */}
-                        <div>
-                          <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                            {currentMediaType === "video"
-                              ? "Ảnh bìa thu nhỏ (Poster) hoặc tải trực tiếp ảnh/video:"
-                              : "Link ảnh đại diện (hoặc bấm Tải ảnh / video):"}
-                          </label>
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="text"
-                              value={cardImg}
-                              placeholder="Dán link ảnh (URL)..."
-                              onChange={(e) => handleUpdateBothLangs(idx, "image", e.target.value)}
-                              className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
-                            />
-                            <label className="shrink-0 cursor-pointer">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-md">
-                                <Upload size={12} />
-                                <span>{lang === "ja" ? "UP" : lang === "en" ? "Upload" : "Tải"}</span>
-                              </span>
-                              <input
-                                type="file"
-                                accept="image/*,video/mp4,video/webm,video/quicktime"
-                                className="hidden"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  const isVid = file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name);
-                                  const fd = new FormData();
-                                  fd.append("file", file);
-                                  try {
-                                    const res = await fetch("/api/upload", { method: "POST", body: fd });
-                                    const data = await res.json();
-                                    if (res.ok && data.url) {
-                                      if (isVid) {
-                                        handlePatchBothLangs(idx, {
-                                          videoUrl: data.url,
-                                          mediaType: "video",
-                                        });
-                                        toast("Tải video thẻ ứng dụng thành công!", "success");
-                                      } else {
-                                        handleUpdateBothLangs(idx, "image", data.url);
-                                        toast("Tải ảnh thẻ ứng dụng thành công!", "success");
-                                      }
-                                    } else {
-                                      toast(data.error || "Tải tệp thất bại", "error");
-                                    }
-                                  } catch {
-                                    toast("Lỗi tải tệp lên máy chủ", "error");
+                        {/* BF / AF Upload Box (hiển thị khi chọn tab BF / AF) */}
+                        {currentMediaType === "beforeAfter" ? (
+                          <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bold text-purple-900">
+                                🌓 Upload 2 ảnh Before & After (Kéo thanh trượt so sánh):
+                              </label>
+                              {(cardBeforeImg || cardAfterImg) && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handlePatchBothLangs(idx, {
+                                      beforeImage: "",
+                                      afterImage: "",
+                                      mediaType: "image",
+                                    })
                                   }
-                                }}
-                              />
-                            </label>
+                                  className="text-[10px] text-red-600 hover:underline"
+                                >
+                                  Xóa cả 2 ảnh
+                                </button>
+                              )}
+                            </div>
+
+                            {/* 1. Before Image */}
+                            <div className="space-y-1">
+                              <label className="block text-[11px] font-semibold text-slate-700">
+                                1. Ảnh Trước (Before):
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="text"
+                                  value={cardBeforeImg}
+                                  placeholder="Dán link ảnh Trước (URL)..."
+                                  onChange={(e) =>
+                                    handlePatchBothLangs(idx, {
+                                      beforeImage: e.target.value,
+                                      image: cJa.image || e.target.value,
+                                      mediaType: "beforeAfter",
+                                    })
+                                  }
+                                  className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-purple-200 rounded-md font-mono"
+                                />
+                                <label className="shrink-0 cursor-pointer">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-md">
+                                    <Upload size={12} />
+                                    <span>Tải Before</span>
+                                  </span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const fd = new FormData();
+                                      fd.append("file", file);
+                                      try {
+                                        const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                        const data = await res.json();
+                                        if (res.ok && data.url) {
+                                          handlePatchBothLangs(idx, {
+                                            beforeImage: data.url,
+                                            image: cJa.image || data.url,
+                                            mediaType: "beforeAfter",
+                                          });
+                                          toast("Tải ảnh Before thành công!", "success");
+                                        } else {
+                                          toast(data.error || "Tải ảnh thất bại", "error");
+                                        }
+                                      } catch {
+                                        toast("Lỗi tải tệp lên máy chủ", "error");
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* 2. After Image */}
+                            <div className="space-y-1">
+                              <label className="block text-[11px] font-semibold text-slate-700">
+                                2. Ảnh Sau (After):
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="text"
+                                  value={cardAfterImg}
+                                  placeholder="Dán link ảnh Sau (URL)..."
+                                  onChange={(e) =>
+                                    handlePatchBothLangs(idx, {
+                                      afterImage: e.target.value,
+                                      mediaType: "beforeAfter",
+                                    })
+                                  }
+                                  className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-purple-200 rounded-md font-mono"
+                                />
+                                <label className="shrink-0 cursor-pointer">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-md">
+                                    <Upload size={12} />
+                                    <span>Tải After</span>
+                                  </span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const fd = new FormData();
+                                      fd.append("file", file);
+                                      try {
+                                        const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                        const data = await res.json();
+                                        if (res.ok && data.url) {
+                                          handlePatchBothLangs(idx, {
+                                            afterImage: data.url,
+                                            mediaType: "beforeAfter",
+                                          });
+                                          toast("Tải ảnh After thành công!", "success");
+                                        } else {
+                                          toast(data.error || "Tải ảnh thất bại", "error");
+                                        }
+                                      } catch {
+                                        toast("Lỗi tải tệp lên máy chủ", "error");
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
+
+                        {/* 1. Ảnh đại diện / Ảnh bìa (luôn hỗ trợ tải ảnh hoặc tải nhanh video khi không ở tab BF/AF) */}
+                        {currentMediaType !== "beforeAfter" && (
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              {currentMediaType === "video"
+                                ? "Ảnh bìa thu nhỏ (Poster) hoặc tải trực tiếp ảnh/video:"
+                                : "Link ảnh đại diện (hoặc bấm Tải ảnh / video):"}
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                value={cardImg}
+                                placeholder="Dán link ảnh (URL)..."
+                                onChange={(e) => handleUpdateBothLangs(idx, "image", e.target.value)}
+                                className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
+                              />
+                              <label className="shrink-0 cursor-pointer">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium rounded-md">
+                                  <Upload size={12} />
+                                  <span>{lang === "ja" ? "UP" : lang === "en" ? "Upload" : "Tải"}</span>
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*,video/mp4,video/webm,video/quicktime"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const isVid = file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name);
+                                    const fd = new FormData();
+                                    fd.append("file", file);
+                                    try {
+                                      const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                      const data = await res.json();
+                                      if (res.ok && data.url) {
+                                        if (isVid) {
+                                          handlePatchBothLangs(idx, {
+                                            videoUrl: data.url,
+                                            mediaType: "video",
+                                          });
+                                          toast("Tải video thẻ ứng dụng thành công!", "success");
+                                        } else {
+                                          handleUpdateBothLangs(idx, "image", data.url);
+                                          toast("Tải ảnh thẻ ứng dụng thành công!", "success");
+                                        }
+                                      } else {
+                                        toast(data.error || "Tải tệp thất bại", "error");
+                                      }
+                                    } catch {
+                                      toast("Lỗi tải tệp lên máy chủ", "error");
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        )}
 
                         {/* 2. Video Upload / Link (hiển thị nổi bật khi chọn tab Video hoặc đã có videoUrl) */}
-                        {(currentMediaType === "video" || Boolean(cardVideoUrl)) && (
+                        {currentMediaType !== "beforeAfter" && (currentMediaType === "video" || Boolean(cardVideoUrl)) && (
                           <div className="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 space-y-1.5">
                             <div className="flex items-center justify-between">
                               <label className="block text-[11px] font-bold text-amber-900">
@@ -3978,82 +4177,84 @@ function ApplicationsForm({
                         )}
 
                         {/* 3. Link VR / AR (luôn hiển thị gọn hoặc nổi bật khi chọn tab VR/AR) */}
-                        <div
-                          className={`p-2.5 rounded-lg border space-y-1.5 ${
-                            currentMediaType === "vr" || Boolean(cardVrUrl)
-                              ? "bg-emerald-50/80 border-emerald-200"
-                              : "bg-white border-slate-200"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <label className="block text-[11px] font-bold text-emerald-900">
-                              🌐 Link VR / AR (VD: vr.i8studio.vn/.../index.html, Matterport, Kuula, 360°):
-                            </label>
-                            {cardVrUrl && (
-                              <button
-                                type="button"
-                                onClick={() =>
+                        {currentMediaType !== "beforeAfter" && (
+                          <div
+                            className={`p-2.5 rounded-lg border space-y-1.5 ${
+                              currentMediaType === "vr" || Boolean(cardVrUrl)
+                                ? "bg-emerald-50/80 border-emerald-200"
+                                : "bg-white border-slate-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <label className="block text-[11px] font-bold text-emerald-900">
+                                🌐 Link VR / AR (VD: vr.i8studio.vn/.../index.html, Matterport, Kuula, 360°):
+                              </label>
+                              {cardVrUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handlePatchBothLangs(idx, {
+                                      vrUrl: "",
+                                      mediaType: cardVideoUrl ? "video" : "image",
+                                    })
+                                  }
+                                  className="text-[10px] text-red-600 hover:underline"
+                                >
+                                  Xóa VR/AR
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="text"
+                                value={cardVrUrl}
+                                placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html"
+                                onChange={(e) =>
                                   handlePatchBothLangs(idx, {
-                                    vrUrl: "",
-                                    mediaType: cardVideoUrl ? "video" : "image",
+                                    vrUrl: e.target.value,
+                                    mediaType:
+                                      e.target.value.trim() && currentMediaType === "image" && !cardVideoUrl
+                                        ? "vr"
+                                        : currentMediaType,
                                   })
                                 }
-                                className="text-[10px] text-red-600 hover:underline"
-                              >
-                                Xóa VR/AR
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="text"
-                              value={cardVrUrl}
-                              placeholder="VD: https://vr.i8studio.vn/360/AR_JAPAN/index.html"
-                              onChange={(e) =>
-                                handlePatchBothLangs(idx, {
-                                  vrUrl: e.target.value,
-                                  mediaType:
-                                    e.target.value.trim() && currentMediaType === "image" && !cardVideoUrl
-                                      ? "vr"
-                                      : currentMediaType,
-                                })
-                              }
-                              className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
-                            />
-                            <label className="shrink-0 cursor-pointer" title="Tải ảnh Panorama 360°">
-                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-medium rounded-md">
-                                <Upload size={11} />
-                                <span>360°</span>
-                              </span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (!file) return;
-                                  const fd = new FormData();
-                                  fd.append("file", file);
-                                  try {
-                                    const res = await fetch("/api/upload", { method: "POST", body: fd });
-                                    const data = await res.json();
-                                    if (res.ok && data.url) {
-                                      handlePatchBothLangs(idx, {
-                                        vrUrl: data.url,
-                                        mediaType: "vr",
-                                      });
-                                      toast("Tải ảnh Panorama 360° thành công!", "success");
-                                    } else {
-                                      toast(data.error || "Tải ảnh 360° thất bại", "error");
-                                    }
-                                  } catch {
-                                    toast("Lỗi tải ảnh 360°", "error");
-                                  }
-                                }}
+                                className="flex-1 px-2.5 py-1 text-xs text-slate-800 bg-white border border-slate-200 rounded-md font-mono"
                               />
-                            </label>
+                              <label className="shrink-0 cursor-pointer" title="Tải ảnh Panorama 360°">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-medium rounded-md">
+                                  <Upload size={11} />
+                                  <span>360°</span>
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    const fd = new FormData();
+                                    fd.append("file", file);
+                                    try {
+                                      const res = await fetch("/api/upload", { method: "POST", body: fd });
+                                      const data = await res.json();
+                                      if (res.ok && data.url) {
+                                        handlePatchBothLangs(idx, {
+                                          vrUrl: data.url,
+                                          mediaType: "vr",
+                                        });
+                                        toast("Tải ảnh Panorama 360° thành công!", "success");
+                                      } else {
+                                        toast(data.error || "Tải ảnh 360° thất bại", "error");
+                                      }
+                                    } catch {
+                                      toast("Lỗi tải ảnh 360°", "error");
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })()}

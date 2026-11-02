@@ -24,6 +24,11 @@ export interface ApplicationCard {
   targetTag: string;
   num: string;
   image: string;
+  mediaType?: "image" | "video" | "vr" | "beforeAfter" | string;
+  videoUrl?: string;
+  vrUrl?: string;
+  beforeImage?: string;
+  afterImage?: string;
   title: string;
   problemLabel?: string;
   problemText: string;

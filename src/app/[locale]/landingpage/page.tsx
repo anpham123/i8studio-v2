@@ -409,6 +409,8 @@ export default async function LandingPage({
                     vrUrl={card.vrUrl}
                     poster={card.poster}
                     mediaType={card.mediaType}
+                    beforeImage={card.beforeImage}
+                    afterImage={card.afterImage}
                     title={card.title}
                     targetTag={card.targetTag}
                     num={card.num || String(idx + 1).padStart(2, "0")}

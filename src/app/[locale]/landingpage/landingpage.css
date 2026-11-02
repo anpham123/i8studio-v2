@@ -13639,3 +13639,98 @@
     transform: none !important;
   }
 }
+
+/* ============================================================================
+   Before / After Interactive Slider for Application Cards
+   ============================================================================ */
+.usecase-img-wrap.is-before-after-wrap {
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.usecase-img-wrap.is-before-after-wrap .usecase-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  transition: none !important;
+  transform: none !important;
+}
+
+.usecase-card:hover .usecase-img-wrap.is-before-after-wrap .usecase-img {
+  transform: none !important;
+}
+
+.usecase-bfaf-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.usecase-bfaf-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.45);
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+.usecase-bfaf-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
+  cursor: ew-resize;
+}
+
+.usecase-bfaf-badge {
+  position: absolute;
+  top: 12px;
+  padding: 4px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 5;
+  line-height: 1.2;
+}
+
+.usecase-bfaf-badge.before {
+  left: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #111827;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.usecase-bfaf-badge.after {
+  right: 12px;
+  background: rgba(17, 24, 39, 0.88);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
