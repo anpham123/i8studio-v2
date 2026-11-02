@@ -48,6 +48,31 @@ const STAGGER_Y_PATTERN = [-24, 48, -38, 42];
 const AUTO_ROTATE_MS = 3200;
 
 
+function extractShortCollectionTitle(rawName?: string, idx: number = 0): string {
+  if (!rawName || !rawName.trim()) {
+    return `COLLECTION 0${idx + 1}`;
+  }
+  const cleaned = rawName
+    .replace(/^(?:コレクション|COLLECTION|BỘ SƯU TẬP)\s*\d+\s*[:：\-・]\s*/i, "")
+    .trim();
+  return cleaned || rawName.trim();
+}
+
+const verticalTitleVariants = {
+  enter: (dir: number) => ({
+    y: dir >= 0 ? "75%" : "-75%",
+    opacity: 0,
+  }),
+  center: {
+    y: "0%",
+    opacity: 1,
+  },
+  exit: (dir: number) => ({
+    y: dir >= 0 ? "-75%" : "75%",
+    opacity: 0,
+  }),
+};
+
 function detectLightBackground(style?: React.CSSProperties): boolean {
   const raw = String(style?.background || style?.backgroundColor || "").trim();
   if (!raw) return false;
@@ -537,9 +562,8 @@ export default function LandingDeliverablesShowcase({
     if (!ratio) return undefined;
     return {
       aspectRatio: `${ratio}`,
-      height: "clamp(220px, 35vh, 340px)",
+      height: "clamp(210px, 34vh, 330px)",
       width: "auto",
-      maxWidth: "clamp(260px, 42vw, 520px)",
     };
   };
 
@@ -629,6 +653,12 @@ export default function LandingDeliverablesShowcase({
   };
 
   
+  const activeVerticalTitle = extractShortCollectionTitle(
+    activeCollection.name,
+    activeColIdx
+  );
+  const isLongVerticalTitle = activeVerticalTitle.length > 13;
+
   return (
     <section
       ref={sectionRef}
@@ -660,11 +690,13 @@ export default function LandingDeliverablesShowcase({
       <div className="deliv-v2-shell">
         {/* TOP HEADER & CONTEXTUAL NAVIGATION BAR */}
         <div className="deliv-v2-top-bar">
-          <div className="deliv-v2-brand-title">
-            <h2 className="deliv-v2-main-heading">
-              {title || "お客様へのお届け成果物コレクション"}
-            </h2>
-          </div>
+          {mode !== "zoom" && (
+            <div className="deliv-v2-brand-title">
+              <h2 className="deliv-v2-main-heading">
+                {title || "お客様へのお届け成果物コレクション"}
+              </h2>
+            </div>
+          )}
 
           <div className="deliv-v2-context-action">
             <AnimatePresence mode="wait">
@@ -723,6 +755,35 @@ export default function LandingDeliverablesShowcase({
             }
           }}
         >
+          {/* GIANT VERTICAL ROTATED DISPLAY TITLE FOR STATE 1 (COLLECTIONS - GIỐNG ẢNH 2) */}
+          {mode === "cylinder" && (
+            <div
+              className={`deliv-v2-vertical-title-layer layer-front ${
+                isLongVerticalTitle ? "is-compact" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <div className="deliv-v2-vertical-rotator">
+                <div className="deliv-v2-vertical-mask">
+                  <AnimatePresence initial={false} custom={colDir}>
+                    <motion.span
+                      key={`vtitle-${activeColIdx}`}
+                      custom={colDir}
+                      variants={verticalTitleVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+                      className="deliv-v2-vertical-text"
+                    >
+                      {activeVerticalTitle}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* STATE 1 vs STATE 2/3 TRACK */}
           <AnimatePresence mode="wait">
             {mode === "cylinder" ? (

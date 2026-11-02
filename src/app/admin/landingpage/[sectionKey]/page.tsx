@@ -4303,6 +4303,24 @@ function ApplicationsForm({
             );
           })}
         </div>
+
+        {/* Nút Thêm thẻ ở dưới danh sách Thẻ giải pháp (giúp không phải cuộn lên trên) */}
+        <div className="pt-3 flex justify-center border-t border-slate-100">
+          <button
+            type="button"
+            onClick={handleAddCard}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-2 border border-emerald-500 cursor-pointer"
+          >
+            <Plus size={18} />
+            <span>
+              {lang === "ja"
+                ? "＋ カードを追加"
+                : lang === "en"
+                  ? "＋ Add New Card"
+                  : "＋ Thêm thẻ mới ở đây"}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );
