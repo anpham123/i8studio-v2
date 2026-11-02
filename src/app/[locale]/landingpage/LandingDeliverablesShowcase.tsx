@@ -47,15 +47,6 @@ const VIRTUAL_SLOTS = [-3, -2, -1, 0, 1, 2, 3];
 const STAGGER_Y_PATTERN = [-24, 48, -38, 42];
 const AUTO_ROTATE_MS = 3200;
 
-function extractShortCollectionTitle(rawName?: string, idx: number = 0): string {
-  if (!rawName || !rawName.trim()) {
-    return `COLLECTION 0${idx + 1}`;
-  }
-  const cleaned = rawName
-    .replace(/^(?:コレクション|COLLECTION|BỘ SƯU TẬP)\s*\d+\s*[:：\-・]\s*/i, "")
-    .trim();
-  return cleaned || rawName.trim();
-}
 
 function detectLightBackground(style?: React.CSSProperties): boolean {
   const raw = String(style?.background || style?.backgroundColor || "").trim();
@@ -85,21 +76,6 @@ function detectLightBackground(style?: React.CSSProperties): boolean {
 
   return false;
 }
-
-const verticalTitleVariants = {
-  enter: (dir: number) => ({
-    y: dir >= 0 ? "75%" : "-75%",
-    opacity: 0,
-  }),
-  center: {
-    y: "0%",
-    opacity: 1,
-  },
-  exit: (dir: number) => ({
-    y: dir >= 0 ? "-75%" : "75%",
-    opacity: 0,
-  }),
-};
 
 export default function LandingDeliverablesShowcase({
   title,
@@ -549,6 +525,24 @@ export default function LandingDeliverablesShowcase({
     };
   };
 
+  const getPhotoCardStyle = (
+    src: string,
+    isZoom: boolean,
+    isCenter: boolean
+  ): React.CSSProperties | undefined => {
+    if (isZoom && isCenter) {
+      return getZoomFittedStyle(src);
+    }
+    const ratio = imgRatios[src];
+    if (!ratio) return undefined;
+    return {
+      aspectRatio: `${ratio}`,
+      height: "clamp(220px, 35vh, 340px)",
+      width: "auto",
+      maxWidth: "clamp(260px, 42vw, 520px)",
+    };
+  };
+
   const getCollectionCover = (cIdx: number) => {
     const col = safeCollections[cIdx];
     const candidate = col?.thumbnail || col?.photos?.[0]?.url;
@@ -634,12 +628,7 @@ export default function LandingDeliverablesShowcase({
     }
   };
 
-  const activeVerticalTitle = extractShortCollectionTitle(
-    activeCollection.name,
-    activeColIdx
-  );
-  const isLongVerticalTitle = activeVerticalTitle.length > 13;
-
+  
   return (
     <section
       ref={sectionRef}
@@ -713,9 +702,7 @@ export default function LandingDeliverablesShowcase({
             </AnimatePresence>
           </div>
 
-          <div className="deliv-v2-side-stamp" aria-hidden="true">
-            <span>ARCHIVE GALLERY</span>
-          </div>
+          
         </div>
 
         {/* MAIN 3-STATE INTERACTIVE STAGE */}
@@ -736,37 +723,6 @@ export default function LandingDeliverablesShowcase({
             }
           }}
         >
-          {/* GIANT VERTICAL ROTATED DISPLAY TITLE (In front in State 1, behind center photo in State 2, hidden in State 3) */}
-          <div
-            className={`deliv-v2-vertical-title-layer ${
-              mode === "cylinder"
-                ? "layer-front"
-                : mode === "collection"
-                ? "layer-behind"
-                : "layer-hidden"
-            } ${isLongVerticalTitle ? "is-compact" : ""}`}
-            aria-hidden="true"
-          >
-            <div className="deliv-v2-vertical-rotator">
-              <div className="deliv-v2-vertical-mask">
-                <AnimatePresence initial={false} custom={colDir}>
-                  <motion.span
-                    key={`vtitle-${activeColIdx}`}
-                    custom={colDir}
-                    variants={verticalTitleVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-                    className="deliv-v2-vertical-text"
-                  >
-                    {activeVerticalTitle}
-                  </motion.span>
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-
           {/* STATE 1 vs STATE 2/3 TRACK */}
           <AnimatePresence mode="wait">
             {mode === "cylinder" ? (
@@ -848,8 +804,7 @@ export default function LandingDeliverablesShowcase({
                   const isCenter = slotOffset === 0;
                   const isZoom = mode === "zoom";
                   const shapeVariant = ((virtualPhotoIdx % 3) + 3) % 3;
-                  const zoomFittedStyle =
-                    isZoom && isCenter ? getZoomFittedStyle(imgSrc) : undefined;
+                  const cardStyle = getPhotoCardStyle(imgSrc, isZoom, isCenter);
 
                   return (
                     <article
@@ -861,7 +816,7 @@ export default function LandingDeliverablesShowcase({
                       className={`deliv-v2-photo-card shape-${shapeVariant} ${
                         isCenter ? "is-center" : "is-neighbor"
                       } ${isZoom && isCenter ? "is-zoomed" : ""}`}
-                      style={zoomFittedStyle}
+                      style={cardStyle}
                       onClick={(e) => handlePhotoClick(virtualPhotoIdx, e)}
                     >
                       <img

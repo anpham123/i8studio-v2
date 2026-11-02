@@ -1428,12 +1428,7 @@ export default function LandingPricingStackShowcase({
                   </span>
                   <div>
                     <div className="pricing-stack-v2-modal-badges">
-                      <span className="pricing-stack-v2-modal-cat">{detailPage.categoryName}</span>
-                      {detailPage.qualityBadge && (
-                        <span className="pricing-stack-v2-modal-qual">
-                          {detailPage.qualityBadge}
-                        </span>
-                      )}
+                      <span className="pricing-stack-v2-modal-cat">{detailPage.categoryName || detailPage.qualityBadge}</span>
                     </div>
                     <h3 className="pricing-stack-v2-modal-title">{detailPage.title}</h3>
                   </div>
@@ -1491,14 +1486,14 @@ export default function LandingPricingStackShowcase({
                     <span className="pricing-stack-v2-modal-price-lbl">
                       {detailPage.priceLabel || "参考制作価格"}
                     </span>
-                    <div className="pricing-stack-v2-modal-price-row">
-                      <span className="pricing-stack-v2-modal-price-val">
+                    <div className="pricing-stack-v2-modal-price-block">
+                      <div className="pricing-stack-v2-modal-price-val">
                         {detailPage.priceValue}
-                      </span>
+                      </div>
                       {detailPage.priceUnit && (
-                        <span className="pricing-stack-v2-modal-price-unit">
+                        <div className="pricing-stack-v2-modal-price-unit">
                           {detailPage.priceUnit}
-                        </span>
+                        </div>
                       )}
                     </div>
 

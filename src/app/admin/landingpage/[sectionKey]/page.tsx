@@ -1879,65 +1879,6 @@ function WorkflowForm({
           </div>
         </div>
 
-        {/* Nút Button dưới mô tả tóm tắt */}
-        <div className="p-4 rounded-xl bg-amber-50/50 border border-amber-200/80 space-y-3">
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-            🔘 Nút Button nằm dưới phần Mô tả tóm tắt
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <BilingualField
-              label="Nội dung chữ trên nút Button"
-              subLabel="Để trống sẽ hiển thị mặc định: 無料相談・お問い合わせ"
-              path={["ctaText"]}
-              contentJa={contentJa}
-              contentEn={contentEn}
-              updateField={updateField}
-              activeLang={lang}
-            />
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700">
-                Đường dẫn khi khách bấm vào nút Button:
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { label: "Trang liên hệ (/ja/contact)", href: "/ja/contact" },
-                  { label: "Cuộn xuống form cuối trang (#dang-ky-tu-van)", href: "#dang-ky-tu-van" },
-                ].map((opt) => {
-                  const curHref = contentJa?.ctaHref || "/ja/contact";
-                  const active = curHref === opt.href;
-                  return (
-                    <button
-                      key={opt.href}
-                      type="button"
-                      onClick={() => {
-                        updateField("ja", ["ctaHref"], opt.href);
-                        updateField("en", ["ctaHref"], opt.href);
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition cursor-pointer ${
-                        active
-                          ? "bg-amber-600 text-white border-amber-600"
-                          : "bg-white text-slate-700 border-slate-300 hover:border-amber-400"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <input
-                type="text"
-                value={contentJa?.ctaHref || ""}
-                onChange={(e) => {
-                  updateField("ja", ["ctaHref"], e.target.value);
-                  updateField("en", ["ctaHref"], e.target.value);
-                }}
-                placeholder="/ja/contact hoặc #dang-ky-tu-van"
-                className="w-full px-3 py-1.5 text-xs font-mono bg-white border border-slate-300 rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Header bar with total steps & Add Step button */}
@@ -3633,16 +3574,7 @@ function ApplicationsForm({
                 className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2.5"
               >
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-slate-400">Key:</span>
-                    <input
-                      type="text"
-                      value={catJa.key || ""}
-                      placeholder="key (vd: bds)"
-                      onChange={(e) => handleUpdateCategoryKey(cIdx, e.target.value)}
-                      className="px-2 py-0.5 text-xs text-blue-700 font-mono font-bold bg-white border border-slate-200 rounded w-28 focus:ring-1 focus:ring-blue-500 outline-none"
-                    />
-                  </div>
+                  <span className="text-xs font-bold text-slate-600">#{cIdx + 1}</span>
                   <button
                     type="button"
                     onClick={() => handleDeleteCategory(cIdx)}

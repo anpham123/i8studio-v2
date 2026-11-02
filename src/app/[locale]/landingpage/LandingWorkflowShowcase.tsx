@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface WorkflowStepItem {
   stepNumber?: string;
@@ -125,7 +125,6 @@ const cardQueueVariants = {
   }),
 };
 
-const AUTOPLAY_MS = 1500;
 
 export default function LandingWorkflowShowcase({
   title,
@@ -242,14 +241,57 @@ export default function LandingWorkflowShowcase({
     setActiveIndex((prev) => (prev - 1 + totalSteps) % totalSteps);
   }, [totalSteps]);
 
-  // Continuous 1.5s autoplay cycle immediately when scrolled into view
+  // Wheel / scroll-driven step progression
   useEffect(() => {
-    if (!isInView || totalSteps <= 1) return;
-    const timer = setInterval(() => {
-      handleNext();
-    }, AUTOPLAY_MS);
-    return () => clearInterval(timer);
-  }, [isInView, totalSteps, handleNext, activeIndex]);
+    const el = sectionRef.current;
+    if (!el || totalSteps <= 1) return;
+
+    let accumulatedDelta = 0;
+    let lastStepTime = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) < 15) return;
+      const now = Date.now();
+      const timeSinceLast = now - lastStepTime;
+
+      accumulatedDelta += e.deltaY;
+
+      if (timeSinceLast < 450) {
+        if (
+          (e.deltaY > 0 && activeIndex < totalSteps - 1) ||
+          (e.deltaY < 0 && activeIndex > 0)
+        ) {
+          e.preventDefault();
+        }
+        return;
+      }
+
+      if (accumulatedDelta > 45) {
+        if (activeIndex < totalSteps - 1) {
+          e.preventDefault();
+          accumulatedDelta = 0;
+          lastStepTime = now;
+          handleNext();
+        } else {
+          accumulatedDelta = 0;
+        }
+      } else if (accumulatedDelta < -45) {
+        if (activeIndex > 0) {
+          e.preventDefault();
+          accumulatedDelta = 0;
+          lastStepTime = now;
+          handlePrev();
+        } else {
+          accumulatedDelta = 0;
+        }
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, [totalSteps, activeIndex, handleNext, handlePrev]);
 
   if (totalSteps === 0) {
     return null;
@@ -308,12 +350,8 @@ export default function LandingWorkflowShowcase({
       handlePrev();
     }
   };
-
-  const progressPercent = ((activeIndex + 1) / totalSteps) * 100;
   const resolvedTitleColor = (activeStep.titleColor || stepTitleColor || "").trim();
   const resolvedDescColor = (activeStep.descColor || stepDescColor || "").trim();
-  const resolvedCtaText = (ctaText && ctaText.trim()) || "無料相談・お問い合わせ";
-  const resolvedCtaHref = (ctaHref && ctaHref.trim()) || contactHref;
 
   return (
     <section
@@ -474,13 +512,7 @@ export default function LandingWorkflowShowcase({
               </AnimatePresence>
             </div>
 
-            {/* Action CTA Button */}
-            <div className="wf-v2-cta-row">
-              <a href={resolvedCtaHref} className="wf-v2-explore-btn">
-                <span>{resolvedCtaText}</span>
-                <ArrowRight size={17} className="wf-v2-explore-arrow" />
-              </a>
-            </div>
+            
           </div>
 
           {/* 3. RIGHT HORIZONTAL CASCADING CARD CAROUSEL */}
@@ -552,14 +584,7 @@ export default function LandingWorkflowShowcase({
                         />
                         <div className="wf-v2-card-gradient" />
 
-                        {/* Top-Right Circular Badge */}
-                        <motion.span
-                          layout="position"
-                          className="wf-v2-card-corner-badge"
-                          aria-hidden="true"
-                        >
-                          <Bookmark size={14} strokeWidth={2.3} />
-                        </motion.span>
+                        
                       </div>
                     </motion.article>
                   );
@@ -571,8 +596,6 @@ export default function LandingWorkflowShowcase({
 
         {/* 4. BOTTOM CONTROLS BAR (Center Prev/Next + Right Progress Counter) */}
         <div className="wf-v2-bottom-bar">
-          <div className="wf-v2-bottom-spacer" aria-hidden="true" />
-
           <div className="wf-v2-nav-controls">
             <button
               type="button"
@@ -590,17 +613,6 @@ export default function LandingWorkflowShowcase({
             >
               <ChevronRight size={19} strokeWidth={2.2} />
             </button>
-          </div>
-
-          <div className="wf-v2-progress-block" aria-live="polite">
-            <span className="wf-v2-progress-num current">{activeStepNum}</span>
-            <div className="wf-v2-progress-track">
-              <div
-                className="wf-v2-progress-fill"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="wf-v2-progress-num total">{totalStepNum}</span>
           </div>
         </div>
       </div>
