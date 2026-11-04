@@ -6,9 +6,11 @@ import React, {
   useLayoutEffect,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 
 export interface DeliverablePhotoItem {
   url?: string;
@@ -34,7 +36,7 @@ interface LandingDeliverablesShowcaseProps {
   style?: React.CSSProperties;
 }
 
-type GalleryMode = "cylinder" | "collection" | "zoom";
+type ShowcaseMode = "carousel" | "collection";
 
 const FALLBACK_ARCHITECTURAL_IMAGES = [
   "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1400&q=85",
@@ -45,110 +47,13 @@ const FALLBACK_ARCHITECTURAL_IMAGES = [
   "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1400&q=85",
 ];
 
-const VIRTUAL_SLOTS = [-3, -2, -1, 0, 1, 2, 3];
-const STAGGER_Y_PATTERN = [-16, 28, -24, 26];
-const AUTO_ROTATE_MS = 3200;
-
-
-function extractShortCollectionTitle(rawName?: string, idx: number = 0): string {
-  if (!rawName || !rawName.trim()) {
-    return `COLLECTION 0${idx + 1}`;
-  }
-  const cleaned = rawName
-    .replace(/^(?:コレクション|COLLECTION|BỘ SƯU TẬP)\s*\d+\s*[:：\-・]\s*/i, "")
-    .trim();
-  return cleaned || rawName.trim();
-}
-
-function renderVerticalTitleSegments(rawText: string) {
-  const trimmed = (rawText || "").trim();
-  if (!trimmed) return null;
-  const parts = trimmed
-    .split(/(\s*\d+[A-Za-z]*[:：]?|\s*[A-Za-z]{2,4}[:：]?)/g)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  return parts.map((part, idx) => {
-    const isHorizToken = /^(?:\d+[A-Za-z]*[:：]?|[A-Za-z]{2,4}[:：]?)$/.test(part);
-    if (isHorizToken) {
-      return (
-        <span key={idx} className="deliv-v2-vertical-horiz-token">
-          {part}
-        </span>
-      );
-    }
-    return (
-      <span key={idx} className="deliv-v2-vertical-upright-run">
-        {part}
-      </span>
-    );
-  });
-}
-
-function countVerticalTitleRows(rawText: string): number {
-  const trimmed = (rawText || "").trim();
-  if (!trimmed) return 0;
-  const parts = trimmed
-    .split(/(\s*\d+[A-Za-z]*[:：]?|\s*[A-Za-z]{2,4}[:：]?)/g)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  let rows = 0;
-  for (const part of parts) {
-    const isHorizToken = /^(?:\d+[A-Za-z]*[:：]?|[A-Za-z]{2,4}[:：]?)$/.test(part);
-    if (isHorizToken) {
-      rows += 1;
-    } else {
-      rows += Array.from(part.replace(/\s+/g, "")).length;
-    }
-  }
-  return rows;
-}
-
-const verticalTitleVariants = {
-  enter: (dir: number) => ({
-    x: dir >= 0 ? "65%" : "-65%",
-    opacity: 0,
-  }),
-  center: {
-    x: "0%",
-    opacity: 1,
-  },
-  exit: (dir: number) => ({
-    x: dir >= 0 ? "-65%" : "65%",
-    opacity: 0,
-  }),
-};
-
-function getVerticalTitleColorStyle(
-  rawColor?: string
-): React.CSSProperties | undefined {
-  const chosen = String(rawColor || "").trim();
-  if (!chosen) return undefined;
-  const hexMatch = chosen.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
-  let isDarkText = false;
-  if (hexMatch) {
-    let hex = hexMatch[1];
-    if (hex.length === 3) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    isDarkText = lum < 0.45;
-  }
-  return {
-    color: chosen,
-    textShadow: isDarkText
-      ? "0 2px 14px rgba(255, 255, 255, 0.72), 0 1px 4px rgba(255, 255, 255, 0.55)"
-      : "0 3px 18px rgba(0, 0, 0, 0.52), 0 1px 5px rgba(0, 0, 0, 0.38)",
-  };
-}
+const VIRTUAL_SLOTS = [-2, -1, 0, 1, 2];
 
 function detectLightBackground(style?: React.CSSProperties): boolean {
   const raw = String(style?.background || style?.backgroundColor || "").trim();
-  if (!raw) return false;
+  if (!raw) {
+    return true;
+  }
 
   const hexMatch = raw.match(/#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/);
   if (hexMatch) {
@@ -172,8 +77,42 @@ function detectLightBackground(style?: React.CSSProperties): boolean {
     return lum > 0.52;
   }
 
-  return false;
+  return true;
 }
+
+function getCollectionTitleStyle(
+  rawColor: string | undefined,
+  isLightBg: boolean
+): React.CSSProperties | undefined {
+  const chosen = String(rawColor || "").trim();
+  if (!chosen) return undefined;
+
+  const isWhiteish = /^#(?:fff|ffffff|fefefe|fafafa)$/i.test(chosen);
+  if (isLightBg && isWhiteish) {
+    return {
+      color: chosen,
+      textShadow:
+        "0 1px 10px rgba(20, 21, 24, 0.45), 0 1px 3px rgba(20, 21, 24, 0.35)",
+    };
+  }
+
+  return { color: chosen };
+}
+
+const horizTitleVariants = {
+  enter: (dir: number) => ({
+    x: dir >= 0 ? 24 : -24,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (dir: number) => ({
+    x: dir >= 0 ? -24 : 24,
+    opacity: 0,
+  }),
+};
 
 export default function LandingDeliverablesShowcase({
   title,
@@ -183,39 +122,40 @@ export default function LandingDeliverablesShowcase({
   closeZoomBtnText,
   style,
 }: LandingDeliverablesShowcaseProps) {
-  const safeCollections = collections.length > 0 ? collections : [];
+  const safeCollections = useMemo(
+    () =>
+      Array.isArray(collections) && collections.length > 0 ? collections : [],
+    [collections]
+  );
   const colCount = safeCollections.length;
 
-  const [mode, setMode] = useState<GalleryMode>("cylinder");
+  const [mode, setMode] = useState<ShowcaseMode>("carousel");
   const [colBaseStep, setColBaseStep] = useState(0);
   const [colDir, setColDir] = useState(1);
-  const [photoBaseStep, setPhotoBaseStep] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
   const [isDraggingUI, setIsDraggingUI] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [isMobileStage, setIsMobileStage] = useState(false);
+  const [viewportSize, setViewportSize] = useState<{ w: number; h: number }>({
+    w: 1440,
+    h: 860,
+  });
   const [failedUrls, setFailedUrls] = useState<Record<string, boolean>>({});
   const [imgRatios, setImgRatios] = useState<Record<string, number>>({});
+  const [zoomPhotoIdx, setZoomPhotoIdx] = useState<number | null>(null);
+  const [portalMounted, setPortalMounted] = useState(false);
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
 
-  // Continuous physics state refs (60/120fps without React re-renders per frame)
-  const modeRef = useRef<GalleryMode>(mode);
+  // Continuous physics state for State 1 horizontal editorial carousel
+  const modeRef = useRef<ShowcaseMode>(mode);
   modeRef.current = mode;
 
   const colPosRef = useRef(0);
   const colTargetRef = useRef(0);
   const colBaseRef = useRef(0);
 
-  const photoPosRef = useRef(0);
-  const photoTargetRef = useRef(0);
-  const photoBaseRef = useRef(0);
-
-  const zoomMixRef = useRef(0);
-
-  // Pointer drag & velocity tracking
+  // Pointer drag & flick velocity tracking
   const isPointerDownRef = useRef(false);
   const didDragRef = useRef(false);
   const dragStartXRef = useRef(0);
@@ -224,149 +164,129 @@ export default function LandingDeliverablesShowcase({
   const pointerSamplesRef = useRef<Array<{ x: number; t: number }>>([]);
   const wheelSnapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // DOM node maps keyed by virtualIndex
-  const cylCardMapRef = useRef<Map<number, HTMLElement>>(new Map());
-  const cylImgMapRef = useRef<Map<number, HTMLImageElement>>(new Map());
-  const photoCardMapRef = useRef<Map<number, HTMLElement>>(new Map());
+  // DOM node map for carousel virtual cards
+  const cardMapRef = useRef<Map<number, HTMLElement>>(new Map());
+
+  useEffect(() => {
+    setPortalMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const syncViewport = () => {
+      const w = stageRef.current?.clientWidth || window.innerWidth || 1440;
+      const h = window.innerHeight || 860;
+      setViewportSize({ w, h });
+    };
+    syncViewport();
+    window.addEventListener("resize", syncViewport, { passive: true });
+    return () => window.removeEventListener("resize", syncViewport);
+  }, []);
+
+  // Lock body scroll only when Fullscreen Zoom Lightbox (State 3) is open
+  useEffect(() => {
+    if (zoomPhotoIdx === null) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [zoomPhotoIdx]);
+
+  const resolveImageUrl = useCallback(
+    (rawUrl: string | undefined, fallbackSeed: number) => {
+      const fallback =
+        FALLBACK_ARCHITECTURAL_IMAGES[
+          Math.abs(fallbackSeed) % FALLBACK_ARCHITECTURAL_IMAGES.length
+        ];
+      if (!rawUrl || !rawUrl.trim() || failedUrls[rawUrl]) {
+        return fallback;
+      }
+      return rawUrl.trim();
+    },
+    [failedUrls]
+  );
+
+  const getPhotosForCollection = useCallback(
+    (cIdx: number): DeliverablePhotoItem[] => {
+      const col = safeCollections[cIdx] || {};
+      const rawPhotos = Array.isArray(col.photos) ? col.photos : [];
+      const nonEmptyPhotos = rawPhotos.filter(
+        (p) => p && typeof p.url === "string" && p.url.trim().length > 0
+      );
+      if (nonEmptyPhotos.length > 0) {
+        return nonEmptyPhotos;
+      }
+      return [
+        {
+          url:
+            col.thumbnail ||
+            FALLBACK_ARCHITECTURAL_IMAGES[
+              Math.abs(cIdx) % FALLBACK_ARCHITECTURAL_IMAGES.length
+            ],
+          tag: col.badge || `COLLECTION 0${cIdx + 1}`,
+          title: col.name || `Collection 0${cIdx + 1}`,
+        },
+      ];
+    },
+    [safeCollections]
+  );
 
   const activeColIdx =
     colCount > 0 ? ((colBaseStep % colCount) + colCount) % colCount : 0;
   const activeCollection = safeCollections[activeColIdx] || {};
-  const activePhotos: DeliverablePhotoItem[] =
-    Array.isArray(activeCollection.photos) && activeCollection.photos.length > 0
-      ? activeCollection.photos
-      : [
-          {
-            url:
-              activeCollection.thumbnail ||
-              FALLBACK_ARCHITECTURAL_IMAGES[
-                activeColIdx % FALLBACK_ARCHITECTURAL_IMAGES.length
-              ],
-            tag: activeCollection.badge || `COLLECTION 0${activeColIdx + 1}`,
-            title: activeCollection.name || `Collection 0${activeColIdx + 1}`,
-          },
-        ];
+  const activePhotos = useMemo(
+    () => getPhotosForCollection(activeColIdx),
+    [getPhotosForCollection, activeColIdx]
+  );
   const photoCount = activePhotos.length;
 
   const isLightBg = detectLightBackground(style);
+  const activeTitleColorStyle = getCollectionTitleStyle(
+    activeCollection.nameColor || collectionNameColor,
+    isLightBg
+  );
 
-  // Compute current stride in pixels for responsive 1:1 pointer tracking
-  const getStridePx = useCallback((forMode: GalleryMode) => {
-    const w = stageRef.current?.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 1440);
-    const isPhone = w <= 768;
-    const isTablet = w > 768 && w <= 960;
-    if (forMode === "cylinder") {
-      return w * (isPhone ? 0.565 : isTablet ? 0.63 : 0.342);
-    }
-    if (forMode === "zoom") {
-      return w * (w <= 960 ? 0.92 : 0.64);
-    }
-    if (isPhone) {
-      return w * 0.665;
-    }
-    if (isTablet) {
-      return Math.max(w * 0.68, 320);
-    }
-    return Math.max(w * 0.32, 440);
+  const getCarouselStridePx = useCallback(() => {
+    const w =
+      stageRef.current?.clientWidth ||
+      (typeof window !== "undefined" ? window.innerWidth : 1440);
+    if (w <= 768) return w * 0.64;
+    if (w <= 960) return w * 0.56;
+    return w * 0.5;
   }, []);
 
-  // Synchronous frame painter for State 1 (Concave 3D Cylinder)
-  const paintCylinderFrame = useCallback(() => {
-    const stageEl = stageRef.current;
-    if (!stageEl) return;
-    const w = stageEl.clientWidth || 1440;
-    const isPhone = w <= 768;
-    const isTablet = w > 768 && w <= 960;
-    const stride = w * (isPhone ? 0.565 : isTablet ? 0.63 : 0.342);
+  const paintCarouselFrame = useCallback(() => {
+    const stride = getCarouselStridePx();
     const pos = colPosRef.current;
 
-    cylCardMapRef.current.forEach((el, vIdx) => {
+    cardMapRef.current.forEach((el, vIdx) => {
       const d = vIdx - pos;
       const absD = Math.abs(d);
       const xPx = d * stride;
-      const opacity = absD > 2.4 ? 0 : absD > 1.85 ? (2.4 - absD) / 0.55 : 1;
+      const opacity = absD > 1.85 ? 0 : absD > 1.35 ? (1.85 - absD) / 0.5 : 1;
 
       el.style.transform = `translate3d(${xPx.toFixed(2)}px, 0px, 0px)`;
       el.style.opacity = String(Math.max(0, Math.min(1, opacity)));
-      el.style.pointerEvents = absD < 1.65 ? "auto" : "none";
-      el.style.zIndex = String(20 - Math.round(absD * 4));
-
-      const imgEl = cylImgMapRef.current.get(vIdx);
-      if (imgEl) {
-        if (isPhone) {
-          // Keep 1:1 natural image geometry on mobile so swiping never causes wavy vertical distortion
-          imgEl.style.transform = "none";
-        } else {
-          // Parabolic vertical expansion matching the outer cylinder flare on desktop
-          const normD = Math.min(1.25, absD);
-          const scaleY = 0.61 + 0.41 * Math.pow(normD, 1.35);
-          const parallaxX = Math.max(-7, Math.min(7, -d * 4.2));
-          imgEl.style.transform = `translate3d(${parallaxX.toFixed(2)}%, 0, 0) scale(1.12, ${scaleY.toFixed(4)})`;
-        }
-      }
+      el.style.pointerEvents = absD < 1.45 ? "auto" : "none";
+      el.style.zIndex = String(20 - Math.round(absD * 5));
     });
-  }, []);
+  }, [getCarouselStridePx]);
 
-  // Synchronous frame painter for State 2 (Staggered) & State 3 (Zoom)
-  const paintPhotosFrame = useCallback(() => {
-    const stageEl = stageRef.current;
-    if (!stageEl) return;
-    const w = stageEl.clientWidth || 1440;
-    const isPhone = w <= 768;
-    const isTablet = w > 768 && w <= 960;
-    const isMobile = w <= 960;
-    const mix = zoomMixRef.current;
-
-    const baseStride = isPhone
-      ? w * 0.665
-      : isTablet
-      ? Math.max(w * 0.68, 320)
-      : Math.max(w * 0.32, 440);
-    const zoomStride = w * (isMobile ? 0.92 : 0.64);
-    const stride = baseStride + (zoomStride - baseStride) * mix;
-    const pos = photoPosRef.current;
-
-    photoCardMapRef.current.forEach((el, vIdx) => {
-      const d = vIdx - pos;
-      const absD = Math.abs(d);
-      const xPx = d * stride;
-
-      // Artistic editorial vertical wave in State 2 -> centers smoothly in State 3
-      const patternIdx = ((vIdx % 4) + 4) % 4;
-      const baseStaggerY = (isPhone ? 0.38 : isMobile ? 0.55 : 1) * STAGGER_Y_PATTERN[patternIdx];
-      const yPx = baseStaggerY * (1 - mix * Math.max(0, 1 - absD * 0.65));
-
-      const neighborDim = mix > 0.05 && absD > 0.45 ? 1 - 0.22 * mix : 1;
-      const edgeFade = absD > 2.6 ? 0 : absD > 2.0 ? (2.6 - absD) / 0.6 : 1;
-      const opacity = Math.max(0, Math.min(1, edgeFade * neighborDim));
-
-      el.style.transform = `translate3d(${xPx.toFixed(2)}px, ${yPx.toFixed(2)}px, 0px)`;
-      el.style.opacity = String(opacity);
-      el.style.pointerEvents = absD < 1.8 ? "auto" : "none";
-      el.style.zIndex = absD < 0.45 ? "18" : String(14 - Math.round(absD * 3));
-    });
-  }, []);
-
-  // Ensure newly mounted virtual slots are positioned BEFORE browser paint (zero flash)
   useLayoutEffect(() => {
-    if (mode === "cylinder") {
-      paintCylinderFrame();
-    } else {
-      paintPhotosFrame();
+    if (mode === "carousel") {
+      paintCarouselFrame();
     }
-  }, [mode, colBaseStep, photoBaseStep, paintCylinderFrame, paintPhotosFrame]);
+  }, [mode, colBaseStep, viewportSize.w, paintCarouselFrame]);
 
-  // Continuous 60/120fps physics animation loop
   useEffect(() => {
     let rafId = 0;
 
     const tick = () => {
-      const curMode = modeRef.current;
-      const dragging = isPointerDownRef.current;
-
-      if (curMode === "cylinder") {
-        const lerpFactor = dragging ? 0.36 : 0.105;
+      if (modeRef.current === "carousel") {
+        const dragging = isPointerDownRef.current;
+        const lerpFactor = dragging ? 0.34 : 0.1;
         const diff = colTargetRef.current - colPosRef.current;
+
         if (Math.abs(diff) > 0.0004) {
           colPosRef.current += diff * lerpFactor;
         } else {
@@ -380,31 +300,7 @@ export default function LandingDeliverablesShowcase({
           setColBaseStep(rounded);
         }
 
-        paintCylinderFrame();
-      } else {
-        const lerpFactor = dragging ? 0.36 : 0.115;
-        const diff = photoTargetRef.current - photoPosRef.current;
-        if (Math.abs(diff) > 0.0004) {
-          photoPosRef.current += diff * lerpFactor;
-        } else {
-          photoPosRef.current = photoTargetRef.current;
-        }
-
-        const targetZoom = curMode === "zoom" ? 1 : 0;
-        const zDiff = targetZoom - zoomMixRef.current;
-        if (Math.abs(zDiff) > 0.001) {
-          zoomMixRef.current += zDiff * 0.14;
-        } else {
-          zoomMixRef.current = targetZoom;
-        }
-
-        const rounded = Math.round(photoPosRef.current);
-        if (rounded !== photoBaseRef.current) {
-          photoBaseRef.current = rounded;
-          setPhotoBaseStep(rounded);
-        }
-
-        paintPhotosFrame();
+        paintCarouselFrame();
       }
 
       rafId = window.requestAnimationFrame(tick);
@@ -412,18 +308,9 @@ export default function LandingDeliverablesShowcase({
 
     rafId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(rafId);
-  }, [paintCylinderFrame, paintPhotosFrame]);
+  }, [paintCarouselFrame]);
 
-  useEffect(() => {
-    const syncMobileStage = () => {
-      setIsMobileStage(window.innerWidth <= 768);
-    };
-    syncMobileStage();
-    window.addEventListener("resize", syncMobileStage, { passive: true });
-    return () => window.removeEventListener("resize", syncMobileStage);
-  }, []);
-
-  // Observe section visibility & first-time entrance reveal
+  // First-time viewport entrance detection
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -436,7 +323,7 @@ export default function LandingDeliverablesShowcase({
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.14 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -451,56 +338,28 @@ export default function LandingDeliverablesShowcase({
     [colCount]
   );
 
-  const stepPhotoBy = useCallback(
-    (delta: number) => {
-      if (photoCount <= 0 || delta === 0) return;
-      photoTargetRef.current = Math.round(photoTargetRef.current + delta);
-    },
-    [photoCount]
-  );
-
-  // Gentle auto-glide in State 1 when visible, idle, and not hovered
-  useEffect(() => {
-    if (
-      mode !== "cylinder" ||
-      !isInView ||
-      isHovered ||
-      isDraggingUI ||
-      colCount <= 1
-    ) {
-      return;
-    }
-    const timer = setInterval(() => {
-      if (!isPointerDownRef.current) {
-        stepCollectionBy(1);
-      }
-    }, AUTO_ROTATE_MS);
-    return () => clearInterval(timer);
-  }, [mode, isInView, isHovered, isDraggingUI, colCount, stepCollectionBy]);
-
-  // Global window pointer move/up listeners for smooth uninterrupted phone-like swiping
+  // Global pointer listeners for smooth horizontal drag in State 1
   useEffect(() => {
     const onWindowPointerMove = (e: PointerEvent) => {
-      if (!isPointerDownRef.current) return;
+      if (!isPointerDownRef.current || modeRef.current !== "carousel") return;
 
       const dx = e.clientX - dragStartXRef.current;
       const dy = e.clientY - dragStartYRef.current;
 
-      if (!didDragRef.current && Math.hypot(dx, dy) > 7) {
-        didDragRef.current = true;
-        setIsDraggingUI(true);
+      if (!didDragRef.current) {
+        if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+          isPointerDownRef.current = false;
+          return;
+        }
+        if (Math.abs(dx) > 6) {
+          didDragRef.current = true;
+          setIsDraggingUI(true);
+        }
       }
 
       if (didDragRef.current) {
-        const curMode = modeRef.current;
-        const stride = getStridePx(curMode);
-        const nextTarget = dragOriginPosRef.current - dx / stride;
-
-        if (curMode === "cylinder") {
-          colTargetRef.current = nextTarget;
-        } else {
-          photoTargetRef.current = nextTarget;
-        }
+        const stride = getCarouselStridePx();
+        colTargetRef.current = dragOriginPosRef.current - dx / stride;
       }
 
       const now = performance.now();
@@ -518,8 +377,7 @@ export default function LandingDeliverablesShowcase({
       isPointerDownRef.current = false;
 
       if (didDragRef.current) {
-        const curMode = modeRef.current;
-        const stride = getStridePx(curMode);
+        const stride = getCarouselStridePx();
         const now = performance.now();
         const samples = pointerSamplesRef.current;
 
@@ -534,35 +392,26 @@ export default function LandingDeliverablesShowcase({
         }
 
         const vCardsPerSec = Math.max(
-          -4.5,
-          Math.min(4.5, (-vxPxPerMs * 1000) / stride)
+          -3.5,
+          Math.min(3.5, (-vxPxPerMs * 1000) / stride)
         );
 
-        const activeTarget =
-          curMode === "cylinder" ? colTargetRef.current : photoTargetRef.current;
-        let snapped = Math.round(activeTarget + vCardsPerSec * 0.22);
-
-        // Ensure deliberate short flicks (> 42px) advance at least 1 item
+        let snapped = Math.round(colTargetRef.current + vCardsPerSec * 0.2);
         const totalDx =
           (clientX ?? (samples[samples.length - 1]?.x || dragStartXRef.current)) -
           dragStartXRef.current;
         const originRounded = Math.round(dragOriginPosRef.current);
-        if (snapped === originRounded && Math.abs(totalDx) > 42) {
+        if (snapped === originRounded && Math.abs(totalDx) > 38) {
           snapped = originRounded + (totalDx < 0 ? 1 : -1);
         }
 
-        if (curMode === "cylinder") {
-          setColDir(snapped >= colBaseRef.current ? 1 : -1);
-          colTargetRef.current = snapped;
-        } else {
-          photoTargetRef.current = snapped;
-        }
-
+        setColDir(snapped >= colBaseRef.current ? 1 : -1);
+        colTargetRef.current = snapped;
         setIsDraggingUI(false);
-        // Keep didDragRef true across the synchronous click dispatch, then clear
+
         window.setTimeout(() => {
           didDragRef.current = false;
-        }, 40);
+        }, 45);
       }
     };
 
@@ -580,41 +429,67 @@ export default function LandingDeliverablesShowcase({
       window.removeEventListener("pointerup", onWindowPointerUp);
       window.removeEventListener("pointercancel", onWindowPointerCancel);
     };
-  }, [getStridePx]);
+  }, [getCarouselStridePx]);
 
-  // Keyboard navigation (Left/Right/Escape)
+  const handleReturnToCarousel = useCallback(() => {
+    setZoomPhotoIdx(null);
+    setMode("carousel");
+    if (sectionRef.current) {
+      const rect = sectionRef.current.getBoundingClientRect();
+      if (rect.top < -80 || rect.top > window.innerHeight * 0.5) {
+        sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, []);
+
+  // Keyboard shortcuts (Escape / Left / Right)
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView && zoomPhotoIdx === null) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (mode === "zoom") setMode("collection");
-        else if (mode === "collection") setMode("cylinder");
-      } else if (e.key === "ArrowRight") {
-        if (mode === "cylinder") stepCollectionBy(1);
-        else stepPhotoBy(1);
+      if (zoomPhotoIdx !== null) {
+        if (e.key === "Escape") {
+          setZoomPhotoIdx(null);
+        } else if (e.key === "ArrowRight") {
+          setZoomPhotoIdx((prev) =>
+            prev === null ? null : (prev + 1) % Math.max(1, photoCount)
+          );
+        } else if (e.key === "ArrowLeft") {
+          setZoomPhotoIdx((prev) =>
+            prev === null
+              ? null
+              : (prev - 1 + Math.max(1, photoCount)) % Math.max(1, photoCount)
+          );
+        }
+        return;
+      }
+
+      if (mode === "collection") {
+        if (e.key === "Escape") {
+          handleReturnToCarousel();
+        }
+        return;
+      }
+
+      if (e.key === "ArrowRight") {
+        stepCollectionBy(1);
       } else if (e.key === "ArrowLeft") {
-        if (mode === "cylinder") stepCollectionBy(-1);
-        else stepPhotoBy(-1);
+        stepCollectionBy(-1);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isInView, mode, stepCollectionBy, stepPhotoBy]);
+  }, [
+    isInView,
+    mode,
+    zoomPhotoIdx,
+    photoCount,
+    stepCollectionBy,
+    handleReturnToCarousel,
+  ]);
 
   if (colCount === 0) {
     return null;
   }
-
-  const resolveImageUrl = (rawUrl: string | undefined, fallbackSeed: number) => {
-    const fallback =
-      FALLBACK_ARCHITECTURAL_IMAGES[
-        Math.abs(fallbackSeed) % FALLBACK_ARCHITECTURAL_IMAGES.length
-      ];
-    if (!rawUrl || !rawUrl.trim() || failedUrls[rawUrl]) {
-      return fallback;
-    }
-    return rawUrl;
-  };
 
   const markUrlFailed = (rawUrl?: string) => {
     if (!rawUrl) return;
@@ -630,69 +505,67 @@ export default function LandingDeliverablesShowcase({
     });
   };
 
-  const getZoomFittedStyle = (src: string): React.CSSProperties | undefined => {
-    const ratio = imgRatios[src];
-    if (!ratio) return undefined;
-    const stageW =
-      stageRef.current?.clientWidth ||
-      (typeof window !== "undefined" ? window.innerWidth : 1440);
-    const stageH =
-      stageRef.current?.clientHeight ||
-      (typeof window !== "undefined" ? window.innerHeight * 0.8 : 740);
-    const isMobile = stageW <= 960;
+  const getCollectionCover = (cIdx: number) => {
+    const col = safeCollections[cIdx];
+    const photos = getPhotosForCollection(cIdx);
+    const candidate =
+      (col?.thumbnail && col.thumbnail.trim()) || photos[0]?.url;
+    return resolveImageUrl(candidate, cIdx);
+  };
 
-    const maxW = isMobile ? stageW * 0.9 : Math.min(stageW * 0.78, 1320);
-    const maxH = isMobile ? stageH * 0.82 : Math.min(stageH * 0.9, 820);
+  // Exact natural uploaded aspect ratio dimensions for State 1 cards
+  const computeCarouselDims = (
+    src: string
+  ): { width: number; height: number } | null => {
+    const ratio = imgRatios[src];
+    if (!ratio) return null;
+
+    const w = viewportSize.w || 1440;
+    const h = viewportSize.h || 860;
+    const isPhone = w <= 768;
+    const isTablet = w > 768 && w <= 960;
+
+    const maxW = isPhone
+      ? w * 0.56
+      : isTablet
+      ? Math.min(w * 0.46, 420)
+      : Math.min(Math.max(290, w * 0.34), 500);
+
+    const maxH = isPhone
+      ? Math.min(Math.max(210, h * 0.38), 310)
+      : isTablet
+      ? Math.min(Math.max(250, h * 0.44), 390)
+      : Math.min(Math.max(280, h * 0.5), 470);
 
     const fitW = Math.min(maxW, maxH * ratio);
     const fitH = fitW / ratio;
 
     return {
-      width: `${Math.round(fitW)}px`,
-      height: `${Math.round(fitH)}px`,
+      width: Math.round(fitW),
+      height: Math.round(fitH),
     };
   };
 
-  const getPhotoCardStyle = (
-    src: string,
-    isZoom: boolean,
-    isCenter: boolean
+  const getCarouselImgFittedStyle = (
+    src: string
   ): React.CSSProperties | undefined => {
-    if (isZoom && isCenter) {
-      return getZoomFittedStyle(src);
-    }
-    const ratio = imgRatios[src];
-    if (!ratio) return undefined;
-    if (isMobileStage) {
-      const stageW =
-        stageRef.current?.clientWidth ||
-        (typeof window !== "undefined" ? window.innerWidth : 393);
-      const stageH =
-        stageRef.current?.clientHeight ||
-        (typeof window !== "undefined" ? window.innerHeight * 0.45 : 340);
-      const maxCardW = stageW * 0.58;
-      const maxCardH = Math.min(Math.max(145, stageH * 0.52), 195);
-      const fitW = Math.min(maxCardW, maxCardH * ratio);
-      const fitH = fitW / ratio;
-      return {
-        width: `${Math.round(fitW)}px`,
-        height: `${Math.round(fitH)}px`,
-      };
-    }
+    const dims = computeCarouselDims(src);
+    if (!dims) return undefined;
     return {
-      aspectRatio: `${ratio}`,
-      height: "clamp(195px, 28vh, 285px)",
-      width: "auto",
+      width: `${dims.width}px`,
+      height: `${dims.height}px`,
     };
   };
 
-  const getCollectionCover = (cIdx: number) => {
-    const col = safeCollections[cIdx];
-    const candidate = col?.thumbnail || col?.photos?.[0]?.url;
-    return resolveImageUrl(candidate, cIdx);
-  };
+  // Match stage height tightly to the active center card so Collection Name sits right ABOVE the photo
+  const activeCenterCoverSrc = getCollectionCover(activeColIdx);
+  const activeCenterDims = computeCarouselDims(activeCenterCoverSrc);
+  const stageDynamicStyle: React.CSSProperties | undefined = activeCenterDims
+    ? { height: `${activeCenterDims.height}px`, minHeight: `${activeCenterDims.height}px` }
+    : undefined;
 
   const handleStagePointerDown = (e: React.PointerEvent) => {
+    if (mode !== "carousel") return;
     if (e.button !== 0 && e.pointerType === "mouse") return;
     if ((e.target as HTMLElement).closest("button")) return;
 
@@ -700,363 +573,496 @@ export default function LandingDeliverablesShowcase({
     didDragRef.current = false;
     dragStartXRef.current = e.clientX;
     dragStartYRef.current = e.clientY;
-
-    if (mode === "cylinder") {
-      colTargetRef.current = colPosRef.current;
-      dragOriginPosRef.current = colPosRef.current;
-    } else {
-      photoTargetRef.current = photoPosRef.current;
-      dragOriginPosRef.current = photoPosRef.current;
-    }
-
+    colTargetRef.current = colPosRef.current;
+    dragOriginPosRef.current = colPosRef.current;
     pointerSamplesRef.current = [{ x: e.clientX, t: performance.now() }];
   };
 
-  // Horizontal trackpad two-finger glide (does not block vertical page scroll)
   const handleStageWheel = (e: React.WheelEvent) => {
+    if (mode !== "carousel") return;
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 3) {
       return;
     }
-    const stride = getStridePx(mode);
-    const deltaCards = e.deltaX / stride;
-
-    if (mode === "cylinder") {
-      colTargetRef.current += deltaCards;
-    } else {
-      photoTargetRef.current += deltaCards;
-    }
+    const stride = getCarouselStridePx();
+    colTargetRef.current += e.deltaX / stride;
 
     if (wheelSnapTimerRef.current) clearTimeout(wheelSnapTimerRef.current);
     wheelSnapTimerRef.current = setTimeout(() => {
-      if (modeRef.current === "cylinder") {
-        colTargetRef.current = Math.round(colTargetRef.current);
-      } else {
-        photoTargetRef.current = Math.round(photoTargetRef.current);
+      if (modeRef.current === "carousel") {
+        const snapped = Math.round(colTargetRef.current);
+        setColDir(snapped >= colBaseRef.current ? 1 : -1);
+        colTargetRef.current = snapped;
       }
-    }, 160);
+    }, 150);
   };
 
-  const openCollectionAt = (virtualColIdx: number) => {
+  const handleCarouselCardClick = (virtualColIdx: number, slotOffset: number) => {
     if (didDragRef.current) return;
+
+    if (slotOffset !== 0) {
+      setColDir(slotOffset > 0 ? 1 : -1);
+      colTargetRef.current = virtualColIdx;
+      return;
+    }
+
     colPosRef.current = virtualColIdx;
     colTargetRef.current = virtualColIdx;
     colBaseRef.current = virtualColIdx;
     setColBaseStep(virtualColIdx);
-
-    photoPosRef.current = 0;
-    photoTargetRef.current = 0;
-    photoBaseRef.current = 0;
-    zoomMixRef.current = 0;
-    setPhotoBaseStep(0);
     setMode("collection");
   };
 
-  const handlePhotoClick = (virtualPhotoIdx: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (didDragRef.current) return;
-
-    if (mode === "zoom") {
-      if (virtualPhotoIdx === photoBaseStep) {
-        setMode("collection");
-      } else {
-        photoTargetRef.current = virtualPhotoIdx;
-        photoBaseRef.current = virtualPhotoIdx;
-        setPhotoBaseStep(virtualPhotoIdx);
-      }
-    } else {
-      photoTargetRef.current = virtualPhotoIdx;
-      photoBaseRef.current = virtualPhotoIdx;
-      setPhotoBaseStep(virtualPhotoIdx);
-      setMode("zoom");
-    }
-  };
-
-  
-  const activeVerticalTitle = extractShortCollectionTitle(
-    activeCollection.name,
-    activeColIdx
-  );
-  const verticalTitleRows = countVerticalTitleRows(activeVerticalTitle);
-  const verticalTitleSizeClass =
-    verticalTitleRows >= 13
-      ? "is-extra-compact"
-      : verticalTitleRows >= 9
-      ? "is-compact"
-      : "";
-  const activeCylinderClipUrl = isMobileStage
-    ? "url(#delivConcaveCylinderClipMobile)"
-    : "url(#delivConcaveCylinderClip)";
-  const activeVerticalTitleStyle = getVerticalTitleColorStyle(
-    activeCollection.nameColor || collectionNameColor
-  );
+  const activeCollectionDisplayName =
+    (activeCollection.name && activeCollection.name.trim()) ||
+    `コレクション 0${activeColIdx + 1}`;
 
   return (
     <section
       ref={sectionRef}
-      className={`deliverables-compare-section deliv-v2-section deliv-first-reveal mode-${mode} ${
+      className={`deliverables-compare-section deliv-v2-section deliv-editorial-v3 mode-${mode} ${
         isLightBg ? "is-light-bg" : "is-dark-bg"
       } ${isDraggingUI ? "is-dragging" : ""} ${hasEntered ? "is-entered" : ""}`}
       id="bo-suu-tap"
       style={style}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Exact Parabolic Concave Cylinder Clip-Path (works with ANY Admin background color!) */}
-      <svg
-        width="0"
-        height="0"
-        style={{ position: "absolute", pointerEvents: "none" }}
-        aria-hidden="true"
-      >
-        <defs>
-          <clipPath
-            id="delivConcaveCylinderClip"
-            clipPathUnits="objectBoundingBox"
-          >
-            <path d="M -0.01,-0.01 Q 0.5,0.47 1.01,-0.01 L 1.01,1.01 Q 0.5,0.53 -0.01,1.01 Z" />
-          </clipPath>
-          <clipPath
-            id="delivConcaveCylinderClipMobile"
-            clipPathUnits="objectBoundingBox"
-          >
-            <path d="M -0.01,-0.01 Q 0.5,0.13 1.01,-0.01 L 1.01,1.01 Q 0.5,0.87 -0.01,1.01 Z" />
-          </clipPath>
-        </defs>
-      </svg>
-
       <div className="deliv-v2-shell">
-        {/* TOP HEADER & CONTEXTUAL NAVIGATION BAR */}
+        {/* MAIN SECTION HEADING */}
         <div className="deliv-v2-top-bar">
-          {mode !== "zoom" && (
-            <div className="deliv-v2-brand-title">
-              <h2 className="deliv-v2-main-heading">
-                {title || "お客様へのお届け成果物コレクション"}
-              </h2>
-            </div>
-          )}
-
-          <div className="deliv-v2-context-action">
-            <AnimatePresence mode="wait">
-              {mode === "collection" && (
-                <motion.button
-                  key="btn-back-collections"
-                  type="button"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-                  className="deliv-v2-top-action-btn"
-                  onClick={() => setMode("cylinder")}
-                >
-                  <ArrowLeft size={14} />
-                  <span>{(backBtnText && backBtnText.trim()) || "一覧へ戻る"}</span>
-                </motion.button>
-              )}
-
-              {mode === "zoom" && (
-                <motion.button
-                  key="btn-close-zoom"
-                  type="button"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-                  className="deliv-v2-top-action-btn is-close"
-                  onClick={() => setMode("collection")}
-                >
-                  <X size={14} />
-                  <span>{(closeZoomBtnText && closeZoomBtnText.trim()) || "拡大表示を閉じる"}</span>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-
-          
+          <motion.div
+            className="deliv-v2-brand-title"
+            initial={{ opacity: 0, y: 26, filter: "blur(5px)" }}
+            animate={
+              hasEntered
+                ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                : { opacity: 0, y: 26, filter: "blur(5px)" }
+            }
+            transition={{ duration: 0.78, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="deliv-v2-main-heading">
+              {title || "お客様へのお届け成果物コレクション"}
+            </h2>
+          </motion.div>
         </div>
 
-        {/* MAIN 3-STATE INTERACTIVE STAGE */}
-        <div
-          ref={stageRef}
-          className="deliv-v2-stage-viewport"
-          onPointerDown={handleStagePointerDown}
-          onWheel={handleStageWheel}
-          onClick={(e) => {
-            if (didDragRef.current) return;
-            const target = e.target as HTMLElement;
-            if (
-              mode === "zoom" &&
-              (target.classList.contains("deliv-v2-stage-viewport") ||
-                target.classList.contains("deliv-v2-staggered-scene"))
-            ) {
-              setMode("collection");
-            }
-          }}
-        >
-          {/* GIANT VERTICAL ROTATED DISPLAY TITLE FOR STATE 1 (COLLECTIONS - GIỐNG ẢNH 2) */}
-          {mode === "cylinder" && (
-            <div
-              className={`deliv-v2-vertical-title-layer layer-front ${verticalTitleSizeClass}`}
-              aria-hidden="true"
+        {/* STATE 2 BACK BUTTON: CENTERED DIRECTLY BELOW MAIN HEADING (NO COLLECTION NAME) */}
+        <AnimatePresence>
+          {mode === "collection" && (
+            <motion.div
+              key="state2-under-title-btn"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="deliv-edit-under-title-bar"
             >
-              <div className="deliv-v2-vertical-rotator">
-                <div className="deliv-v2-vertical-mask">
-                  <AnimatePresence initial={false} custom={colDir}>
-                    <motion.span
-                      key={`vtitle-${activeColIdx}`}
-                      custom={colDir}
-                      variants={verticalTitleVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-                      className="deliv-v2-vertical-text"
-                      style={activeVerticalTitleStyle}
-                    >
-                      {renderVerticalTitleSegments(activeVerticalTitle)}
-                    </motion.span>
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={handleReturnToCarousel}
+                className="deliv-v2-top-action-btn"
+              >
+                <ArrowLeft size={14} />
+                <span>
+                  {(backBtnText && backBtnText.trim()) || "一覧へ戻る"}
+                </span>
+              </button>
+            </motion.div>
           )}
+        </AnimatePresence>
 
-          {/* STATE 1 vs STATE 2/3 TRACK */}
-          <AnimatePresence mode="wait">
-            {mode === "cylinder" ? (
-              /* ============================================================
-                 STATE 1: DRAMATIC CONCAVE CYLINDRICAL PANORAMA (COLLECTIONS)
-                 ============================================================ */
+        <AnimatePresence mode="wait">
+          {mode === "carousel" ? (
+            /* ================================================================
+               STATE 1: MINIMAL EDITORIAL HORIZONTAL CAROUSEL
+               - Collection Name positioned directly ABOVE the center image (never inside image)
+               - First-time scroll entrance animation
+               ================================================================ */
+            <motion.div
+              key="editorial-state-carousel"
+              initial={{ opacity: 0, y: 36 }}
+              animate={
+                hasEntered
+                  ? { opacity: 1, y: 0 }
+                  : { opacity: 0, y: 36 }
+              }
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
+              className="deliv-edit-carousel-wrapper"
+            >
+              {/* Collection Name Directly ABOVE the Center Image (Outside Image) */}
               <motion.div
-                key="stage-cylinder"
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.04 }}
-                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="deliv-v2-cylinder-clip"
-                style={{
-                  clipPath: activeCylinderClipUrl,
-                  WebkitClipPath: activeCylinderClipUrl,
+                className="deliv-edit-title-row"
+                initial={{ opacity: 0, y: 18 }}
+                animate={
+                  hasEntered ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
+                }
+                transition={{
+                  duration: 0.68,
+                  delay: 0.12,
+                  ease: [0.16, 1, 0.3, 1],
                 }}
               >
-                <div className="deliv-v2-cylinder-scene">
+                <AnimatePresence mode="wait" initial={false} custom={colDir}>
+                  <motion.button
+                    key={`htitle-${activeColIdx}`}
+                    type="button"
+                    custom={colDir}
+                    variants={horizTitleVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+                    className="deliv-edit-collection-title-btn"
+                    style={activeTitleColorStyle}
+                    onClick={() => setMode("collection")}
+                  >
+                    {activeCollectionDisplayName}
+                  </motion.button>
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Center + Far-Left / Far-Right Peeking Stage */}
+              <motion.div
+                ref={stageRef}
+                className="deliv-edit-stage-viewport"
+                style={stageDynamicStyle}
+                initial={{ opacity: 0, y: 44, scale: 0.93 }}
+                animate={
+                  hasEntered
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : { opacity: 0, y: 44, scale: 0.93 }
+                }
+                transition={{
+                  duration: 0.88,
+                  delay: 0.18,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                onPointerDown={handleStagePointerDown}
+                onWheel={handleStageWheel}
+              >
+                <div className="deliv-edit-track">
                   {VIRTUAL_SLOTS.map((slotOffset) => {
                     const virtualIdx = colBaseStep + slotOffset;
-                    const cIdx = ((virtualIdx % colCount) + colCount) % colCount;
+                    const cIdx =
+                      ((virtualIdx % colCount) + colCount) % colCount;
                     const col = safeCollections[cIdx];
-                    const rawThumb = col?.thumbnail || col?.photos?.[0]?.url;
+                    const colPhotos = getPhotosForCollection(cIdx);
+                    const rawThumb =
+                      (col?.thumbnail && col.thumbnail.trim()) ||
+                      colPhotos[0]?.url;
                     const imgSrc = getCollectionCover(cIdx);
                     const isCenter = slotOffset === 0;
+                    const fittedImgStyle = getCarouselImgFittedStyle(imgSrc);
 
                     return (
                       <article
-                        key={`cyl-${virtualIdx}`}
+                        key={`edit-col-${virtualIdx}`}
                         ref={(el) => {
-                          if (el) cylCardMapRef.current.set(virtualIdx, el);
-                          else cylCardMapRef.current.delete(virtualIdx);
+                          if (el) cardMapRef.current.set(virtualIdx, el);
+                          else cardMapRef.current.delete(virtualIdx);
                         }}
-                        className={`deliv-v2-cyl-card ${
-                          isCenter ? "is-center" : "is-side"
+                        className={`deliv-edit-card ${
+                          isCenter ? "is-center" : "is-peek"
                         }`}
-                        onClick={() => openCollectionAt(virtualIdx)}
+                        onClick={() =>
+                          handleCarouselCardClick(virtualIdx, slotOffset)
+                        }
                       >
-                        <img
-                          ref={(imgEl) => {
-                            if (imgEl)
-                              cylImgMapRef.current.set(virtualIdx, imgEl);
-                            else cylImgMapRef.current.delete(virtualIdx);
-                          }}
-                          src={imgSrc}
-                          alt={col?.name || `Collection ${cIdx + 1}`}
-                          className="deliv-v2-cyl-img"
-                          draggable={false}
-                          onError={() => markUrlFailed(rawThumb)}
-                        />
+                        <div className="deliv-edit-card-frame">
+                          <img
+                            ref={(imgEl) => {
+                              if (
+                                imgEl &&
+                                imgEl.complete &&
+                                imgEl.naturalWidth > 0 &&
+                                imgEl.naturalHeight > 0
+                              ) {
+                                recordImgRatio(
+                                  imgSrc,
+                                  imgEl.naturalWidth,
+                                  imgEl.naturalHeight
+                                );
+                              }
+                            }}
+                            src={imgSrc}
+                            alt={col?.name || `Collection 0${cIdx + 1}`}
+                            className="deliv-edit-carousel-img"
+                            style={fittedImgStyle}
+                            draggable={false}
+                            onLoad={(e) => {
+                              const img = e.currentTarget;
+                              recordImgRatio(
+                                imgSrc,
+                                img.naturalWidth,
+                                img.naturalHeight
+                              );
+                            }}
+                            onError={() => markUrlFailed(rawThumb)}
+                          />
+                        </div>
                       </article>
                     );
                   })}
                 </div>
               </motion.div>
-            ) : (
-              /* ============================================================
-                 STATE 2 & STATE 3: STAGGERED COLLECTION PHOTOS + ZOOM VIEW
-                 ============================================================ */
-              <motion.div
-                key={`stage-collection-${activeColIdx}`}
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                className="deliv-v2-staggered-scene"
-              >
-                {VIRTUAL_SLOTS.map((slotOffset) => {
-                  const virtualPhotoIdx = photoBaseStep + slotOffset;
-                  const pIdx =
-                    ((virtualPhotoIdx % photoCount) + photoCount) % photoCount;
-                  const photo = activePhotos[pIdx];
+            </motion.div>
+          ) : (
+            /* ================================================================
+               STATE 2: VERTICAL STAGGERED EDITORIAL LOOKBOOK
+               - Photo #1: Centered hero, NO title
+               - Photos #2+: Left image -> Title centered on Right; Right image -> Title centered on Left
+               - No collection name, no bottom credits block
+               - First-time reveal animation on open & scroll
+               ================================================================ */
+            <motion.div
+              key={`editorial-lookbook-${activeColIdx}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="deliv-edit-lookbook-wrap"
+            >
+              <div className="deliv-edit-lookbook-stream">
+                {activePhotos.map((photo, pIdx) => {
                   const rawUrl = photo?.url;
                   const imgSrc = resolveImageUrl(
                     rawUrl,
                     activeColIdx * 10 + pIdx
                   );
-                  const isCenter = slotOffset === 0;
-                  const isZoom = mode === "zoom";
-                  const shapeVariant = ((virtualPhotoIdx % 3) + 3) % 3;
-                  const cardStyle = getPhotoCardStyle(imgSrc, isZoom, isCenter);
+
+                  // Photo #1 (index 0): Centered hero image, NO title
+                  if (pIdx === 0) {
+                    return (
+                      <motion.figure
+                        key={`lookbook-hero-${activeColIdx}-0`}
+                        className="deliv-edit-hero-row"
+                        initial={{
+                          opacity: 0,
+                          y: 52,
+                          scale: 0.93,
+                          filter: "blur(5px)",
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          filter: "blur(0px)",
+                        }}
+                        transition={{
+                          duration: 0.86,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        <div
+                          className="deliv-edit-lookbook-card"
+                          onClick={() => setZoomPhotoIdx(0)}
+                        >
+                          <img
+                            src={imgSrc}
+                            alt={
+                              photo?.title ||
+                              photo?.tag ||
+                              `Deliverable 01`
+                            }
+                            className="deliv-edit-lookbook-img"
+                            loading="eager"
+                            onLoad={(e) => {
+                              const img = e.currentTarget;
+                              recordImgRatio(
+                                imgSrc,
+                                img.naturalWidth,
+                                img.naturalHeight
+                              );
+                            }}
+                            onError={() => markUrlFailed(rawUrl)}
+                          />
+
+                          <span
+                            className="deliv-edit-lookbook-zoom-badge"
+                            aria-hidden="true"
+                          >
+                            <ZoomIn size={14} />
+                          </span>
+                        </div>
+                      </motion.figure>
+                    );
+                  }
+
+                  // Photos #2+: Alternate Right image (Title on Left) & Left image (Title on Right)
+                  const isImageRight = pIdx % 2 === 1;
+                  const photoLabel =
+                    (photo?.title && photo.title.trim()) ||
+                    (photo?.tag && photo.tag.trim()) ||
+                    "";
 
                   return (
-                    <article
-                      key={`photo-${virtualPhotoIdx}`}
-                      ref={(el) => {
-                        if (el) photoCardMapRef.current.set(virtualPhotoIdx, el);
-                        else photoCardMapRef.current.delete(virtualPhotoIdx);
-                      }}
-                      className={`deliv-v2-photo-card shape-${shapeVariant} ${
-                        isCenter ? "is-center" : "is-neighbor"
-                      } ${isZoom && isCenter ? "is-zoomed" : ""}`}
-                      style={cardStyle}
-                      onClick={(e) => handlePhotoClick(virtualPhotoIdx, e)}
+                    <div
+                      key={`lookbook-split-${activeColIdx}-${pIdx}`}
+                      className={`deliv-edit-split-row ${
+                        isImageRight ? "is-img-right" : "is-img-left"
+                      }`}
                     >
-                      <img
-                        ref={(imgEl) => {
-                          if (
-                            imgEl &&
-                            imgEl.complete &&
-                            imgEl.naturalWidth > 0 &&
-                            imgEl.naturalHeight > 0
-                          ) {
-                            recordImgRatio(
-                              imgSrc,
-                              imgEl.naturalWidth,
-                              imgEl.naturalHeight
-                            );
-                          }
+                      <motion.div
+                        className="deliv-edit-split-media-col"
+                        initial={{
+                          opacity: 0,
+                          y: 54,
+                          x: isImageRight ? 34 : -34,
+                          scale: 0.95,
                         }}
-                        src={imgSrc}
-                        alt={
-                          photo?.title ||
-                          photo?.tag ||
-                          `Deliverable ${pIdx + 1}`
-                        }
-                        className="deliv-v2-photo-img"
-                        draggable={false}
-                        onLoad={(e) => {
-                          const img = e.currentTarget;
-                          recordImgRatio(
-                            imgSrc,
-                            img.naturalWidth,
-                            img.naturalHeight
-                          );
+                        whileInView={{
+                          opacity: 1,
+                          y: 0,
+                          x: 0,
+                          scale: 1,
                         }}
-                        onError={() => markUrlFailed(rawUrl)}
-                      />
-                    </article>
+                        viewport={{ once: true, amount: 0.18 }}
+                        transition={{
+                          duration: 0.85,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        <div
+                          className="deliv-edit-lookbook-card"
+                          onClick={() => setZoomPhotoIdx(pIdx)}
+                        >
+                          <img
+                            src={imgSrc}
+                            alt={photoLabel || `Deliverable ${pIdx + 1}`}
+                            className="deliv-edit-lookbook-img"
+                            loading={pIdx <= 2 ? "eager" : "lazy"}
+                            onLoad={(e) => {
+                              const img = e.currentTarget;
+                              recordImgRatio(
+                                imgSrc,
+                                img.naturalWidth,
+                                img.naturalHeight
+                              );
+                            }}
+                            onError={() => markUrlFailed(rawUrl)}
+                          />
+
+                          <span
+                            className="deliv-edit-lookbook-zoom-badge"
+                            aria-hidden="true"
+                          >
+                            <ZoomIn size={14} />
+                          </span>
+                        </div>
+                      </motion.div>
+
+                      <motion.div
+                        className="deliv-edit-split-title-col"
+                        initial={{
+                          opacity: 0,
+                          y: 22,
+                          x: isImageRight ? -26 : 26,
+                        }}
+                        whileInView={{
+                          opacity: 1,
+                          y: 0,
+                          x: 0,
+                        }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        transition={{
+                          duration: 0.76,
+                          delay: 0.14,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        {photoLabel && (
+                          <p className="deliv-edit-side-photo-title">
+                            {photoLabel}
+                          </p>
+                        )}
+                      </motion.div>
+                    </div>
                   );
                 })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* STATE 3: FULLSCREEN UNCROPPED ZOOM LIGHTBOX PORTAL (NO TOP-LEFT CONTENT) */}
+      {portalMounted &&
+        zoomPhotoIdx !== null &&
+        createPortal(
+          <div
+            className="deliv-edit-zoom-backdrop"
+            onClick={() => setZoomPhotoIdx(null)}
+          >
+            <div
+              className="deliv-edit-zoom-topbar"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setZoomPhotoIdx(null)}
+                className="deliv-edit-zoom-close-btn"
+              >
+                <X size={15} />
+                <span>
+                  {(closeZoomBtnText && closeZoomBtnText.trim()) ||
+                    "拡大表示を閉じる"}
+                </span>
+              </button>
+            </div>
+
+            {photoCount > 1 && (
+              <button
+                type="button"
+                className="deliv-edit-zoom-nav is-prev"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomPhotoIdx(
+                    (zoomPhotoIdx - 1 + photoCount) % photoCount
+                  );
+                }}
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={24} />
+              </button>
+            )}
+
+            <div
+              className="deliv-edit-zoom-stage"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={resolveImageUrl(
+                  activePhotos[zoomPhotoIdx]?.url,
+                  activeColIdx * 10 + zoomPhotoIdx
+                )}
+                alt={
+                  activePhotos[zoomPhotoIdx]?.title ||
+                  `Deliverable ${zoomPhotoIdx + 1}`
+                }
+                className="deliv-edit-zoom-img"
+              />
+              {activePhotos[zoomPhotoIdx]?.title && (
+                <p className="deliv-edit-zoom-caption">
+                  {activePhotos[zoomPhotoIdx]?.title}
+                </p>
+              )}
+            </div>
+
+            {photoCount > 1 && (
+              <button
+                type="button"
+                className="deliv-edit-zoom-nav is-next"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoomPhotoIdx((zoomPhotoIdx + 1) % photoCount);
+                }}
+                aria-label="Next image"
+              >
+                <ChevronRight size={24} />
+              </button>
+            )}
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

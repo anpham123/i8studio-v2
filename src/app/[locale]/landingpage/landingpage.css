@@ -5183,6 +5183,23 @@
   border-bottom: 1px solid rgba(18, 19, 22, 0.05);
 }
 
+@media (min-width: 961px) {
+  .applications-section .section-title-split {
+    grid-template-columns: minmax(0, 1.85fr) minmax(260px, 0.95fr);
+    gap: 2.4rem;
+    align-items: end;
+  }
+
+  .applications-section .section-title-split .title-left {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.applications-section .app-title-line {
+  display: block;
+}
+
 .usecase-filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -11580,34 +11597,41 @@
    ========================================================================== */
 .deliverables-compare-section.deliv-v2-section {
   position: relative;
-  height: 100vh;
-  min-height: 640px;
-  max-height: 1020px;
-  padding: clamp(2rem, 3.6vh, 2.85rem) 0 clamp(1.25rem, 2.4vh, 2rem);
-  background: #141518;
-  background-color: #141518;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+  padding: clamp(2.8rem, 5vh, 4.2rem) 0 clamp(2.4rem, 4.5vh, 3.6rem);
+  background: radial-gradient(circle at 50% 30%, #fdfcf9 0%, #f7f4ed 60%, #eee8de 100%);
+  border-bottom: 1px solid rgba(20, 21, 24, 0.08);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   user-select: none;
 }
 
-.deliverables-compare-section.deliv-v2-section.is-light-bg {
-  border-bottom: 1px solid rgba(20, 21, 24, 0.09);
+.deliverables-compare-section.deliv-v2-section.is-dark-bg {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.deliverables-compare-section.deliv-v2-section.mode-carousel {
+  min-height: clamp(580px, 88vh, 920px);
+  overflow: hidden;
+}
+
+.deliverables-compare-section.deliv-v2-section.mode-collection {
+  height: auto !important;
+  min-height: 82vh;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .deliv-v2-shell {
   position: relative;
   width: 100%;
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-/* Top Bar: Section Title ALWAYS Centered + Contextual Back/Close Button Centered Directly Below Title */
+/* Top Bar: Section Title Centered & Prominent */
 .deliv-v2-top-bar {
   position: relative;
   z-index: 35;
@@ -11617,8 +11641,7 @@
   justify-content: center;
   text-align: center;
   padding: 0 clamp(1.5rem, 3.5vw, 3.5rem);
-  gap: 0.65rem;
-  min-height: 48px;
+  margin-bottom: clamp(0.85rem, 1.8vh, 1.35rem);
   flex-shrink: 0;
   width: 100%;
 }
@@ -11633,10 +11656,10 @@
 
 .deliv-v2-main-heading {
   font-family: var(--font-heading);
-  font-size: clamp(1.38rem, 1.85vw, 1.78rem);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 1.22;
+  font-size: clamp(2.25rem, 3.35vw, 3.1rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.24;
   margin: 0;
   text-align: center;
   background: linear-gradient(
@@ -11675,30 +11698,41 @@
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
-.deliv-v2-context-action {
+/* State 2 Back Button Centered Directly Under Main Heading */
+.deliv-edit-under-title-bar {
+  position: sticky;
+  top: calc(var(--lp-sticky-top, 0px) + 12px);
+  z-index: 44;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  width: 100%;
+  padding: 0.25rem 1rem;
+  margin-bottom: clamp(1.35rem, 3.2vh, 2.4rem);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.deliv-edit-under-title-bar > button {
+  pointer-events: auto;
 }
 
 .deliv-v2-top-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.15rem;
+  padding: 0.54rem 1.25rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   color: #ffffff;
   font-family: var(--font-heading);
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition:
     background-color 0.25s ease,
     border-color 0.25s ease,
@@ -11714,9 +11748,10 @@
 }
 
 .deliv-v2-section.is-light-bg .deliv-v2-top-action-btn {
-  background: rgba(20, 21, 24, 0.06);
-  border-color: rgba(20, 21, 24, 0.24);
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(20, 21, 24, 0.2);
   color: #141518;
+  box-shadow: 0 6px 20px -8px rgba(20, 21, 24, 0.14);
 }
 
 .deliv-v2-section.is-light-bg .deliv-v2-top-action-btn:hover {
@@ -11725,290 +11760,425 @@
   color: #ffffff;
 }
 
-.deliv-v2-side-stamp {
-  justify-self: end;
-  position: relative;
-}
-
-.deliv-v2-side-stamp span {
-  display: inline-block;
-  writing-mode: vertical-rl;
-  font-family: var(--font-heading);
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  color: rgba(255, 255, 255, 0.38);
-}
-
-.deliv-v2-section.is-light-bg .deliv-v2-side-stamp span {
-  color: rgba(20, 21, 24, 0.42);
-}
-
-/* Main Interactive Stage */
-.deliv-v2-stage-viewport {
-  position: relative;
+/* ==========================================================================
+   STATE 1: MINIMAL EDITORIAL HORIZONTAL CAROUSEL
+   Collection Title sits directly ABOVE the center image (never inside image)
+   ========================================================================== */
+.deliv-edit-carousel-wrapper {
   flex: 1;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  touch-action: pan-y;
-  cursor: grab;
-}
-
-.deliv-v2-section.is-dragging .deliv-v2-stage-viewport,
-.deliv-v2-section.is-dragging .deliv-v2-cyl-card,
-.deliv-v2-section.is-dragging .deliv-v2-photo-card {
-  cursor: grabbing !important;
-}
-
-/* Giant Vertical Rotated Title Crossing Center */
-.deliv-v2-vertical-title-layer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  transition: opacity 0.38s ease;
-}
-
-.deliv-v2-vertical-title-layer.layer-front {
-  z-index: 26;
-  opacity: 1;
-}
-
-.deliv-v2-vertical-title-layer.layer-behind {
-  z-index: 5;
-  opacity: 0.96;
-}
-
-.deliv-v2-vertical-title-layer.layer-hidden {
-  z-index: 2;
-  opacity: 0;
-}
-
-.deliv-v2-vertical-rotator {
-  transform: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.deliv-v2-vertical-mask {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  place-items: center;
-  overflow: hidden;
-  padding: 0.4rem 0.85rem;
-}
-
-.deliv-v2-vertical-mask > * {
-  grid-area: 1 / 1;
-}
-
-.deliv-v2-vertical-text {
-  display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.14em;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Times New Roman", Georgia, serif;
-  font-size: clamp(2.4rem, 4.1vw, 3.95rem);
-  font-weight: 500;
-  color: #ffffff;
-  text-shadow:
-    0 3px 18px rgba(0, 0, 0, 0.52),
-    0 1px 5px rgba(0, 0, 0, 0.38);
-  line-height: 1.08;
-  text-align: center;
+  gap: 0;
 }
 
-.deliv-v2-vertical-upright-run {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  display: inline-block;
-  letter-spacing: 0.14em;
-  line-height: 1;
-}
-
-.deliv-v2-vertical-horiz-token {
-  writing-mode: horizontal-tb;
-  display: inline-block;
-  letter-spacing: 0.04em;
-  line-height: 1.12;
-  font-family: "Times New Roman", "Yu Mincho", Georgia, serif;
-}
-
-.deliv-v2-vertical-title-layer.is-compact .deliv-v2-vertical-text {
-  font-size: clamp(1.8rem, 2.9vw, 2.75rem);
-  gap: 0.09em;
-}
-
-.deliv-v2-vertical-title-layer.is-extra-compact .deliv-v2-vertical-text {
-  font-size: clamp(1.32rem, 2.05vw, 1.9rem);
-  gap: 0.06em;
-}
-
-.deliv-v2-section.is-light-bg .deliv-v2-vertical-title-layer.layer-behind .deliv-v2-vertical-text {
-  color: #141518;
-  text-shadow: none;
-}
-
-/* ==========================================================================
-   STATE 1: DRAMATIC CONCAVE CYLINDRICAL PANORAMA (SVG PARABOLIC CLIP)
-   ========================================================================== */
-.deliv-v2-cylinder-clip {
-  position: relative;
-  width: 100%;
-  height: clamp(340px, 64vh, 590px);
+.deliv-edit-title-row {
+  min-height: 32px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  clip-path: url(#delivConcaveCylinderClip);
-  -webkit-clip-path: url(#delivConcaveCylinderClip);
+  padding: 0 1.25rem;
+  text-align: center;
+  z-index: 26;
 }
 
-.deliv-v2-cylinder-scene {
+.deliv-edit-collection-title-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0.15rem 0.65rem;
+  margin: 0;
+  cursor: pointer;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", Georgia, serif;
+  font-size: clamp(1.02rem, 1.38vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: #141518;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.deliv-v2-section.is-dark-bg .deliv-edit-collection-title-btn {
+  color: #f6f5f0;
+}
+
+.deliv-edit-collection-title-btn:hover {
+  opacity: 0.74;
+}
+
+.deliv-edit-stage-viewport {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+  height: clamp(260px, 44vh, 380px);
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  touch-action: pan-y;
+  cursor: grab;
+  transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deliv-v2-section.is-dragging .deliv-edit-stage-viewport,
+.deliv-v2-section.is-dragging .deliv-edit-card {
+  cursor: grabbing !important;
+}
+
+.deliv-edit-track {
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.deliv-v2-cyl-card {
+.deliv-edit-card {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 31.8%;
-  height: 100%;
-  overflow: hidden;
-  background: transparent;
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   will-change: transform, opacity;
 }
 
-.deliv-v2-cyl-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.deliv-edit-card-frame {
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 22px 52px -20px rgba(16, 18, 23, 0.22);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease,
+    filter 0.4s ease;
+}
+
+.deliv-edit-card.is-peek .deliv-edit-card-frame {
+  filter: brightness(0.95);
+}
+
+.deliv-v2-section:not(.is-dragging) .deliv-edit-card.is-center:hover .deliv-edit-card-frame {
+  transform: scale(1.018);
+  box-shadow: 0 28px 64px -20px rgba(16, 18, 23, 0.3);
+}
+
+.deliv-edit-carousel-img {
   display: block;
-  transform-origin: center center;
-  will-change: transform;
-  transition: filter 0.35s ease;
+  width: auto;
+  height: auto;
+  max-width: clamp(290px, 34vw, 500px);
+  max-height: clamp(280px, 50vh, 470px);
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-.deliv-v2-cyl-card.is-side .deliv-v2-cyl-img {
-  filter: brightness(0.9) contrast(1.03);
+.deliv-edit-count-row {
+  min-height: 26px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 26;
 }
 
-.deliv-v2-section:not(.is-dragging) .deliv-v2-cyl-card:hover .deliv-v2-cyl-img {
-  filter: brightness(1.04) contrast(1.03);
+.deliv-edit-photo-counter {
+  font-family: "Times New Roman", "Yu Mincho", Georgia, serif;
+  font-size: clamp(0.88rem, 1.05vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(20, 21, 24, 0.72);
+}
+
+.deliv-v2-section.is-dark-bg .deliv-edit-photo-counter {
+  color: rgba(246, 245, 240, 0.75);
 }
 
 /* ==========================================================================
-   STATE 2 & 3: STAGGERED EDITORIAL PHOTOS & EXPANDED ZOOM VIEW
+   STATE 2: VERTICAL STAGGERED EDITORIAL LOOKBOOK
+   - Photo #1: Centered hero, NO title
+   - Photos #2+: Left image -> Title centered on Right; Right image -> Title centered on Left
    ========================================================================== */
-.deliv-v2-staggered-scene {
+.deliv-edit-lookbook-wrap {
   position: relative;
   width: 100%;
-  height: 100%;
-  z-index: 12;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 4rem) clamp(2.5rem, 5vh, 4.5rem);
+  box-sizing: border-box;
 }
 
-.deliv-v2-photo-card {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: auto;
-  height: clamp(195px, 28vh, 285px);
-  overflow: hidden;
-  background: transparent;
-  cursor: pointer;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
-  will-change: transform, opacity, width, height;
-  border-radius: 4px;
-  transition:
-    width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.52s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.38s ease;
-}
-
-.deliv-v2-photo-card.is-zoomed {
-  width: min(88vw, 1380px);
-  height: min(82vh, 820px);
-  max-width: none;
-  background: transparent;
-  box-shadow: 0 34px 84px rgba(0, 0, 0, 0.55);
-  cursor: zoom-out;
-  border-radius: 6px;
-}
-
-.deliv-v2-photo-card.is-zoomed .deliv-v2-photo-img {
-  object-fit: contain;
-}
-
-.deliv-v2-photo-img {
+.deliv-edit-lookbook-stream {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3.6rem, 9vh, 7.5rem);
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: transparent;
+}
+
+.deliv-edit-hero-row {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  max-width: min(70vw, 840px);
+}
+
+.deliv-edit-split-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5.5rem);
+  width: 100%;
+}
+
+.deliv-edit-split-row.is-img-right {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+}
+
+.deliv-edit-split-row.is-img-left .deliv-edit-split-media-col {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.deliv-edit-split-row.is-img-left .deliv-edit-split-title-col {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 clamp(0.5rem, 2vw, 2rem);
+}
+
+.deliv-edit-split-row.is-img-right .deliv-edit-split-title-col {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 clamp(0.5rem, 2vw, 2rem);
+}
+
+.deliv-edit-split-row.is-img-right .deliv-edit-split-media-col {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.deliv-edit-side-photo-title {
+  margin: 0;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", Georgia, serif;
+  font-size: clamp(1.02rem, 1.45vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: #141518;
+  max-width: 380px;
+  word-break: break-word;
+}
+
+.deliv-v2-section.is-dark-bg .deliv-edit-side-photo-title {
+  color: #f6f5f0;
+}
+
+.deliv-edit-lookbook-card {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  cursor: zoom-in;
+  box-shadow: 0 24px 58px -22px rgba(16, 18, 23, 0.22);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+}
+
+.deliv-edit-lookbook-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 30px 68px -22px rgba(16, 18, 23, 0.3);
+}
+
+.deliv-edit-lookbook-img {
   display: block;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.deliv-v2-section:not(.is-dragging) .deliv-v2-photo-card:not(.is-zoomed):hover .deliv-v2-photo-img {
-  transform: scale(1.04);
+.deliv-edit-lookbook-card:hover .deliv-edit-lookbook-img {
+  transform: scale(1.018);
 }
 
-/* Responsive Tablet & Mobile */
+.deliv-edit-lookbook-zoom-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #141518;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.deliv-edit-lookbook-card:hover .deliv-edit-lookbook-zoom-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   STATE 3: FULLSCREEN UNCROPPED ZOOM LIGHTBOX PORTAL (NO TOP-LEFT TEXT)
+   ========================================================================== */
+.deliv-edit-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(12, 13, 16, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.deliv-edit-zoom-topbar {
+  position: absolute;
+  top: clamp(14px, 2.4vh, 26px);
+  left: clamp(16px, 3vw, 36px);
+  right: clamp(16px, 3vw, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 5;
+}
+
+.deliv-edit-zoom-close-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.deliv-edit-zoom-close-btn:hover {
+  background: #ffffff;
+  color: #141518;
+}
+
+.deliv-edit-zoom-stage {
+  max-width: 90vw;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.deliv-edit-zoom-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 90vw;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.55);
+}
+
+.deliv-edit-zoom-caption {
+  margin: 0;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+}
+
+.deliv-edit-zoom-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.deliv-edit-zoom-nav:hover {
+  background: #ffffff;
+  color: #141518;
+}
+
+.deliv-edit-zoom-nav.is-prev {
+  left: clamp(12px, 2.5vw, 32px);
+}
+
+.deliv-edit-zoom-nav.is-next {
+  right: clamp(12px, 2.5vw, 32px);
+}
+
+/* Responsive Tablet */
 @media (max-width: 960px) {
-  .deliverables-compare-section.deliv-v2-section {
-    height: 86vh;
-    min-height: 540px;
-    padding: 1.5rem 0 1.25rem;
-  }
-
-  .deliv-v2-top-bar {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0 1.25rem;
-  }
-
-  .deliv-v2-side-stamp {
-    display: none;
+  .deliverables-compare-section.deliv-v2-section.mode-carousel {
+    min-height: 520px;
+    padding: 2.2rem 0 1.85rem;
   }
 
   .deliv-v2-main-heading {
-    font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+    font-size: clamp(1.8rem, 4.4vw, 2.3rem);
   }
 
-  .deliv-v2-cylinder-clip {
-    height: clamp(280px, 50vh, 420px);
+  .deliv-edit-carousel-img {
+    max-width: min(46vw, 420px);
+    max-height: min(44vh, 390px);
   }
 
-  .deliv-v2-cyl-card {
-    width: 58%;
+  .deliv-edit-hero-row {
+    max-width: 84vw;
   }
 
-  .deliv-v2-photo-card {
-    width: auto;
-    height: clamp(165px, 26vh, 220px);
-    max-width: 58vw;
-  }
-
-  .deliv-v2-photo-card.is-zoomed {
-    width: 92vw;
-    height: min(72vh, 560px);
-    max-width: none;
-  }
-
-  .deliv-v2-vertical-text {
-    font-size: clamp(1.85rem, 6.8vw, 2.6rem);
+  .deliv-edit-split-row {
+    gap: 1.5rem;
   }
 }
 
@@ -12710,6 +12880,19 @@
   height: 100%;
   border: 0;
   cursor: grab;
+}
+
+.pricing-stack-v2-vrss-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pricing-stack-v2-vr-stage.is-vrss-stage:hover .pricing-stack-v2-vrss-img {
+  transform: scale(1.02);
 }
 
 .pricing-stack-v2-vr-canvas:active {
@@ -13835,6 +14018,17 @@
   z-index: 2;
 }
 
+.usecase-bfaf-after-badge-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+}
+
 .usecase-bfaf-divider {
   position: absolute;
   top: 0;
@@ -13877,6 +14071,12 @@
   pointer-events: none;
   z-index: 5;
   line-height: 1.2;
+  opacity: 1;
+  transition: opacity 0.18s ease;
+}
+
+.usecase-bfaf-badge.is-hidden {
+  opacity: 0;
 }
 
 .usecase-bfaf-badge.before {
@@ -14037,57 +14237,66 @@
     padding-right: 0;
   }
 
-  /* 05. Deliverables 3-State Showcase */
-  .deliverables-compare-section.deliv-v2-section {
+  /* 05. Deliverables Editorial Showcase */
+  .deliverables-compare-section.deliv-v2-section.mode-carousel {
     height: auto;
-    min-height: 500px;
+    min-height: 480px;
     max-height: none;
-    padding: 2.15rem 0 1.85rem;
+    padding: 2.2rem 0 1.85rem;
+  }
+
+  .deliverables-compare-section.deliv-v2-section.mode-collection {
+    padding: 2rem 0 2.25rem;
   }
 
   .deliv-v2-main-heading {
-    font-size: clamp(1.12rem, 4.6vw, 1.45rem);
+    font-size: clamp(1.55rem, 6vw, 1.95rem);
     line-height: 1.32;
     text-wrap: balance;
   }
 
-  .deliv-v2-stage-viewport {
-    min-height: 340px;
+  .deliv-edit-stage-viewport {
+    min-height: 220px;
   }
 
-  .deliv-v2-cylinder-clip {
-    height: clamp(275px, 46vh, 360px);
-    clip-path: url(#delivConcaveCylinderClipMobile);
-    -webkit-clip-path: url(#delivConcaveCylinderClipMobile);
+  .deliv-edit-carousel-img {
+    max-width: 56vw;
+    max-height: min(38vh, 310px);
   }
 
-  .deliv-v2-cyl-card {
-    width: 52%;
+  .deliv-edit-collection-title-btn {
+    font-size: clamp(0.95rem, 4vw, 1.12rem);
   }
 
-  .deliv-v2-vertical-text {
-    font-size: clamp(1.42rem, 5.2vw, 1.82rem);
-    gap: 0.1em;
+  .deliv-edit-lookbook-wrap {
+    padding: 0 16px 2.2rem;
   }
 
-  .deliv-v2-vertical-title-layer.is-compact .deliv-v2-vertical-text {
-    font-size: clamp(1.12rem, 4.1vw, 1.4rem);
-    gap: 0.06em;
+  .deliv-edit-lookbook-stream {
+    gap: 2.6rem;
   }
 
-  .deliv-v2-vertical-title-layer.is-extra-compact .deliv-v2-vertical-text {
-    font-size: clamp(0.88rem, 3.15vw, 1.08rem);
-    gap: 0.04em;
+  .deliv-edit-hero-row {
+    max-width: 92vw;
   }
 
-  .deliv-v2-photo-card {
-    height: clamp(140px, 21vh, 175px);
-    max-width: 58vw;
+  .deliv-edit-split-row {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    gap: 0.95rem;
   }
 
-  .deliv-v2-photo-card.is-zoomed {
-    width: 92vw;
-    height: min(68vh, 480px);
+  .deliv-edit-split-row.is-img-right {
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+  }
+
+  .deliv-edit-side-photo-title {
+    font-size: clamp(0.8rem, 3.4vw, 0.96rem);
+    line-height: 1.45;
+  }
+
+  .deliv-edit-zoom-nav {
+    width: 38px;
+    height: 38px;
   }
 
   /* 06. Practical Applications & Before/After Slider */

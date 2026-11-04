@@ -2855,6 +2855,28 @@ function DeliverablesForm({
     toast(`Đã thêm Bộ sưu tập 0${newIdx}`, "success");
   };
 
+  const handleMoveCollection = (cIdx: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? cIdx - 1 : cIdx + 1;
+    if (targetIdx < 0 || targetIdx >= collectionsJa.length) return;
+
+    const nextJa = [...collectionsJa];
+    const nextEn = Array.from(
+      { length: collectionsJa.length },
+      (_, i) => collectionsEn[i] || nextJa[i] || {}
+    );
+
+    [nextJa[cIdx], nextJa[targetIdx]] = [nextJa[targetIdx], nextJa[cIdx]];
+    [nextEn[cIdx], nextEn[targetIdx]] = [nextEn[targetIdx], nextEn[cIdx]];
+
+    saveCollections(nextJa, nextEn);
+    toast(
+      `Đã chuyển Bộ sưu tập ${String(cIdx + 1).padStart(2, "0")} ${
+        direction === "up" ? "lên vị trí" : "xuống vị trí"
+      } ${String(targetIdx + 1).padStart(2, "0")}`,
+      "success"
+    );
+  };
+
   const handleDeleteCollection = (cIdx: number) => {
     if (collectionsJa.length <= 1) {
       toast("Phải có ít nhất 1 bộ sưu tập!", "error");
@@ -3047,7 +3069,7 @@ function DeliverablesForm({
               2. Quản lý các Bộ sưu tập Bản vẽ &amp; Hình ảnh bàn giao
             </h2>
             <p className="text-xs text-slate-500 font-normal mt-0.5">
-              Chỉnh sửa Tên bộ sưu tập (chữ dọc chính giữa &amp; thanh chọn bên dưới) cùng danh sách hình ảnh bên trong
+              Khổ ảnh hiển thị tự động theo đúng tỷ lệ ảnh tải lên. Mỗi bộ sưu tập có thể thêm không giới hạn (5–10+ ảnh/bản vẽ).
             </p>
           </div>
           <button
@@ -3064,7 +3086,7 @@ function DeliverablesForm({
         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <label className="block text-xs font-bold text-slate-800">
-              🎨 Màu chữ Tên bộ sưu tập mặc định (Áp dụng chung cho chữ dọc chính giữa):
+              🎨 Màu chữ Tên bộ sưu tập mặc định (Áp dụng chung cho tên bộ sưu tập):
             </label>
             <p className="text-[11px] text-slate-500 mt-0.5">
               Nhập mã màu Hex (ví dụ: <code className="font-mono text-slate-700">#121316</code>, <code className="font-mono text-slate-700">#F59E0B</code> hoặc <code className="font-mono text-slate-700">#FFFFFF</code>) hoặc chọn trên bảng màu. Từng bộ sưu tập bên dưới cũng có thể đổi màu riêng.
@@ -3120,33 +3142,55 @@ function DeliverablesForm({
             const photosEn = Array.isArray(cEn.photos) ? cEn.photos : [];
 
             return (
-              <div key={cIdx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <div key={cJa.id ?? cIdx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2 gap-2 flex-wrap">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
-                      0{cIdx + 1}
+                      {String(cIdx + 1).padStart(2, "0")}
                     </span>
                     <h3 className="text-xs font-bold text-slate-800 uppercase">
-                      Bộ sưu tập 0{cIdx + 1}
+                      Bộ sưu tập {String(cIdx + 1).padStart(2, "0")}
                     </h3>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCollection(cIdx)}
-                    disabled={collectionsJa.length <= 1}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-transparent text-xs font-medium rounded-lg transition cursor-pointer"
-                    title="Xóa bộ sưu tập này"
-                  >
-                    <Trash2 size={13} />
-                    <span>Xóa bộ sưu tập</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCollection(cIdx, "up")}
+                      disabled={cIdx === 0}
+                      className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded-md border border-slate-200 bg-white transition cursor-pointer disabled:cursor-not-allowed"
+                      title="Di chuyển bộ sưu tập lên trên"
+                      aria-label="Di chuyển bộ sưu tập lên trên"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveCollection(cIdx, "down")}
+                      disabled={cIdx === collectionsJa.length - 1}
+                      className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded-md border border-slate-200 bg-white transition cursor-pointer disabled:cursor-not-allowed"
+                      title="Di chuyển bộ sưu tập xuống dưới"
+                      aria-label="Di chuyển bộ sưu tập xuống dưới"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCollection(cIdx)}
+                      disabled={collectionsJa.length <= 1}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:hover:bg-transparent text-xs font-medium rounded-lg transition cursor-pointer"
+                      title="Xóa bộ sưu tập này"
+                    >
+                      <Trash2 size={13} />
+                      <span>Xóa bộ sưu tập</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Tên bộ sưu tập (Hiển thị chữ dọc lớn ở giữa và thanh tab dưới cùng) */}
+                {/* Tên bộ sưu tập (Hiển thị phía trên khung ảnh & phần tổng kết bộ sưu tập) */}
                 <div className="bg-white p-3.5 rounded-xl border border-blue-200/80 shadow-xs space-y-2.5">
                   <label className="block text-xs font-bold text-slate-800">
-                    🏷️ Tên Bộ Sưu Tập 0{cIdx + 1} (Hiển thị chữ dọc chính giữa &amp; thanh danh mục bên dưới):
+                    🏷️ Tên Bộ Sưu Tập 0{cIdx + 1} (Hiển thị phía trên khung ảnh &amp; phần tổng kết bộ sưu tập):
                   </label>
 
                   <div className={`grid grid-cols-1 ${lang === "both" ? "md:grid-cols-2" : ""} gap-3`}>
@@ -3262,9 +3306,16 @@ function DeliverablesForm({
 
                       return (
                         <div key={pIdx} className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs space-y-2">
-                          <div className="flex items-center justify-between border-b border-slate-100 pb-1">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-1 gap-2">
                             <span className="text-[10px] font-bold text-slate-500">
-                              Mục #{pIdx + 1}
+                              Mục #{pIdx + 1}{" "}
+                              <span className="font-normal text-slate-400">
+                                {pIdx === 0
+                                  ? "(Ảnh mở đầu Trạng thái 2 — ẩn tên cạnh ảnh)"
+                                  : pIdx % 2 === 1
+                                  ? "(Trạng thái 2: Ảnh phải · Tên bên trái)"
+                                  : "(Trạng thái 2: Ảnh trái · Tên bên phải)"}
+                              </span>
                             </span>
                             <button
                               type="button"
@@ -3327,6 +3378,38 @@ function DeliverablesForm({
                                   />
                                 </label>
                               </div>
+
+                              {(lang === "ja" || lang === "both") && (
+                                <input
+                                  type="text"
+                                  value={pJa.title || ""}
+                                  placeholder={
+                                    pIdx === 0
+                                      ? "Tiêu đề ảnh (chỉ hiện khi phóng to Trạng thái 3)..."
+                                      : "Tiêu đề hình ảnh hiển thị bên cạnh (JA)..."
+                                  }
+                                  onChange={(e) =>
+                                    handleUpdatePhotoMeta(cIdx, pIdx, "title", "ja", e.target.value)
+                                  }
+                                  className="w-full px-2 py-1 text-[11px] text-slate-800 bg-white border border-slate-200 rounded"
+                                />
+                              )}
+
+                              {(lang === "en" || lang === "both") && (
+                                <input
+                                  type="text"
+                                  value={pEn.title || ""}
+                                  placeholder={
+                                    pIdx === 0
+                                      ? "Image title (shown only in State 3 zoom)..."
+                                      : "Side image title (EN)..."
+                                  }
+                                  onChange={(e) =>
+                                    handleUpdatePhotoMeta(cIdx, pIdx, "title", "en", e.target.value)
+                                  }
+                                  className="w-full px-2 py-1 text-[11px] text-slate-800 bg-white border border-slate-200 rounded"
+                                />
+                              )}
                             </div>
                           </div>
                         </div>
@@ -3337,6 +3420,17 @@ function DeliverablesForm({
               </div>
             );
           })}
+        </div>
+
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-center sm:justify-end">
+          <button
+            type="button"
+            onClick={handleAddCollection}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition cursor-pointer"
+          >
+            <Plus size={15} />
+            <span>Thêm bộ sưu tập</span>
+          </button>
         </div>
       </div>
     </div>
@@ -3694,6 +3788,7 @@ function ApplicationsForm({
         </h2>
         <BilingualField
           label="Tiêu đề chính Section (PRACTICAL APPLICATIONS...)"
+          subLabel="Có thể chèn <\br> hoặc <br> tại vị trí bất kỳ để chủ động xuống dòng (VD: あらゆる建築タイプに<\br>対応する実践ソリューション)"
           path={["info", "title"]}
           contentJa={contentJa}
           contentEn={contentEn}
@@ -3702,6 +3797,7 @@ function ApplicationsForm({
         />
         <BilingualField
           label="Mô tả phụ đề bên phải (Spatial rendering and simulation...)"
+          subLabel="Hỗ trợ xuống dòng bằng phím Enter hoặc chèn <\br> / <br>"
           path={["info", "subtitle"]}
           contentJa={contentJa}
           contentEn={contentEn}
@@ -6261,8 +6357,8 @@ function GalleryForm({
                 },
                 {
                   mode: "vrss",
-                  title: "📸 Bộ ảnh / clip VR SS",
-                  desc: "Hiện bộ ảnh hoặc clip trích xuất đa góc từ không gian VR",
+                  title: "📸 Khung không gian VR SS",
+                  desc: "Hiện 1 khung lớn toàn chiều rộng như VR360 kèm nút chuyển góc & phóng to",
                 },
               ].map((opt) => {
                 const active = (curPageJa.mediaMode || "gallery") === opt.mode;
@@ -6286,12 +6382,15 @@ function GalleryForm({
               })}
             </div>
 
-            {/* Cài đặt chữ hiển thị riêng trên khung Video hoặc khung VR360 */}
-            {(curPageJa.mediaMode === "movie" || curPageJa.mediaMode === "vr360") && (
+            {/* Cài đặt chữ hiển thị riêng trên khung Video, VR360 hoặc VR SS */}
+            {(curPageJa.mediaMode === "movie" ||
+              curPageJa.mediaMode === "vr360" ||
+              curPageJa.mediaMode === "vrss") && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3.5 rounded-xl bg-sky-50/60 border border-sky-200">
                 <div>
                   <label className="block text-xs font-bold text-sky-950 mb-1">
-                    {curPageJa.mediaMode === "vr360"
+                    {curPageJa.mediaMode === "vr360" ||
+                    curPageJa.mediaMode === "vrss"
                       ? "Dòng chữ hướng dẫn góc trái khung 360°:"
                       : "Nhãn chữ góc trên trái khung Video:"}
                   </label>
@@ -6307,7 +6406,8 @@ function GalleryForm({
                       )
                     }
                     placeholder={
-                      curPageJa.mediaMode === "vr360"
+                      curPageJa.mediaMode === "vr360" ||
+                      curPageJa.mediaMode === "vrss"
                         ? "360° ドラッグして視点回転"
                         : "4K ARCHITECTURAL FILM"
                     }
@@ -6330,12 +6430,18 @@ function GalleryForm({
                         e.target.value
                       )
                     }
-                    placeholder={curPageJa.mediaMode === "vr360" ? "全画面VR体験" : "全画面再生"}
+                    placeholder={
+                      curPageJa.mediaMode === "vr360"
+                        ? "全画面VR体験"
+                        : curPageJa.mediaMode === "vrss"
+                        ? "全画面表示"
+                        : "全画面再生"
+                    }
                     className="w-full px-3 py-1.5 text-xs border border-sky-200 rounded-lg bg-white"
                   />
                 </div>
 
-                {curPageJa.mediaMode === "vr360" && (
+                {(curPageJa.mediaMode === "vr360" || curPageJa.mediaMode === "vrss") && (
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-sky-950 mb-1">
                       🌐 Đường dẫn Link Web VR / AR (Hỗ trợ link vr.i8studio.vn/.../index.html, Matterport, Kuula, Panoee — Bỏ trống nếu dùng ảnh Panorama 360° bên dưới):

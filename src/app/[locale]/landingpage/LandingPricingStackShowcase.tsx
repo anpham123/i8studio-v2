@@ -596,6 +596,116 @@ const InlineVR360Showcase: React.FC<InlineVR360ShowcaseProps> = ({
 };
 
 /* ============================================================================
+   INLINE VR SS SHOWCASE FOR CARD 05 (SINGLE FULL-WIDTH SPACE VIEW LIKE VR360)
+   ============================================================================ */
+interface InlineVRSSShowcaseProps {
+  page: PricingStackPageItem;
+  isActive: boolean;
+  onOpenFullscreen: (sceneIdx: number, mode: "media" | "vr360") => void;
+}
+
+const InlineVRSSShowcase: React.FC<InlineVRSSShowcaseProps> = ({
+  page,
+  isActive,
+  onOpenFullscreen,
+}) => {
+  const [sceneIdx, setSceneIdx] = useState(0);
+  const scenes = page.mediaItems && page.mediaItems.length > 0 ? page.mediaItems : [];
+  const activeScene = scenes[sceneIdx] || scenes[0];
+  const hasExternalEmbed = Boolean(page.vrEmbedUrl && page.vrEmbedUrl.trim());
+  const activeSceneIsWebVr = Boolean(activeScene?.url && isWebVrArUrl(activeScene.url));
+  const activeEmbedVideo = activeScene?.url ? getEmbedVideoUrl(activeScene.url) : null;
+  const activeSceneIsVideo = Boolean(
+    activeScene?.url && isVideoUrl(activeScene.url, activeScene.type)
+  );
+  const expandMode: "media" | "vr360" =
+    activeEmbedVideo || activeSceneIsVideo ? "media" : "vr360";
+
+  return (
+    <div className="pricing-stack-v2-vr-box">
+      <div className="pricing-stack-v2-vr-stage is-vrss-stage">
+        {hasExternalEmbed ? (
+          <iframe
+            src={page.vrEmbedUrl}
+            title={page.title}
+            className="pricing-stack-v2-vr-iframe"
+            allow="xr-spatial-tracking; gyroscope; accelerometer; magnetometer; camera; autoplay; fullscreen"
+            allowFullScreen
+          />
+        ) : activeScene && activeSceneIsWebVr ? (
+          <iframe
+            src={activeScene.url}
+            title={activeScene.caption || page.title}
+            className="pricing-stack-v2-vr-iframe"
+            allow="xr-spatial-tracking; gyroscope; accelerometer; magnetometer; camera; autoplay; fullscreen"
+            allowFullScreen
+          />
+        ) : activeScene && activeEmbedVideo ? (
+          <iframe
+            src={activeEmbedVideo}
+            title={activeScene.caption || page.title}
+            className="pricing-stack-v2-movie-iframe"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+          />
+        ) : activeScene && activeSceneIsVideo ? (
+          <video
+            key={activeScene.url}
+            src={activeScene.url}
+            poster={activeScene.poster || activeScene.thumbnail}
+            muted
+            loop
+            playsInline
+            autoPlay={isActive}
+            preload="metadata"
+            onClick={() => onOpenFullscreen(sceneIdx, "media")}
+            className="pricing-stack-v2-vrss-img"
+          />
+        ) : activeScene ? (
+          <InteractivePanorama360
+            imageUrl={activeScene.url}
+            isActive={isActive}
+          />
+        ) : null}
+
+        <div className="pricing-stack-v2-vr-hud-top">
+          <span className="pricing-stack-v2-vr-drag-hint">
+            <Compass className="w-3.5 h-3.5 shrink-0" />
+            <span className="pricing-stack-v2-vr-drag-text">
+              {page.mediaBadgeText || "360° ドラッグして視点回転"}
+            </span>
+          </span>
+
+          <button
+            type="button"
+            onClick={() => onOpenFullscreen(sceneIdx, expandMode)}
+            className="pricing-stack-v2-vr-expand-btn"
+          >
+            <Expand className="w-3.5 h-3.5 shrink-0" />
+            <span>{page.expandBtnText || "全画面VR体験"}</span>
+          </button>
+        </div>
+      </div>
+
+      {!hasExternalEmbed && scenes.length > 1 && (
+        <div className="pricing-stack-v2-vr-scenes">
+          {scenes.map((sc, sIdx) => (
+            <button
+              key={sc.id || sIdx}
+              type="button"
+              onClick={() => setSceneIdx(sIdx)}
+              className={`pricing-stack-v2-vr-scene-btn ${sceneIdx === sIdx ? "is-active" : ""}`}
+            >
+              {sc.caption || `VR SS 0${sIdx + 1}`}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ============================================================================
    MAIN COMPONENT: SCROLL-PINNED 3D FOLDING CARD STACK (5 SERVICE PAGES)
    ============================================================================ */
 export default function LandingPricingStackShowcase({
@@ -1115,8 +1225,16 @@ export default function LandingPricingStackShowcase({
                               setLightboxState({ page: pg, index: sIdx, mode: "vr360" })
                             }
                           />
+                        ) : pg.mediaMode === "vrss" || (!pg.mediaMode && pg.id === "page-vr-ss") ? (
+                          <InlineVRSSShowcase
+                            page={pg}
+                            isActive={isNearActive && !lightboxState && !detailPage}
+                            onOpenFullscreen={(sIdx, openMode) =>
+                              setLightboxState({ page: pg, index: sIdx, mode: openMode })
+                            }
+                          />
                         ) : (
-                          /* GALLERY / VR SS 3-CARD THUMBNAIL STRIP (Matches reference video bottom-right) */
+                          /* GALLERY 3-CARD THUMBNAIL STRIP (Cards 01 & 02) */
                           <div className="pricing-stack-v2-thumb-grid">
                             {mediaItems.slice(0, 3).map((item, mIdx) => {
                               const isVid = isVideoUrl(item.url, item.type);

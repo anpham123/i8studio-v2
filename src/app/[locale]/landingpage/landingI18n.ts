@@ -684,7 +684,7 @@ export const contentJa: LandingContent = {
     laserTag: "納品成果物プレビュー",
   },
   applications: {
-    title: "あらゆる建築タイプに対応する実践ソリューション",
+    title: "あらゆる建築タイプに<\\br>対応する実践ソリューション",
     subtitle: "空間ビジュアライゼーションと設計シミュレーションを、企画・販売促進・コスト管理・現場施工の各段階に直接適用。",
     cardTag: "対応分野",
   },

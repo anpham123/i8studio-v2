@@ -308,15 +308,29 @@ const BeforeAfterSlider: React.FC<{
       onPointerCancel={handlePointerUp}
       style={{ touchAction: "pan-y", cursor: "ew-resize" }}
     >
-      {/* Base After Image */}
+      {/* Base After Image & Clipped After Badge */}
       <img
         src={afterImage || beforeImage}
         alt={title ? `${title} (After)` : "After"}
         className="usecase-img usecase-img-after"
         draggable={false}
       />
+      <div
+        className="usecase-bfaf-after-badge-layer"
+        style={{
+          clipPath: `inset(0 0 0 ${sliderPos}%)`,
+        }}
+      >
+        <div
+          className={`usecase-bfaf-badge after${
+            sliderPos >= 78 ? " is-hidden" : ""
+          }`}
+        >
+          After
+        </div>
+      </div>
 
-      {/* Clipped Before Image */}
+      {/* Clipped Before Image & Clipped Before Badge */}
       <div
         className="usecase-bfaf-overlay"
         style={{
@@ -329,11 +343,14 @@ const BeforeAfterSlider: React.FC<{
           className="usecase-img usecase-img-before"
           draggable={false}
         />
+        <div
+          className={`usecase-bfaf-badge before${
+            sliderPos <= 22 ? " is-hidden" : ""
+          }`}
+        >
+          Before
+        </div>
       </div>
-
-      {/* Badges */}
-      <div className="usecase-bfaf-badge before">Before</div>
-      <div className="usecase-bfaf-badge after">After</div>
 
       {/* Draggable Divider Line & Knob */}
       <div

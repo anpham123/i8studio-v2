@@ -369,11 +369,37 @@ export default async function LandingPage({
       <div className="content-container">
         <div className="section-title-split reveal-item">
           <div className="title-left">
-            <h2 className="sec-main-title">{t.applications?.title}</h2>
+            <h2 className="sec-main-title">
+              {(() => {
+                const rawAppTitle = String(t.applications?.title || "");
+                const normalizedTitle =
+                  rawAppTitle === "あらゆる建築タイプに対応する実践ソリューション"
+                    ? "あらゆる建築タイプに<\\br>対応する実践ソリューション"
+                    : rawAppTitle;
+                const parts = normalizedTitle.split(/<\\?\/?[bB][rR]\s*\\?\/?>|\r?\n/g);
+                return parts.map((part, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && <br />}
+                    {part}
+                  </React.Fragment>
+                ));
+              })()}
+            </h2>
           </div>
           <div className="title-right">
             <p className="sec-subtitle">
-              {t.applications?.subtitle || "空間ビジュアライゼーションと設計シミュレーションを、企画・販売促進・コスト管理・現場施工の各段階に直接適用。"}
+              {(() => {
+                const rawSub =
+                  t.applications?.subtitle ||
+                  "空間ビジュアライゼーションと設計シミュレーションを、企画・販売促進・コスト管理・現場施工の各段階に直接適用。";
+                const subParts = String(rawSub).split(/<\\?\/?[bB][rR]\s*\\?\/?>|\r?\n/g);
+                return subParts.map((part, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && <br />}
+                    {part}
+                  </React.Fragment>
+                ));
+              })()}
             </p>
           </div>
         </div>
