@@ -2917,6 +2917,41 @@ function DeliverablesForm({
     toast(`Đã thêm mục 0${pNum} vào Bộ sưu tập 0${cIdx + 1}`, "success");
   };
 
+  const handleMovePhoto = (cIdx: number, pIdx: number, direction: "up" | "down") => {
+    const updatedJa = [...collectionsJa];
+    const updatedEn = Array.from(
+      { length: collectionsJa.length },
+      (_, i) => collectionsEn[i] || updatedJa[i] || {}
+    );
+
+    const cJa = { ...(updatedJa[cIdx] || {}) };
+    const cEn = { ...(updatedEn[cIdx] || {}) };
+    const photosJa = Array.isArray(cJa.photos) ? [...cJa.photos] : [];
+    const targetIdx = direction === "up" ? pIdx - 1 : pIdx + 1;
+    if (targetIdx < 0 || targetIdx >= photosJa.length) return;
+
+    const photosEn = Array.from(
+      { length: photosJa.length },
+      (_, i) => (Array.isArray(cEn.photos) && cEn.photos[i]) || { ...(photosJa[i] || {}) }
+    );
+
+    [photosJa[pIdx], photosJa[targetIdx]] = [photosJa[targetIdx], photosJa[pIdx]];
+    [photosEn[pIdx], photosEn[targetIdx]] = [photosEn[targetIdx], photosEn[pIdx]];
+
+    cJa.photos = photosJa;
+    cEn.photos = photosEn;
+    updatedJa[cIdx] = cJa;
+    updatedEn[cIdx] = cEn;
+
+    saveCollections(updatedJa, updatedEn);
+    toast(
+      `Đã chuyển Mục #${pIdx + 1} ${
+        direction === "up" ? "lên vị trí" : "xuống vị trí"
+      } #${targetIdx + 1}`,
+      "success"
+    );
+  };
+
   const handleDeletePhoto = (cIdx: number, pIdx: number) => {
     const updatedJa = [...collectionsJa];
     const updatedEn = [...collectionsEn];
@@ -3317,16 +3352,38 @@ function DeliverablesForm({
                                   : "(Trạng thái 2: Ảnh trái · Tên bên phải)"}
                               </span>
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => handleDeletePhoto(cIdx, pIdx)}
-                              disabled={photosJa.length <= 1}
-                              className="inline-flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-30 disabled:hover:bg-transparent px-1.5 py-0.5 rounded text-[10px] transition"
-                              title="Xóa mục này"
-                            >
-                              <Trash2 size={11} />
-                              <span>Xóa mục</span>
-                            </button>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleMovePhoto(cIdx, pIdx, "up")}
+                                disabled={pIdx === 0}
+                                className="p-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded border border-slate-200 bg-white transition cursor-pointer disabled:cursor-not-allowed"
+                                title="Di chuyển mục lên trước"
+                                aria-label="Di chuyển mục lên trước"
+                              >
+                                <ArrowUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMovePhoto(cIdx, pIdx, "down")}
+                                disabled={pIdx === photosJa.length - 1}
+                                className="p-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 rounded border border-slate-200 bg-white transition cursor-pointer disabled:cursor-not-allowed"
+                                title="Di chuyển mục xuống sau"
+                                aria-label="Di chuyển mục xuống sau"
+                              >
+                                <ArrowDown size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeletePhoto(cIdx, pIdx)}
+                                disabled={photosJa.length <= 1}
+                                className="inline-flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50 disabled:opacity-30 disabled:hover:bg-transparent px-1.5 py-0.5 rounded text-[10px] transition cursor-pointer"
+                                title="Xóa mục này"
+                              >
+                                <Trash2 size={11} />
+                                <span>Xóa mục</span>
+                              </button>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-3">

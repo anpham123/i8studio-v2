@@ -1111,6 +1111,11 @@ export default function LandingPricingStackShowcase({
               const mediaItems = Array.isArray(pg.mediaItems) ? pg.mediaItems : [];
               const specs = Array.isArray(pg.specs) ? pg.specs : [];
               const isNearActive = isMobileStack || Math.abs(activeIndex - idx) <= 1;
+              const is16x9Card =
+                pg.mediaMode === "movie" ||
+                pg.mediaMode === "vr360" ||
+                pg.mediaMode === "vrss" ||
+                (!pg.mediaMode && pg.id === "page-vr-ss");
 
               return (
                 <article
@@ -1162,25 +1167,47 @@ export default function LandingPricingStackShowcase({
                       </div>
                     </header>
 
-                    {/* FLOATING RIGHT-EDGE ACTION PILL ("詳細を見る →" like reference video) */}
-                    <div className="pricing-stack-v2-mid-action-row">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedProjectInModal(null);
-                          setDetailPage(pg);
-                        }}
-                        className="pricing-stack-v2-detail-btn"
-                      >
-                        <span>{pg.btnDetailText || btnViewDetail}</span>
-                        <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
-                      </button>
-                    </div>
+                    {/* FLOATING RIGHT-EDGE ACTION PILL (Original position for View 01 & 02) */}
+                    {!is16x9Card && (
+                      <div className="pricing-stack-v2-mid-action-row">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedProjectInModal(null);
+                            setDetailPage(pg);
+                          }}
+                          className="pricing-stack-v2-detail-btn"
+                        >
+                          <span>{pg.btnDetailText || btnViewDetail}</span>
+                          <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
+                        </button>
+                      </div>
+                    )}
 
                     {/* BOTTOM ROW: Price & Specs on Left, Interactive Media Showcase on Right */}
-                    <div className="pricing-stack-v2-card-bottom">
+                    <div
+                      className={`pricing-stack-v2-card-bottom ${
+                        is16x9Card ? "is-16x9-layout" : ""
+                      }`}
+                    >
                       {/* LEFT: PRICE & SPECS */}
                       <div className="pricing-stack-v2-price-panel">
+                        {is16x9Card && (
+                          <div className="pricing-stack-v2-mid-action-row is-16x9-action">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedProjectInModal(null);
+                                setDetailPage(pg);
+                              }}
+                              className="pricing-stack-v2-detail-btn"
+                            >
+                              <span>{pg.btnDetailText || btnViewDetail}</span>
+                              <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
+                            </button>
+                          </div>
+                        )}
+
                         <div className="pricing-stack-v2-price-box">
                           {pg.priceLabel && (
                             <span className="pricing-stack-v2-price-label">{pg.priceLabel}</span>
@@ -1206,7 +1233,11 @@ export default function LandingPricingStackShowcase({
                       </div>
 
                       {/* RIGHT: INTERACTIVE MEDIA SHOWCASE */}
-                      <div className="pricing-stack-v2-media-panel">
+                      <div
+                        className={`pricing-stack-v2-media-panel ${
+                          is16x9Card ? "is-16x9-panel" : "is-gallery-panel"
+                        }`}
+                      >
                         {pg.mediaMode === "movie" ? (
                           <InlineMovieShowcase
                             items={mediaItems}

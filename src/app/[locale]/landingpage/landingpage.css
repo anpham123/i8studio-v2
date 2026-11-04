@@ -12475,6 +12475,11 @@
   margin: -4px 0;
 }
 
+.pricing-stack-v2-mid-action-row.is-16x9-action {
+  justify-content: flex-start;
+  margin: 0;
+}
+
 .pricing-stack-v2-detail-btn {
   display: inline-flex;
   align-items: center;
@@ -12518,6 +12523,11 @@
   min-height: 0;
   min-width: 0;
   max-width: 100%;
+}
+
+.pricing-stack-v2-card-bottom.is-16x9-layout {
+  grid-template-columns: minmax(260px, 37%) minmax(0, 1fr);
+  flex: 1;
 }
 
 /* Price & Spec Pills (Bottom-Left) */
@@ -12616,6 +12626,14 @@
   min-height: 0;
 }
 
+.pricing-stack-v2-media-panel.is-16x9-panel {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
 /* 1) 3-Card Thumbnail Strip (View Standard / View HQ / VR SS) */
 .pricing-stack-v2-thumb-grid {
   width: 100%;
@@ -12707,10 +12725,14 @@
   backdrop-filter: blur(3px);
 }
 
-/* 2) Movie Showcase (Card 03) */
+/* 2) Movie Showcase (Card 03 - 16:9) */
 .pricing-stack-v2-movie-box {
-  width: 100%;
-  height: 100%;
+  position: relative;
+  width: min(100%, max(320px, calc((100svh - 355px) * 16 / 9)));
+  height: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -12718,7 +12740,9 @@
 
 .pricing-stack-v2-movie-stage {
   position: relative;
-  flex: 1;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
   min-height: 0;
   border-radius: 20px;
   overflow: hidden;
@@ -12848,13 +12872,14 @@
   color: #FFFFFF;
 }
 
-/* 3) Interactive 360° VR Showcase (Card 04) */
+/* 3) Interactive 360° VR & VR SS Showcase (Cards 04 & 05 - 16:9) */
 .pricing-stack-v2-vr-box {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: min(100%, max(320px, calc((100svh - 380px) * 16 / 9)));
+  height: auto;
   min-width: 0;
   max-width: 100%;
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -12863,7 +12888,8 @@
 .pricing-stack-v2-vr-stage {
   position: relative;
   width: 100%;
-  flex: 1;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
   min-height: 0;
   min-width: 0;
   border-radius: 20px;
@@ -13655,6 +13681,26 @@
     min-height: 120px;
     max-height: 245px;
     height: auto;
+  }
+
+  .pricing-stack-v2-media-panel.is-16x9-panel {
+    flex: 0 0 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    align-items: center;
+  }
+
+  .pricing-stack-v2-movie-box,
+  .pricing-stack-v2-vr-box {
+    width: min(100%, max(210px, calc((100svh - var(--lp-sticky-top, 0px) - 415px) * 16 / 9)));
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pricing-stack-v2-movie-stage,
+  .pricing-stack-v2-vr-stage {
+    border-radius: 16px;
   }
 
   .pricing-stack-v2-modal-hero,
