@@ -12393,6 +12393,7 @@
 }
 
 .pricing-stack-v2-card-title-col {
+  flex: 1 1 auto;
   max-width: 760px;
   min-width: 0;
 }
@@ -12454,9 +12455,12 @@
   font-size: clamp(0.84rem, 1.02vw, 0.98rem);
   line-height: 1.58;
   opacity: 0.82;
-  max-width: 680px;
+  width: 100%;
+  max-width: calc(11.58 * clamp(1.5rem, 2.5vw, 2.45rem));
+  overflow-wrap: anywhere;
+  word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -13656,6 +13660,11 @@
   .pricing-stack-v2-card-inner {
     padding: 18px 18px;
     gap: 10px;
+  }
+
+  .pricing-stack-v2-card-desc {
+    max-width: 100%;
+    -webkit-line-clamp: 3;
   }
 
   .pricing-stack-v2-mid-action-row {

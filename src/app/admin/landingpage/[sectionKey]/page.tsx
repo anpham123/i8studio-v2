@@ -5866,8 +5866,12 @@ function GalleryForm({
                         {curPageJa.categoryName}
                       </span>
                     </div>
-                    <h4 className="text-lg font-extrabold leading-snug">{curPageJa.title}</h4>
-                    <p className="text-xs opacity-80 line-clamp-1 mt-0.5">{curPageJa.description}</p>
+                    <h4 className="text-lg font-extrabold leading-snug">
+                      {String(curPageJa.title || "").replace(/<\\?\/?[bB][rR]\s*\\?\/?>/g, " ")}
+                    </h4>
+                    <p className="text-xs opacity-80 line-clamp-3 mt-0.5 max-w-[340px] break-words whitespace-pre-line">
+                      {String(curPageJa.description || "").replace(/<\\?\/?[bB][rR]\s*\\?\/?>/g, "\n")}
+                    </p>
                   </div>
                   <span className="text-2xl font-extrabold opacity-85 shrink-0">
                     {String(curPageJa.pageNumber || `0${safeSelectedIdx + 1}`).replace(/[()]/g, "")}
@@ -6169,11 +6173,14 @@ function GalleryForm({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Đoạn giới thiệu ngắn bên dưới tiêu đề (2 dòng):
+                    <label className="block text-xs font-semibold text-slate-700 mb-0.5">
+                      Đoạn giới thiệu ngắn bên dưới tiêu đề:
                     </label>
+                    <p className="text-[11px] text-slate-500 mb-1">
+                      Tự động xuống dòng theo khung chuẩn hoặc nhập <code className="px-1 py-0.5 bg-white border border-slate-200 rounded font-mono text-amber-700">&lt;\br&gt;</code> / phím Enter để chủ động ngắt dòng.
+                    </p>
                     <textarea
-                      rows={2}
+                      rows={3}
                       value={curPageJa.description || ""}
                       onChange={(e) =>
                         handleUpdatePageField(safeSelectedIdx, "description", "ja", e.target.value)
@@ -6222,11 +6229,14 @@ function GalleryForm({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-0.5">
                       Đoạn giới thiệu ngắn (EN):
                     </label>
+                    <p className="text-[11px] text-slate-500 mb-1">
+                      Có thể chèn <code className="px-1 py-0.5 bg-white border border-slate-200 rounded font-mono text-amber-700">&lt;\br&gt;</code> hoặc nhấn Enter để tự ý xuống hàng.
+                    </p>
                     <textarea
-                      rows={2}
+                      rows={3}
                       value={curPageEn.description || ""}
                       onChange={(e) =>
                         handleUpdatePageField(safeSelectedIdx, "description", "en", e.target.value)

@@ -141,6 +141,19 @@ function formatCleanStepNumber(raw?: string, fallbackIdx: number = 0): string {
   return cleaned || `0${fallbackIdx + 1}`;
 }
 
+function renderWithLineBreaks(text?: string): React.ReactNode {
+  if (!text) return null;
+  const parts = String(text).split(
+    /(?:<\\?\/?[bB][rR]\s*\\?\/?>|&lt;\\?\/?[bB][rR]\s*\\?\/?&gt;|\r?\n)/g
+  );
+  return parts.map((part, idx) => (
+    <React.Fragment key={idx}>
+      {idx > 0 && <br />}
+      {part}
+    </React.Fragment>
+  ));
+}
+
 /* ============================================================================
    INTERACTIVE 360° EQUIRECTANGULAR WEBGL VIEWER (Three.js)
    ============================================================================ */
@@ -1153,10 +1166,14 @@ export default function LandingPricingStackShowcase({
                           <span className="pricing-stack-v2-cat-chip">{pg.categoryName}</span>
                         </div>
 
-                        <h3 className="pricing-stack-v2-card-title">{pg.title}</h3>
+                        <h3 className="pricing-stack-v2-card-title">
+                          {renderWithLineBreaks(pg.title)}
+                        </h3>
 
                         {pg.description && (
-                          <p className="pricing-stack-v2-card-desc">{pg.description}</p>
+                          <p className="pricing-stack-v2-card-desc">
+                            {renderWithLineBreaks(pg.description)}
+                          </p>
                         )}
                       </div>
 
@@ -1592,7 +1609,7 @@ export default function LandingPricingStackShowcase({
                     <div className="pricing-stack-v2-modal-badges">
                       <span className="pricing-stack-v2-modal-cat">{detailPage.categoryName || detailPage.qualityBadge}</span>
                     </div>
-                    <h3 className="pricing-stack-v2-modal-title">{detailPage.title}</h3>
+                    <h3 className="pricing-stack-v2-modal-title">{renderWithLineBreaks(detailPage.title)}</h3>
                   </div>
                 </div>
 
@@ -1620,7 +1637,7 @@ export default function LandingPricingStackShowcase({
                 >
                   <div className="pricing-stack-v2-modal-hero-info">
                     <p className="pricing-stack-v2-modal-summary">
-                      {detailPage.detailSummary || detailPage.description}
+                      {renderWithLineBreaks(detailPage.detailSummary || detailPage.description)}
                     </p>
 
                     {Array.isArray(detailPage.deliverables) &&
