@@ -12185,6 +12185,275 @@
   }
 }
 
+/* ==========================================================================
+   DELIVERABLES V4: SCROLL-PINNED MULTI-PHOTO NATURAL ASPECT SHOWCASE
+   - Wheel scroll steps cleanly through each category
+   - 5–6+ photos per category rendered in authentic uploaded aspect ratio (zero crop, zero fixed mold)
+   - Centered larger heading + curtain clip-path wipe reveal
+   ========================================================================== */
+.deliverables-compare-section.deliv-scroll-v4 {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(20, 21, 24, 0.08);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.deliverables-compare-section.deliv-scroll-v4.is-dark-bg {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.deliv-v4-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: clamp(68px, 7.8vh, 88px) clamp(20px, 4.5vw, 72px) clamp(22px, 3.2vh, 36px);
+  box-sizing: border-box;
+}
+
+/* Top Centered Editorial Header */
+.deliv-v4-header {
+  position: relative;
+  z-index: 15;
+  width: 100%;
+  max-width: 1640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.deliv-v4-heading-group {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.deliv-v4-main-title {
+  margin: 0;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", Georgia, serif;
+  font-size: clamp(2.15rem, 3.25vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.deliv-scroll-v4.is-dark-bg .deliv-v4-main-title {
+  color: #f6f5f0;
+}
+
+.deliv-v4-subtitle-slot {
+  min-height: 1.65em;
+  margin-top: 0.3rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deliv-v4-category-subtitle {
+  margin: 0;
+  font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.12rem, 1.55vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: #c29b61;
+  text-align: center;
+}
+
+/* Center Multi-Photo Natural-Aspect-Ratio Stage */
+.deliv-v4-stage-outer {
+  position: relative;
+  z-index: 10;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: clamp(10px, 1.8vh, 22px) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.deliv-v4-stage-canvas {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deliv-v4-mosaic-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.deliv-v4-mosaic-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deliv-v4-tile {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+  cursor: zoom-in;
+  flex-shrink: 0;
+  display: block;
+}
+
+.deliv-v4-tile:focus-visible {
+  outline: 2px solid #c29b61;
+  outline-offset: 2px;
+}
+
+.deliv-v4-tile-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.deliv-v4-tile:hover .deliv-v4-tile-img {
+  transform: scale(1.024);
+}
+
+.deliv-v4-tile-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.55rem;
+  transition: background-color 0.28s ease;
+}
+
+.deliv-v4-tile:hover .deliv-v4-tile-overlay {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.deliv-v4-tile-caption {
+  max-width: 82%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: #ffffff;
+  background: rgba(16, 18, 22, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 0.24rem 0.55rem;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.deliv-v4-tile-zoom-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #141518;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.deliv-v4-tile:hover .deliv-v4-tile-caption,
+.deliv-v4-tile:hover .deliv-v4-tile-zoom-icon {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.deliv-v4-tile-extra {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 15, 18, 0.48);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+}
+
+.deliv-v4-empty-state {
+  padding: 3.5rem 2.5rem;
+  border: 1px dashed rgba(20, 21, 24, 0.16);
+  border-radius: 16px;
+  text-align: center;
+  color: rgba(20, 21, 24, 0.45);
+}
+
+.deliv-v4-empty-state p {
+  margin: 0 0 0.35rem;
+  font-family: "Yu Mincho", Georgia, serif;
+  font-size: 1.15rem;
+}
+
+.deliv-v4-empty-state span {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 768px) {
+  .deliv-v4-sticky {
+    padding: 68px 16px 18px;
+  }
+
+  .deliv-v4-main-title {
+    font-size: clamp(1.7rem, 6.2vw, 2.25rem);
+  }
+
+  .deliv-v4-category-subtitle {
+    font-size: clamp(0.98rem, 3.8vw, 1.2rem);
+  }
+}
+
 
 /* ==========================================================================
    SECTION 07 (GALLERY / PRICING): SCROLL-PINNED 3D FOLDING CARD STACK

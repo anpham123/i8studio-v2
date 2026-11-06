@@ -40,6 +40,7 @@ import {
   Megaphone,
   ArrowUp,
   ArrowDown,
+  Loader2,
 } from "lucide-react";
 import {
   getDeliverableCollections,
@@ -2802,6 +2803,10 @@ function DeliverablesForm({
   updateField: (lang: "en" | "ja", path: string[], value: any) => void;
 }) {
   const { toast } = useToast();
+  const [batchUploadingCol, setBatchUploadingCol] = useState<{
+    cIdx: number;
+    progress: string;
+  } | null>(null);
 
   const collectionsJa = Array.isArray(contentJa?.collections)
     ? contentJa.collections
@@ -2818,6 +2823,10 @@ function DeliverablesForm({
     if (!contentEn?.collections) {
       updateField("en", ["collections"], collectionsEn);
     }
+    const rawCloseJa = String(contentJa?.info?.closeZoomBtnText || "").trim();
+    if (rawCloseJa && /quay\s*l[aạ]i|trang\s*\d|đóng/i.test(rawCloseJa)) {
+      updateField("ja", ["info", "closeZoomBtnText"], "拡大表示を閉じる");
+    }
   }, []);
 
   const saveCollections = (newJa: any[], newEn: any[]) => {
@@ -2827,32 +2836,102 @@ function DeliverablesForm({
 
   const handleAddCollection = () => {
     const newIdx = collectionsJa.length + 1;
+    const colId = `col_${Date.now()}`;
     const newColJa = {
-      id: `col_${Date.now()}`,
-      name: `コレクション 0${newIdx}: 新規コレクション`,
+      id: colId,
+      name: `コレクション ${String(newIdx).padStart(2, "0")}: 新規カテゴリー`,
       badge: "NEW",
-      photos: [
-        {
-          url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85",
-          tag: "新規図面",
-          title: `01. 新規図面タイトル 0${newIdx}`,
-        },
-      ],
+      photos: Array.from({ length: 6 }, (_, i) => ({
+        url: "",
+        tag: `MỤC 0${i + 1}`,
+        title: "",
+      })),
     };
     const newColEn = {
-      id: `col_${Date.now()}`,
-      name: `COLLECTION 0${newIdx}: NEW COLLECTION`,
+      id: colId,
+      name: `COLLECTION ${String(newIdx).padStart(2, "0")}: NEW CATEGORY`,
       badge: "NEW",
-      photos: [
-        {
-          url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85",
-          tag: "NEW DRAWING",
-          title: `01. New Drawing Title 0${newIdx}`,
-        },
-      ],
+      photos: Array.from({ length: 6 }, (_, i) => ({
+        url: "",
+        tag: `ITEM 0${i + 1}`,
+        title: "",
+      })),
     };
     saveCollections([...collectionsJa, newColJa], [...collectionsEn, newColEn]);
-    toast(`Đã thêm Bộ sưu tập 0${newIdx}`, "success");
+    toast(`Đã thêm Thể loại ${String(newIdx).padStart(2, "0")} (kèm sẵn 6 khung tải ảnh)`, "success");
+  };
+
+  const handleBatchUploadPhotos = async (cIdx: number, fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+    const uploadedUrls: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      setBatchUploadingCol({ cIdx, progress: `${i + 1}/${files.length}` });
+      try {
+        const fd = new FormData();
+        fd.append("file", files[i]);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          uploadedUrls.push(data.url);
+        }
+      } catch {
+        // continue remaining files
+      }
+    }
+
+    setBatchUploadingCol(null);
+    if (uploadedUrls.length === 0) {
+      toast("Tải ảnh thất bại", "error");
+      return;
+    }
+
+    const updatedJa = [...collectionsJa];
+    const updatedEn = Array.from(
+      { length: collectionsJa.length },
+      (_, i) => collectionsEn[i] || updatedJa[i] || {}
+    );
+
+    const cJa = { ...(updatedJa[cIdx] || {}) };
+    const cEn = { ...(updatedEn[cIdx] || {}) };
+    const photosJa = Array.isArray(cJa.photos) ? [...cJa.photos] : [];
+    const photosEn = Array.from(
+      { length: photosJa.length },
+      (_, i) => (Array.isArray(cEn.photos) && cEn.photos[i]) || { ...(photosJa[i] || {}) }
+    );
+
+    let uPtr = 0;
+    // Fill existing empty slots first
+    for (let i = 0; i < photosJa.length && uPtr < uploadedUrls.length; i++) {
+      if (!photosJa[i]?.url || !String(photosJa[i].url).trim()) {
+        photosJa[i] = { ...photosJa[i], url: uploadedUrls[uPtr] };
+        photosEn[i] = { ...photosEn[i], url: uploadedUrls[uPtr] };
+        uPtr++;
+      }
+    }
+    // Append remaining uploaded files
+    while (uPtr < uploadedUrls.length) {
+      const pNum = photosJa.length + 1;
+      photosJa.push({
+        url: uploadedUrls[uPtr],
+        tag: `MỤC 0${pNum}`,
+        title: "",
+      });
+      photosEn.push({
+        url: uploadedUrls[uPtr],
+        tag: `ITEM 0${pNum}`,
+        title: "",
+      });
+      uPtr++;
+    }
+
+    cJa.photos = photosJa;
+    cEn.photos = photosEn;
+    updatedJa[cIdx] = cJa;
+    updatedEn[cIdx] = cEn;
+    saveCollections(updatedJa, updatedEn);
+    toast(`Đã tải lên ${uploadedUrls.length} ảnh vào Bộ sưu tập ${String(cIdx + 1).padStart(2, "0")}`, "success");
   };
 
   const handleMoveCollection = (cIdx: number, direction: "up" | "down") => {
@@ -3060,11 +3139,11 @@ function DeliverablesForm({
       {/* Tiêu đề Section & Chữ trên nút bấm điều hướng */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide border-b border-slate-100 pb-3">
-          1. Tiêu đề Section &amp; Chữ Nút Quay Lại Danh Sách
+          1. Tiêu đề Section &amp; Nút Đóng Phóng To Ảnh
         </h2>
 
         <BilingualField
-          label="Tiêu đề chính Section (Main Title)"
+          label="Tiêu đề chính Section (Hiển thị chính giữa phía trên)"
           subLabel="Ví dụ: お客様へのお届け成果物コレクション / CLIENT DELIVERABLES & PROJECT PORTFOLIO"
           path={["info", "title"]}
           contentJa={contentJa}
@@ -3073,20 +3152,10 @@ function DeliverablesForm({
           activeLang={lang}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-          <BilingualField
-            label="Chữ trên nút Quay lại danh sách ở giữa phía trên (← 一覧へ戻る)"
-            subLabel="Hiển thị khi khách bấm vào 1 bộ sưu tập. Để trống mặc định: 一覧へ戻る"
-            path={["info", "backBtnText"]}
-            contentJa={contentJa}
-            contentEn={contentEn}
-            updateField={updateField}
-            activeLang={lang}
-          />
-
+        <div className="pt-2 border-t border-slate-100">
           <BilingualField
             label="Chữ trên nút Đóng chế độ phóng to ảnh (× 拡大表示を閉じる)"
-            subLabel="Hiển thị khi khách bấm phóng lớn 1 ảnh. Để trống mặc định: 拡大表示を閉じる"
+            subLabel="Hiển thị góc trên phải khi khách bấm phóng lớn 1 ảnh. Để trống mặc định: 拡大表示を閉じる"
             path={["info", "closeZoomBtnText"]}
             contentJa={contentJa}
             contentEn={contentEn}
@@ -3101,10 +3170,10 @@ function DeliverablesForm({
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">
-              2. Quản lý các Bộ sưu tập Bản vẽ &amp; Hình ảnh bàn giao
+              2. Quản lý các Thể loại / Bộ sưu tập hình ảnh (Lăn chuột chuyển thể loại)
             </h2>
             <p className="text-xs text-slate-500 font-normal mt-0.5">
-              Khổ ảnh hiển thị tự động theo đúng tỷ lệ ảnh tải lên. Mỗi bộ sưu tập có thể thêm không giới hạn (5–10+ ảnh/bản vẽ).
+              Khuyến nghị 5–6 ảnh mỗi thể loại. Giao diện tự động hiển thị đúng khổ ảnh gốc tải lên (ngang / dọc / vuông), không ép khuôn cắt ảnh.
             </p>
           </div>
           <button
@@ -3321,17 +3390,47 @@ function DeliverablesForm({
                 {/* Photos in this collection */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between border-t border-slate-200 pt-3 flex-wrap gap-2">
-                    <h4 className="text-[11px] font-bold text-slate-600 uppercase">
-                      Danh sách hình ảnh / bản vẽ trong bộ sưu tập ({photosJa.length} mục)
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => handleAddPhoto(cIdx)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded-md shadow-xs transition"
-                    >
-                      <Plus size={12} />
-                      <span>Thêm mục (ảnh / bản vẽ)</span>
-                    </button>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-[11px] font-bold text-slate-600 uppercase">
+                        Danh sách hình ảnh trong thể loại ({photosJa.filter((p: any) => p?.url && String(p.url).trim()).length}/{photosJa.length} mục đã có ảnh)
+                      </h4>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">
+                        Khuyến nghị 5–6 ảnh · Giữ nguyên khổ gốc
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <label className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-md shadow-xs transition cursor-pointer">
+                        {batchUploadingCol?.cIdx === cIdx ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            <span>Đang tải ({batchUploadingCol.progress})...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={12} />
+                            <span>Tải nhiều ảnh (5–6 ảnh)</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(e) => {
+                            handleBatchUploadPhotos(cIdx, e.target.files);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleAddPhoto(cIdx)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold rounded-md shadow-xs transition cursor-pointer"
+                      >
+                        <Plus size={12} />
+                        <span>Thêm mục lẻ</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -3342,14 +3441,10 @@ function DeliverablesForm({
                       return (
                         <div key={pIdx} className="bg-white p-3 rounded-lg border border-slate-200 shadow-xs space-y-2">
                           <div className="flex items-center justify-between border-b border-slate-100 pb-1 gap-2">
-                            <span className="text-[10px] font-bold text-slate-500">
-                              Mục #{pIdx + 1}{" "}
+                            <span className="text-[10px] font-bold text-slate-600">
+                              Ảnh #{pIdx + 1}{" "}
                               <span className="font-normal text-slate-400">
-                                {pIdx === 0
-                                  ? "(Ảnh mở đầu Trạng thái 2 — ẩn tên cạnh ảnh)"
-                                  : pIdx % 2 === 1
-                                  ? "(Trạng thái 2: Ảnh phải · Tên bên trái)"
-                                  : "(Trạng thái 2: Ảnh trái · Tên bên phải)"}
+                                (Hiển thị đúng khổ ảnh gốc tải lên)
                               </span>
                             </span>
                             <div className="flex items-center gap-1 shrink-0">
@@ -3387,20 +3482,20 @@ function DeliverablesForm({
                           </div>
 
                           <div className="flex items-center gap-3">
-                            <div className="relative w-16 h-14 rounded overflow-hidden border border-slate-200 shrink-0 bg-slate-100 flex items-center justify-center">
+                            <div className="relative w-20 h-16 rounded overflow-hidden border border-slate-200 shrink-0 bg-slate-50 p-0.5 flex items-center justify-center">
                               {pUrl ? (
-                                <img src={pUrl} alt="Document" className="w-full h-full object-cover" />
+                                <img src={pUrl} alt="Preview" className="max-w-full max-h-full w-auto h-auto object-contain rounded-xs" />
                               ) : (
                                 <span className="text-[9px] text-slate-400">Trống</span>
                               )}
                             </div>
 
-                            <div className="flex-grow space-y-1.5">
+                            <div className="flex-grow space-y-1.5 min-w-0">
                               <div className="flex items-center gap-1.5">
                                 <input
                                   type="text"
                                   value={pUrl}
-                                  placeholder="Link ảnh bản vẽ..."
+                                  placeholder="Link ảnh..."
                                   onChange={(e) => handleUpdatePhotoUrl(cIdx, pIdx, e.target.value)}
                                   className="w-full px-2 py-1 text-[11px] text-slate-800 bg-slate-50 border border-slate-200 rounded font-mono"
                                 />
@@ -3424,13 +3519,14 @@ function DeliverablesForm({
                                         const data = await res.json();
                                         if (res.ok && data.url) {
                                           handleUpdatePhotoUrl(cIdx, pIdx, data.url);
-                                          toast("Tải ảnh bản vẽ thành công!", "success");
+                                          toast("Tải ảnh thành công!", "success");
                                         } else {
                                           toast(data.error || "Tải ảnh thất bại", "error");
                                         }
                                       } catch {
                                         toast("Lỗi tải ảnh", "error");
                                       }
+                                      e.target.value = "";
                                     }}
                                   />
                                 </label>
@@ -3440,11 +3536,7 @@ function DeliverablesForm({
                                 <input
                                   type="text"
                                   value={pJa.title || ""}
-                                  placeholder={
-                                    pIdx === 0
-                                      ? "Tiêu đề ảnh (chỉ hiện khi phóng to Trạng thái 3)..."
-                                      : "Tiêu đề hình ảnh hiển thị bên cạnh (JA)..."
-                                  }
+                                  placeholder="Chú thích / tiêu đề ảnh (JA - tùy chọn)..."
                                   onChange={(e) =>
                                     handleUpdatePhotoMeta(cIdx, pIdx, "title", "ja", e.target.value)
                                   }
@@ -3456,11 +3548,7 @@ function DeliverablesForm({
                                 <input
                                   type="text"
                                   value={pEn.title || ""}
-                                  placeholder={
-                                    pIdx === 0
-                                      ? "Image title (shown only in State 3 zoom)..."
-                                      : "Side image title (EN)..."
-                                  }
+                                  placeholder="Image caption / title (EN - optional)..."
                                   onChange={(e) =>
                                     handleUpdatePhotoMeta(cIdx, pIdx, "title", "en", e.target.value)
                                   }

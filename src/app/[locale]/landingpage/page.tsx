@@ -11,6 +11,7 @@ import LandingDeliverablesShowcase from "./LandingDeliverablesShowcase";
 import LandingApplicationCardMedia from "./LandingApplicationCardMedia";
 import { getLandingContent, getGalleryProjectsData, getDeliverableCollections } from "./landingI18n";
 import { getMergedLandingContent, DEFAULT_SECTION_ORDER } from "@/lib/landingpage-data";
+import { getImageAspectRatio } from "@/lib/image-meta";
 import { Phone, Mail, Clock, MapPin } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,18 @@ export default async function LandingPage({
     partnerStats,
     partnerBrands,
   } = await getMergedLandingContent("ja");
+
+  const enrichedDeliverables = await Promise.all(
+    (deliverables || []).map(async (col: any) => ({
+      ...col,
+      photos: await Promise.all(
+        (Array.isArray(col?.photos) ? col.photos : []).map(async (ph: any) => ({
+          ...ph,
+          aspectRatio: ph?.url ? await getImageAspectRatio(ph.url) : undefined,
+        }))
+      ),
+    }))
+  );
 
   const pLakeside = galleryData["p-lakeside"] || Object.values(galleryData)[0] || {
     id: "p-lakeside",
@@ -227,7 +240,7 @@ export default async function LandingPage({
     <LandingDeliverablesShowcase
       key="deliverables"
       title={t.deliverables?.title}
-      collections={deliverables}
+      collections={enrichedDeliverables}
       collectionNameColor={(t.deliverables as any)?.collectionNameColor}
       backBtnText={(t.deliverables as any)?.backBtnText}
       closeZoomBtnText={(t.deliverables as any)?.closeZoomBtnText}
