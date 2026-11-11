@@ -1,11 +1,19 @@
 # *
 User-agent: *
 Allow: /
+Allow: /api/favicon
+Allow: /favicon.ico
+Allow: /icon.png
+Allow: /apple-touch-icon.png
 Disallow: /admin
 Disallow: /api
 
 # GPTBot
 User-agent: GPTBot
+Allow: /
+
+# OAI-SearchBot
+User-agent: OAI-SearchBot
 Allow: /
 
 # ChatGPT-User
@@ -30,6 +38,10 @@ Allow: /
 
 # Google-Extended
 User-agent: Google-Extended
+Allow: /
+
+# Google-Favicon
+User-agent: Google-Favicon
 Allow: /
 
 # Applebot-Extended

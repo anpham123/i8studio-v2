@@ -98,9 +98,9 @@ export function organizationJsonLd() {
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/og-default.jpg`,
-      width: "1200",
-      height: "630",
+      url: `${SITE_URL}/icon.png`,
+      width: "192",
+      height: "192",
     },
     image: `${SITE_URL}/og-default.jpg`,
     contactPoint: {
@@ -254,9 +254,9 @@ export function articleJsonLd({
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/og-default.jpg`,
-        width: "1200",
-        height: "630",
+        url: `${SITE_URL}/icon.png`,
+        width: "192",
+        height: "192",
       },
     },
   };

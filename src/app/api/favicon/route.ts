@@ -1,49 +1,61 @@
 import { prisma } from "@/lib/prisma";
+import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const rawSize = parseInt(searchParams.get("size") || "96", 10);
+    const size = [16, 32, 48, 64, 96, 144, 180, 192, 512].includes(rawSize)
+      ? rawSize
+      : 96;
+
     const settings = await prisma.setting.findMany();
     const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
     let iconBuffer: Buffer | null = null;
-    let contentType = "image/x-icon";
+    let contentType = "image/png";
 
-    // Use dedicated favicon if set, otherwise fall back to logo
-    const iconSource = settingsMap.faviconImage || settingsMap.logoImage;
+    const publicDir = path.join(process.cwd(), "public");
+    const candidates = [
+      settingsMap.faviconImage,
+      settingsMap.logoImage,
+      "/images/logo.webp",
+      "/icon.png",
+    ].filter(Boolean) as string[];
 
-    if (iconSource) {
-      // Prevent path traversal attacks
-      const publicDir = path.join(process.cwd(), "public");
-      const imagePath = iconSource.startsWith("/")
-        ? path.join(publicDir, iconSource)
-        : iconSource;
-
-      // Ensure resolved path stays within public directory
+    for (const candidate of candidates) {
+      const imagePath = candidate.startsWith("/")
+        ? path.join(publicDir, candidate)
+        : path.join(publicDir, candidate);
       const resolvedPath = path.resolve(imagePath);
-      if (!resolvedPath.startsWith(path.resolve(publicDir))) {
-        // Path traversal attempt — fall through to fallback
-      } else if (fs.existsSync(resolvedPath)) {
-        // Resize using sharp to 48x48 PNG
-        iconBuffer = await sharp(imagePath)
-          .resize(48, 48, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+
+      if (
+        resolvedPath.startsWith(path.resolve(publicDir)) &&
+        fs.existsSync(resolvedPath)
+      ) {
+        iconBuffer = await sharp(resolvedPath)
+          .resize(size, size, {
+            fit: "contain",
+            background: { r: 255, g: 255, b: 255, alpha: 0 },
+          })
           .png()
           .toBuffer();
         contentType = "image/png";
+        break;
       }
     }
 
     if (!iconBuffer) {
-      // Fallback to the original favicon.ico at src/app/favicon.ico
-      const fallbackPath = path.join(process.cwd(), "src", "app", "favicon.ico");
+      const fallbackPath = path.join(publicDir, "favicon.ico");
       if (fs.existsSync(fallbackPath)) {
         iconBuffer = await fs.promises.readFile(fallbackPath);
+        contentType = "image/x-icon";
       } else {
-        // Ultimate fallback to an empty transparent 1x1 png
         iconBuffer = Buffer.from(
           "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
           "base64"
@@ -55,7 +67,7 @@ export async function GET() {
     return new Response(new Uint8Array(iconBuffer), {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=60, s-maxage=60, must-revalidate",
+        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
