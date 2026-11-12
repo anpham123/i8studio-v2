@@ -719,6 +719,183 @@ const InlineVRSSShowcase: React.FC<InlineVRSSShowcaseProps> = ({
 };
 
 /* ============================================================================
+   INLINE GALLERY CAROUSEL (Cards 01 & 02 - Large Single-Image Frame + Arrows)
+   ============================================================================ */
+const InlineGalleryCarousel: React.FC<{
+  items: PricingStackMediaItem[];
+  pageTitle: string;
+  isNearActive: boolean;
+  eagerLoad: boolean;
+  onSelectMedia: (idx: number, mode: "media" | "vr360") => void;
+}> = ({ items, pageTitle, isNearActive, eagerLoad, onSelectMedia }) => {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const dragStateRef = useRef({
+    active: false,
+    startX: 0,
+    moved: false,
+  });
+
+  const total = items.length;
+  const safeIdx = total > 0 ? ((activeIdx % total) + total) % total : 0;
+  const currentItem = items[safeIdx];
+
+  const handleStep = useCallback(
+    (dir: -1 | 1) => {
+      if (total <= 1) return;
+      setActiveIdx((prev) => (((prev + dir) % total) + total) % total);
+    },
+    [total]
+  );
+
+  // Preload adjacent images for instant switching when clicking arrows
+  useEffect(() => {
+    if (total <= 1 || typeof window === "undefined") return;
+    const nextItem = items[(safeIdx + 1) % total];
+    const prevItem = items[(safeIdx - 1 + total) % total];
+    [nextItem, prevItem].forEach((it) => {
+      if (it?.url && !isVideoUrl(it.url, it.type) && !isWebVrArUrl(it.url)) {
+        const img = new window.Image();
+        img.src = it.url;
+      }
+    });
+  }, [items, safeIdx, total]);
+
+  if (!currentItem) return null;
+
+  const isVid = isVideoUrl(currentItem.url, currentItem.type);
+  const isWebVr = isWebVrArUrl(currentItem.url);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (total <= 1) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    dragStateRef.current = {
+      active: true,
+      startX: e.clientX,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current.active) return;
+    if (Math.abs(e.clientX - dragStateRef.current.startX) > 8) {
+      dragStateRef.current.moved = true;
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current.active) return;
+    const dx = e.clientX - dragStateRef.current.startX;
+    dragStateRef.current.active = false;
+    if (Math.abs(dx) > 36) {
+      handleStep(dx < 0 ? 1 : -1);
+    }
+  };
+
+  return (
+    <div className="pricing-stack-v2-movie-box pricing-stack-v2-single-gallery-box">
+      <div
+        className="pricing-stack-v2-movie-stage pricing-stack-v2-single-gallery-stage group"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={() => {
+          dragStateRef.current.active = false;
+        }}
+        onClick={() => {
+          if (dragStateRef.current.moved) {
+            dragStateRef.current.moved = false;
+            return;
+          }
+          onSelectMedia(
+            safeIdx,
+            isWebVr || currentItem.type === "vr360" ? "vr360" : "media"
+          );
+        }}
+      >
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStep(-1);
+            }}
+            className="pricing-stack-v2-gallery-arrow is-prev"
+            aria-label="前の画像を見る"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+
+        {isVid ? (
+          <video
+            key={currentItem.id || currentItem.url || safeIdx}
+            src={currentItem.url}
+            poster={currentItem.poster || currentItem.thumbnail}
+            muted
+            loop
+            playsInline
+            autoPlay={isNearActive}
+            preload="metadata"
+            draggable={false}
+            className="pricing-stack-v2-thumb-img"
+          />
+        ) : isWebVr ? (
+          currentItem.poster || currentItem.thumbnail ? (
+            <img
+              key={currentItem.id || currentItem.url || safeIdx}
+              src={currentItem.poster || currentItem.thumbnail}
+              alt={currentItem.caption || `${pageTitle} ${safeIdx + 1}`}
+              loading="lazy"
+              draggable={false}
+              className="pricing-stack-v2-thumb-img"
+            />
+          ) : (
+            <iframe
+              key={currentItem.id || currentItem.url || safeIdx}
+              src={currentItem.url}
+              title={currentItem.caption || `${pageTitle} VR`}
+              className="pricing-stack-v2-thumb-img border-0 pointer-events-none"
+              loading="lazy"
+            />
+          )
+        ) : (
+          <img
+            key={currentItem.id || currentItem.url || safeIdx}
+            src={currentItem.url}
+            alt={currentItem.caption || `${pageTitle} ${safeIdx + 1}`}
+            loading={eagerLoad ? "eager" : "lazy"}
+            draggable={false}
+            className="pricing-stack-v2-thumb-img"
+          />
+        )}
+
+        {currentItem.caption && (
+          <div className="pricing-stack-v2-thumb-overlay is-caption-only">
+            <span className="pricing-stack-v2-thumb-caption">
+              {currentItem.caption}
+            </span>
+          </div>
+        )}
+
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStep(1);
+            }}
+            className="pricing-stack-v2-gallery-arrow is-next"
+            aria-label="次の画像を見る"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ============================================================================
    MAIN COMPONENT: SCROLL-PINNED 3D FOLDING CARD STACK (5 SERVICE PAGES)
    ============================================================================ */
 export default function LandingPricingStackShowcase({
@@ -1184,46 +1361,23 @@ export default function LandingPricingStackShowcase({
                       </div>
                     </header>
 
-                    {/* FLOATING RIGHT-EDGE ACTION PILL (Original position for View 01 & 02) */}
-                    {!is16x9Card && (
-                      <div className="pricing-stack-v2-mid-action-row">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedProjectInModal(null);
-                            setDetailPage(pg);
-                          }}
-                          className="pricing-stack-v2-detail-btn"
-                        >
-                          <span>{pg.btnDetailText || btnViewDetail}</span>
-                          <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
-                        </button>
-                      </div>
-                    )}
-
                     {/* BOTTOM ROW: Price & Specs on Left, Interactive Media Showcase on Right */}
-                    <div
-                      className={`pricing-stack-v2-card-bottom ${
-                        is16x9Card ? "is-16x9-layout" : ""
-                      }`}
-                    >
+                    <div className="pricing-stack-v2-card-bottom is-16x9-layout">
                       {/* LEFT: PRICE & SPECS */}
                       <div className="pricing-stack-v2-price-panel">
-                        {is16x9Card && (
-                          <div className="pricing-stack-v2-mid-action-row is-16x9-action">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedProjectInModal(null);
-                                setDetailPage(pg);
-                              }}
-                              className="pricing-stack-v2-detail-btn"
-                            >
-                              <span>{pg.btnDetailText || btnViewDetail}</span>
-                              <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
-                            </button>
-                          </div>
-                        )}
+                        <div className="pricing-stack-v2-mid-action-row is-16x9-action">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedProjectInModal(null);
+                              setDetailPage(pg);
+                            }}
+                            className="pricing-stack-v2-detail-btn"
+                          >
+                            <span>{pg.btnDetailText || btnViewDetail}</span>
+                            <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
+                          </button>
+                        </div>
 
                         <div className="pricing-stack-v2-price-box">
                           {pg.priceLabel && (
@@ -1250,11 +1404,7 @@ export default function LandingPricingStackShowcase({
                       </div>
 
                       {/* RIGHT: INTERACTIVE MEDIA SHOWCASE */}
-                      <div
-                        className={`pricing-stack-v2-media-panel ${
-                          is16x9Card ? "is-16x9-panel" : "is-gallery-panel"
-                        }`}
-                      >
+                      <div className="pricing-stack-v2-media-panel is-16x9-panel">
                         {pg.mediaMode === "movie" ? (
                           <InlineMovieShowcase
                             items={mediaItems}
@@ -1282,83 +1432,20 @@ export default function LandingPricingStackShowcase({
                             }
                           />
                         ) : (
-                          /* GALLERY 3-CARD THUMBNAIL STRIP (Cards 01 & 02) */
-                          <div className="pricing-stack-v2-thumb-grid">
-                            {mediaItems.slice(0, 3).map((item, mIdx) => {
-                              const isVid = isVideoUrl(item.url, item.type);
-                              const isWebVr = isWebVrArUrl(item.url);
-                              const extraCount =
-                                mIdx === 2 && mediaItems.length > 3 ? mediaItems.length - 3 : 0;
-
-                              return (
-                                <button
-                                  key={item.id || mIdx}
-                                  type="button"
-                                  onClick={() =>
-                                    setLightboxState({
-                                      page: pg,
-                                      index: mIdx,
-                                      mode: isWebVr || item.type === "vr360" ? "vr360" : "media",
-                                    })
-                                  }
-                                  className="pricing-stack-v2-thumb-card group"
-                                >
-                                  {isVid ? (
-                                    <video
-                                      src={item.url}
-                                      poster={item.poster || item.thumbnail}
-                                      muted
-                                      loop
-                                      playsInline
-                                      autoPlay={isNearActive}
-                                      preload="metadata"
-                                      className="pricing-stack-v2-thumb-img"
-                                    />
-                                  ) : isWebVr ? (
-                                    item.poster || item.thumbnail ? (
-                                      <img
-                                        src={item.poster || item.thumbnail}
-                                        alt={item.caption || `${pg.title} ${mIdx + 1}`}
-                                        loading="lazy"
-                                        className="pricing-stack-v2-thumb-img"
-                                      />
-                                    ) : (
-                                      <iframe
-                                        src={item.url}
-                                        title={item.caption || `${pg.title} VR`}
-                                        className="pricing-stack-v2-thumb-img border-0 pointer-events-none"
-                                        loading="lazy"
-                                      />
-                                    )
-                                  ) : (
-                                    <img
-                                      src={item.url}
-                                      alt={item.caption || `${pg.title} ${mIdx + 1}`}
-                                      loading={idx <= 1 ? "eager" : "lazy"}
-                                      className="pricing-stack-v2-thumb-img"
-                                    />
-                                  )}
-
-                                  <div className="pricing-stack-v2-thumb-overlay">
-                                    <span className="pricing-stack-v2-thumb-zoom">
-                                      <ZoomIn className="w-3.5 h-3.5" />
-                                    </span>
-                                    {item.caption && (
-                                      <span className="pricing-stack-v2-thumb-caption">
-                                        {item.caption}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {extraCount > 0 && (
-                                    <div className="pricing-stack-v2-thumb-more">
-                                      +{extraCount}
-                                    </div>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
+                          /* GALLERY NATURAL-ASPECT CAROUSEL WITH ARROWS (Cards 01 & 02) */
+                          <InlineGalleryCarousel
+                            items={mediaItems}
+                            pageTitle={pg.title}
+                            isNearActive={isNearActive}
+                            eagerLoad={idx <= 1}
+                            onSelectMedia={(mIdx, openMode) =>
+                              setLightboxState({
+                                page: pg,
+                                index: mIdx,
+                                mode: openMode,
+                              })
+                            }
+                          />
                         )}
                       </div>
                     </div>

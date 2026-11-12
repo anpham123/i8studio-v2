@@ -241,58 +241,88 @@ export default function LandingWorkflowShowcase({
     setActiveIndex((prev) => (prev - 1 + totalSteps) % totalSteps);
   }, [totalSteps]);
 
-  // Wheel / scroll-driven step progression
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el || totalSteps <= 1) return;
+  // Interactive Mouse / Pointer Drag State for Right-Hand Card Carousel
+  const [isDraggingCards, setIsDraggingCards] = useState(false);
+  const [dragOffsetX, setDragOffsetX] = useState(0);
+  const cardDragRef = useRef({
+    active: false,
+    startX: 0,
+    lastStepX: 0,
+    didStep: false,
+    moved: false,
+  });
 
-    let accumulatedDelta = 0;
-    let lastStepTime = 0;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (window.innerWidth <= 1024) return;
-      if (Math.abs(e.deltaY) < 15) return;
-      const now = Date.now();
-      const timeSinceLast = now - lastStepTime;
-
-      accumulatedDelta += e.deltaY;
-
-      if (timeSinceLast < 450) {
-        if (
-          (e.deltaY > 0 && activeIndex < totalSteps - 1) ||
-          (e.deltaY < 0 && activeIndex > 0)
-        ) {
-          e.preventDefault();
-        }
-        return;
-      }
-
-      if (accumulatedDelta > 45) {
-        if (activeIndex < totalSteps - 1) {
-          e.preventDefault();
-          accumulatedDelta = 0;
-          lastStepTime = now;
-          handleNext();
-        } else {
-          accumulatedDelta = 0;
-        }
-      } else if (accumulatedDelta < -45) {
-        if (activeIndex > 0) {
-          e.preventDefault();
-          accumulatedDelta = 0;
-          lastStepTime = now;
-          handlePrev();
-        } else {
-          accumulatedDelta = 0;
-        }
-      }
+  const handleCardsPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (totalSteps <= 1) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    cardDragRef.current = {
+      active: true,
+      startX: e.clientX,
+      lastStepX: e.clientX,
+      didStep: false,
+      moved: false,
     };
+    setIsDraggingCards(true);
+    setDragOffsetX(0);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore if pointer capture is unavailable
+    }
+  };
 
-    el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      el.removeEventListener("wheel", handleWheel);
-    };
-  }, [totalSteps, activeIndex, handleNext, handlePrev]);
+  const handleCardsPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const state = cardDragRef.current;
+    if (!state.active || totalSteps <= 1) return;
+
+    const totalDx = e.clientX - state.startX;
+    if (Math.abs(totalDx) > 6) {
+      state.moved = true;
+    }
+
+    const deltaSinceStep = e.clientX - state.lastStepX;
+    const liveStepThreshold = 90;
+
+    if (deltaSinceStep <= -liveStepThreshold) {
+      handleNext();
+      state.lastStepX = e.clientX;
+      state.didStep = true;
+      setDragOffsetX(0);
+    } else if (deltaSinceStep >= liveStepThreshold) {
+      handlePrev();
+      state.lastStepX = e.clientX;
+      state.didStep = true;
+      setDragOffsetX(0);
+    } else {
+      setDragOffsetX(Math.max(-60, Math.min(60, deltaSinceStep * 0.45)));
+    }
+  };
+
+  const endCardsPointerDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    const state = cardDragRef.current;
+    if (!state.active) return;
+
+    const remainingDx = e.clientX - state.lastStepX;
+    if (!state.didStep && Math.abs(remainingDx) > 32) {
+      if (remainingDx < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+      state.didStep = true;
+    }
+
+    state.active = false;
+    setIsDraggingCards(false);
+    setDragOffsetX(0);
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Ignore
+    }
+  };
 
   if (totalSteps === 0) {
     return null;
@@ -518,8 +548,27 @@ export default function LandingWorkflowShowcase({
           </div>
 
           {/* 3. RIGHT HORIZONTAL CASCADING CARD CAROUSEL */}
-          <div className="wf-v2-cards-col">
-            <div className="wf-v2-cards-track">
+          <div
+            className={`wf-v2-cards-col ${isDraggingCards ? "is-dragging" : ""}`}
+            onPointerDown={handleCardsPointerDown}
+            onPointerMove={handleCardsPointerMove}
+            onPointerUp={endCardsPointerDrag}
+            onPointerCancel={endCardsPointerDrag}
+          >
+            <div
+              className="wf-v2-cards-track"
+              style={
+                dragOffsetX !== 0
+                  ? {
+                      transform: `translate3d(${dragOffsetX}px, 0, 0)`,
+                      transition: "none",
+                    }
+                  : {
+                      transform: "translate3d(0, 0, 0)",
+                      transition: "transform 0.28s cubic-bezier(0.22, 1, 0.36, 1)",
+                    }
+              }
+            >
               <AnimatePresence mode="popLayout" initial={false} custom={direction}>
                 {visibleQueue.map((item) => {
                   const isLead = item.slotIdx === 0;
@@ -549,6 +598,10 @@ export default function LandingWorkflowShowcase({
                         isLead ? "is-lead" : `is-trail slot-${item.slotIdx}`
                       }`}
                       onClick={() => {
+                        if (cardDragRef.current.moved) {
+                          cardDragRef.current.moved = false;
+                          return;
+                        }
                         if (!isLead) {
                           goToStep(item.stepIdx, 1);
                         }
@@ -569,12 +622,11 @@ export default function LandingWorkflowShowcase({
                         <img
                           src={item.imgSrc}
                           alt={cardTitle}
+                          draggable={false}
                           className="wf-v2-card-img"
                           onError={() => handleCardImageError(item.stepIdx)}
                         />
                         <div className="wf-v2-card-gradient" />
-
-                        
                       </div>
                     </motion.article>
                   );

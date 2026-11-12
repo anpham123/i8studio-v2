@@ -11225,6 +11225,17 @@
   overflow: visible;
   position: relative;
   z-index: 3;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.wf-v2-cards-col.is-dragging {
+  cursor: grabbing;
+}
+
+.wf-v2-cards-col.is-dragging .wf-v2-card-unit {
+  cursor: grabbing;
 }
 
 .wf-v2-cards-track {
@@ -11341,6 +11352,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  -webkit-user-drag: none;
+  user-select: none;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -12276,8 +12289,8 @@
   margin: 0;
   font-family: "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
   font-style: italic;
-  font-size: clamp(1.12rem, 1.55vw, 1.45rem);
-  font-weight: 500;
+  font-size: clamp(1.42rem, 2.05vw, 1.95rem);
+  font-weight: 600;
   line-height: 1.35;
   letter-spacing: 0.02em;
   color: #c29b61;
@@ -12450,7 +12463,7 @@
   }
 
   .deliv-v4-category-subtitle {
-    font-size: clamp(0.98rem, 3.8vw, 1.2rem);
+    font-size: clamp(1.2rem, 4.6vw, 1.5rem);
   }
 }
 
@@ -12663,7 +12676,7 @@
 
 .pricing-stack-v2-card-title-col {
   flex: 1 1 auto;
-  max-width: 760px;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -12725,7 +12738,7 @@
   line-height: 1.58;
   opacity: 0.82;
   width: 100%;
-  max-width: calc(11.58 * clamp(1.5rem, 2.5vw, 2.45rem));
+  max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
   display: -webkit-box;
@@ -12793,17 +12806,28 @@
 /* Card Bottom Split Row */
 .pricing-stack-v2-card-bottom {
   display: grid;
-  grid-template-columns: minmax(260px, 36%) minmax(0, 1fr);
+  grid-template-columns: minmax(250px, 34%) minmax(0, 1fr);
   align-items: end;
-  gap: clamp(18px, 2.6vw, 36px);
+  gap: clamp(18px, 2.4vw, 32px);
   min-height: 0;
   min-width: 0;
   max-width: 100%;
+  flex: 1;
 }
 
 .pricing-stack-v2-card-bottom.is-16x9-layout {
   grid-template-columns: minmax(260px, 37%) minmax(0, 1fr);
   flex: 1;
+}
+
+.pricing-stack-v2-card-bottom.is-gallery-layout {
+  grid-template-columns: minmax(245px, 32%) minmax(0, 1fr);
+  flex: 1;
+  align-items: stretch;
+}
+
+.pricing-stack-v2-card-bottom.is-gallery-layout .pricing-stack-v2-price-panel {
+  justify-content: flex-end;
 }
 
 /* Price & Spec Pills (Bottom-Left) */
@@ -12898,8 +12922,15 @@
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: clamp(185px, 28vh, 285px);
+  height: clamp(235px, 36vh, 375px);
   min-height: 0;
+}
+
+.pricing-stack-v2-media-panel.is-gallery-panel {
+  height: clamp(240px, 37vh, 380px);
+  align-self: end;
+  display: flex;
+  align-items: stretch;
 }
 
 .pricing-stack-v2-media-panel.is-16x9-panel {
@@ -12910,7 +12941,42 @@
   justify-content: flex-end;
 }
 
-/* 1) 3-Card Thumbnail Strip (View Standard / View HQ / VR SS) */
+/* 1) Natural-Aspect Gallery Carousel with Left/Right Arrows (Cards 01 & 02) */
+.pricing-stack-v2-gallery-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.pricing-stack-v2-gallery-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.25vw, 16px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 2px;
+  box-sizing: border-box;
+  cursor: grab;
+  user-select: none;
+}
+
+.pricing-stack-v2-gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.pricing-stack-v2-gallery-track.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
 .pricing-stack-v2-thumb-grid {
   width: 100%;
   height: 100%;
@@ -12933,8 +12999,18 @@
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 
+.pricing-stack-v2-thumb-card.is-natural-aspect {
+  width: auto;
+  height: 100%;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
 .pricing-stack-v2-thumb-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   box-shadow: 0 18px 34px -10px rgba(15, 20, 28, 0.32);
 }
 
@@ -12946,8 +13022,18 @@
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.pricing-stack-v2-thumb-img.is-natural-img {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 .pricing-stack-v2-thumb-card:hover .pricing-stack-v2-thumb-img {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 
 .pricing-stack-v2-thumb-overlay {
@@ -12961,6 +13047,60 @@
   padding: 10px 12px;
   opacity: 0.92;
   transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+
+.pricing-stack-v2-thumb-overlay.is-caption-only {
+  justify-content: flex-end;
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(12, 14, 18, 0) 58%, rgba(12, 14, 18, 0.74) 100%);
+}
+
+.pricing-stack-v2-single-gallery-stage {
+  user-select: none;
+}
+
+.pricing-stack-v2-single-gallery-stage:hover .pricing-stack-v2-thumb-img {
+  transform: scale(1.03);
+}
+
+.pricing-stack-v2-gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(20, 22, 27, 0.78);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pricing-stack-v2-gallery-arrow:hover {
+  background: rgba(20, 22, 27, 0.95);
+  transform: translateY(-50%) scale(1.07);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+}
+
+.pricing-stack-v2-gallery-arrow:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.pricing-stack-v2-gallery-arrow.is-prev {
+  left: 14px;
+}
+
+.pricing-stack-v2-gallery-arrow.is-next {
+  right: 14px;
 }
 
 .pricing-stack-v2-thumb-zoom {
