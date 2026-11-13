@@ -12820,7 +12820,7 @@
 /* Card Bottom Split Row */
 .pricing-stack-v2-card-bottom {
   display: grid;
-  grid-template-columns: minmax(250px, 34%) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 37%) minmax(0, 1fr);
   align-items: end;
   gap: clamp(18px, 2.4vw, 32px);
   min-height: 0;
@@ -12835,7 +12835,7 @@
 }
 
 .pricing-stack-v2-card-bottom.is-gallery-layout {
-  grid-template-columns: minmax(235px, 31%) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 37%) minmax(0, 1fr);
   flex: 1;
   align-items: end;
 }
