@@ -1012,17 +1012,6 @@ export default function LandingPricingStackShowcase({
     mode: "media" | "vr360";
   } | null>(null);
 
-  // Detail modal state ("詳細を見る →")
-  const [detailPage, setDetailPage] = useState<PricingStackPageItem | null>(null);
-  const [selectedProjectInModal, setSelectedProjectInModal] = useState<ProjectItem | null>(null);
-  const [zoomProjectImg, setZoomProjectImg] = useState<{
-    src: string;
-    title: string;
-    mediaType?: "image" | "video" | "vr360";
-    vrEmbedUrl?: string;
-    poster?: string;
-  } | null>(null);
-
   useEffect(() => {
     setPortalMounted(true);
     // Keep 60fps scroll-pinned 3D folding card stack active on both Desktop and Mobile
@@ -1058,24 +1047,15 @@ export default function LandingPricingStackShowcase({
     return () => obs.disconnect();
   }, []);
 
-  // Lock body scroll when any modal/lightbox is open
+  // Lock body scroll when lightbox is open
   useEffect(() => {
-    const anyModalOpen = Boolean(lightboxState || detailPage || zoomProjectImg);
-    if (!anyModalOpen) return;
+    if (!lightboxState) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (zoomProjectImg) {
-          setZoomProjectImg(null);
-        } else if (lightboxState) {
-          setLightboxState(null);
-        } else if (selectedProjectInModal) {
-          setSelectedProjectInModal(null);
-        } else if (detailPage) {
-          setDetailPage(null);
-        }
+        setLightboxState(null);
       } else if (lightboxState && lightboxState.mode === "media") {
         const mediaCount = lightboxState.page.mediaItems?.length || 0;
         if (mediaCount > 1 && e.key === "ArrowRight") {
@@ -1095,7 +1075,7 @@ export default function LandingPricingStackShowcase({
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [lightboxState, detailPage, selectedProjectInModal, zoomProjectImg]);
+  }, [lightboxState]);
 
   /* ==========================================================================
      60FPS SCROLL-DRIVEN 3D CARD FOLDING ENGINE (Desktop >= 920px)
@@ -1397,17 +1377,6 @@ export default function LandingPricingStackShowcase({
                         <span className="pricing-stack-v2-step-num">
                           {formatCleanStepNumber(pg.pageNumber, idx)}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedProjectInModal(null);
-                            setDetailPage(pg);
-                          }}
-                          className="pricing-stack-v2-detail-btn"
-                        >
-                          <span>{pg.btnDetailText || btnViewDetail}</span>
-                          <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
-                        </button>
                       </div>
                     </header>
 
@@ -1448,7 +1417,7 @@ export default function LandingPricingStackShowcase({
                         {pg.mediaMode === "movie" ? (
                           <InlineMovieShowcase
                             items={mediaItems}
-                            isActive={isNearActive && !lightboxState && !detailPage}
+                            isActive={isNearActive && !lightboxState}
                             badgeText={pg.mediaBadgeText}
                             expandText={pg.expandBtnText}
                             onOpenFullscreen={(mIdx) =>
@@ -1458,7 +1427,7 @@ export default function LandingPricingStackShowcase({
                         ) : pg.mediaMode === "vr360" ? (
                           <InlineVR360Showcase
                             page={pg}
-                            isActive={isNearActive && !lightboxState && !detailPage}
+                            isActive={isNearActive && !lightboxState}
                             onOpenFullscreenVR={(sIdx) =>
                               setLightboxState({ page: pg, index: sIdx, mode: "vr360" })
                             }
@@ -1466,7 +1435,7 @@ export default function LandingPricingStackShowcase({
                         ) : pg.mediaMode === "vrss" || (!pg.mediaMode && pg.id === "page-vr-ss") ? (
                           <InlineVRSSShowcase
                             page={pg}
-                            isActive={isNearActive && !lightboxState && !detailPage}
+                            isActive={isNearActive && !lightboxState}
                             onOpenFullscreen={(sIdx, openMode) =>
                               setLightboxState({ page: pg, index: sIdx, mode: openMode })
                             }
@@ -1703,500 +1672,6 @@ export default function LandingPricingStackShowcase({
                     </div>
                   );
                 })()
-              )}
-            </div>
-          </div>,
-          document.body
-        )}
-
-      {/* ========================================================================
-          PORTAL 2: SERVICE DETAIL & REFERENCE PROJECTS MODAL ("詳細を見る →")
-          ======================================================================== */}
-      {portalMounted &&
-        detailPage &&
-        createPortal(
-          <div
-            className="pricing-stack-v2-modal-backdrop"
-            onClick={() => {
-              setSelectedProjectInModal(null);
-              setDetailPage(null);
-            }}
-          >
-            <div
-              className="pricing-stack-v2-modal-panel"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Sticky Top Bar */}
-              <div className="pricing-stack-v2-modal-header">
-                <div className="pricing-stack-v2-modal-header-left">
-                  <span className="pricing-stack-v2-modal-step">
-                    {formatCleanStepNumber(detailPage.pageNumber, 0)}
-                  </span>
-                  <div>
-                    <div className="pricing-stack-v2-modal-badges">
-                      <span className="pricing-stack-v2-modal-cat">{detailPage.categoryName || detailPage.qualityBadge}</span>
-                    </div>
-                    <h3 className="pricing-stack-v2-modal-title">{renderWithLineBreaks(detailPage.title)}</h3>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedProjectInModal(null);
-                    setDetailPage(null);
-                  }}
-                  className="pricing-stack-v2-modal-close"
-                  aria-label="Close modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Scrollable Modal Content */}
-              <div className="pricing-stack-v2-modal-body">
-                {/* Summary + Price Banner */}
-                <div
-                  className={`pricing-stack-v2-modal-hero ${
-                    detectLightCardBg(detailPage.cardBgColor) ? "is-light-hero" : "is-dark-hero"
-                  }`}
-                  style={{ backgroundColor: detailPage.cardBgColor || "#E7F2F8" }}
-                >
-                  <div className="pricing-stack-v2-modal-hero-info">
-                    <p className="pricing-stack-v2-modal-summary">
-                      {renderWithLineBreaks(detailPage.detailSummary || detailPage.description)}
-                    </p>
-
-                    {Array.isArray(detailPage.deliverables) &&
-                      detailPage.deliverables.length > 0 && (
-                        <div className="pricing-stack-v2-modal-delivs">
-                          <h4 className="pricing-stack-v2-modal-subhead">
-                            <Layers className="w-4 h-4" />
-                            <span>
-                              {detailPage.deliverablesHeading || resolvedDeliverablesHeading}
-                            </span>
-                          </h4>
-                          <ul className="pricing-stack-v2-modal-deliv-grid">
-                            {detailPage.deliverables.map((dlv, dIdx) => (
-                              <li key={dIdx}>
-                                <Check className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-                                <span>{dlv}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                  </div>
-
-                  <div className="pricing-stack-v2-modal-cta-card">
-                    <span className="pricing-stack-v2-modal-price-lbl">
-                      {detailPage.priceLabel || "参考制作価格"}
-                    </span>
-                    <div className="pricing-stack-v2-modal-price-block">
-                      <div className="pricing-stack-v2-modal-price-val">
-                        {detailPage.priceValue}
-                      </div>
-                      {detailPage.priceUnit && (
-                        <div className="pricing-stack-v2-modal-price-unit">
-                          {detailPage.priceUnit}
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const mode = detailPage.mediaMode === "vr360" ? "vr360" : "media";
-                        setLightboxState({ page: detailPage, index: 0, mode });
-                      }}
-                      className="pricing-stack-v2-modal-preview-btn"
-                    >
-                      <Images className="w-4 h-4" />
-                      <span>
-                        {detailPage.modalPreviewBtnText ||
-                          (detailPage.mediaMode === "vr360"
-                            ? "360° VRを全画面で体験"
-                            : detailPage.mediaMode === "movie"
-                            ? "サンプル映像を全画面再生"
-                            : "サンプル画像をフルサイズで見る")}
-                      </span>
-                    </button>
-
-                    <a href={resolvedConsultHref} className="pricing-stack-v2-modal-consult-btn">
-                      <span>{btnConsult}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
-
-                    {hotlineText && (
-                      <div className="pricing-stack-v2-modal-hotline">
-                        <Phone className="w-3.5 h-3.5" />
-                        <span>{hotlineText}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Reference Projects from Admin CMS (Preserves existing DB projects) */}
-                {showReferenceProjects && Array.isArray(projects) && projects.length > 0 && (
-                  <div className="pricing-stack-v2-modal-projects">
-                    <div className="pricing-stack-v2-modal-proj-head">
-                      <h4>{resolvedProjectsHeading}</h4>
-                      <span>{resolvedProjectsSubheading}</span>
-                    </div>
-
-                    {selectedProjectInModal ? (
-                      <div className="pricing-stack-v2-proj-detail-box">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedProjectInModal(null)}
-                          className="pricing-stack-v2-proj-back-btn"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                          <span>実績一覧に戻る</span>
-                        </button>
-
-                        <div className="pricing-stack-v2-proj-detail-grid">
-                          {(() => {
-                            const projType = resolveProjectMediaType(selectedProjectInModal);
-                            const embedVideo =
-                              projType === "video"
-                                ? getEmbedVideoUrl(selectedProjectInModal.img)
-                                : null;
-
-                            if (projType === "vr360") {
-                              const projVrWebUrl = resolveProjectVrWebUrl(selectedProjectInModal);
-                              return (
-                                <div className="pricing-stack-v2-proj-detail-img-wrap is-interactive-media">
-                                  {projVrWebUrl && !isImageFileUrl(projVrWebUrl) ? (
-                                    <iframe
-                                      src={projVrWebUrl}
-                                      title={selectedProjectInModal.title}
-                                      className="w-full h-full border-0"
-                                      allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer; magnetometer; camera; autoplay"
-                                      allowFullScreen
-                                    />
-                                  ) : (
-                                    <InteractivePanorama360
-                                      imageUrl={projVrWebUrl || selectedProjectInModal.img}
-                                      isActive={true}
-                                      className="w-full h-full"
-                                    />
-                                  )}
-                                  <span className="pricing-stack-v2-proj-media-badge is-vr">
-                                    <Compass className="w-3.5 h-3.5" />
-                                    <span>{projVrWebUrl ? "VR / AR 体験" : "360° ドラッグして回転"}</span>
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setZoomProjectImg({
-                                        src: selectedProjectInModal.img,
-                                        title: selectedProjectInModal.title,
-                                        mediaType: "vr360",
-                                        vrEmbedUrl: projVrWebUrl || selectedProjectInModal.vrEmbedUrl,
-                                      })
-                                    }
-                                    className="pricing-stack-v2-proj-zoom-pill is-btn"
-                                  >
-                                    <Maximize2 className="w-3.5 h-3.5" />
-                                    <span>全画面VR体験</span>
-                                  </button>
-                                </div>
-                              );
-                            }
-
-                            if (projType === "video") {
-                              return (
-                                <div className="pricing-stack-v2-proj-detail-img-wrap is-interactive-media">
-                                  {embedVideo ? (
-                                    <iframe
-                                      src={embedVideo}
-                                      title={selectedProjectInModal.title}
-                                      className="w-full h-full border-0"
-                                      allow="autoplay; fullscreen; picture-in-picture"
-                                      allowFullScreen
-                                    />
-                                  ) : (
-                                    <video
-                                      src={selectedProjectInModal.img}
-                                      poster={selectedProjectInModal.poster}
-                                      controls
-                                      autoPlay
-                                      playsInline
-                                      loop
-                                      className="w-full h-full object-cover"
-                                    />
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setZoomProjectImg({
-                                        src: selectedProjectInModal.img,
-                                        title: selectedProjectInModal.title,
-                                        mediaType: "video",
-                                        poster: selectedProjectInModal.poster,
-                                      })
-                                    }
-                                    className="pricing-stack-v2-proj-zoom-pill is-btn is-top-right"
-                                  >
-                                    <Maximize2 className="w-3.5 h-3.5" />
-                                    <span>全画面再生</span>
-                                  </button>
-                                </div>
-                              );
-                            }
-
-                            return (
-                              <div
-                                className="pricing-stack-v2-proj-detail-img-wrap"
-                                onClick={() =>
-                                  setZoomProjectImg({
-                                    src: selectedProjectInModal.img,
-                                    title: selectedProjectInModal.title,
-                                    mediaType: "image",
-                                  })
-                                }
-                              >
-                                <img
-                                  src={selectedProjectInModal.img}
-                                  alt={selectedProjectInModal.title}
-                                />
-                                <span className="pricing-stack-v2-proj-zoom-pill">
-                                  <ZoomIn className="w-3.5 h-3.5" />
-                                  {btnZoom}
-                                </span>
-                              </div>
-                            );
-                          })()}
-
-                          <div className="pricing-stack-v2-proj-detail-info">
-                            {selectedProjectInModal.catTag && (
-                              <span className="pricing-stack-v2-proj-cat">
-                                {selectedProjectInModal.catTag}
-                              </span>
-                            )}
-                            <h5>{selectedProjectInModal.title}</h5>
-                            {selectedProjectInModal.loc && (
-                              <p className="pricing-stack-v2-proj-loc">
-                                <MapPin className="w-3.5 h-3.5" />
-                                {selectedProjectInModal.loc}
-                              </p>
-                            )}
-                            <div className="pricing-stack-v2-proj-price-badge">
-                              {getProjectPrice(selectedProjectInModal)}
-                            </div>
-                            {(selectedProjectInModal.detailContent ||
-                              selectedProjectInModal.narrative) && (
-                              <p className="pricing-stack-v2-proj-narrative">
-                                {selectedProjectInModal.detailContent ||
-                                  selectedProjectInModal.narrative}
-                              </p>
-                            )}
-                            {Array.isArray(selectedProjectInModal.deliverables) &&
-                              selectedProjectInModal.deliverables.length > 0 && (
-                                <ul className="pricing-stack-v2-proj-deliv-list">
-                                  {selectedProjectInModal.deliverables.map((d, i) => (
-                                    <li key={i}>
-                                      <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                      <span>{d}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="pricing-stack-v2-proj-cards-grid">
-                        {projects.map((proj, pIdx) => {
-                          const projType = resolveProjectMediaType(proj);
-                          const embedVideo =
-                            projType === "video" ? getEmbedVideoUrl(proj.img) : null;
-
-                          return (
-                            <div
-                              key={proj.id || pIdx}
-                              onClick={() => setSelectedProjectInModal(proj)}
-                              className="pricing-stack-v2-proj-card"
-                            >
-                              <div className="pricing-stack-v2-proj-card-img">
-                                {projType === "video" ? (
-                                  embedVideo ? (
-                                    proj.poster ? (
-                                      <img src={proj.poster} alt={proj.title} loading="lazy" />
-                                    ) : (
-                                      <iframe
-                                        src={embedVideo}
-                                        title={proj.title}
-                                        className="w-full h-full border-0 pointer-events-none"
-                                      />
-                                    )
-                                  ) : (
-                                    <video
-                                      src={proj.img}
-                                      poster={proj.poster}
-                                      muted
-                                      loop
-                                      playsInline
-                                      autoPlay
-                                      preload="metadata"
-                                      className="w-full h-full object-cover"
-                                    />
-                                  )
-                                ) : projType === "vr360" && isWebVrArUrl(proj.img) && !proj.poster ? (
-                                  <iframe
-                                    src={resolveProjectVrWebUrl(proj)}
-                                    title={proj.title}
-                                    className="w-full h-full border-0 pointer-events-none"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <img
-                                    src={(!isWebVrArUrl(proj.img) && proj.img) || proj.poster}
-                                    alt={proj.title}
-                                    loading="lazy"
-                                  />
-                                )}
-
-                                {projType === "video" && (
-                                  <span className="pricing-stack-v2-proj-media-badge is-movie">
-                                    <Film className="w-3 h-3" />
-                                    <span>MOVIE</span>
-                                  </span>
-                                )}
-                                {projType === "vr360" && (
-                                  <span className="pricing-stack-v2-proj-media-badge is-vr">
-                                    <Compass className="w-3 h-3" />
-                                    <span>360° VR</span>
-                                  </span>
-                                )}
-
-                                <span className="pricing-stack-v2-proj-card-price">
-                                  {getProjectPrice(proj)}
-                                </span>
-                              </div>
-                              <div className="pricing-stack-v2-proj-card-body">
-                                {proj.catTag && (
-                                  <span className="pricing-stack-v2-proj-card-tag">
-                                    {proj.catTag}
-                                  </span>
-                                )}
-                                <h5>{proj.title}</h5>
-                                {proj.loc && <p>{proj.loc}</p>}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
-
-      {/* ========================================================================
-          PORTAL 3: PROJECT FULLSCREEN PHOTO / MOVIE / 360° VR ZOOM
-          ======================================================================== */}
-      {portalMounted &&
-        zoomProjectImg &&
-        createPortal(
-          <div
-            className="pricing-stack-v2-lightbox-backdrop"
-            onClick={() => setZoomProjectImg(null)}
-          >
-            <div
-              className="pricing-stack-v2-lightbox-shell"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="pricing-stack-v2-lightbox-topbar">
-                <h4 className="pricing-stack-v2-lightbox-title">{zoomProjectImg.title}</h4>
-                <div className="flex items-center gap-2">
-                  {zoomProjectImg.mediaType === "vr360" &&
-                    (zoomProjectImg.vrEmbedUrl || isWebVrArUrl(zoomProjectImg.src)) && (
-                      <a
-                        href={(zoomProjectImg.vrEmbedUrl || zoomProjectImg.src).trim()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-50 border border-emerald-400/40 transition"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>別タブで開く</span>
-                      </a>
-                    )}
-                  <button
-                    type="button"
-                    onClick={() => setZoomProjectImg(null)}
-                    className="pricing-stack-v2-lightbox-close"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              {zoomProjectImg.mediaType === "vr360" ? (
-                <div className="pricing-stack-v2-lightbox-vr-body">
-                  {(() => {
-                    const targetVr = (
-                      (zoomProjectImg.vrEmbedUrl && zoomProjectImg.vrEmbedUrl.trim()) ||
-                      (isWebVrArUrl(zoomProjectImg.src) ? zoomProjectImg.src.trim() : "")
-                    );
-                    if (targetVr && !isImageFileUrl(targetVr)) {
-                      return (
-                        <iframe
-                          src={targetVr}
-                          title={zoomProjectImg.title}
-                          className="pricing-stack-v2-lightbox-iframe"
-                          allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer; magnetometer; camera; autoplay"
-                          allowFullScreen
-                        />
-                      );
-                    }
-                    return (
-                      <InteractivePanorama360
-                        imageUrl={targetVr || zoomProjectImg.src}
-                        isActive={true}
-                        autoRotateSpeed={0.04}
-                        className="pricing-stack-v2-lightbox-pano"
-                      />
-                    );
-                  })()}
-                </div>
-              ) : zoomProjectImg.mediaType === "video" || isVideoUrl(zoomProjectImg.src) ? (
-                <div className="pricing-stack-v2-lightbox-media-body">
-                  <div className="pricing-stack-v2-lightbox-stage">
-                    {getEmbedVideoUrl(zoomProjectImg.src) ? (
-                      <iframe
-                        src={getEmbedVideoUrl(zoomProjectImg.src)!}
-                        title={zoomProjectImg.title}
-                        className="pricing-stack-v2-lightbox-iframe"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <video
-                        src={zoomProjectImg.src}
-                        poster={zoomProjectImg.poster}
-                        controls
-                        autoPlay
-                        playsInline
-                        loop
-                        className="pricing-stack-v2-lightbox-video"
-                      />
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="pricing-stack-v2-lightbox-media-body">
-                  <div className="pricing-stack-v2-lightbox-stage">
-                    <img
-                      src={zoomProjectImg.src}
-                      alt={zoomProjectImg.title}
-                      className="pricing-stack-v2-lightbox-img"
-                    />
-                  </div>
-                </div>
               )}
             </div>
           </div>,
