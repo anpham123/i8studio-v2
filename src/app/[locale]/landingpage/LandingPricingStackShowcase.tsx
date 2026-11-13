@@ -719,7 +719,7 @@ const InlineVRSSShowcase: React.FC<InlineVRSSShowcaseProps> = ({
 };
 
 /* ============================================================================
-   INLINE GALLERY CAROUSEL (Cards 01 & 02 - Large Single-Image Frame + Arrows)
+   INLINE GALLERY CAROUSEL (Cards 01 & 02 - Large Single-Image Natural Aspect Frame + Arrows)
    ============================================================================ */
 const InlineGalleryCarousel: React.FC<{
   items: PricingStackMediaItem[];
@@ -729,6 +729,7 @@ const InlineGalleryCarousel: React.FC<{
   onSelectMedia: (idx: number, mode: "media" | "vr360") => void;
 }> = ({ items, pageTitle, isNearActive, eagerLoad, onSelectMedia }) => {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [aspectRatios, setAspectRatios] = useState<Record<number, number>>({});
   const dragStateRef = useRef({
     active: false,
     startX: 0,
@@ -739,6 +740,13 @@ const InlineGalleryCarousel: React.FC<{
   const safeIdx = total > 0 ? ((activeIdx % total) + total) % total : 0;
   const currentItem = items[safeIdx];
 
+  const recordRatio = useCallback((idx: number, w: number, h: number) => {
+    if (!w || !h) return;
+    const ratio = Number((w / h).toFixed(4));
+    if (!Number.isFinite(ratio) || ratio <= 0) return;
+    setAspectRatios((prev) => (prev[idx] === ratio ? prev : { ...prev, [idx]: ratio }));
+  }, []);
+
   const handleStep = useCallback(
     (dir: -1 | 1) => {
       if (total <= 1) return;
@@ -747,23 +755,32 @@ const InlineGalleryCarousel: React.FC<{
     [total]
   );
 
-  // Preload adjacent images for instant switching when clicking arrows
+  // Preload images and detect natural aspect ratios for instant frame sizing
   useEffect(() => {
-    if (total <= 1 || typeof window === "undefined") return;
-    const nextItem = items[(safeIdx + 1) % total];
-    const prevItem = items[(safeIdx - 1 + total) % total];
-    [nextItem, prevItem].forEach((it) => {
-      if (it?.url && !isVideoUrl(it.url, it.type) && !isWebVrArUrl(it.url)) {
-        const img = new window.Image();
-        img.src = it.url;
-      }
+    if (total === 0 || typeof window === "undefined") return;
+    items.forEach((it, idx) => {
+      const imgUrl =
+        isWebVrArUrl(it?.url)
+          ? it?.poster || it?.thumbnail || ""
+          : !isVideoUrl(it?.url, it?.type)
+            ? it?.url || ""
+            : it?.poster || it?.thumbnail || "";
+      if (!imgUrl) return;
+      const img = new window.Image();
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight) {
+          recordRatio(idx, img.naturalWidth, img.naturalHeight);
+        }
+      };
+      img.src = imgUrl;
     });
-  }, [items, safeIdx, total]);
+  }, [items, total, recordRatio]);
 
   if (!currentItem) return null;
 
   const isVid = isVideoUrl(currentItem.url, currentItem.type);
   const isWebVr = isWebVrArUrl(currentItem.url);
+  const currentRatio = aspectRatios[safeIdx] || 16 / 9;
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (total <= 1) return;
@@ -792,9 +809,13 @@ const InlineGalleryCarousel: React.FC<{
   };
 
   return (
-    <div className="pricing-stack-v2-movie-box pricing-stack-v2-single-gallery-box">
+    <div className="pricing-stack-v2-single-gallery-box">
       <div
-        className="pricing-stack-v2-movie-stage pricing-stack-v2-single-gallery-stage group"
+        className="pricing-stack-v2-single-gallery-stage group"
+        style={{
+          aspectRatio: `${currentRatio}`,
+          width: `min(100%, calc(var(--pricing-single-gallery-max-h, clamp(250px, calc(100svh - 335px), 445px)) * ${currentRatio}))`,
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -837,7 +858,13 @@ const InlineGalleryCarousel: React.FC<{
             autoPlay={isNearActive}
             preload="metadata"
             draggable={false}
-            className="pricing-stack-v2-thumb-img"
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              if (v.videoWidth && v.videoHeight) {
+                recordRatio(safeIdx, v.videoWidth, v.videoHeight);
+              }
+            }}
+            className="pricing-stack-v2-thumb-img is-natural-stage-img"
           />
         ) : isWebVr ? (
           currentItem.poster || currentItem.thumbnail ? (
@@ -847,14 +874,20 @@ const InlineGalleryCarousel: React.FC<{
               alt={currentItem.caption || `${pageTitle} ${safeIdx + 1}`}
               loading="lazy"
               draggable={false}
-              className="pricing-stack-v2-thumb-img"
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth && img.naturalHeight) {
+                  recordRatio(safeIdx, img.naturalWidth, img.naturalHeight);
+                }
+              }}
+              className="pricing-stack-v2-thumb-img is-natural-stage-img"
             />
           ) : (
             <iframe
               key={currentItem.id || currentItem.url || safeIdx}
               src={currentItem.url}
               title={currentItem.caption || `${pageTitle} VR`}
-              className="pricing-stack-v2-thumb-img border-0 pointer-events-none"
+              className="pricing-stack-v2-thumb-img is-natural-stage-img border-0 pointer-events-none"
               loading="lazy"
             />
           )
@@ -865,7 +898,13 @@ const InlineGalleryCarousel: React.FC<{
             alt={currentItem.caption || `${pageTitle} ${safeIdx + 1}`}
             loading={eagerLoad ? "eager" : "lazy"}
             draggable={false}
-            className="pricing-stack-v2-thumb-img"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                recordRatio(safeIdx, img.naturalWidth, img.naturalHeight);
+              }
+            }}
+            className="pricing-stack-v2-thumb-img is-natural-stage-img"
           />
         )}
 
@@ -1358,27 +1397,28 @@ export default function LandingPricingStackShowcase({
                         <span className="pricing-stack-v2-step-num">
                           {formatCleanStepNumber(pg.pageNumber, idx)}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedProjectInModal(null);
+                            setDetailPage(pg);
+                          }}
+                          className="pricing-stack-v2-detail-btn"
+                        >
+                          <span>{pg.btnDetailText || btnViewDetail}</span>
+                          <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
+                        </button>
                       </div>
                     </header>
 
                     {/* BOTTOM ROW: Price & Specs on Left, Interactive Media Showcase on Right */}
-                    <div className="pricing-stack-v2-card-bottom is-16x9-layout">
+                    <div
+                      className={`pricing-stack-v2-card-bottom ${
+                        is16x9Card ? "is-16x9-layout" : "is-gallery-layout"
+                      }`}
+                    >
                       {/* LEFT: PRICE & SPECS */}
                       <div className="pricing-stack-v2-price-panel">
-                        <div className="pricing-stack-v2-mid-action-row is-16x9-action">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedProjectInModal(null);
-                              setDetailPage(pg);
-                            }}
-                            className="pricing-stack-v2-detail-btn"
-                          >
-                            <span>{pg.btnDetailText || btnViewDetail}</span>
-                            <ArrowRight className="w-4 h-4 pricing-stack-v2-detail-arrow" />
-                          </button>
-                        </div>
-
                         <div className="pricing-stack-v2-price-box">
                           {pg.priceLabel && (
                             <span className="pricing-stack-v2-price-label">{pg.priceLabel}</span>

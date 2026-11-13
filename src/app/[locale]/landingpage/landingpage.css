@@ -12747,6 +12747,14 @@
   overflow: hidden;
 }
 
+.pricing-stack-v2-card-index-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .pricing-stack-v2-step-num {
   font-size: clamp(2.15rem, 3.2vw, 3.1rem);
   font-weight: 800;
@@ -12767,6 +12775,12 @@
 .pricing-stack-v2-mid-action-row.is-16x9-action {
   justify-content: flex-start;
   margin: 0;
+}
+
+.pricing-stack-v2-mid-action-row.is-top-right-action {
+  width: 100%;
+  justify-content: flex-end;
+  margin: 0 0 10px;
 }
 
 .pricing-stack-v2-detail-btn {
@@ -12821,9 +12835,9 @@
 }
 
 .pricing-stack-v2-card-bottom.is-gallery-layout {
-  grid-template-columns: minmax(245px, 32%) minmax(0, 1fr);
+  grid-template-columns: minmax(235px, 31%) minmax(0, 1fr);
   flex: 1;
-  align-items: stretch;
+  align-items: end;
 }
 
 .pricing-stack-v2-card-bottom.is-gallery-layout .pricing-stack-v2-price-panel {
@@ -13056,8 +13070,43 @@
   background: linear-gradient(180deg, rgba(12, 14, 18, 0) 58%, rgba(12, 14, 18, 0.74) 100%);
 }
 
+.pricing-stack-v2-single-gallery-box {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
 .pricing-stack-v2-single-gallery-stage {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0F1115;
+  border: 1px solid rgba(20, 22, 27, 0.14);
+  box-shadow: 0 16px 36px -12px rgba(12, 15, 22, 0.32);
+  cursor: pointer;
   user-select: none;
+  transition: width 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pricing-stack-v2-thumb-img.is-natural-stage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pricing-stack-v2-single-gallery-stage:hover .pricing-stack-v2-thumb-img {
@@ -13144,7 +13193,7 @@
 /* 2) Movie Showcase (Card 03 - 16:9) */
 .pricing-stack-v2-movie-box {
   position: relative;
-  width: min(100%, max(320px, calc((100svh - 355px) * 16 / 9)));
+  width: min(100%, max(320px, calc((100svh - 350px) * 16 / 9)));
   height: auto;
   min-width: 0;
   max-width: 100%;
@@ -13291,7 +13340,7 @@
 /* 3) Interactive 360° VR & VR SS Showcase (Cards 04 & 05 - 16:9) */
 .pricing-stack-v2-vr-box {
   position: relative;
-  width: min(100%, max(320px, calc((100svh - 380px) * 16 / 9)));
+  width: min(100%, max(320px, calc((100svh - 375px) * 16 / 9)));
   height: auto;
   min-width: 0;
   max-width: 100%;
@@ -14077,9 +14126,20 @@
   }
 
   .pricing-stack-v2-mid-action-row {
-    justify-content: flex-start;
-    margin: 0;
+    justify-content: flex-end;
+    margin: 0 0 8px;
     flex-shrink: 0;
+  }
+
+  .pricing-stack-v2-single-gallery-box {
+    justify-content: center;
+  }
+
+  .pricing-stack-v2-single-gallery-stage {
+    --pricing-single-gallery-max-h: clamp(145px, calc(100svh - var(--lp-sticky-top, 0px) - 430px), 235px);
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
   }
 
   .pricing-stack-v2-card-bottom {
