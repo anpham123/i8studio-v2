@@ -72,6 +72,8 @@ export async function GET(
 
     // Inject CSS & JS to keep the enlarged model centered above the Hero typography
     // while keeping the left info panel and right action buttons untouched.
+    // Also hides the 3D canvas behind a poster overlay until the model + environment
+    // are fully loaded to prevent the dark/unlit flash on first visit.
     const heroZoomInjection = `
   <style id="i8-ar-hero-zoom-style">
     model-viewer#myModel, model-viewer {
@@ -82,9 +84,23 @@ export async function GET(
     model-viewer::part(default-poster) {
       transform: scale(2.15);
     }
+    /* Smooth fade-in: hide model canvas until fully loaded */
+    .i8-mv-loading model-viewer,
+    .i8-mv-loading model-viewer#myModel {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .i8-mv-ready model-viewer,
+    .i8-mv-ready model-viewer#myModel {
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
   </style>
   <script id="i8-ar-hero-zoom-script">
     (function () {
+      // Mark body as loading to hide the dark unlit flash
+      document.body.classList.add("i8-mv-loading");
+
       function applyEnlargedHeroView() {
         var mv = document.getElementById("myModel") || document.querySelector("model-viewer");
         if (!mv) return;
@@ -97,17 +113,35 @@ export async function GET(
           mv.jumpCameraToGoal();
         }
       }
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", applyEnlargedHeroView);
-      } else {
-        applyEnlargedHeroView();
+
+      function revealModel() {
+        document.body.classList.remove("i8-mv-loading");
+        document.body.classList.add("i8-mv-ready");
       }
-      window.addEventListener("load", function () {
+
+      function setupModelReveal() {
         var mv = document.getElementById("myModel") || document.querySelector("model-viewer");
         if (!mv) return;
         applyEnlargedHeroView();
-        mv.addEventListener("load", applyEnlargedHeroView, { once: true });
-      });
+        // Reveal after model is fully loaded (geometry + textures + environment)
+        if (mv.loaded) {
+          // Already loaded, reveal with a small delay for environment to settle
+          setTimeout(revealModel, 300);
+        } else {
+          mv.addEventListener("load", function () {
+            applyEnlargedHeroView();
+            setTimeout(revealModel, 300);
+          }, { once: true });
+        }
+        // Fallback: reveal after 4s max to avoid indefinite blank screen
+        setTimeout(revealModel, 4000);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupModelReveal);
+      } else {
+        setupModelReveal();
+      }
     })();
   </script>`;
 
