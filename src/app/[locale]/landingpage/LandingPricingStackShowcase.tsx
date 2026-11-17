@@ -755,7 +755,7 @@ const InlineGalleryCarousel: React.FC<{
     [total]
   );
 
-  // Preload images and detect natural aspect ratios for instant frame sizing
+  // Preload and pre-decode images in background GPU memory for zero first-scroll hitch
   useEffect(() => {
     if (total === 0 || typeof window === "undefined") return;
     items.forEach((it, idx) => {
@@ -767,9 +767,13 @@ const InlineGalleryCarousel: React.FC<{
             : it?.poster || it?.thumbnail || "";
       if (!imgUrl) return;
       const img = new window.Image();
+      img.decoding = "async";
       img.onload = () => {
         if (img.naturalWidth && img.naturalHeight) {
           recordRatio(idx, img.naturalWidth, img.naturalHeight);
+        }
+        if (typeof img.decode === "function") {
+          img.decode().catch(() => {});
         }
       };
       img.src = imgUrl;
@@ -896,7 +900,8 @@ const InlineGalleryCarousel: React.FC<{
             key={currentItem.id || currentItem.url || safeIdx}
             src={currentItem.url}
             alt={currentItem.caption || `${pageTitle} ${safeIdx + 1}`}
-            loading={eagerLoad ? "eager" : "lazy"}
+            loading="eager"
+            decoding="async"
             draggable={false}
             onLoad={(e) => {
               const img = e.currentTarget;
@@ -1082,6 +1087,7 @@ export default function LandingPricingStackShowcase({
      ========================================================================== */
   const applyStackTransforms = useCallback(
     (p: number) => {
+      const isPhone = typeof window !== "undefined" && window.innerWidth <= 768;
       for (let i = 0; i < count; i++) {
         const el = cardRefs.current[i];
         if (!el) continue;
@@ -1103,7 +1109,8 @@ export default function LandingPricingStackShowcase({
           el.style.transform = `perspective(1350px) translate3d(0, ${tyPercent.toFixed(2)}%, 0) rotateX(${rotX.toFixed(2)}deg) scale(${sc.toFixed(4)})`;
           el.style.opacity = op.toFixed(3);
           el.style.pointerEvents = rel > 0.24 ? "none" : "auto";
-          el.style.visibility = op <= 0.01 ? "hidden" : "visible";
+          // Only hide after the outgoing fold is completely offscreen
+          el.style.visibility = rel > 1.15 ? "hidden" : "visible";
 
           if (shadeEl) {
             shadeEl.style.opacity = Math.min(0.28, fold * 0.24).toFixed(3);
@@ -1114,14 +1121,14 @@ export default function LandingPricingStackShowcase({
           const clampedDepth = Math.min(depth, 3.3);
           const sc = 1 - clampedDepth * 0.042;
           // Push lower cards slightly downward so their rounded bottom edge peeks cleanly below the active card
-          const isPhone = typeof window !== "undefined" && window.innerWidth <= 768;
           const tyPx = clampedDepth * (isPhone ? 14 : 26);
-          const op = depth > 3.15 ? Math.max(0, 1 - (depth - 3.15) * 1.6) : 1;
+          // Keep minimum opacity 0.001 and visibility: visible so underneath cards stay pre-rasterized in GPU memory
+          const op = depth > 3.15 ? Math.max(0.001, 1 - (depth - 3.15) * 1.6) : 1;
 
           el.style.transform = `perspective(1350px) translate3d(0, ${tyPx.toFixed(1)}px, 0) rotateX(0deg) scale(${sc.toFixed(4)})`;
           el.style.opacity = op.toFixed(3);
           el.style.pointerEvents = depth < 0.35 ? "auto" : "none";
-          el.style.visibility = op <= 0.01 ? "hidden" : "visible";
+          el.style.visibility = "visible";
 
           if (shadeEl) {
             shadeEl.style.opacity = Math.min(0.18, clampedDepth * 0.055).toFixed(3);
@@ -1150,6 +1157,19 @@ export default function LandingPricingStackShowcase({
 
     let rafId = 0;
     let running = true;
+    let pillHighlightIdx = activeIndexRef.current;
+
+    const syncNavPillHighlight = (idx: number) => {
+      if (idx === pillHighlightIdx) return;
+      pillHighlightIdx = idx;
+      const navEl = navPillsRef.current;
+      if (!navEl) return;
+      const btns = navEl.querySelectorAll<HTMLElement>(".pricing-stack-v2-nav-pill");
+      btns.forEach((btn, bIdx) => {
+        if (bIdx === idx) btn.classList.add("is-active");
+        else btn.classList.remove("is-active");
+      });
+    };
 
     const computeTargetFromScroll = () => {
       const runway = runwayRef.current;
@@ -1176,7 +1196,8 @@ export default function LandingPricingStackShowcase({
       rafId = window.requestAnimationFrame(tick);
 
       const diff = targetProgressRef.current - progressRef.current;
-      if (Math.abs(diff) > 0.0006) {
+      const absDiff = Math.abs(diff);
+      if (absDiff > 0.0006) {
         progressRef.current += diff * 0.22;
         applyStackTransforms(progressRef.current);
       } else if (progressRef.current !== targetProgressRef.current) {
@@ -1185,7 +1206,14 @@ export default function LandingPricingStackShowcase({
       }
 
       const nearest = Math.max(0, Math.min(count - 1, Math.round(progressRef.current)));
-      if (nearest !== activeIndexRef.current) {
+      syncNavPillHighlight(nearest);
+
+      // Defer React state re-render & heavy media startup until the card fold is nearly settled
+      // so we never interrupt the 60fps 3D folding animation at mid-flight (progress = 0.5)
+      if (
+        nearest !== activeIndexRef.current &&
+        (Math.abs(progressRef.current - nearest) < 0.22 || absDiff < 0.025)
+      ) {
         activeIndexRef.current = nearest;
         setActiveIndex(nearest);
       }
@@ -1417,7 +1445,7 @@ export default function LandingPricingStackShowcase({
                         {pg.mediaMode === "movie" ? (
                           <InlineMovieShowcase
                             items={mediaItems}
-                            isActive={isNearActive && !lightboxState}
+                            isActive={activeIndex === idx && !lightboxState}
                             badgeText={pg.mediaBadgeText}
                             expandText={pg.expandBtnText}
                             onOpenFullscreen={(mIdx) =>
@@ -1427,7 +1455,7 @@ export default function LandingPricingStackShowcase({
                         ) : pg.mediaMode === "vr360" ? (
                           <InlineVR360Showcase
                             page={pg}
-                            isActive={isNearActive && !lightboxState}
+                            isActive={activeIndex === idx && !lightboxState}
                             onOpenFullscreenVR={(sIdx) =>
                               setLightboxState({ page: pg, index: sIdx, mode: "vr360" })
                             }
@@ -1435,7 +1463,7 @@ export default function LandingPricingStackShowcase({
                         ) : pg.mediaMode === "vrss" || (!pg.mediaMode && pg.id === "page-vr-ss") ? (
                           <InlineVRSSShowcase
                             page={pg}
-                            isActive={isNearActive && !lightboxState}
+                            isActive={activeIndex === idx && !lightboxState}
                             onOpenFullscreen={(sIdx, openMode) =>
                               setLightboxState({ page: pg, index: sIdx, mode: openMode })
                             }
@@ -1446,7 +1474,7 @@ export default function LandingPricingStackShowcase({
                             items={mediaItems}
                             pageTitle={pg.title}
                             isNearActive={isNearActive}
-                            eagerLoad={idx <= 1}
+                            eagerLoad={true}
                             onSelectMedia={(mIdx, openMode) =>
                               setLightboxState({
                                 page: pg,

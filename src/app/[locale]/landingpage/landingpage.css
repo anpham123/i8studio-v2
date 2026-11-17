@@ -12856,9 +12856,8 @@
 .pricing-stack-v2-price-box {
   padding: 14px 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(20, 22, 27, 0.09);
-  backdrop-filter: blur(8px);
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
@@ -13096,7 +13095,6 @@
   box-shadow: 0 16px 36px -12px rgba(12, 15, 22, 0.32);
   cursor: pointer;
   user-select: none;
-  transition: width 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pricing-stack-v2-thumb-img.is-natural-stage-img {
@@ -14488,7 +14486,7 @@
 }
 
 .pricing-first-reveal.is-entered .pricing-stack-v2-stage {
-  animation: stageArchitecturalFirstEnter 0.92s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  animation: secBottomFirstEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
 }
 
 @media (prefers-reduced-motion: reduce) {
