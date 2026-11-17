@@ -66,7 +66,9 @@ export async function GET(
       .replace(
         /min-field-of-view\s*=\s*"[^"]*"/i,
         'field-of-view="13.5deg" min-field-of-view="6deg" max-field-of-view="35deg"'
-      );
+      )
+      // Fix: upstream references poster.webp but only poster.png exists
+      .replace(/poster\.webp/g, "poster.png");
 
     // Inject CSS & JS to keep the enlarged model centered above the Hero typography
     // while keeping the left info panel and right action buttons untouched.
