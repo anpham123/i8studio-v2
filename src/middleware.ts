@@ -199,6 +199,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // For /api/ar-embed/* routes, ensure X-Frame-Options is SAMEORIGIN (not DENY)
+  // to allow the AR 3D model viewer to be embedded via iframe on the same origin.
+  if (pathname.startsWith("/api/ar-embed")) {
+    const response = NextResponse.next();
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    return response;
+  }
+
   // Apply i18n middleware for public routes
   if (!pathname.startsWith("/admin") && !pathname.startsWith("/api")) {
     return intlMiddleware(request);
