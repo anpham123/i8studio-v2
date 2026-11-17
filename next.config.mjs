@@ -62,6 +62,12 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: "/api/ar-embed/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
     ];
   },
   webpack: (config) => {

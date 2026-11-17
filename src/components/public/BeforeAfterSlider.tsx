@@ -49,7 +49,7 @@ export default function BeforeAfterSlider({
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const hasDraggedRef = useRef<boolean>(false);
   const [detectedRatio, setDetectedRatio] = useState<string | null>(null);
-  // viewportRatio removed — was unused
+  const [detectedNumericRatio, setDetectedNumericRatio] = useState<number | null>(null);
 
   // Aspect ratio check & warning + auto-detect ratio
   useEffect(() => {
@@ -82,12 +82,21 @@ export default function BeforeAfterSlider({
       afterRatio = imgAfter.naturalWidth / imgAfter.naturalHeight;
       if (autoAspect) {
         setDetectedRatio(`${imgAfter.naturalWidth}/${imgAfter.naturalHeight}`);
+        setDetectedNumericRatio(afterRatio);
       }
       checkRatios();
     };
 
     imgBefore.src = finalBeforeImage;
     imgAfter.src = finalAfterImage;
+
+    if (imgAfter.complete && imgAfter.naturalWidth && imgAfter.naturalHeight) {
+      afterRatio = imgAfter.naturalWidth / imgAfter.naturalHeight;
+      if (autoAspect) {
+        setDetectedRatio(`${imgAfter.naturalWidth}/${imgAfter.naturalHeight}`);
+        setDetectedNumericRatio(afterRatio);
+      }
+    }
   }, [finalBeforeImage, finalAfterImage, autoAspect]);
 
   // First-load hint animation: 50 -> 43 -> 57 -> 50 on mount if no interaction
@@ -278,7 +287,7 @@ export default function BeforeAfterSlider({
     : { top: `${position}%`, left: 0, right: 0, height: "2px", transform: "translateY(-50%)" };
 
   const containerStyle: React.CSSProperties = {};
-  let containerClass = "relative overflow-hidden select-none bg-gray-100 outline-none";
+  let containerClass = "relative overflow-hidden select-none bg-transparent outline-none";
   if (isHorizontal) {
     containerClass += " cursor-ew-resize";
   } else {
@@ -288,10 +297,25 @@ export default function BeforeAfterSlider({
   if (fillContainer) {
     containerClass += " w-full h-full";
   } else if (autoAspect) {
-    containerStyle.aspectRatio = detectedRatio || "16/10";
-    containerStyle.maxWidth = "100%";
-    containerStyle.maxHeight = "80vh";
-    containerStyle.margin = "0 auto";
+    const parsedPropRatio = (() => {
+      if (!aspectRatio) return null;
+      if (aspectRatio.includes("/")) {
+        const [w, h] = aspectRatio.split("/").map(Number);
+        return w && h ? w / h : null;
+      }
+      const n = Number(aspectRatio);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    })();
+    const numRatio = detectedNumericRatio || parsedPropRatio || 1.6;
+
+    containerStyle.aspectRatio = detectedRatio || aspectRatio || "16/10";
+    if (_preferHeightOverWidth) {
+      containerStyle.width = `min(90vw, 1300px, calc(82vh * ${numRatio.toFixed(4)}))`;
+      containerStyle.maxHeight = "82vh";
+      containerStyle.margin = "0 auto";
+    } else {
+      containerClass += " w-full";
+    }
   } else if (aspectRatio) {
     containerStyle.aspectRatio = aspectRatio;
     containerClass += " w-full";

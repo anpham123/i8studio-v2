@@ -182,9 +182,13 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     const fullEmbed = embed.includes("?")
                       ? `${embed}&autoplay=1&mute=1&loop=1&controls=0`
                       : `${embed}?autoplay=1&mute=1&loop=1&controls=0`;
+                    const resolvedHeroEmbed =
+                      data.slug === "ar" && /^https?:\/\/vr\.i8studio\.vn\//i.test(embed)
+                        ? embed.replace(/^https?:\/\/vr\.i8studio\.vn\//i, "/api/ar-embed/")
+                        : embed;
                     return (
                       <iframe
-                        src={isBackgroundVideoEmbed ? fullEmbed : embed}
+                        src={isBackgroundVideoEmbed ? fullEmbed : resolvedHeroEmbed}
                         className={isBackgroundVideoEmbed ? "w-full h-full min-w-[140%] min-h-[140%] pointer-events-none scale-110 object-cover border-0" : "absolute inset-0 w-full h-full border-0 pointer-events-auto"}
                         allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; xr-spatial-tracking"
                         title={title}

@@ -67,25 +67,25 @@ interface Work {
 /*  Placeholder data (fallback if DB is empty)                        */
 /* ------------------------------------------------------------------ */
 const WORKS: Work[] = [
-  { id: "1", title: "Riverside Residence", type: "still", category: "residential", bg: "#c8c2b8", span: "wide" },
-  { id: "2", title: "Forest Villa Aerial", type: "still", category: "resort", bg: "#b0aca2", span: "wide" },
-  { id: "3", title: "Urban Tower", type: "animation", category: "commercial", bg: "#a8a498", span: "narrow" },
-  { id: "4", title: "Autumn Apartment", type: "still", category: "apartment", bg: "#c4bfa6", span: "narrow" },
-  { id: "5", title: "Luxury Pool Interior", type: "composite", category: "resort", bg: "#bab4aa", span: "wide" },
-  { id: "6", title: "City Office Complex", type: "vr360", category: "office", bg: "#9e9a92", span: "narrow" },
-  { id: "7", title: "Public Library", type: "walkthrough", category: "public", bg: "#c0bcb2", span: "narrow" },
-  { id: "8", title: "Seaside Resort", type: "still", category: "resort", bg: "#d4cec4", span: "wide" },
-  { id: "9", title: "Shopping Mall", type: "animation", category: "commercial", bg: "#b8b2a8", span: "narrow" },
-  { id: "10", title: "Smart City Plan", type: "digital", category: "urban", bg: "#a4a098", span: "narrow" },
-  { id: "11", title: "Mountain Villa", type: "composite", category: "residential", bg: "#ccc6bc", span: "wide" },
-  { id: "12", title: "AR Showroom", type: "ar", category: "commercial", bg: "#b4aea4", span: "narrow" },
+  { id: "1", title: "Riverside Residence", titleJa: "リバーサイド・レジデンス", type: "still", category: "residential", bg: "#c8c2b8", span: "wide" },
+  { id: "2", title: "Forest Villa Aerial", titleJa: "フォレストヴィラ鳥瞰", type: "still", category: "resort", bg: "#b0aca2", span: "wide" },
+  { id: "3", title: "Urban Tower", titleJa: "アーバンタワー", type: "animation", category: "commercial", bg: "#a8a498", span: "narrow" },
+  { id: "4", title: "Autumn Apartment", titleJa: "オータム・アパートメント", type: "still", category: "apartment", bg: "#c4bfa6", span: "narrow" },
+  { id: "5", title: "Luxury Pool Interior", titleJa: "ラグジュアリープール内観", type: "composite", category: "resort", bg: "#bab4aa", span: "wide" },
+  { id: "6", title: "City Office Complex", titleJa: "シティオフィス複合施設", type: "vr360", category: "office", bg: "#9e9a92", span: "narrow" },
+  { id: "7", title: "Public Library", titleJa: "市立図書館", type: "walkthrough", category: "public", bg: "#c0bcb2", span: "narrow" },
+  { id: "8", title: "Seaside Resort", titleJa: "シーサイド・リゾート", type: "still", category: "resort", bg: "#d4cec4", span: "wide" },
+  { id: "9", title: "Shopping Mall", titleJa: "ショッピングモール", type: "animation", category: "commercial", bg: "#b8b2a8", span: "narrow" },
+  { id: "10", title: "Smart City Plan", titleJa: "スマートシティ計画", type: "digital", category: "urban", bg: "#a4a098", span: "narrow" },
+  { id: "11", title: "Mountain Villa", titleJa: "マウンテン・ヴィラ", type: "composite", category: "residential", bg: "#ccc6bc", span: "wide" },
+  { id: "12", title: "AR Showroom", titleJa: "ARショールーム", type: "ar", category: "commercial", bg: "#b4aea4", span: "narrow" },
 ];
 
 const TYPE_KEYS: WorkType[] = ["still", "animation", "composite", "vr360", "walkthrough", "ar", "digital"];
 const CAT_KEYS: WorkCategory[] = ["residential", "apartment", "resort", "commercial", "office", "public", "urban"];
 
-const INITIAL_BATCH = 12;
-const BATCH_INCREMENT = 6;
+const INITIAL_BATCH = 18;
+const BATCH_INCREMENT = 9;
 
 // Helper: Group cards by actual visual rows on the screen
 function groupCardsByVisualRows(cards: HTMLElement[]): HTMLElement[][] {
@@ -279,9 +279,8 @@ function WorkCardItem({
   const hoverVideoSrc = work.hoverVideo || (isVideoFile(work.videoUrl) ? work.videoUrl : undefined);
   const hasHoverVideo = Boolean(hoverVideoSrc);
   const isComposite = (work.type === "composite" || Boolean(work.beforeImage)) && Boolean(work.beforeImage) && Boolean(work.image);
-  // Inline Before/After slider only in the "Photo Composite" tab (isExpandedShowcase).
-  // In "Show all" a composite renders as a normal card showing the After image; click → fullscreen Before/After.
-  const isCompositeSlider = isComposite && isExpandedShowcase;
+  // Render the interactive Before/After slider with the middle drag handle in all tabs (including "Show all" & "Photo Composite")
+  const isCompositeSlider = isComposite;
 
   // Cinematic Camera Motion Mode for static images:
   // 0: Zoom chậm từ xa lại gần (Slow Push-in / Dolly-in)
@@ -387,109 +386,99 @@ function WorkCardItem({
     <motion.div
       data-flip-id={work.id}
       data-composite={isCompositeSlider ? "true" : undefined}
-      initial={{ opacity: 0, y: isCompositeSlider ? 0 : 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.3), ease: "easeOut" }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.16, margin: "0px 0px -75px 0px" }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`work-card w-full group ${
-        isCompositeSlider
-          ? "block my-2"
-          : "break-inside-avoid w-full group inline-block will-change-transform mb-6"
-      }`}
+      className="work-card w-full block group"
     >
       {isCompositeSlider ? (
-        <div className={`w-full ${isPortrait ? "max-w-[620px] mx-auto" : "max-w-5xl mx-auto"}`}>
-          <div
-            style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
-            className="work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[4px] shadow-sm will-change-transform group/slider"
+        <div className="work-card-media relative overflow-hidden w-full bg-transparent rounded-[4px] group/slider">
+          <BeforeAfterSlider
+            beforeImage={work.beforeImage!}
+            afterImage={work.image!}
+            beforeLabel=""
+            afterLabel=""
+            aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
+            autoAspect={true}
+          />
+
+          {/* Top-right Fullscreen / Lightbox button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+            className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-white text-[11.5px] font-medium backdrop-blur-md transition-all shadow-md hover:scale-105 cursor-pointer"
+            title="Fullscreen Comparison"
+            aria-label="Fullscreen Comparison"
           >
-            <BeforeAfterSlider
-              beforeImage={work.beforeImage!}
-              afterImage={work.image!}
-              beforeLabel="Before"
-              afterLabel="After"
-              autoAspect={true}
-            />
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Fullscreen</span>
+          </button>
 
-            {/* Top-right Fullscreen / Lightbox button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick();
-              }}
-              className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-white text-[12px] font-medium backdrop-blur-md transition-all shadow-md hover:scale-105 cursor-pointer"
-              title="Fullscreen Comparison"
-              aria-label="Fullscreen Comparison"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Fullscreen</span>
-            </button>
-
-            {/* Top-left subtle badge */}
-            <div className="absolute top-3.5 left-3.5 z-20 pointer-events-none flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/55 text-white/90 text-[11px] font-medium tracking-wider uppercase backdrop-blur-md shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Photo Composite
-            </div>
+          {/* Top-left subtle badge */}
+          <div className="absolute top-3 left-3 z-20 pointer-events-none flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 text-white/95 text-[10.5px] font-medium tracking-wider uppercase backdrop-blur-md shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {isExpandedShowcase ? "Photo Composite" : "Before / After"}
           </div>
 
-          <div
-            onClick={onClick}
-            className="work-card-info mt-4 mb-2 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 sm:gap-4"
-          >
-            <div>
-              <h3 className="text-[19px] sm:text-[22px] font-semibold text-black tracking-[0.01em] leading-snug">
-                <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
+          {/* Hover gradient & Title inside bottom-left */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/75 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-10" />
+          {work.title && (
+            <div
+              onClick={onClick}
+              className="work-card-info absolute inset-x-0 bottom-0 z-20 p-4 sm:p-5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400 ease-out cursor-pointer"
+            >
+              <h3 className="text-[16px] sm:text-[18px] font-semibold text-white tracking-[0.015em] leading-snug drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
+                <span className="bg-left-bottom bg-gradient-to-r from-white to-white bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
                   {work.title}
                 </span>
               </h3>
-              {work.titleJa && (
-                <p className="text-[13px] sm:text-[14px] text-[#666] mt-0.5">
-                  {work.titleJa}
-                </p>
-              )}
             </div>
-
-            <div className="flex items-center gap-3 text-[12px] text-[#777] mt-1 sm:mt-0 shrink-0">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f2efe9] text-[#555] text-[11px] font-medium tracking-wide">
-                ↔ Drag slider to compare
-              </span>
-            </div>
-          </div>
+          )}
         </div>
       ) : (
         <div
           onClick={onClick}
-          style={{ aspectRatio: aspectRatio ? `${aspectRatio}` : undefined }}
-          className={`work-card-media relative overflow-hidden w-full bg-[#eae7e1] rounded-[3px] will-change-transform transition-all cursor-pointer shadow-xs ${!aspectRatio ? "min-h-[180px]" : ""
-            }`}
+          style={!isLoaded && aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined}
+          className={`work-card-media relative overflow-hidden w-full rounded-[3px] transition-all cursor-pointer ${
+            !isLoaded ? "bg-[#eae7e1] min-h-[180px]" : "bg-transparent"
+          }`}
         >
           {/* Shimmer skeleton until loaded */}
           {!isLoaded && (
             <div className="absolute inset-0 bg-gradient-to-r from-[#eae7e1] via-[#f4f1eb] to-[#eae7e1] animate-pulse pointer-events-none" />
           )}
 
-          {/* Static thumbnail image with cinematic slow zoom / pan motion (True Natural Masonry: Vertical stays Vertical, Horizontal stays Horizontal) */}
+          {/* Static thumbnail image with cinematic slow zoom / pan motion */}
           {work.image ? (
             <img
               ref={imgRef}
               src={work.image}
               alt={`${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`}
-              loading={index < 9 ? "eager" : "lazy"}
-              fetchPriority={index < 9 ? "high" : "auto"}
-              decoding={index < 9 ? "sync" : "async"}
+              loading={index < 6 ? "eager" : "lazy"}
+              fetchPriority={index < 6 ? "high" : "auto"}
+              decoding="async"
               onLoad={(e) => {
                 const img = e.currentTarget;
-                if (img.naturalWidth && img.naturalHeight && !aspectRatio) {
+                if (img.naturalWidth && img.naturalHeight) {
                   setAspectRatio(img.naturalWidth / img.naturalHeight);
                 }
                 setIsLoaded(true);
               }}
-              className={`w-full h-auto block will-change-transform transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+              className={`w-full h-auto block will-change-transform transition-opacity duration-300 ${
+                isLoaded ? "opacity-100" : "opacity-0"
+              }`}
               style={{
-                aspectRatio: aspectRatio ? `${aspectRatio}` : undefined,
-                transform: !hasHoverVideo ? getCinematicTransform() : isHovered ? "scale(1.02)" : "scale(1)",
+                transform: !hasHoverVideo
+                  ? getCinematicTransform()
+                  : isHovered
+                  ? "scale(1.02)"
+                  : "scale(1)",
                 transition: isHovered
                   ? "transform 2.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease"
                   : "transform 1.0s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease",
@@ -523,7 +512,7 @@ function WorkCardItem({
           )}
 
           {/* Subtle cinematic gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/18 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
           {/* Composite (Show all): After image only — badge hints that click opens Before/After */}
           {isComposite && (
@@ -532,19 +521,17 @@ function WorkCardItem({
               Before / After
             </div>
           )}
-        </div>
-      )}
 
-      {!isCompositeSlider && (
-        <div
-          onClick={onClick}
-          className="work-card-info mt-3 mb-1 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 cursor-pointer"
-        >
-          <h3 className="text-[17px] sm:text-[18px] font-semibold text-black tracking-[0.01em] leading-snug">
-            <span className="bg-left-bottom bg-gradient-to-r from-black to-black bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
-              {work.title}
-            </span>
-          </h3>
+          {/* Image Title inside bottom-left on hover (no numbers, no extra text) */}
+          {work.title && (
+            <div className="work-card-info absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5 pointer-events-none opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-400 ease-out">
+              <h3 className="text-[16px] sm:text-[18px] font-semibold text-white tracking-[0.015em] leading-snug drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
+                <span className="bg-left-bottom bg-gradient-to-r from-white to-white bg-[length:0%_1.5px] bg-no-repeat group-hover:bg-[length:100%_1.5px] transition-[background-size] duration-500 pb-0.5">
+                  {work.title}
+                </span>
+              </h3>
+            </div>
+          )}
         </div>
       )}
     </motion.div>
@@ -576,28 +563,24 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH);
+  const [colCount, setColCount] = useState<number>(3);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const scrollRowObserverRef = useRef<IntersectionObserver | null>(null);
-  const isFirstRender = useRef(true);
-  const activeTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const isFilteringRef = useRef(false);
-  const prevRenderedCountRef = useRef(INITIAL_BATCH);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Cleanup observer on unmount
-  useEffect(() => {
-    return () => {
-      if (scrollRowObserverRef.current) {
-        scrollRowObserverRef.current.disconnect();
-      }
+    const updateCols = () => {
+      if (typeof window === "undefined") return;
+      if (window.innerWidth < 640) setColCount(1);
+      else if (window.innerWidth < 1024) setColCount(2);
+      else setColCount(3);
     };
+    updateCols();
+    window.addEventListener("resize", updateCols, { passive: true });
+    return () => window.removeEventListener("resize", updateCols);
   }, []);
 
   // Social Links
@@ -616,7 +599,10 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
   // Dynamic mapper for database works
   const mappedWorks = useMemo(() => {
     if (!initialWorks || initialWorks.length === 0) {
-      return WORKS;
+      return WORKS.map((w) => ({
+        ...w,
+        title: locale === "ja" ? w.titleJa || w.title : w.title,
+      }));
     }
 
     const placeholderColors = [
@@ -626,7 +612,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
     ];
 
     return initialWorks.map((w, index) => {
-      const title = locale === "ja" ? w.titleJa || w.title : w.title;
+      const title = locale === "ja" ? w.titleJa || w.title : w.title || w.titleJa;
       const subtitle = w.subtitle ? w.subtitle.toLowerCase() : "";
       const titleLower = w.title ? w.title.toLowerCase() : "";
 
@@ -751,7 +737,7 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
     };
   }, [hasMore, filtered.length]);
 
-  // Initial page entrance animation & setup scroll row observer
+  // Initial sidebar entrance animation
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
 
@@ -759,7 +745,6 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
       const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (prefersReducedMotion) return;
 
-      // 1. Sidebar entrance
       if (sidebarRef.current) {
         gsap.fromTo(
           sidebarRef.current.children,
@@ -767,75 +752,38 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
           { opacity: 1, y: 0, duration: 0.6, stagger: 0.04, ease: "power3.out" }
         );
       }
-
-      // 2. Setup row-by-row Push-up Reveal on scroll after DOM layout
-      requestAnimationFrame(() => {
-        setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.08, true);
-      });
     }, containerRef);
 
     return () => ctx.revert();
   }, [mounted]);
 
-  // Handle filter change: instant tab switch followed by row reveal
+  // Handle filter change: instant tab switch with zero layout thrashing
   const handleFilterChange = (newType?: WorkType | "all", newCat?: WorkCategory | "all") => {
-    // 1. Immediately update active state so tabs and items respond instantly with 0ms delay
     if (newType !== undefined) setActiveType(newType);
     if (newCat !== undefined) setActiveCat(newCat);
     setVisibleCount(INITIAL_BATCH);
-    prevRenderedCountRef.current = INITIAL_BATCH;
-
-    // 2. Clear any running timeline to prevent lagging
-    if (activeTimelineRef.current) {
-      activeTimelineRef.current.kill();
-      activeTimelineRef.current = null;
-    }
-    if (gridRef.current) {
-      gsap.set(gridRef.current.querySelectorAll(".work-card"), { clearProps: "all" });
-    }
-
-    isFilteringRef.current = true;
   };
 
-  // Push-up Reveal Animation on filter update
-  useIsomorphicLayoutEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+  // Distribute items deterministically into stable columns so appending items on scroll
+  // NEVER reshuffles existing cards across columns (eliminates scroll jumping/stuttering)
+  const masonryColumns = useMemo(() => {
+    const cols: { work: Work; index: number }[][] = Array.from({ length: colCount }, () => []);
+    const heights = new Array(colCount).fill(0);
 
-    if (!isFilteringRef.current) return;
-
-    if (!gridRef.current) {
-      isFilteringRef.current = false;
-      return;
-    }
-
-    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      isFilteringRef.current = false;
-      return;
-    }
-
-    // Re-setup scroll row observer for newly filtered cards
-    requestAnimationFrame(() => {
-      setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0.05, true);
-      isFilteringRef.current = false;
+    displayedWorks.forEach((work, index) => {
+      let shortestCol = 0;
+      for (let i = 1; i < colCount; i++) {
+        if (heights[i] < heights[shortestCol]) {
+          shortestCol = i;
+        }
+      }
+      cols[shortestCol].push({ work, index });
+      const ratio = work.aspectRatio && work.aspectRatio > 0 ? work.aspectRatio : 1.5;
+      heights[shortestCol] += 1 / ratio + 0.08;
     });
-  }, [activeType, activeCat]);
 
-  // Setup scroll row observer when new items are appended via infinite scroll
-  useIsomorphicLayoutEffect(() => {
-    if (isFirstRender.current || isFilteringRef.current) return;
-
-    if (gridRef.current && displayedWorks.length > prevRenderedCountRef.current) {
-      requestAnimationFrame(() => {
-        setupScrollRowObserver(gridRef.current, scrollRowObserverRef, 0, false);
-      });
-    }
-
-    prevRenderedCountRef.current = displayedWorks.length;
-  }, [displayedWorks.length]);
+    return cols;
+  }, [displayedWorks, colCount]);
 
   return (
     <div ref={containerRef} className="bg-white min-h-screen">
@@ -995,50 +943,46 @@ export default function WorksContent({ initialWorks, settings = {}, collections 
           ) : (
             <div
               ref={gridRef}
-              className={
-                activeType === "composite"
-                  ? "flex flex-col gap-12 sm:gap-16 w-full max-w-5xl mx-auto"
-                  : "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 [column-fill:_balance] w-full"
-              }
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start w-full"
             >
-              {displayedWorks.map((work, index) => {
-                const isItemComposite =
-                  (work.type === "composite" || Boolean(work.beforeImage)) &&
-                  Boolean(work.beforeImage) &&
-                  Boolean(work.image);
+              {masonryColumns.map((colItems, colIdx) => (
+                <div key={colIdx} className="flex flex-col gap-6 min-w-0">
+                  {colItems.map(({ work, index }) => {
+                    const isItemComposite =
+                      (work.type === "composite" || Boolean(work.beforeImage)) &&
+                      Boolean(work.beforeImage) &&
+                      Boolean(work.image);
 
-                const cardElement = (
-                  <WorkCardItem
-                    key={work.id}
-                    work={work}
-                    index={index}
-                    typeLabel={t(`types.${work.type}`)}
-                    isExpandedShowcase={isItemComposite && activeType === "composite"}
-                    onClick={() => {
-                      const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
-                      if (work.vrUrl) {
-                        setVrModal({ url: work.vrUrl, title: work.title });
-                      } else if (work.videoUrl) {
-                        setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type, title: work.title });
-                      } else if (work.type === "composite" || work.beforeImage) {
-                        setLightbox({
-                          src: work.image || "",
-                          beforeImage: work.beforeImage || "",
-                          alt: altText,
-                          type: "composite",
-                          title: work.titleJa ? `${work.title} (${work.titleJa})` : work.title,
-                        });
-                      } else if (work.image) {
-                        setLightbox({ src: work.image, alt: altText, type: work.type, title: work.title });
-                      }
-                    }}
-                  />
-                );
-
-                // "Show all": composites flow in the masonry grid like any other card (no full-width row)
-
-                return cardElement;
-              })}
+                    return (
+                      <WorkCardItem
+                        key={work.id}
+                        work={work}
+                        index={index}
+                        typeLabel={t(`types.${work.type}`)}
+                        isExpandedShowcase={isItemComposite && activeType === "composite"}
+                        onClick={() => {
+                          const altText = `${work.titleJa || work.title} | 建築CG・パース | i8スタジオ`;
+                          if (work.vrUrl) {
+                            setVrModal({ url: work.vrUrl, title: work.title });
+                          } else if (work.videoUrl) {
+                            setLightbox({ src: work.videoUrl, alt: altText, isVideo: true, type: work.type, title: work.title });
+                          } else if (work.type === "composite" || work.beforeImage) {
+                            setLightbox({
+                              src: work.image || "",
+                              beforeImage: work.beforeImage || "",
+                              alt: altText,
+                              type: "composite",
+                              title: work.titleJa ? `${work.title} (${work.titleJa})` : work.title,
+                            });
+                          } else if (work.image) {
+                            setLightbox({ src: work.image, alt: altText, type: work.type, title: work.title });
+                          }
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           )}
 

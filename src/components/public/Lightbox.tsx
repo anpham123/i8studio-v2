@@ -109,13 +109,14 @@ export default function Lightbox({ src, beforeImage, alt, isVideo, type, title, 
         >
           {isComposite && beforeImage ? (
             <div className="relative flex flex-col items-center justify-center max-w-[94vw] max-h-[92vh]">
-              <div className="w-[90vw] max-w-[1300px] max-h-[85vh] rounded-2xl overflow-hidden shadow-2xl border border-white/15 bg-black">
+              <div className="w-fit max-w-[92vw] max-h-[84vh] rounded-2xl overflow-hidden shadow-2xl border border-white/15 bg-black">
                 <BeforeAfterSlider
                   beforeImage={beforeImage}
                   afterImage={src}
                   beforeLabel="Before"
                   afterLabel="After"
                   autoAspect={true}
+                  preferHeightOverWidth={true}
                 />
               </div>
               {title && (
