@@ -53,6 +53,20 @@ export async function GET(
   if (isHtml && upstreamRes.ok) {
     let html = await upstreamRes.text();
 
+    // Compute directory base URL so relative assets (.glb, .png, etc.) resolve properly
+    // even when rendered via iframe srcDoc (which bypasses X-Frame-Options header conflicts on VPS).
+    const dirSegments = pathSegments.slice(0, -1).map(encodeURIComponent);
+    const baseHref =
+      dirSegments.length > 0
+        ? `/api/ar-embed/${dirSegments.join("/")}/`
+        : `/api/ar-embed/`;
+
+    if (/<head[^>]*>/i.test(html)) {
+      html = html.replace(/<head([^>]*)>/i, `<head$1>\n  <base href="${baseHref}">`);
+    } else {
+      html = `<base href="${baseHref}">\n` + html;
+    }
+
     // Update <model-viewer> attributes so the 3D house loads at ~2.2x size immediately
     html = html
       .replace(
@@ -119,7 +133,24 @@ export async function GET(
         document.body.classList.add("i8-mv-ready");
       }
 
+      function prefillFirstMaterialPanel() {
+        var firstBox = document.querySelector(".color-box");
+        var matImg = document.getElementById("material-image");
+        var infoEl = document.getElementById("variant-info");
+        if (firstBox && matImg && infoEl) {
+          var thumb = firstBox.querySelector("img");
+          var info = firstBox.getAttribute("data-info") || "";
+          if (thumb && thumb.getAttribute("src")) {
+            matImg.src = thumb.getAttribute("src");
+          }
+          if (info) {
+            infoEl.innerHTML = info.replace(/\n/g, "<br>");
+          }
+        }
+      }
+
       function setupModelReveal() {
+        prefillFirstMaterialPanel();
         var mv = document.getElementById("myModel") || document.querySelector("model-viewer");
         if (!mv) return;
         applyEnlargedHeroView();
@@ -156,7 +187,6 @@ export async function GET(
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "no-store, must-revalidate",
-        "X-Frame-Options": "SAMEORIGIN",
       },
     });
   }
@@ -176,7 +206,6 @@ export async function GET(
     if (val) responseHeaders.set(key, val);
   }
   responseHeaders.set("Cache-Control", "public, max-age=3600");
-  responseHeaders.set("X-Frame-Options", "SAMEORIGIN");
 
   return new NextResponse(upstreamRes.body, {
     status: upstreamRes.status,

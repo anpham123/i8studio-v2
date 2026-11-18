@@ -1,11 +1,49 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import type { SolutionService } from "@/lib/solution-data";
 import { getEmbedUrl } from "@/lib/embed";
 import BeforeAfterSlider from "@/components/public/BeforeAfterSlider";
+
+/**
+ * Loads the proxied AR HTML via fetch() and renders it using iframe `srcDoc`.
+ * Using `srcDoc` avoids browser `X-Frame-Options` frame-navigation checks when
+ * reverse proxies (e.g. Nginx on VPS) append conflicting `X-Frame-Options: DENY` headers.
+ */
+function ArEmbedIframe({ url, title }: { url: string; title: string }) {
+  const [srcDoc, setSrcDoc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(url, { cache: "no-store" })
+      .then((res) => (res.ok ? res.text() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then((html) => {
+        if (!cancelled) setSrcDoc(html);
+      })
+      .catch(() => {
+        if (!cancelled) setSrcDoc(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  if (!srcDoc) {
+    return <div className="absolute inset-0 w-full h-full bg-[#0c0c10]" />;
+  }
+
+  return (
+    <iframe
+      srcDoc={srcDoc}
+      className="absolute inset-0 w-full h-full border-0 pointer-events-auto"
+      allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; xr-spatial-tracking"
+      title={title}
+    />
+  );
+}
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 
@@ -186,6 +224,11 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                       data.slug === "ar" && /^https?:\/\/vr\.i8studio\.vn\//i.test(embed)
                         ? embed.replace(/^https?:\/\/vr\.i8studio\.vn\//i, "/api/ar-embed/")
                         : embed;
+                    const isArProxyEmbed =
+                      !isBackgroundVideoEmbed && resolvedHeroEmbed.startsWith("/api/ar-embed/");
+                    if (isArProxyEmbed) {
+                      return <ArEmbedIframe url={resolvedHeroEmbed} title={title} />;
+                    }
                     return (
                       <iframe
                         src={isBackgroundVideoEmbed ? fullEmbed : resolvedHeroEmbed}
