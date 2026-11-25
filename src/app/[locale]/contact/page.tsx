@@ -31,10 +31,17 @@ export default async function ContactPage({ params }: { params: { locale: string
   const { locale } = params;
   const [settings, services, qaItems] = await Promise.all([
     prisma.setting.findMany(),
-    prisma.service.findMany({ orderBy: { order: "asc" }, select: { name: true } }),
+    prisma.service.findMany({ where: { isPublished: true }, orderBy: { order: "asc" }, select: { slug: true, name: true, isPublished: true } }),
     prisma.qA.findMany({ orderBy: { order: "asc" } }),
   ]);
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+  const DEFAULT_HIDDEN_SLUGS = new Set(["pachinko-slot-cg", "anime-illustration", "bim-services"]);
+  const visibleServices = services.filter((s) => {
+    const toggleKey = `serviceVisible_${s.slug}`;
+    if (toggleKey in settingsMap) return settingsMap[toggleKey] === "true";
+    if (DEFAULT_HIDDEN_SLUGS.has(s.slug)) return false;
+    return s.isPublished !== false;
+  });
 
   const pageLd = webPageJsonLd({
     title: "Contact Us & FAQ | i8 STUDIO",
@@ -63,7 +70,7 @@ export default async function ContactPage({ params }: { params: { locale: string
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
         />
       )}
-      <ContactSection settings={settingsMap} serviceNames={services.map((s) => s.name)} />
+      <ContactSection settings={settingsMap} serviceNames={visibleServices.map((s) => s.name)} />
       
       {/* Q&A Section merged directly below Contact */}
       <div className="border-t border-gray-100">

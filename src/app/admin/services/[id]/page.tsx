@@ -96,18 +96,29 @@ export default function EditServicePage() {
     setProcessWarnings(warnings);
 
     setSaving(true);
-    const res = await fetch(`/api/services/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        order: parseInt(String(form.order)) || 0,
-        isPublished: !!form.isPublished,
-        featuresJson: JSON.stringify(features),
-        processJson: JSON.stringify(process),
-        plansJson: JSON.stringify(plans),
+    const [res] = await Promise.all([
+      fetch(`/api/services/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          order: parseInt(String(form.order)) || 0,
+          isPublished: !!form.isPublished,
+          featuresJson: JSON.stringify(features),
+          processJson: JSON.stringify(process),
+          plansJson: JSON.stringify(plans),
+        }),
       }),
-    });
+      form.slug
+        ? fetch("/api/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              [`serviceVisible_${String(form.slug)}`]: form.isPublished ? "true" : "false",
+            }),
+          })
+        : Promise.resolve(),
+    ]);
     const data = await res.json();
     setSaving(false);
     if (data.data) {

@@ -127,10 +127,23 @@ export default async function LocaleLayout({
   // Fetch data for layout components
   const [settings, services] = await Promise.all([
     prisma.setting.findMany(),
-    prisma.service.findMany({ orderBy: { order: "asc" } }),
+    prisma.service.findMany({ where: { isPublished: true }, orderBy: { order: "asc" } }),
   ]);
 
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+
+  // Default hidden slugs on Solution menu if not explicitly turned back on in Admin
+  const DEFAULT_HIDDEN_SLUGS = new Set(["pachinko-slot-cg", "anime-illustration", "bim-services"]);
+  const visibleServices = services.filter((s) => {
+    const toggleKey = `serviceVisible_${s.slug}`;
+    if (toggleKey in settingsMap) {
+      return settingsMap[toggleKey] === "true";
+    }
+    if (DEFAULT_HIDDEN_SLUGS.has(s.slug)) {
+      return false;
+    }
+    return s.isPublished !== false;
+  });
 
   const headerHeight = 76;
 
@@ -167,13 +180,13 @@ export default async function LocaleLayout({
             headerHeight={headerHeight}
             logoImage={settingsMap.logoImage}
             logoHeight={parseInt(settingsMap.logoHeight) || 48}
-            services={services.map(s => ({ slug: s.slug, name: s.name, nameJa: s.nameJa, image: s.image }))}
+            services={visibleServices.map(s => ({ slug: s.slug, name: s.name, nameJa: s.nameJa, image: s.image }))}
             menuImages={settingsMap}
           />
           <main style={{ paddingTop: headerHeight }}>
             <PageTransition>{children}</PageTransition>
           </main>
-          <Footer settings={settingsMap} services={services} />
+          <Footer settings={settingsMap} services={visibleServices} />
           <FloatingCTA />
           <FloatingBackToTop />
           <QuickInquiryDrawer />

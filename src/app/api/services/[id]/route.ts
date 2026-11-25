@@ -16,7 +16,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const data = ServiceSchema.partial().parse(await req.json());
+    const rawBody = await req.json();
+    const parsed = ServiceSchema.partial().parse(rawBody);
+    // Only update keys that were actually sent in the request body so Zod's .default() does not overwrite existing order/fields
+    const data = Object.fromEntries(
+      Object.entries(parsed).filter(([key]) => key in rawBody)
+    );
     const item = await prisma.service.update({ where: { id: params.id }, data });
     return NextResponse.json({ data: item });
   } catch (e) {
