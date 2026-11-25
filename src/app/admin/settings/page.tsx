@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import { useToast } from "@/components/admin/Toast";
-import { Loader2, Save, Building2, Phone, Globe } from "lucide-react";
+import { Loader2, Save, Building2, Phone, Globe, Mail } from "lucide-react";
 
 interface SettingGroup {
   title: string;
@@ -12,12 +12,58 @@ interface SettingGroup {
     key: string;
     label: string;
     placeholder?: string;
-    type?: "text" | "textarea" | "select";
+    type?: "text" | "textarea" | "select" | "password";
     options?: { value: string; label: string }[];
   }[];
 }
 
 const SETTING_GROUPS: SettingGroup[] = [
+  {
+    title: "Nội dung Email Tự động gửi cho Khách hàng",
+    icon: Mail,
+    fields: [
+      {
+        key: "autoReplyEnabled",
+        label: "Tự động gửi Email xác nhận cho khách khi gửi Contact",
+        type: "select",
+        options: [
+          { value: "true", label: "Bật (Tự động gửi ngay khi khách liên hệ)" },
+          { value: "false", label: "Tắt" },
+        ],
+      },
+      {
+        key: "smtpFromNameJa",
+        label: "Tên người gửi hiển thị trong hộp thư khách",
+        placeholder: "i8 studio",
+      },
+      {
+        key: "autoReplySubjectJa",
+        label: "Tiêu đề Email (Subject)",
+        placeholder: "【i8 studio】お問い合わせを受け付けました",
+      },
+      {
+        key: "autoReplyGreetingJa",
+        label: "Câu chào mở đầu",
+        placeholder: "こんにちは、i8 Studioです。",
+      },
+      {
+        key: "autoReplyIntroJa",
+        label: "Nội dung chính của Email",
+        type: "textarea",
+        placeholder: "この度は、当社のサービスにご興味をお持ちいただき、ご利用いただき誠にありがとうございます!\n内容を確認の上、24時間以内(土日祝日を除く)に担当者よりご連絡いたします。\n今しばらくお待ちくださいますようお願い申し上げます。",
+      },
+      {
+        key: "autoReplyNoteJa",
+        label: "Dòng lưu ý email tự động (in nghiêng)",
+        placeholder: "※本メールは自動送信されております。このメールへのご返信はお受けできませんので、ご了承ください。",
+      },
+      {
+        key: "autoReplyClosingJa",
+        label: "Lời chào kết thư (in đậm)",
+        placeholder: "よろしくお願いいたします。",
+      },
+    ],
+  },
   {
     title: "Thông tin công ty",
     icon: Building2,
@@ -300,6 +346,7 @@ export default function SettingsPage() {
                       </select>
                     ) : (
                       <input
+                        type={field.type === "password" ? "password" : "text"}
                         value={values[field.key] || ""}
                         onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
                         placeholder={field.placeholder}

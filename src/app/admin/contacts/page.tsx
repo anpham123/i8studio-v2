@@ -7,7 +7,7 @@ import DataTable, { Column } from "@/components/admin/DataTable";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useToast } from "@/components/admin/Toast";
 import { formatDate } from "@/lib/utils";
-import { CheckCheck, ChevronLeft, ChevronRight, Calendar, BarChart3, Filter } from "lucide-react";
+import { CheckCheck, ChevronLeft, ChevronRight, Calendar, BarChart3, Filter, Mail } from "lucide-react";
 
 interface Contact {
   id: string;
@@ -275,16 +275,25 @@ export default function ContactsPage() {
     <AdminShell
       title={`Liên hệ${unreadCount > 0 ? ` (${unreadCount} mới)` : ""}`}
       actions={
-        unreadCount > 0 ? (
+        <div className="flex items-center gap-2">
           <button
-            onClick={markAllRead}
-            disabled={markingAll}
-            className="flex items-center gap-2 border border-blue-200 text-blue-600 px-3.5 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 disabled:opacity-50 transition-colors"
+            onClick={() => router.push("/admin/settings")}
+            className="flex items-center gap-2 bg-gray-900 text-white px-3.5 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
           >
-            <CheckCheck size={15} />
-            {markingAll ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
+            <Mail size={15} />
+            Cấu hình Email Tự động
           </button>
-        ) : null
+          {unreadCount > 0 ? (
+            <button
+              onClick={markAllRead}
+              disabled={markingAll}
+              className="flex items-center gap-2 border border-blue-200 text-blue-600 px-3.5 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 disabled:opacity-50 transition-colors"
+            >
+              <CheckCheck size={15} />
+              {markingAll ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
+            </button>
+          ) : null}
+        </div>
       }
     >
       {/* Month / Year Time Filter Bar */}

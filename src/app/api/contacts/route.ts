@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { checkRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { sendContactAutoReplyEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic"
 
@@ -14,6 +15,7 @@ const schema = z.object({
   hearAboutUs: z.string().max(100).optional().default(""),
   referrer: z.string().max(500).optional().default(""),
   message: z.string().min(1).max(5000),
+  locale: z.string().max(10).optional().default("ja"),
 });
 
 export async function GET(req: NextRequest) {
@@ -62,9 +64,26 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const data = schema.parse(body);
-    const contact = await prisma.contactSubmission.create({ data });
-    return NextResponse.json({ data: contact }, { status: 201 });
+    const parsed = schema.parse(body);
+    const { locale, ...contactData } = parsed;
+    const contact = await prisma.contactSubmission.create({ data: contactData });
+
+    // Automatically send confirmation email from info@i8studio.vn to the user's email
+    const mailResult = await sendContactAutoReplyEmail({
+      fullName: contactData.fullName,
+      email: contactData.email,
+      service: contactData.service,
+      message: contactData.message,
+      hearAboutUs: contactData.hearAboutUs,
+      locale,
+      ip,
+      createdAt: contact.createdAt,
+    });
+
+    return NextResponse.json(
+      { data: contact, autoReplySent: mailResult.sent },
+      { status: 201 }
+    );
   } catch (e) {
     console.error("CONTACT SUBMISSION ERROR:", e);
     if (e instanceof z.ZodError) {
