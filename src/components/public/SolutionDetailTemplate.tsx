@@ -154,10 +154,12 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
     ? rawCtaLink
     : `/${locale}${rawCtaLink.startsWith("/") ? "" : "/"}${rawCtaLink}`;
 
+  const isArHero = data.slug === "ar";
+
   return (
     <div className="min-h-screen bg-white">
       {/* ── Hero (Solution 3: Ken Burns Auto-Panoramic Pan Hero on Mobile) ── */}
-      <section className="relative w-full bg-[#0c0c10] overflow-hidden flex flex-col justify-end items-center h-[calc(100vh-var(--header-h,76px))] min-h-[580px] sm:min-h-[600px] max-h-[1200px] pb-10 sm:pb-16 md:pb-20 select-none">
+      <section className={`relative w-full bg-[#0c0c10] overflow-hidden flex flex-col justify-end items-center h-[calc(100vh-var(--header-h,76px))] min-h-[580px] sm:min-h-[600px] max-h-[1200px] ${isArHero ? "pb-4" : "pb-10 sm:pb-16 md:pb-20"} select-none`}>
 
         {/* Blueprint CAD Grid Background */}
         <div
@@ -227,7 +229,10 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
                     const isArProxyEmbed =
                       !isBackgroundVideoEmbed && resolvedHeroEmbed.startsWith("/api/ar-embed/");
                     if (isArProxyEmbed) {
-                      return <ArEmbedIframe url={resolvedHeroEmbed} title={title} />;
+                      const arUrlWithLang = resolvedHeroEmbed.includes("?")
+                        ? `${resolvedHeroEmbed}&lang=${locale}`
+                        : `${resolvedHeroEmbed}?lang=${locale}`;
+                      return <ArEmbedIframe url={arUrlWithLang} title={title} />;
                     }
                     return (
                       <iframe
@@ -271,89 +276,127 @@ export default function SolutionDetailTemplate({ data }: { data: SolutionService
           })()}
         </div>
 
-        {/* Content overlay */}
-        <div className="relative z-10 text-center px-5 sm:px-6 max-w-5xl md:max-w-6xl mx-auto pointer-events-none">
-          {/* Category / Sub-badge */}
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-xs sm:text-base md:text-lg uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-2 sm:mb-3 drop-shadow-md"
-            style={data.heroLabelColor ? { color: data.heroLabelColor } : undefined}
+        {/* Content overlay (Moved below Hero for AR so the 3D building model is 100% unobstructed) */}
+        {!isArHero && (
+          <div className="relative z-10 text-center px-5 sm:px-6 max-w-5xl md:max-w-6xl mx-auto pointer-events-none">
+            {/* Category / Sub-badge */}
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-xs sm:text-base md:text-lg uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-2 sm:mb-3 drop-shadow-md"
+              style={data.heroLabelColor ? { color: data.heroLabelColor } : undefined}
+            >
+              {title}
+            </motion.p>
+
+            {/* Main Title / Hero Tagline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-snug sm:leading-tight mb-3 sm:mb-4 drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:whitespace-nowrap"
+              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif", ...(data.heroTitleColor ? { color: data.heroTitleColor } : {}) }}
+            >
+              {heroTagline}
+            </motion.h1>
+
+            {(() => {
+              if (!heroDesc) return null;
+
+              let lines: string[] = [];
+              if (heroDesc.includes("\n") || /<br\s*\/?>/i.test(heroDesc)) {
+                lines = heroDesc.split(/\r?\n|<br\s*\/?>/gi).map((s) => s.trim()).filter(Boolean);
+              } else if (isJa && heroDesc.includes("。")) {
+                lines = heroDesc.split(/(?<=。)/).map((s) => s.trim()).filter(Boolean);
+              } else if (!isJa && heroDesc.includes(". ")) {
+                lines = heroDesc.split(/(?<=\.\s+)/).map((s) => s.trim()).filter(Boolean);
+              } else {
+                lines = [heroDesc.trim()];
+              }
+
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.8 }}
+                  className="text-white/90 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-4 sm:mb-6 leading-relaxed font-light drop-shadow-md space-y-1"
+                  style={data.heroDescColor ? { color: data.heroDescColor } : undefined}
+                >
+                  {lines.map((line, idx) => (
+                    <span key={idx} className="block whitespace-normal md:whitespace-nowrap">
+                      {line}
+                    </span>
+                  ))}
+                </motion.div>
+              );
+            })()}
+
+            <motion.div className="pointer-events-auto inline-block" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+              <Link
+                href={heroCtaHref}
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
+                style={{ ...(data.heroCtaBgColor ? { backgroundColor: data.heroCtaBgColor } : {}), ...(data.heroCtaTextColor ? { color: data.heroCtaTextColor } : {}) }}
+              >
+                <span>{heroCtaText}</span>
+              </Link>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Scroll indicator (hidden on AR hero so bottom 3D instruction bar sits cleanly) */}
+        {!isArHero && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
           >
-            {title}
-          </motion.p>
-
-          {/* Main Title / Hero Tagline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xl sm:text-3xl md:text-4xl lg:text-[44px] font-light text-white leading-snug sm:leading-tight mb-3 sm:mb-4 drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)] md:whitespace-nowrap"
-            style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif", ...(data.heroTitleColor ? { color: data.heroTitleColor } : {}) }}
-          >
-            {heroTagline}
-          </motion.h1>
-
-          {(() => {
-            if (!heroDesc) return null;
-
-            // Split into 2 distinct sentences/lines (by newline, Japanese 。 or English .)
-            let lines: string[] = [];
-            if (heroDesc.includes("\n") || /<br\s*\/?>/i.test(heroDesc)) {
-              lines = heroDesc.split(/\r?\n|<br\s*\/?>/gi).map((s) => s.trim()).filter(Boolean);
-            } else if (isJa && heroDesc.includes("。")) {
-              lines = heroDesc.split(/(?<=。)/).map((s) => s.trim()).filter(Boolean);
-            } else if (!isJa && heroDesc.includes(". ")) {
-              lines = heroDesc.split(/(?<=\.\s+)/).map((s) => s.trim()).filter(Boolean);
-            } else {
-              lines = [heroDesc.trim()];
-            }
-
-            return (
+            <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="text-white/90 text-xs sm:text-sm md:text-base max-w-4xl lg:max-w-5xl mx-auto mb-4 sm:mb-6 leading-relaxed font-light drop-shadow-md space-y-1"
+                animate={{ y: [0, 5, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                className="w-1 h-1 rounded-full bg-white/70"
+              />
+            </div>
+          </motion.div>
+        )}
+      </section>
+
+      {/* ── Dedicated AR Intro Banner right below the 3D Hero (so text never covers the building) ── */}
+      {isArHero && (
+        <section className="bg-[#111216] border-t border-white/10 py-10 sm:py-14 px-5 sm:px-8 text-center">
+          <div className="max-w-4xl mx-auto">
+            <p
+              className="text-xs sm:text-sm uppercase tracking-[0.28em] text-[#c5a666] font-bold mb-2"
+              style={data.heroLabelColor ? { color: data.heroLabelColor } : undefined}
+            >
+              {title}
+            </p>
+            <h1
+              className="text-2xl sm:text-3xl md:text-4xl font-light text-white leading-snug mb-3"
+              style={{ fontFamily: "var(--font-noto-serif), var(--font-display), serif", ...(data.heroTitleColor ? { color: data.heroTitleColor } : {}) }}
+            >
+              {heroTagline}
+            </h1>
+            {heroDesc && (
+              <p
+                className="text-white/80 text-xs sm:text-sm md:text-base max-w-3xl mx-auto mb-6 leading-relaxed font-light"
                 style={data.heroDescColor ? { color: data.heroDescColor } : undefined}
               >
-                {lines.map((line, idx) => (
-                  <span key={idx} className="block whitespace-normal md:whitespace-nowrap">
-                    {line}
-                  </span>
-                ))}
-              </motion.div>
-            );
-          })()}
-
-          <motion.div className="pointer-events-auto inline-block" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                {heroDesc}
+              </p>
+            )}
             <Link
               href={heroCtaHref}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#111] text-xs sm:text-sm font-semibold rounded-full hover:bg-white/95 hover:scale-105 transition-all shadow-xl active:scale-95"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#c5a666] text-[#111] text-xs sm:text-sm font-bold rounded-full hover:bg-[#d4b675] hover:scale-105 transition-all shadow-lg"
               style={{ ...(data.heroCtaBgColor ? { backgroundColor: data.heroCtaBgColor } : {}), ...(data.heroCtaTextColor ? { color: data.heroCtaTextColor } : {}) }}
             >
               <span>{heroCtaText}</span>
             </Link>
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none"
-        >
-          <div className="w-5 h-8 rounded-full border border-white/30 flex justify-center pt-1.5 backdrop-blur-[1px]">
-            <motion.div
-              animate={{ y: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1 h-1 rounded-full bg-white/70"
-            />
           </div>
-        </motion.div>
-      </section>
+        </section>
+      )}
 
       {/* ── Service-level Media Embed (VR360 / Video / 3D) ── */}
       {data.mediaEmbedUrl && data.slug !== "cg-video" && data.slug !== "vr360" && data.slug !== "vr-360" && (

@@ -73,7 +73,7 @@ export default function Footer({ settings }: FooterProps) {
   ];
 
   const aboutLinks = [
-    { label: navT("aboutSub.companyOverview"), href: `/${locale}/about-us` },
+    { label: navT("aboutSub.companyOverview"), href: `/${locale}/about-us/company-overview` },
     { label: navT("aboutSub.portfolio"), href: `/${locale}/about-us/portfolio` },
     { label: navT("aboutSub.workflow"), href: `/${locale}/about-us/workflow` },
   ];

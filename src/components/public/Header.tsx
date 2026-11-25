@@ -141,81 +141,14 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
     return () => window.removeEventListener('scroll', onScroll);
   }, [openDesktopMenu, mobileOpen]);
 
-  /* ---- nav data ---- */
+  /* ---- nav data (Direct page links — sub-items are displayed inside each destination page) ---- */
   const navLinks: NavItem[] = [
     { label: t("work"), href: `/${locale}/works` },
-    {
-      label: t("solution"),
-      href: `/${locale}/solution`,
-      megaMenu: true,
-      megaTitle: locale === "ja" ? "ソリューション" : "SERVICE",
-      gridCols: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
-      children: services.map((svc) => ({
-        label: getServiceName(svc, locale === "ja"),
-        href: `/${locale}/solution/${svc.slug}`,
-        thumbnail: svc.image || undefined,
-      })),
-    },
+    { label: t("solution"), href: `/${locale}/solution` },
     { label: t("price"), href: `/${locale}/price` },
-    {
-      label: t("aboutUs"),
-      href: `/${locale}/about-us`,
-      megaMenu: true,
-      megaTitle: locale === "ja" ? "私たちについて" : "ABOUT US",
-      gridCols: "grid-cols-1 sm:grid-cols-3 max-w-5xl mx-auto",
-      children: [
-        {
-          label: t("aboutSub.companyOverview"),
-          href: `/${locale}/about-us`,
-          thumbnail: menuImages.menuImgAboutCompany || "/uploads/1781662116949-House_in_forest__Summer_.webp",
-        },
-        {
-          label: t("aboutSub.portfolio"),
-          href: `/${locale}/about-us/portfolio`,
-          thumbnail: menuImages.menuImgAboutPortfolio || "/uploads/1782359708167-Skyline_Tower.webp",
-        },
-        {
-          label: t("aboutSub.workflow"),
-          href: `/${locale}/about-us/workflow`,
-          thumbnail: menuImages.menuImgAboutWorkflow || "/uploads/1787802610927-upscalemedia-transformed.webp",
-        },
-      ],
-    },
+    { label: t("aboutUs"), href: `/${locale}/about-us` },
     { label: t("contact"), href: `/${locale}/contact` },
-    {
-      label: t("blogs"),
-      href: `/${locale}/blogs`,
-      megaMenu: true,
-      megaTitle: locale === "ja" ? "ブログ・コラム" : "BLOGS & ARTICLES",
-      gridCols: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
-      children: [
-        {
-          label: t("blogSub.caseStudy"),
-          href: `/${locale}/blogs/case-study`,
-          thumbnail: menuImages.menuImgBlogCaseStudy || "/uploads/1781164288528-260402_Cover_01.webp",
-        },
-        {
-          label: t("blogSub.techniqueSharing"),
-          href: `/${locale}/blogs/tips`,
-          thumbnail: menuImages.menuImgBlogTips || "/uploads/1782700167114-1722_Study.webp",
-        },
-        {
-          label: t("blogSub.knowledge"),
-          href: `/${locale}/blogs/knowledge`,
-          thumbnail: menuImages.menuImgBlogKnowledge || "/uploads/1782282467636-wood_sauna_at_ziedlejas_wellness_resort_Sauna.webp",
-        },
-        {
-          label: t("blogSub.ai"),
-          href: `/${locale}/blogs/ai-feature`,
-          thumbnail: menuImages.menuImgBlogAi || "/uploads/1781165121094-1722_vr01-2.webp",
-        },
-        {
-          label: t("blogSub.lifeGallery"),
-          href: `/${locale}/blogs/life-gallery`,
-          thumbnail: menuImages.menuImgBlogLifeGallery || "/uploads/1781661627502-615196287_122209779764576056_3698202373077728542_n.webp",
-        },
-      ],
-    },
+    { label: t("blogs"), href: `/${locale}/blogs` },
   ];
 
   const toggleLocale = () => {
@@ -240,7 +173,7 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
   const linkCls = (href: string, hasChildren?: boolean) => {
     const active = isActive(href);
     return `px-4 py-2 text-[16px] sm:text-[17px] ${active ? "font-bold text-[#000]" : "font-normal text-[#111] hover:text-[#000]"
-      } uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1${hasChildren ? " cursor-default" : ""
+      } uppercase tracking-[0.05em] transition-colors duration-200 relative inline-flex items-center gap-1${hasChildren ? " cursor-pointer" : ""
       }`;
   };
 
@@ -324,10 +257,6 @@ export default function Header({ headerHeight = 76, logoImage, logoHeight = 48, 
                   className="relative h-full flex items-center"
                   onMouseEnter={() => {
                     setHoveredNav(link.href);
-                    if (link.children) handleMouseEnter(link.href);
-                  }}
-                  onMouseLeave={() => {
-                    if (link.children) handleMouseLeave();
                   }}
                 >
                   {/* Bottom Logo Green Indicator (Chạy mở rộng phía dưới theo màu xanh logo) */}

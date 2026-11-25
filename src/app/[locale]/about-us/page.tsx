@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-
-export const dynamic = "force-dynamic";
+import { getTranslations } from "next-intl/server";
 import { buildMetadata, webPageJsonLd } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
-import CompanyOverviewContent from "@/components/public/CompanyOverviewContent";
+import CategoryDirectoryGrid from "@/components/public/CategoryDirectoryGrid";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -11,16 +12,18 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const isJa = params.locale === "ja";
-  const setting = await prisma.setting.findFirst({
-    where: { key: "aboutHeroImage" },
-  }).catch(() => null);
+  const setting = await prisma.setting
+    .findFirst({
+      where: { key: "aboutHeroImage" },
+    })
+    .catch(() => null);
 
   const heroImg = setting?.value || "/og-default.jpg";
 
   return buildMetadata({
     title: isJa
-      ? "会社概要 (About Us) — i8 STUDIO"
-      : "About Us — Company Overview | i8 STUDIO",
+      ? "私たちについて (About Us) — i8 STUDIO"
+      : "About Us — i8 STUDIO",
     description: isJa
       ? "ベトナム・ダナンを拠点とする建築ビジュアライゼーション専門スタジオ「i8 STUDIO」。スタッフ80名体制で高品質・短納期の3DCG制作をご提供。"
       : "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
@@ -31,59 +34,61 @@ export async function generateMetadata({
   });
 }
 
-export default async function AboutPage() {
-  const settings = await prisma.setting.findMany();
+export default async function AboutPage({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  const isJa = params.locale === "ja";
+  const [settings, navT] = await Promise.all([
+    prisma.setting.findMany(),
+    getTranslations({ locale: params.locale, namespace: "nav" }),
+  ]);
   const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
 
-  // Fetch milestones & overview from company_content
-  const [milestonesRow, overviewRow] = await Promise.all([
-    prisma.companyContent.findUnique({ where: { section: "milestones" } }),
-    prisma.companyContent.findUnique({ where: { section: "overview" } }),
-  ]);
-
-  let milestones: Array<{
-    year?: string;
-    yearJa?: string;
-    yearEn?: string;
-    titleJa: string;
-    titleEn: string;
-    descJa: string;
-    descEn: string;
-    image?: string;
-    images?: string[];
-  }> = [];
-  if (milestonesRow?.contentJson) {
-    try {
-      const parsed = JSON.parse(milestonesRow.contentJson);
-      if (Array.isArray(parsed)) milestones = parsed;
-    } catch { /* ignore */ }
-  }
-
-  let overview: Record<string, string> = {};
-  if (overviewRow?.contentJson) {
-    try {
-      overview = JSON.parse(overviewRow.contentJson);
-    } catch { /* ignore */ }
-  }
-
-  const milestoneImages = milestones.map((m) => m.image).filter(Boolean) as string[];
-  const aboutImages = [settingsMap.aboutHeroImage, ...milestoneImages, "/og-default.jpg"].filter(Boolean) as string[];
+  const items = [
+    {
+      label: navT("aboutSub.companyOverview"),
+      href: `/${params.locale}/about-us/company-overview`,
+      thumbnail:
+        settingsMap.menuImgAboutCompany ||
+        "/uploads/1781662116949-House_in_forest__Summer_.webp",
+    },
+    {
+      label: navT("aboutSub.portfolio"),
+      href: `/${params.locale}/about-us/portfolio`,
+      thumbnail:
+        settingsMap.menuImgAboutPortfolio ||
+        "/uploads/1782359708167-Skyline_Tower.webp",
+    },
+    {
+      label: navT("aboutSub.workflow"),
+      href: `/${params.locale}/about-us/workflow`,
+      thumbnail:
+        settingsMap.menuImgAboutWorkflow ||
+        "/uploads/1787802610927-upscalemedia-transformed.webp",
+    },
+  ];
 
   const pageLd = webPageJsonLd({
-    title: "About Us — Company Overview | i8 STUDIO",
+    title: "About Us | i8 STUDIO",
     description:
       "i8 STUDIO was founded in 2019 in Da Nang, Vietnam. 80+ professional staff specializing in high-quality 3DCG, Animation, VR & BIM for the Japanese architecture market.",
     url: "https://i8studio.vn/about-us",
-    images: aboutImages,
+    images: items.map((i) => i.thumbnail).filter(Boolean) as string[],
   });
 
   return (
-    <>
+    <div className="min-h-[calc(100vh-var(--header-h,76px))] bg-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pageLd) }}
       />
-      <CompanyOverviewContent settings={settingsMap} milestones={milestones} overview={overview} />
-    </>
+      <CategoryDirectoryGrid
+        title={isJa ? "私たちについて" : "ABOUT US"}
+        items={items}
+        gridCols="grid-cols-1 sm:grid-cols-3"
+      />
+    </div>
   );
 }

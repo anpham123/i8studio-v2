@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
-import SolutionContent from "@/components/public/SolutionContent";
+import { getServiceName } from "@/lib/solution-data";
+import CategoryDirectoryGrid from "@/components/public/CategoryDirectoryGrid";
 
-// ISR: regenerate every 60 seconds
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -12,12 +12,14 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const isJa = params.locale === "ja";
-  const topWorks = await prisma.work.findMany({
-    where: { image: { not: "" } },
-    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-    take: 5,
-    select: { image: true },
-  }).catch(() => []);
+  const topWorks = await prisma.work
+    .findMany({
+      where: { image: { not: "" } },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      take: 5,
+      select: { image: true },
+    })
+    .catch(() => []);
   const topImages = topWorks.map((w) => w.image).filter(Boolean);
 
   return buildMetadata({
@@ -34,44 +36,52 @@ export async function generateMetadata({
   });
 }
 
-export default async function SolutionPage() {
-  // Fetch works grouped by type for solution gallery slides
-  const [works, settingsRows] = await Promise.all([
-    prisma.work.findMany({
-      where: { image: { not: "" } },
+export default async function SolutionPage({
+  params,
+}: {
+  params: { locale: string };
+}) {
+  const isJa = params.locale === "ja";
+
+  const [services, settings] = await Promise.all([
+    prisma.service.findMany({
+      where: { isPublished: true },
       orderBy: { order: "asc" },
-      select: { title: true, titleJa: true, image: true, beforeImage: true, type: true, videoUrl: true, vrUrl: true },
     }),
-    prisma.setting.findMany({
-      where: {
-        key: {
-          in: [
-            "solutionS1Desc", "solutionS1DescJa",
-            "solutionS2Desc", "solutionS2DescJa",
-            "solutionS3Desc", "solutionS3DescJa",
-            "solutionS4Desc", "solutionS4DescJa",
-            "solutionS5Desc", "solutionS5DescJa",
-            "solutionS6Desc", "solutionS6DescJa",
-          ],
-        },
-      },
-    }),
+    prisma.setting.findMany(),
   ]);
 
-  // Group works by type → { still: [...], animation: [...], ... }
-  const worksByType: Record<string, { title: string; titleJa: string; image: string; beforeImage: string; videoUrl: string; vrUrl?: string }[]> = {};
-  for (const w of works) {
-    const t = w.type || "still";
-    if (!worksByType[t]) worksByType[t] = [];
-    worksByType[t].push({ title: w.title, titleJa: w.titleJa, image: w.image, beforeImage: w.beforeImage, videoUrl: w.videoUrl, vrUrl: w.vrUrl || undefined });
-  }
+  const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s.value]));
+  const DEFAULT_HIDDEN_SLUGS = new Set([
+    "pachinko-slot-cg",
+    "anime-illustration",
+    "bim-services",
+  ]);
 
-  const settings: Record<string, string> = {};
-  for (const s of settingsRows) settings[s.key] = s.value;
+  const visibleServices = services.filter((s) => {
+    const toggleKey = `serviceVisible_${s.slug}`;
+    if (toggleKey in settingsMap) {
+      return settingsMap[toggleKey] === "true";
+    }
+    if (DEFAULT_HIDDEN_SLUGS.has(s.slug)) {
+      return false;
+    }
+    return s.isPublished !== false;
+  });
+
+  const items = visibleServices.map((svc) => ({
+    label: getServiceName(svc, isJa),
+    href: `/${params.locale}/solution/${svc.slug}`,
+    thumbnail: svc.image || undefined,
+  }));
 
   return (
-    <div className="min-h-screen bg-white">
-      <SolutionContent worksByType={worksByType} settings={settings} />
+    <div className="min-h-[calc(100vh-var(--header-h,76px))] bg-white">
+      <CategoryDirectoryGrid
+        title={isJa ? "ソリューション" : "SERVICE"}
+        items={items}
+        gridCols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      />
     </div>
   );
 }
