@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
   try {
     const { path = "/" } = await req.json();
     revalidatePath(path, "layout");
+    revalidatePath("/ja", "page");
+    revalidatePath("/en", "page");
     return NextResponse.json({ revalidated: true, path, time: Date.now() });
   } catch {
     return NextResponse.json({ error: "Failed to revalidate" }, { status: 500 });

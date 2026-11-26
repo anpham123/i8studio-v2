@@ -115,9 +115,13 @@ function isVideoFile(url: string) {
   return /\.(mp4|webm|mov)$/i.test(url);
 }
 
-/** Only local raster images go through the Next.js optimizer (resized + cached per device width) */
+/**
+ * Local raster images in static build paths go through the Next.js optimizer,
+ * while runtime-uploaded files in /uploads/* are already pre-optimized WebP (1920px, q=85)
+ * by sharp during upload and are served directly to avoid Docker standalone cache/FS lookup failures.
+ */
 function canOptimize(url: string) {
-  return url.startsWith("/") && !/\.(svg|gif)$/i.test(url);
+  return url.startsWith("/") && !url.startsWith("/uploads/") && !/\.(svg|gif)$/i.test(url);
 }
 
 function canHover() {
@@ -189,6 +193,11 @@ function GridTile({
   const isFullScreenHeroType = Boolean(minHeight);
   const hv = useHoverVideo(hasVideo);
   const [imgFailed, setImgFailed] = useState(false);
+
+  // Reset failure state whenever the image URL changes
+  useEffect(() => {
+    setImgFailed(false);
+  }, [image?.url]);
 
   return (
     <div

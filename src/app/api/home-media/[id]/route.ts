@@ -18,9 +18,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const data = HomeMediaSchema.partial().parse(await req.json());
+    const rawBody = await req.json();
+    const parsed = HomeMediaSchema.partial().parse(rawBody);
+    const data = Object.fromEntries(
+      Object.entries(parsed).filter(([key]) => key in rawBody)
+    );
     const item = await prisma.homeMedia.update({ where: { id: params.id }, data });
     revalidatePath("/", "layout");
+    revalidatePath("/ja", "page");
+    revalidatePath("/en", "page");
     return NextResponse.json({ data: item });
   } catch (e) {
     if (e instanceof z.ZodError) return NextResponse.json({ error: e.issues }, { status: 400 });
